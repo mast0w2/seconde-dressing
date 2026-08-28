@@ -1,238 +1,177 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import { supabase } from '@/lib/supabase/client';
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+
+const formSchema = z.object({
+  email: z.string().email("Adresse email invalide"),
+  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const { toast } = useToast();
+  const supabase = createClientComponentClient();
 
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        router.push('/dashboard');
-      }
-    };
-    checkSession();
-  }, [router]);
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
+  const { handleSubmit, register, formState } = form;
+  const { errors, isSubmitting } = formState;
 
+  const onSubmit = async (data: FormValues) => {
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: data.email,
+        password: data.password,
       });
 
       if (error) {
         throw error;
       }
 
-      setSuccess(true);
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 1000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
-    } finally {
-      setIsLoading(false);
+      toast({
+        title: "Connexion réussie",
+        description: "Vous êtes maintenant connecté.",
+      });
+
+      router.push("/");
+    } catch (error: any) {
+      toast({
+        title: "Erreur de connexion",
+        description: error.message || "Email ou mot de passe incorrect.",
+        variant: "destructive",
+      });
     }
   };
 
   const handleGoogleLogin = async () => {
-    setIsLoading(true);
-    setError(null);
-
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/api/auth/callback`,
-        },
+        provider: "google",
       });
 
       if (error) {
         throw error;
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Google login failed');
-    } finally {
-      setIsLoading(false);
+    } catch (error: any) {
+      toast({
+        title: "Erreur de connexion",
+        description: error.message || "Une erreur est survenue.",
+        variant: "destructive",
+      });
     }
   };
 
-  if (success) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow flex items-center justify-center py-20">
-          <div className="bg-green-50 border border-green-200 rounded-lg p-8 max-w-md mx-auto text-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-12 w-12 text-green-500 mx-auto mb-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-            <h2 className="text-2xl font-bold text-green-800 mb-2">Login Successful!</h2>
-            <p className="text-green-600">Redirecting to dashboard...</p>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-2xl">Se connecter</CardTitle>
+          <CardDescription>
+            Connectez-vous à votre compte pour continuer
+          </CardDescription>
+        </CardHeader>
 
-      <main className="flex-grow flex items-center py-20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-md mx-auto w-full">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-800 mb-4">
-                Welcome Back
-              </h1>
-              <p className="text-gray-600">
-                Log in to manage your bookings
-              </p>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="votre@email.com"
+                {...register("email")}
+                className={errors.email ? "border-destructive" : ""}
+              />
+              {errors.email && (
+                <p className="text-sm text-destructive">{errors.email.message}</p>
+              )}
             </div>
 
-            <form onSubmit={handleLogin} className="bg-white rounded-xl shadow-md p-8 mb-6">
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-600 p-4 rounded-lg mb-6">
-                  {error}
-                </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Mot de passe</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                {...register("password")}
+                className={errors.password ? "border-destructive" : ""}
+              />
+              {errors.password && (
+                <p className="text-sm text-destructive">{errors.password.message}</p>
               )}
+            </div>
 
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-colors"
-                />
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Connexion..." : "Se connecter"}
+            </Button>
+          </form>
+
+          <div className="mt-4">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t" />
               </div>
-
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-colors"
-                />
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-background text-muted-foreground">
+                  ou
+                </span>
               </div>
+            </div>
 
-              <button
-                type="submit"
-                disabled={isLoading}
-                className={`w-full py-3 px-6 rounded-lg font-semibold text-white transition-colors ${
-                  isLoading
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-primary-600 hover:bg-primary-700'
-                }`}
-              >
-                {isLoading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <svg
-                      className="animate-spin h-5 w-5"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    Logging in...
-                  </span>
-                ) : (
-                  'Log In'
-                )}
-              </button>
-
-              <div className="mt-4 text-center">
-                <Link href="/signup" className="text-primary-600 hover:underline text-sm">
-                  Don't have an account? Sign up
-                </Link>
-              </div>
-            </form>
-
-            {/* Google Login */}
-            <button
+            <Button
+              variant="outline"
+              className="w-full mt-4"
               onClick={handleGoogleLogin}
-              disabled={isLoading}
-              className="w-full py-3 px-6 rounded-lg font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors flex items-center justify-center gap-3"
+              type="button"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 48 48"
-              >
+              <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                 <path
-                  fill="#FFC107"
-                  d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"
+                  fill="#4285F4"
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                 />
                 <path
-                  fill="#FF3D00"
-                  d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"
+                  fill="#34A853"
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
                 />
                 <path
-                  fill="#4CAF50"
-                  d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.222,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"
+                  fill="#FBBC05"
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
                 />
                 <path
-                  fill="#1976D2"
-                  d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C42.012,35.24,44,30.023,44,24C44,22.659,43.862,21.35,43.611,20.083z"
+                  fill="#EA4335"
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              <span>Continue with Google</span>
-            </button>
+              Se connecter avec Google
+            </Button>
           </div>
-        </div>
-      </main>
 
-      <Footer />
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            Vous n&apos;avez pas de compte ?{" "}
+            <Link href="/signup" className="text-primary hover:underline">
+              S&apos;inscrire
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }

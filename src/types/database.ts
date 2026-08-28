@@ -1,96 +1,170 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
+export type Role = 'client' | 'vendeuse';
+export type StatutDisponibilite = 'disponible' | 'reserve';
+export type StatutRendezVous = 'en_attente' | 'accepte' | 'refuse' | 'annule';
+export type Langue = 'FR' | 'EN';
+export type Theme = 'clair' | 'sombre';
+
 export interface Database {
   public: {
     Tables: {
       profiles: {
         Row: {
           id: string;
-          full_name: string | null;
-          phone: string | null;
+          nom: string;
+          prenom: string;
+          email: string;
+          telephone: string | null;
+          photo_url: string | null;
+          role: Role;
           created_at: string;
+          bio: string | null;
+          specialisation: string | null;
+          tarif_horaire: number | null;
+          annees_experience: number | null;
         };
         Insert: {
           id: string;
-          full_name?: string | null;
-          phone?: string | null;
+          nom: string;
+          prenom: string;
+          email: string;
+          telephone?: string | null;
+          photo_url?: string | null;
+          role: Role;
           created_at?: string;
+          bio?: string | null;
+          specialisation?: string | null;
+          tarif_horaire?: number | null;
+          annees_experience?: number | null;
         };
         Update: {
           id?: string;
-          full_name?: string | null;
-          phone?: string | null;
+          nom?: string;
+          prenom?: string;
+          email?: string;
+          telephone?: string | null;
+          photo_url?: string | null;
+          role?: Role;
           created_at?: string;
+          bio?: string | null;
+          specialisation?: string | null;
+          tarif_horaire?: number | null;
+          annees_experience?: number | null;
         };
-        Relationships: [
-          {
-            foreignKeyName: "profiles_id_fkey";
-            columns: ["id"];
-            isOneToOne: true;
-            referencedRelation: "users";
-            referencedColumns: ["id"];
-          }
-        ];
       };
-      bookings: {
+      disponibilites: {
         Row: {
           id: string;
           user_id: string;
-          service_type: 'drop-off' | 'wardrobe-sorting';
           date: string;
-          status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-          notes: string | null;
+          heure_debut: string;
+          heure_fin: string;
+          statut: StatutDisponibilite;
+          est_recurrent: boolean;
+          jour_recurrence: string | null;
           created_at: string;
         };
         Insert: {
           id?: string;
           user_id: string;
-          service_type: 'drop-off' | 'wardrobe-sorting';
           date: string;
-          status?: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-          notes?: string | null;
+          heure_debut: string;
+          heure_fin: string;
+          statut?: StatutDisponibilite;
+          est_recurrent?: boolean;
+          jour_recurrence?: string | null;
           created_at?: string;
         };
         Update: {
           id?: string;
           user_id?: string;
-          service_type?: 'drop-off' | 'wardrobe-sorting';
           date?: string;
-          status?: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-          notes?: string | null;
+          heure_debut?: string;
+          heure_fin?: string;
+          statut?: StatutDisponibilite;
+          est_recurrent?: boolean;
+          jour_recurrence?: string | null;
           created_at?: string;
         };
-        Relationships: [
-          {
-            foreignKeyName: "bookings_user_id_fkey";
-            columns: ["user_id"];
-            isOneToOne: false;
-            referencedRelation: "users";
-            referencedColumns: ["id"];
-          }
-        ];
       };
-    };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      [_ in never]: never;
-    };
-    Enums: {
-      [_ in never]: never;
-    };
-    CompositeTypes: {
-      [_ in never]: never;
+      rendez_vous: {
+        Row: {
+          id: string;
+          client_id: string;
+          vendeuse_id: string;
+          disponibilite_id: string;
+          statut: StatutRendezVous;
+          cree_le: string;
+          mis_a_jour_le: string;
+        };
+        Insert: {
+          id?: string;
+          client_id: string;
+          vendeuse_id: string;
+          disponibilite_id: string;
+          statut?: StatutRendezVous;
+          cree_le?: string;
+          mis_a_jour_le?: string;
+        };
+        Update: {
+          id?: string;
+          client_id?: string;
+          vendeuse_id?: string;
+          disponibilite_id?: string;
+          statut?: StatutRendezVous;
+          cree_le?: string;
+          mis_a_jour_le?: string;
+        };
+      };
+      preferences: {
+        Row: {
+          id: string;
+          user_id: string;
+          langue: Langue;
+          fuseau_horaire: string;
+          theme: Theme;
+          notifications_email: boolean;
+          notifications_sms: boolean;
+          preferences_ventes: Json | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          langue?: Langue;
+          fuseau_horaire?: string;
+          theme?: Theme;
+          notifications_email?: boolean;
+          notifications_sms?: boolean;
+          preferences_ventes?: Json | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          langue?: Langue;
+          fuseau_horaire?: string;
+          theme?: Theme;
+          notifications_email?: boolean;
+          notifications_sms?: boolean;
+          preferences_ventes?: Json | null;
+        };
+      };
     };
   };
 }
 
-export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row'];
-export type InsertTables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Insert'];
-export type UpdateTables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Update'];
+export type Profile = Database['public']['Tables']['profiles']['Row'];
+export type InsertProfile = Database['public']['Tables']['profiles']['Insert'];
+export type UpdateProfile = Database['public']['Tables']['profiles']['Update'];
 
-export type Profile = Tables<'profiles'>;
-export type Booking = Tables<'bookings'>;
-export type InsertBooking = InsertTables<'bookings'>;
-export type UpdateBooking = UpdateTables<'bookings'>;
+export type Disponibilite = Database['public']['Tables']['disponibilites']['Row'];
+export type InsertDisponibilite = Database['public']['Tables']['disponibilites']['Insert'];
+export type UpdateDisponibilite = Database['public']['Tables']['disponibilites']['Update'];
+
+export type RendezVous = Database['public']['Tables']['rendez_vous']['Row'];
+export type InsertRendezVous = Database['public']['Tables']['rendez_vous']['Insert'];
+export type UpdateRendezVous = Database['public']['Tables']['rendez_vous']['Update'];
+
+export type Preference = Database['public']['Tables']['preferences']['Row'];
+export type InsertPreference = Database['public']['Tables']['preferences']['Insert'];
+export type UpdatePreference = Database['public']['Tables']['preferences']['Update'];

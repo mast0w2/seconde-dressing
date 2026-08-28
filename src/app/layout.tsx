@@ -1,12 +1,16 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
+import { ToastProvider } from "@/components/ToastProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Seconde Dressing - Clothing Resale Service",
-  description: "Book appointments to sell your clothes without the hassle. Drop-off bags or in-home wardrobe sorting sessions.",
+  title: "Seconde Dressing - Plateforme de revente de vêtements",
+  description:
+    "Seconde Dressing connecte les clients avec des vendeuses professionnelles pour vendre vos vêtements.",
 };
 
 export default function RootLayout({
@@ -15,8 +19,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
+    <html lang="fr">
+      <body className={inter.className}>
+        <div className="flex min-h-screen flex-col">
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </div>
+        <ToastProvider />
+      </body>
     </html>
   );
 }

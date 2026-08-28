@@ -1,118 +1,195 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { supabase } from '@/lib/supabase/client';
+import { usePathname } from "next/navigation";
+import { Button } from "./ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { useToast } from "./ui/use-toast";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-export default function Navbar() {
+export function Navbar() {
   const pathname = usePathname();
+  const { toast } = useToast();
   const router = useRouter();
+  const supabase = createClientComponentClient();
   const [user, setUser] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      setIsLoading(false);
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+        setProfile(profile);
+      }
     };
-    checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
+    getUser();
 
-    return () => subscription.unsubscribe();
-  }, []);
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async () => {
+        await getUser();
+      }
+    );
 
-  const isActive = (path: string) => pathname === path;
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push('/');
+    toast({ title: "Déconnecté", description: "Vous avez été déconnecté." });
+    router.push("/");
   };
 
+  const isClient = profile?.role === "client";
+  const isVendeuse = profile?.role === "vendeuse";
+
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-50">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-lg">SD</span>
-            </div>
-            <span className="text-xl font-bold text-gray-800">Seconde Dressing</span>
+    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-14 max-w-screen-2xl items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link href="/" className="flex items-center gap-2">
+            <span className="text-xl font-bold text-primary">Seconde Dressing</span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex md:gap-6">
             <Link
               href="/"
-              className={"font-medium transition-colors " + (isActive("/") ? "text-primary-600" : "text-gray-600 hover:text-primary-600")}
+              className={`text-sm font-medium transition-colors hover:text-primary ${
+                pathname === "/" ? "text-primary" : "text-muted-foreground"
+              }`}
             >
-              Home
+              Accueil
             </Link>
-            <Link
-              href="/book"
-              className={"font-medium transition-colors " + (isActive("/book") ? "text-primary-600" : "text-gray-600 hover:text-primary-600")}
-            >
-              Book Appointment
-            </Link>
-            <Link
-              href="/dashboard"
-              className={"font-medium transition-colors " + (isActive("/dashboard") ? "text-primary-600" : "text-gray-600 hover:text-primary-600")}
-            >
-              Dashboard
-            </Link>
-            
-            {isLoading ? (
-              <div className="w-8 h-8 border-2 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
-            ) : user ? (
-              <div className="flex items-center space-x-4">
-                <span className="text-gray-600">{user.email?.split('@')[0]}</span>
-                <button
-                  onClick={handleLogout}
-                  className="text-gray-600 hover:text-primary-600 font-medium transition-colors"
-                >
-                  Logout
-                </button>
-              </div>
-            ) : (
+
+            {user && (
               <>
-                <Link
-                  href="/login"
-                  className="text-gray-600 hover:text-primary-600 font-medium transition-colors"
-                >
-                  Login
-                </Link>
-                <Link
-                  href="/signup"
-                  className="bg-primary-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors"
-                >
-                  Sign Up
-                </Link>
+                {isClient && (
+                  <>
+                    <Link
+                      href="/client/disponibilites"
+                      className={`text-sm font-medium transition-colors hover:text-primary ${
+                        pathname.startsWith("/client/disponibilites")
+                          ? "text-primary"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      Mes disponibilités
+                    </Link>
+                    <Link
+                      href="/client/rdv"
+                      className={`text-sm font-medium transition-colors hover:text-primary ${
+                        pathname.startsWith("/client/rdv")
+                          ? "text-primary"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      Mes rendez-vous
+                    </Link>
+                  </>
+                )}
+
+                {isVendeuse && (
+                  <>
+                    <Link
+                      href="/vendeuse/demandes"
+                      className={`text-sm font-medium transition-colors hover:text-primary ${
+                        pathname.startsWith("/vendeuse/demandes")
+                          ? "text-primary"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      Demandes
+                    </Link>
+                    <Link
+                      href="/vendeuse/agenda"
+                      className={`text-sm font-medium transition-colors hover:text-primary ${
+                        pathname.startsWith("/vendeuse/agenda")
+                          ? "text-primary"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      Mon agenda
+                    </Link>
+                  </>
+                )}
               </>
             )}
           </div>
+        </div>
 
-          {/* Mobile menu button */}
-          <button className="md:hidden p-2 rounded-md text-gray-600 hover:text-primary-600 hover:bg-primary-50">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </button>
+        <div className="flex items-center gap-4">
+          {user ? (
+            <>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      {profile?.photo_url ? (
+                        <AvatarImage
+                          src={profile.photo_url}
+                          alt={profile.prenom}
+                        />
+                      ) : (
+                        <AvatarFallback className="bg-primary text-primary-foreground">
+                          {profile?.prenom?.charAt(0) || "U"}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">
+                        {profile?.prenom} {profile?.nom}
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {profile?.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href={`/${profile?.role}/settings`}>Paramètres</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                    Se déconnecter
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          ) : (
+            <>
+              <Button asChild variant="ghost" size="sm">
+                <Link href="/login">Se connecter</Link>
+              </Button>
+              <Button asChild size="sm">
+                <Link href="/signup">S&apos;inscrire</Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </nav>
