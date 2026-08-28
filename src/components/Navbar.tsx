@@ -81,9 +81,43 @@ export function Navbar() {
             >
               Accueil
             </Link>
+            <Link
+              href="/about"
+              className={`text-sm font-medium transition-colors hover:text-primary ${
+                pathname === "/about" ? "text-primary" : "text-muted-foreground"
+              }`}
+            >
+              Le concept
+            </Link>
+            <Link
+              href="/reviews"
+              className={`text-sm font-medium transition-colors hover:text-primary ${
+                pathname === "/reviews" ? "text-primary" : "text-muted-foreground"
+              }`}
+            >
+              Avis clients
+            </Link>
+            <Link
+              href="/contact"
+              className={`text-sm font-medium transition-colors hover:text-primary ${
+                pathname === "/contact" ? "text-primary" : "text-muted-foreground"
+              }`}
+            >
+              Contact
+            </Link>
 
             {user && (
               <>
+                <Link
+                  href="/dashboard"
+                  className={`text-sm font-medium transition-colors hover:text-primary ${
+                    pathname.startsWith("/dashboard")
+                      ? "text-primary"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  Tableau de bord
+                </Link>
                 {isClient && (
                   <>
                     <Link
