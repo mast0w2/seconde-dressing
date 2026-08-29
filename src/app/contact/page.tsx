@@ -1,14 +1,20 @@
-"use client";
+// src/app/contact/page.tsx
+// Contact page with form validation and submission
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { createBrowserClient } from "@supabase/ssr";
-import { useToast } from "@/components/ui/use-toast";
-import { Mail, Phone, MapPin } from "lucide-react";
+'use client';
+
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/components/ui/use-toast';
+import { Mail, Phone, MapPin } from 'lucide-react';
+
+// ============================================================================
+// Types
+// ============================================================================
 
 interface ContactFormData {
   name: string;
@@ -18,18 +24,91 @@ interface ContactFormData {
   message: string;
 }
 
+// ============================================================================
+// Validation
+// ============================================================================
+
+/**
+ * Email validation regex
+ */
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * Validate contact form
+ */
+function validateForm(data: ContactFormData): { valid: boolean; errors: string[] } {
+  const errors: string[] = [];
+
+  if (!data.name.trim()) {
+    errors.push('Le nom est requis');
+  }
+
+  if (!data.email.trim()) {
+    errors.push('L\'email est requis');
+  } else if (!EMAIL_REGEX.test(data.email)) {
+    errors.push('L\'email n\'est pas valide');
+  }
+
+  if (!data.subject.trim()) {
+    errors.push('Le sujet est requis');
+  }
+
+  if (!data.message.trim()) {
+    errors.push('Le message est requis');
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
+// ============================================================================
+// API Functions
+// ============================================================================
+
+/**
+ * Submit contact form
+ */
+async function submitContactForm(data: ContactFormData): Promise<{ success: boolean; message?: string; errors?: string[] }> {
+  try {
+    const response = await fetch('/api/contact', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      return { success: false, ...result };
+    }
+
+    return { success: true, ...result };
+  } catch (error) {
+    console.error('[Contact] Submission error:', error);
+    return {
+      success: false,
+      message: 'Une erreur est survenue. Veuillez réessayer.',
+    };
+  }
+}
+
+// ============================================================================
+// Component
+// ============================================================================
+
 export default function ContactPage() {
-  const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
   const { toast } = useToast();
   const [formData, setFormData] = useState<ContactFormData>({
-    name: "",
-    email: "",
-    phone: "",
-    subject: "",
-    message: "",
+    name: '',
+    email: '',
+    phone: '',
+    subject: '',
+    message: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
     setFormData((prev) => ({
@@ -38,26 +117,19 @@ export default function ContactPage() {
     }));
   };
 
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Basic validation
-    if (!formData.name.trim() || !formData.email.trim() || !formData.subject.trim() || !formData.message.trim()) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez remplir tous les champs obligatoires.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez entrer une adresse email valide.",
-        variant: "destructive",
+    // Validate form
+    const validation = validateForm(formData);
+    if (!validation.valid) {
+      validation.errors.forEach((error) => {
+        toast({
+          title: 'Erreur',
+          description: error,
+          variant: 'destructive',
+        });
       });
       return;
     }
@@ -65,52 +137,53 @@ export default function ContactPage() {
     setIsSubmitting(true);
 
     try {
-      // Submit via API route
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone || null,
-          subject: formData.subject,
-          message: formData.message,
-        }),
-      });
+      const result = await submitContactForm(formData);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to submit contact form");
+      if (!result.success) {
+        if (result.errors && Array.isArray(result.errors)) {
+          result.errors.forEach((error) => {
+            toast({
+              title: 'Erreur',
+              description: error,
+              variant: 'destructive',
+            });
+          });
+        } else {
+          toast({
+            title: 'Erreur',
+            description: result.message || 'Impossible d\'envoyer votre message.',
+            variant: 'destructive',
+          });
+        }
+        return;
       }
 
       // Reset form
       setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        subject: "",
-        message: "",
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: '',
       });
 
       toast({
-        title: "Succès",
-        description: "Votre message a été envoyé avec succès. Nous vous répondrons dans les plus brefs délais.",
+        title: 'Succès',
+        description: result.message || 'Votre message a été envoyé avec succès. Nous vous répondrons dans les plus brefs délais.',
       });
     } catch (error) {
-      console.error("Error submitting contact form:", error);
+      console.error('[Contact] Error:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible d'envoyer votre message. Veuillez réessayer.",
-        variant: "destructive",
+        title: 'Erreur',
+        description: 'Impossible d\'envoyer votre message. Veuillez réessayer.',
+        variant: 'destructive',
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  // Render
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
@@ -141,6 +214,7 @@ export default function ContactPage() {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Name and Email */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="name">Nom complet *</Label>
@@ -167,6 +241,7 @@ export default function ContactPage() {
                     </div>
                   </div>
 
+                  {/* Phone */}
                   <div className="space-y-2">
                     <Label htmlFor="phone">Téléphone (optionnel)</Label>
                     <Input
@@ -178,6 +253,7 @@ export default function ContactPage() {
                     />
                   </div>
 
+                  {/* Subject */}
                   <div className="space-y-2">
                     <Label htmlFor="subject">Sujet *</Label>
                     <Input
@@ -190,6 +266,7 @@ export default function ContactPage() {
                     />
                   </div>
 
+                  {/* Message */}
                   <div className="space-y-2">
                     <Label htmlFor="message">Message *</Label>
                     <Textarea
@@ -203,8 +280,9 @@ export default function ContactPage() {
                     />
                   </div>
 
+                  {/* Submit Button */}
                   <Button type="submit" disabled={isSubmitting} className="w-full">
-                    {isSubmitting ? "Envoi en cours..." : "Envoyer le message"}
+                    {isSubmitting ? 'Envoi en cours...' : 'Envoyer le message'}
                   </Button>
                 </form>
               </CardContent>
@@ -212,6 +290,7 @@ export default function ContactPage() {
 
             {/* Contact Info */}
             <div className="space-y-6">
+              {/* Email and Phone */}
               <Card>
                 <CardHeader>
                   <CardTitle className="text-2xl">Informations de contact</CardTitle>
@@ -260,9 +339,10 @@ export default function ContactPage() {
                 </CardContent>
               </Card>
 
+              {/* Business Hours */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-2xl">Heures d&apos;ouverture</CardTitle>
+                  <CardTitle className="text-2xl">Heures d'ouverture</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -282,6 +362,7 @@ export default function ContactPage() {
                 </CardContent>
               </Card>
 
+              {/* Social Media */}
               <Card>
                 <CardHeader>
                   <CardTitle className="text-2xl">Réseaux sociaux</CardTitle>
@@ -325,7 +406,7 @@ export default function ContactPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Cliquez sur "S&apos;inscrire" dans le menu, remplissez le formulaire avec vos informations et validez votre adresse email.
+                    Cliquez sur "S'inscrire" dans le menu, remplissez le formulaire avec vos informations et validez votre adresse email.
                   </p>
                 </CardContent>
               </Card>
@@ -347,7 +428,7 @@ export default function ContactPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Connectez-vous à votre compte, accédez à l&apos;espace client et sélectionnez une vendeuse disponible selon vos préférences.
+                    Connectez-vous à votre compte, accédez à l'espace client et sélectionnez une vendeuse disponible selon vos préférences.
                   </p>
                 </CardContent>
               </Card>
