@@ -7,13 +7,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileForm } from "@/components/Form/ProfileForm";
 import { useToast } from "@/components/ui/use-toast";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createBrowserClient } from "@supabase/ssr";
 import { Profile, Preference } from "@/types/database";
 
 export default function ClientSettingsPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const supabase = createClientComponentClient();
+  const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [preferences, setPreferences] = useState<Preference | null>(null);
   const [isLoading, setIsLoading] = useState(true);

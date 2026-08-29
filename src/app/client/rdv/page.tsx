@@ -6,14 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createBrowserClient } from "@supabase/ssr";
 import { format } from "date-fns";
+import { fr } from 'date-fns/locale';
+import { cn } from "@/lib/utils";
 import { RendezVous, StatutRendezVous } from "@/types/database";
 
 export default function ClientRendezVousPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const supabase = createClientComponentClient();
+  const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
   const [rendezVous, setRendezVous] = useState<RendezVous[]>([]);
   const [vendeuses, setVendeuses] = useState<any[]>([]);
   const [disponibilites, setDisponibilites] = useState<any[]>([]);
@@ -343,7 +345,7 @@ export default function ClientRendezVousPage() {
                                   <div className="flex flex-col items-center">
                                     <span className="text-xs">
                                       {format(new Date(dispo.date), "d MMM", {
-                                        locale: "fr",
+                                        locale: fr,
                                       })}
                                     </span>
                                     <span className="text-xs">
@@ -369,7 +371,7 @@ export default function ClientRendezVousPage() {
                     <h4 className="font-semibold mb-2">Sélectionné:</h4>
                     <p>
                       {format(new Date(selectedDisponibilite.date), "EEEE d MMMM yyyy", {
-                        locale: "fr",
+                        locale: fr,
                       })}
                     </p>
                     <p>
@@ -447,7 +449,7 @@ export default function ClientRendezVousPage() {
                           <>
                             <p className="text-sm text-muted-foreground">
                               {format(new Date(dispoInfo.date), "EEEE d MMMM yyyy", {
-                                locale: "fr",
+                                locale: fr,
                               })}
                             </p>
                             <p className="text-sm text-muted-foreground">
@@ -457,7 +459,7 @@ export default function ClientRendezVousPage() {
                         )}
                         <p className="text-sm text-muted-foreground">
                           Créé le: {format(new Date(rdv.cree_le), "d MMMM yyyy à HH:mm", {
-                            locale: "fr",
+                            locale: fr,
                           })}
                         </p>
                       </div>

@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import type { ToastActionElement } from "./toast";
 
 const TOAST_LIMIT = 1;
 const TOAST_REMOVE_DELAY = 1000000;
@@ -10,7 +9,7 @@ interface ToasterToast {
   id: string;
   title?: React.ReactNode;
   description?: React.ReactNode;
-  action?: ToastActionElement;
+  action?: React.ReactNode;
   variant?: "default" | "destructive";
 }
 
@@ -123,7 +122,7 @@ const subscribe = (listener: (state: State) => void) => {
 export interface ToastProps {
   title?: React.ReactNode;
   description?: React.ReactNode;
-  action?: ToastActionElement;
+  action?: React.ReactNode;
   variant?: "default" | "destructive";
 }
 
@@ -174,4 +173,5 @@ const useToast = () => {
   };
 };
 
-export { useToast, toast, ToasterToast };
+export { useToast, toast };
+export type { ToasterToast };

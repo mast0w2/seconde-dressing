@@ -8,14 +8,15 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/Calendar/Calendar";
 import { DisponibiliteForm } from "@/components/Form/DisponibiliteForm";
 import { useToast } from "@/components/ui/use-toast";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createBrowserClient } from "@supabase/ssr";
 import { format } from "date-fns";
+import { fr } from 'date-fns/locale';
 import { RendezVous, Disponibilite, StatutRendezVous, Profile } from "@/types/database";
 
 export default function VendeuseAgendaPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const supabase = createClientComponentClient();
+  const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
   const [rendezVous, setRendezVous] = useState<RendezVous[]>([]);
   const [disponibilites, setDisponibilites] = useState<Disponibilite[]>([]);
   const [clients, setClients] = useState<Profile[]>([]);
@@ -75,7 +76,7 @@ export default function VendeuseAgendaPage() {
         setDisponibilites(dispoData || []);
 
         // Fetch client profiles
-        const clientIds = [...new Set(rdvData?.map((rdv) => rdv.client_id) || [])];
+        const clientIds = Array.from(new Set(rdvData?.map((rdv) => rdv.client_id) || []));
         if (clientIds.length > 0) {
           const { data: clientsData, error: clientsError } = await supabase
             .from("profiles")
@@ -363,7 +364,7 @@ export default function VendeuseAgendaPage() {
                             <div className="flex items-center gap-2">
                               <h3 className="font-semibold">
                                 {format(new Date(dispo.date), "EEEE d MMMM yyyy", {
-                                  locale: "fr",
+                                  locale: fr,
                                 })}
                               </h3>
                               <Badge className={getStatutColor(dispo.statut)}>
@@ -438,7 +439,7 @@ export default function VendeuseAgendaPage() {
                               <>
                                 <p className="text-sm text-muted-foreground">
                                   {format(new Date(dispoInfo.date), "EEEE d MMMM yyyy", {
-                                    locale: "fr",
+                                    locale: fr,
                                   })}
                                 </p>
                                 <p className="text-sm text-muted-foreground">
@@ -448,7 +449,7 @@ export default function VendeuseAgendaPage() {
                             )}
                             <p className="text-sm text-muted-foreground">
                               Créé le: {format(new Date(rdv.cree_le), "d MMMM yyyy à HH:mm", {
-                                locale: "fr",
+                                locale: fr,
                               })}
                             </p>
                           </div>

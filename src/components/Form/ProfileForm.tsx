@@ -11,7 +11,7 @@ import { Textarea } from "../ui/textarea";
 import { Select } from "../ui/select";
 import { cn } from "@/lib/utils";
 import { useToast } from "../ui/use-toast";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createBrowserClient } from "@supabase/ssr";
 import { Profile, Role } from "@/types/database";
 
 const clientSchema = z.object({
@@ -39,7 +39,7 @@ interface ProfileFormProps {
 
 export function ProfileForm({ profile, role, onSuccess }: ProfileFormProps) {
   const { toast } = useToast();
-  const supabase = createClientComponentClient();
+  const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
   const schema = role === "vendeuse" ? vendeuseSchema : clientSchema;
 
@@ -50,9 +50,11 @@ export function ProfileForm({ profile, role, onSuccess }: ProfileFormProps) {
       prenom: profile?.prenom || "",
       telephone: profile?.telephone || "",
       bio: profile?.bio || "",
-      specialisation: profile?.specialisation || "",
-      tarif_horaire: profile?.tarif_horaire || 0,
-      annees_experience: profile?.annees_experience || 0,
+      ...(role === "vendeuse" && {
+        specialisation: profile?.specialisation || "",
+        tarif_horaire: profile?.tarif_horaire || 0,
+        annees_experience: profile?.annees_experience || 0,
+      }),
     },
   });
 
@@ -84,10 +86,11 @@ export function ProfileForm({ profile, role, onSuccess }: ProfileFormProps) {
         role,
       };
 
-      if (role === "vendeuse") {
-        profileData.specialisation = data.specialisation;
-        profileData.tarif_horaire = data.tarif_horaire;
-        profileData.annees_experience = data.annees_experience;
+      if (role === "vendeuse" && "specialisation" in data) {
+        const vendeuseData = data as z.infer<typeof vendeuseSchema>;
+        profileData.specialisation = vendeuseData.specialisation;
+        profileData.tarif_horaire = vendeuseData.tarif_horaire;
+        profileData.annees_experience = vendeuseData.annees_experience;
       }
 
       const { error } = await supabase
@@ -173,12 +176,12 @@ export function ProfileForm({ profile, role, onSuccess }: ProfileFormProps) {
             <Label htmlFor="specialisation">Spécialisation</Label>
             <Input
               id="specialisation"
-              {...register("specialisation")}
-              className={cn(errors.specialisation && "border-destructive")}
+              {...register("specialisation" as any)}
+              className={cn((errors as any).specialisation && "border-destructive")}
             />
-            {errors.specialisation && (
+            {(errors as any).specialisation && (
               <p className="text-sm text-destructive">
-                {errors.specialisation.message}
+                {(errors as any).specialisation.message}
               </p>
             )}
           </div>
@@ -189,12 +192,12 @@ export function ProfileForm({ profile, role, onSuccess }: ProfileFormProps) {
               <Input
                 id="tarif_horaire"
                 type="number"
-                {...register("tarif_horaire")}
-                className={cn(errors.tarif_horaire && "border-destructive")}
+                {...register("tarif_horaire" as any)}
+                className={cn((errors as any).tarif_horaire && "border-destructive")}
               />
-              {errors.tarif_horaire && (
+              {(errors as any).tarif_horaire && (
                 <p className="text-sm text-destructive">
-                  {errors.tarif_horaire.message}
+                  {(errors as any).tarif_horaire.message}
                 </p>
               )}
             </div>
@@ -204,12 +207,12 @@ export function ProfileForm({ profile, role, onSuccess }: ProfileFormProps) {
               <Input
                 id="annees_experience"
                 type="number"
-                {...register("annees_experience")}
-                className={cn(errors.annees_experience && "border-destructive")}
+                {...register("annees_experience" as any)}
+                className={cn((errors as any).annees_experience && "border-destructive")}
               />
-              {errors.annees_experience && (
+              {(errors as any).annees_experience && (
                 <p className="text-sm text-destructive">
-                  {errors.annees_experience.message}
+                  {(errors as any).annees_experience.message}
                 </p>
               )}
             </div>

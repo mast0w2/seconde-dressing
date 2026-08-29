@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createBrowserClient } from "@supabase/ssr";
 import { useToast } from "@/components/ui/use-toast";
 import { Mail, Phone, MapPin } from "lucide-react";
 
@@ -19,7 +19,7 @@ interface ContactFormData {
 }
 
 export default function ContactPage() {
-  const supabase = createClientComponentClient();
+  const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
   const { toast } = useToast();
   const [formData, setFormData] = useState<ContactFormData>({
     name: "",
@@ -65,22 +65,26 @@ export default function ContactPage() {
     setIsSubmitting(true);
 
     try {
-      // Save to database
-      const { error } = await supabase
-        .from("contact_messages")
-        .insert([
-          {
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone || null,
-            subject: formData.subject,
-            message: formData.message,
-            created_at: new Date().toISOString(),
-            status: "pending",
-          },
-        ]);
+      // Submit via API route
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone || null,
+          subject: formData.subject,
+          message: formData.message,
+        }),
+      });
 
-      if (error) throw error;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to submit contact form");
+      }
 
       // Reset form
       setFormData({

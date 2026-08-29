@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createBrowserClient } from "@supabase/ssr";
 import { useToast } from "@/components/ui/use-toast";
 import { Star } from "lucide-react";
 
@@ -19,7 +19,7 @@ interface Review {
 }
 
 export default function ReviewsPage() {
-  const supabase = createClientComponentClient();
+  const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
   const { toast } = useToast();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
@@ -92,41 +92,31 @@ export default function ReviewsPage() {
     setIsSubmitting(true);
 
     try {
-      const { data: existingReview } = await supabase
-        .from("reviews")
-        .select("*")
-        .eq("client_name", name)
-        .single();
+      const response = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          client_name: name,
+          rating,
+          comment,
+        }),
+      });
 
-      if (existingReview) {
-        toast({
-          title: "Erreur",
-          description: "Vous avez déjà soumis un avis.",
-          variant: "destructive",
-        });
-        return;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to submit review");
       }
 
-      const { error } = await supabase
-        .from("reviews")
-        .insert([
-          {
-            client_name: name,
-            rating,
-            comment,
-            created_at: new Date().toISOString(),
-          },
-        ]);
-
-      if (error) throw error;
-
       // Refresh reviews
-      const { data } = await supabase
+      const { data: reviewsData } = await supabase
         .from("reviews")
         .select("*")
         .order("created_at", { ascending: false });
 
-      setReviews(data || []);
+      setReviews(reviewsData || []);
 
       // Reset form
       setName("");
@@ -135,13 +125,13 @@ export default function ReviewsPage() {
 
       toast({
         title: "Succès",
-        description: "Votre avis a été soumis avec succès. Merci !",
+        description: data.message || "Votre avis a été soumis avec succès. Merci !",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting review:", error);
       toast({
         title: "Erreur",
-        description: "Impossible de soumettre votre avis. Veuillez réessayer.",
+        description: error.message || "Impossible de soumettre votre avis. Veuillez réessayer.",
         variant: "destructive",
       });
     } finally {
@@ -150,7 +140,7 @@ export default function ReviewsPage() {
   };
 
   const getAverageRating = () => {
-    if (reviews.length === 0) return 0;
+    if (reviews.length === 0) return "0";
     const total = reviews.reduce((sum, review) => sum + review.rating, 0);
     return (total / reviews.length).toFixed(1);
   };

@@ -95,6 +95,9 @@ export interface Database {
           vendeuse_id: string;
           disponibilite_id: string;
           statut: StatutRendezVous;
+          date: string;
+          heure_debut: string;
+          heure_fin: string;
           cree_le: string;
           mis_a_jour_le: string;
         };
