@@ -144,13 +144,13 @@ export default function VendeuseSettingsPage() {
       });
 
       // Refresh preferences
-      const { data: preferencesData } = await supabase
+      const { data: updatedPreferences } = await supabase
         .from("preferences")
         .select("*")
         .eq("user_id", user.id)
         .single();
 
-      setPreferences(preferencesData);
+      setPreferences(updatedPreferences);
     } catch (error: any) {
       toast({
         title: "Erreur",
