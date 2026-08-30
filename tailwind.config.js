@@ -16,21 +16,19 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        serif: ['Playfair Display', 'serif'],
-        sans: ['Inter', 'sans-serif'],
+        serif: ['Playfair Display', 'Georgia', 'serif'],
+        sans: ['Inter', 'Helvetica Neue', 'sans-serif'],
       },
       colors: {
-        // Brand Colors - Seconde Dressing
-        'vert-pale': '#E8F5E8',
-        'vert-pale-accent': '#D4EDDA',
-        'vert-fonce': '#A8D5BA',
-        'vert-tres-clair': '#F0F8F0',
-        'vert-emeraude': '#28A745',
-        'vert-emeraude-clair': '#5CB85C',
-        'noir-profond': '#212529',
-        'gris-fonce': '#495057',
-        'gris-moyen': '#E9ECEF',
-        'gris-tres-clair': '#F8F9FA',
+        // Cezanne-inspired Black & White Palette
+        'noir': '#000000',
+        'gris-fonce': '#1a1a1a',
+        'gris-moyen': '#333333',
+        'gris-clair': '#f5f5f5',
+        'gris-tres-clair': '#fafafa',
+        'blanc': '#ffffff',
+        'beige': '#f8f6f3',
+        'creme': '#f0ede8',
         
         // Semantic colors
         border: "hsl(var(--border))",
@@ -71,8 +69,8 @@ module.exports = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
-        'brand': '12px',
-        'brand-lg': '16px',
+        'brand': '0px',
+        'brand-sm': '2px',
       },
       spacing: {
         'brand-xs': '8px',

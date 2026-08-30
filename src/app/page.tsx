@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProgressiveEstimationForm } from "@/components/Form/ProgressiveEstimationForm";
-import { Mail, Phone, Check, Users, Calendar, Sparkles, Leaf, Target, Euro, Heart, TrendingUp, ChevronDown } from "lucide-react";
+import { Mail, Phone, Check, Calendar, Leaf, Target, Euro, ChevronDown, TrendingUp, Heart, Sparkles, Users } from "lucide-react";
 
 // ============================================================================
 // Component
@@ -24,51 +24,51 @@ export default function Home() {
 
   // Render
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Hero Section - Full page */}
-      <section className="relative bg-gradient-to-br from-vert-tres-clair to-vert-pale py-20 md:py-32 scroll-section">
+    <div className="flex flex-col min-h-screen bg-blanc text-noir">
+      {/* Hero Section - Full page - Cezanne Style */}
+      <section className="relative py-20 md:py-32 scroll-section bg-creme">
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="mb-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-vert-emeraude rounded-2xl mb-6">
-                <Leaf className="h-8 w-8 text-white" />
+            <div className="mb-12">
+              <div className="inline-flex items-center justify-center w-20 h-20 border border-noir rounded-full mb-8">
+                <Leaf className="h-10 w-10 text-noir" />
               </div>
-              <h1 className="text-4xl md:text-6xl font-600 text-noir-profond mb-6">
+              <h1 className="text-5xl md:text-7xl font-700 text-noir mb-8 leading-tight">
                 Seconde
               </h1>
-              <p className="text-xl md:text-2xl text-gris-fonce mb-12 max-w-3xl mx-auto">
+              <p className="text-xl md:text-2xl text-gris-moyen mb-16 max-w-3xl mx-auto">
                 Donner une seconde vie à vos vêtements
               </p>
               
-              {/* Avantages avec icônes */}
-              <div className="flex flex-col sm:flex-row gap-6 md:gap-8 justify-center mb-12">
+              {/* Avantages avec icônes - Style Cezanne */}
+              <div className="flex flex-col sm:flex-row gap-8 md:gap-12 justify-center">
                 {/* Vendez sans effort */}
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-16 h-16 bg-vert-tres-clair rounded-2xl flex items-center justify-center border border-vert-pale">
-                    <Target className="h-8 w-8 text-vert-emeraude" />
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-16 h-16 border border-noir rounded-full flex items-center justify-center">
+                    <Target className="h-8 w-8 text-noir" />
                   </div>
-                  <span className="text-sm md:text-base font-500 text-noir-profond">
-                    Vendez sans effort
+                  <span className="text-base md:text-lg font-500 text-noir tracking-wide">
+                    VENDEZ SANS EFFORT
                   </span>
                 </div>
                 
                 {/* Rentabilisez vos vêtements */}
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-16 h-16 bg-vert-tres-clair rounded-2xl flex items-center justify-center border border-vert-pale">
-                    <Euro className="h-8 w-8 text-vert-emeraude" />
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-16 h-16 border border-noir rounded-full flex items-center justify-center">
+                    <Euro className="h-8 w-8 text-noir" />
                   </div>
-                  <span className="text-sm md:text-base font-500 text-noir-profond">
-                    Rentabilisez vos vêtements
+                  <span className="text-base md:text-lg font-500 text-noir tracking-wide">
+                    RENTABILISEZ VOS VÊTEMENTS
                   </span>
                 </div>
                 
                 {/* Circularité */}
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-16 h-16 bg-vert-tres-clair rounded-2xl flex items-center justify-center border border-vert-pale">
-                    <Leaf className="h-8 w-8 text-vert-emeraude" />
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-16 h-16 border border-noir rounded-full flex items-center justify-center">
+                    <Leaf className="h-8 w-8 text-noir" />
                   </div>
-                  <span className="text-sm md:text-base font-500 text-noir-profond">
-                    Circularité
+                  <span className="text-base md:text-lg font-500 text-noir tracking-wide">
+                    CIRCULARITÉ
                   </span>
                 </div>
               </div>
@@ -78,50 +78,48 @@ export default function Home() {
         {/* Scroll down indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
           <div className="flex flex-col items-center gap-2 animate-bounce">
-            <ChevronDown className="h-6 w-6 text-vert-emeraude" />
-            <span className="text-xs text-vert-emeraude font-medium">Scrollez</span>
+            <ChevronDown className="h-6 w-6 text-noir" />
+            <span className="text-xs text-noir font-medium tracking-widest">SCROLLEZ</span>
           </div>
         </div>
       </section>
 
-      {/* Concept Section - Full page */}
-      <section className="py-16 md:py-24 bg-white scroll-section">
+      {/* Concept Section - Full page - Cezanne Style */}
+      <section className="py-16 md:py-24 bg-blanc scroll-section">
         <div className="container">
           <div className="max-w-6xl mx-auto">
             {/* Main Concept Card */}
-            <Card className="mb-12 md:mb-16 shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-3xl md:text-4xl font-600 text-center text-noir-profond">
-                  Notre Concept
+            <Card className="mb-16 shadow-none border-0">
+              <CardHeader className="text-center pb-0">
+                <CardTitle className="text-4xl md:text-5xl font-700 text-noir mb-4">
+                  NOTRE CONCEPT
                 </CardTitle>
-                <CardDescription className="text-center text-gris-fonce text-lg">
+                <CardDescription className="text-lg text-gris-moyen">
                   Une solution unique pour vendre vos vêtements de qualité
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="prose prose-lg max-w-none">
-                  <p className="mb-6 text-lg text-noir-profond">
-                    <strong className="font-600">Seconde</strong> est une plateforme
+                <div className="max-w-4xl mx-auto">
+                  <p className="mb-12 text-lg text-gris-moyen leading-relaxed">
+                    <strong className="font-700 text-noir">Seconde</strong> est une plateforme
                     innovante qui vous permet de vendre vos vêtements de marque sans vous en occuper.
                     Notre mission est de simplifier le processus de revente tout en
                     garantissant une expérience de qualité.
                   </p>
 
-                  <h3 className="text-2xl md:text-3xl font-500 mb-8 text-noir-profond">
-                    Pourquoi choisir Seconde ?
+                  <h3 className="text-2xl md:text-3xl font-600 mb-12 text-noir">
+                    POURQUOI CHOISIR SECONDE ?
                   </h3>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {/* Benefit 1 */}
-                    <div className="flex items-start gap-4 p-4 md:p-6 bg-vert-tres-clair rounded-xl border border-vert-pale">
-                      <div className="flex-shrink-0 w-12 h-12 bg-vert-emeraude/10 rounded-xl flex items-center justify-center">
-                        <TrendingUp className="h-6 w-6 text-vert-emeraude" />
+                    <div className="flex items-start gap-6 p-6 border-t border-noir/10">
+                      <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center">
+                        <TrendingUp className="h-8 w-8 text-noir" />
                       </div>
                       <div>
-                        <h4 className="font-600 mb-2 text-noir-profond">
-                          Gain de temps
-                        </h4>
-                        <p className="text-sm text-gris-fonce">
+                        <h4 className="font-600 mb-3 text-noir">GAIN DE TEMPS</h4>
+                        <p className="text-sm text-gris-moyen">
                           Plus besoin de gérer les annonces, les rendez-vous ou
                           les négociations
                         </p>
@@ -129,30 +127,26 @@ export default function Home() {
                     </div>
 
                     {/* Benefit 2 */}
-                    <div className="flex items-start gap-4 p-4 md:p-6 bg-vert-tres-clair rounded-xl border border-vert-pale">
-                      <div className="flex-shrink-0 w-12 h-12 bg-vert-emeraude/10 rounded-xl flex items-center justify-center">
-                        <Euro className="h-6 w-6 text-vert-emeraude" />
+                    <div className="flex items-start gap-6 p-6 border-t border-noir/10">
+                      <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center">
+                        <Euro className="h-8 w-8 text-noir" />
                       </div>
                       <div>
-                        <h4 className="font-600 mb-2 text-noir-profond">
-                          40% de commission
-                        </h4>
-                        <p className="text-sm text-gris-fonce">
+                        <h4 className="font-600 mb-3 text-noir">40% DE COMMISSION</h4>
+                        <p className="text-sm text-gris-moyen">
                           Vous récupérez 40% du prix de vente de vos articles
                         </p>
                       </div>
                     </div>
 
                     {/* Benefit 3 */}
-                    <div className="flex items-start gap-4 p-4 md:p-6 bg-vert-tres-clair rounded-xl border border-vert-pale">
-                      <div className="flex-shrink-0 w-12 h-12 bg-vert-emeraude/10 rounded-xl flex items-center justify-center">
-                        <Calendar className="h-6 w-6 text-vert-emeraude" />
+                    <div className="flex items-start gap-6 p-6 border-t border-noir/10">
+                      <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center">
+                        <Calendar className="h-8 w-8 text-noir" />
                       </div>
                       <div>
-                        <h4 className="font-600 mb-2 text-noir-profond">
-                          Flexibilité
-                        </h4>
-                        <p className="text-sm text-gris-fonce">
+                        <h4 className="font-600 mb-3 text-noir">FLEXIBILITÉ</h4>
+                        <p className="text-sm text-gris-moyen">
                           Choisissez le moment qui vous convient pour les
                           rendez-vous
                         </p>
@@ -160,15 +154,13 @@ export default function Home() {
                     </div>
 
                     {/* Benefit 4 */}
-                    <div className="flex items-start gap-4 p-4 md:p-6 bg-vert-tres-clair rounded-xl border border-vert-pale">
-                      <div className="flex-shrink-0 w-12 h-12 bg-vert-emeraude/10 rounded-xl flex items-center justify-center">
-                        <Check className="h-6 w-6 text-vert-emeraude" />
+                    <div className="flex items-start gap-6 p-6 border-t border-noir/10">
+                      <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center">
+                        <Check className="h-8 w-8 text-noir" />
                       </div>
                       <div>
-                        <h4 className="font-600 mb-2 text-noir-profond">
-                          Service clé en main
-                        </h4>
-                        <p className="text-sm text-gris-fonce">
+                        <h4 className="font-600 mb-3 text-noir">SERVICE CLÉ EN MAIN</h4>
+                        <p className="text-sm text-gris-moyen">
                           Nous nous occupons de tout : récupération, photographie,
                           mise en ligne et vente
                         </p>
@@ -176,15 +168,13 @@ export default function Home() {
                     </div>
 
                     {/* Benefit 5 */}
-                    <div className="flex items-start gap-4 p-4 md:p-6 bg-vert-tres-clair rounded-xl border border-vert-pale">
-                      <div className="flex-shrink-0 w-12 h-12 bg-vert-emeraude/10 rounded-xl flex items-center justify-center">
-                        <Sparkles className="h-6 w-6 text-vert-emeraude" />
+                    <div className="flex items-start gap-6 p-6 border-t border-noir/10">
+                      <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center">
+                        <Sparkles className="h-8 w-8 text-noir" />
                       </div>
                       <div>
-                        <h4 className="font-600 mb-2 text-noir-profond">
-                          Sécurité
-                        </h4>
-                        <p className="text-sm text-gris-fonce">
+                        <h4 className="font-600 mb-3 text-noir">SÉCURITÉ</h4>
+                        <p className="text-sm text-gris-moyen">
                           Transactions sécurisées et suivi transparent de vos
                           ventes
                         </p>
@@ -192,15 +182,13 @@ export default function Home() {
                     </div>
 
                     {/* Benefit 6 */}
-                    <div className="flex items-start gap-4 p-4 md:p-6 bg-vert-tres-clair rounded-xl border border-vert-pale">
-                      <div className="flex-shrink-0 w-12 h-12 bg-vert-emeraude/10 rounded-xl flex items-center justify-center">
-                        <Heart className="h-6 w-6 text-vert-emeraude" />
+                    <div className="flex items-start gap-6 p-6 border-t border-noir/10">
+                      <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center">
+                        <Heart className="h-8 w-8 text-noir" />
                       </div>
                       <div>
-                        <h4 className="font-600 mb-2 text-noir-profond">
-                          Durabilité
-                        </h4>
-                        <p className="text-sm text-gris-fonce">
+                        <h4 className="font-600 mb-3 text-noir">DURABILITÉ</h4>
+                        <p className="text-sm text-gris-moyen">
                           En donnant une seconde vie à vos vêtements, vous
                           contribuez à une mode plus durable et responsable
                         </p>
@@ -215,92 +203,83 @@ export default function Home() {
         {/* Scroll down indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
           <div className="flex flex-col items-center gap-2 animate-bounce">
-            <ChevronDown className="h-6 w-6 text-vert-emeraude" />
-            <span className="text-xs text-vert-emeraude font-medium">Scrollez</span>
-          </div>
-        </div>
-        {/* Scroll down indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-          <div className="flex flex-col items-center gap-2 animate-bounce">
-            <ChevronDown className="h-6 w-6 text-vert-emeraude" />
-            <span className="text-xs text-vert-emeraude font-medium">Scrollez</span>
+            <ChevronDown className="h-6 w-6 text-noir" />
+            <span className="text-xs text-noir font-medium tracking-widest">SCROLLEZ</span>
           </div>
         </div>
       </section>
 
-      {/* How It Works Section - Full page */}
+      {/* How It Works Section - Full page - Cezanne Style */}
       <section 
         ref={howItWorksRef}
-        className="py-16 md:py-24 bg-vert-tres-clair scroll-section"
+        className="py-16 md:py-24 bg-creme scroll-section"
       >
         <div className="container">
           <div className="max-w-6xl mx-auto">
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-3xl text-center text-noir-profond">
-                  Comment ça fonctionne ?
+            <Card className="shadow-none border-0">
+              <CardHeader className="text-center pb-0">
+                <CardTitle className="text-4xl md:text-5xl font-700 text-noir mb-8">
+                  COMMENT ÇA FONCTIONNE ?
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-8">
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-10 h-10 bg-vert-emeraude text-white rounded-full flex items-center justify-center font-600">
+                <div className="max-w-4xl mx-auto space-y-10">
+                  <div className="flex gap-6">
+                    <div className="flex-shrink-0 w-12 h-12 bg-noir text-blanc rounded-full flex items-center justify-center font-700">
                       1
                     </div>
                     <div>
-                      <h4 className="font-600 mb-2 text-noir-profond">
-                        Estimation en ligne
-                      </h4>
-                      <p className="text-gris-fonce">
+                      <h4 className="font-600 mb-3 text-noir">ESTIMATION EN LIGNE</h4>
+                      <p className="text-gris-moyen">
                         Remplissez notre formulaire pour obtenir une estimation personnalisée
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-10 h-10 bg-vert-emeraude text-white rounded-full flex items-center justify-center font-600">
+                  <div className="flex gap-6">
+                    <div className="flex-shrink-0 w-12 h-12 bg-noir text-blanc rounded-full flex items-center justify-center font-700">
                       2
                     </div>
                     <div>
-                      <h4 className="font-600 mb-2 text-noir-profond">Contact rapide</h4>
-                      <p className="text-gris-fonce">
+                      <h4 className="font-600 mb-3 text-noir">CONTACT RAPIDE</h4>
+                      <p className="text-gris-moyen">
                         Nous vous contactons sous 24h pour organiser un rendez-vous
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-10 h-10 bg-vert-emeraude text-white rounded-full flex items-center justify-center font-600">
+                  <div className="flex gap-6">
+                    <div className="flex-shrink-0 w-12 h-12 bg-noir text-blanc rounded-full flex items-center justify-center font-700">
                       3
                     </div>
                     <div>
-                      <h4 className="font-600 mb-2 text-noir-profond">Récupération à domicile</h4>
-                      <p className="text-gris-fonce">
+                      <h4 className="font-600 mb-3 text-noir">RÉCUPÉRATION À DOMICILE</h4>
+                      <p className="text-gris-moyen">
                         Nous venons récupérer vos vêtements directement chez vous
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-10 h-10 bg-vert-emeraude text-white rounded-full flex items-center justify-center font-600">
+                  <div className="flex gap-6">
+                    <div className="flex-shrink-0 w-12 h-12 bg-noir text-blanc rounded-full flex items-center justify-center font-700">
                       4
                     </div>
                     <div>
-                      <h4 className="font-600 mb-2 text-noir-profond">Mise en vente</h4>
-                      <p className="text-gris-fonce">
+                      <h4 className="font-600 mb-3 text-noir">MISE EN VENTE</h4>
+                      <p className="text-gris-moyen">
                         Vos vêtements sont photographiés, décrits et mis en
                         ligne sur nos plateformes partenaires
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-10 h-10 bg-vert-emeraude text-white rounded-full flex items-center justify-center font-600">
+                  <div className="flex gap-6">
+                    <div className="flex-shrink-0 w-12 h-12 bg-noir text-blanc rounded-full flex items-center justify-center font-700">
                       5
                     </div>
                     <div>
-                      <h4 className="font-600 mb-2 text-noir-profond">Paiement</h4>
-                      <p className="text-gris-fonce">
+                      <h4 className="font-600 mb-3 text-noir">PAIEMENT</h4>
+                      <p className="text-gris-moyen">
                         Recevez votre paiement (40% du prix de vente) directement sur votre compte
                         bancaire après la vente
                       </p>
@@ -314,133 +293,114 @@ export default function Home() {
         {/* Scroll down indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
           <div className="flex flex-col items-center gap-2 animate-bounce">
-            <ChevronDown className="h-6 w-6 text-vert-emeraude" />
-            <span className="text-xs text-vert-emeraude font-medium">Scrollez</span>
-          </div>
-        </div>
-        {/* Scroll down indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-          <div className="flex flex-col items-center gap-2 animate-bounce">
-            <ChevronDown className="h-6 w-6 text-vert-emeraude" />
-            <span className="text-xs text-vert-emeraude font-medium">Scrollez</span>
+            <ChevronDown className="h-6 w-6 text-noir" />
+            <span className="text-xs text-noir font-medium tracking-widest">SCROLLEZ</span>
           </div>
         </div>
       </section>
 
-      {/* Progressive Form Section - Full page */}
+      {/* Progressive Form Section - Full page - Cezanne Style */}
       <section 
         ref={formRef}
         id="estimation-form"
-        className="py-16 md:py-24 bg-gradient-to-br from-vert-tres-clair to-vert-pale scroll-section"
+        className="py-16 md:py-24 bg-blanc scroll-section"
       >
         <div className="container">
           <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-600 mb-4 text-noir-profond">
-                Obtenez une estimation gratuite
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-700 mb-6 text-noir">
+                OBTENEZ UNE ESTIMATION GRATUITE
               </h2>
-              <p className="text-xl text-gris-fonce">
+              <p className="text-xl text-gris-moyen mb-4">
                 Remplissez notre formulaire et découvrez combien vous pourriez gagner
               </p>
-              <p className="text-sm text-muted-foreground mt-4">
-        {/* Scroll down indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-          <div className="flex flex-col items-center gap-2 animate-bounce">
-            <ChevronDown className="h-6 w-6 text-vert-emeraude" />
-            <span className="text-xs text-vert-emeraude font-medium">Scrollez</span>
-          </div>
-        </div>
-                Vous toucherez 40% du prix de vente estimé
+              <p className="text-sm text-gris-moyen tracking-wide">
+                VOUS TOUCHEREZ 40% DU PRIX DE VENTE ESTIMÉ
               </p>
             </div>
 
-            <ProgressiveEstimationForm />
+            <div className="max-w-2xl mx-auto">
+              <ProgressiveEstimationForm />
+            </div>
           </div>
         </div>
         {/* Scroll down indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
           <div className="flex flex-col items-center gap-2 animate-bounce">
-            <ChevronDown className="h-6 w-6 text-vert-emeraude" />
-            <span className="text-xs text-vert-emeraude font-medium">Scrollez</span>
+            <ChevronDown className="h-6 w-6 text-noir" />
+            <span className="text-xs text-noir font-medium tracking-widest">SCROLLEZ</span>
           </div>
         </div>
       </section>
 
-      {/* CTA Section - Full page */}
-      <section className="py-16 md:py-24 bg-white scroll-section">
+      {/* CTA Section - Full page - Cezanne Style */}
+      <section className="py-16 md:py-24 bg-creme scroll-section">
         <div className="container">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-600 mb-6 text-noir-profond">
-        {/* Scroll down indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-          <div className="flex flex-col items-center gap-2 animate-bounce">
-            <ChevronDown className="h-6 w-6 text-vert-emeraude" />
-            <span className="text-xs text-vert-emeraude font-medium">Scrollez</span>
-          </div>
-        </div>
-              Prêt à donner une seconde vie à vos vêtements ?
+            <h2 className="text-4xl md:text-5xl font-700 mb-8 text-noir">
+              PRÊT À DONNER UNE SECONDE VIE À VOS VÊTEMENTS ?
             </h2>
-            <p className="text-xl text-gris-fonce mb-8">
+            <p className="text-xl text-gris-moyen mb-12">
               Contactez-nous dès maintenant et commencez votre expérience avec
               Seconde.
             </p>
             <Button 
               onClick={() => scrollToSection(formRef)}
-              className="bg-vert-emeraude hover:bg-vert-emeraude-clair text-white px-8 py-4 rounded-lg text-lg font-500 transition-all duration-200"
+              className="bg-noir hover:bg-gris-fonce text-blanc px-12 py-4 rounded-none text-lg font-500 transition-all duration-300 tracking-widest"
             >
-              Commencer l'estimation
+              COMMENCER L'ESTIMATION
             </Button>
           </div>
         </div>
         {/* Scroll down indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
           <div className="flex flex-col items-center gap-2 animate-bounce">
-            <ChevronDown className="h-6 w-6 text-vert-emeraude" />
-            <span className="text-xs text-vert-emeraude font-medium">Scrollez</span>
+            <ChevronDown className="h-6 w-6 text-noir" />
+            <span className="text-xs text-noir font-medium tracking-widest">SCROLLEZ</span>
           </div>
         </div>
       </section>
 
-      {/* Contact Information Section - Full page */}
-      <section className="py-16 md:py-24 bg-vert-tres-clair scroll-section">
+      {/* Contact Information Section - Full page - Cezanne Style */}
+      <section className="py-16 md:py-24 bg-blanc scroll-section">
         <div className="container">
           <div className="max-w-4xl mx-auto">
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-2xl text-center text-noir-profond">
-                  Autres moyens de contact
+            <Card className="shadow-none border-0">
+              <CardHeader className="text-center pb-0">
+                <CardTitle className="text-3xl text-center text-noir">
+                  AUTRES MOYENS DE CONTACT
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-6">
-                    <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0 w-12 h-12 bg-vert-emeraude/10 rounded-full flex items-center justify-center">
-                        <Mail className="h-6 w-6 text-vert-emeraude" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                  <div className="space-y-8">
+                    <div className="flex items-start gap-6">
+                      <div className="flex-shrink-0 w-12 h-12 border border-noir rounded-full flex items-center justify-center">
+                        <Mail className="h-6 w-6 text-noir" />
                       </div>
                       <div>
-                        <h3 className="font-600 mb-1 text-noir-profond">Email</h3>
-                        <p className="text-muted-foreground">
+                        <h3 className="font-600 mb-2 text-noir">EMAIL</h3>
+                        <p className="text-gris-moyen">
                           contact@seconde-dressing.fr
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0 w-12 h-12 bg-vert-emeraude/10 rounded-full flex items-center justify-center">
-                        <Phone className="h-6 w-6 text-vert-emeraude" />
+                    <div className="flex items-start gap-6">
+                      <div className="flex-shrink-0 w-12 h-12 border border-noir rounded-full flex items-center justify-center">
+                        <Phone className="h-6 w-6 text-noir" />
                       </div>
                       <div>
-                        <h3 className="font-600 mb-1 text-noir-profond">Téléphone</h3>
-                        <p className="text-muted-foreground">+33 1 23 45 67 89</p>
+                        <h3 className="font-600 mb-2 text-noir">TÉLÉPHONE</h3>
+                        <p className="text-gris-moyen">+33 1 23 45 67 89</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="space-y-6">
+                  <div className="space-y-8">
                     <div>
-                      <h3 className="font-600 mb-2 text-noir-profond">Adresse</h3>
-                      <p className="text-muted-foreground">
+                      <h3 className="font-600 mb-4 text-noir">ADRESSE</h3>
+                      <p className="text-gris-moyen">
                         123 Rue de la Mode
                         <br />
                         75000 Paris, France
@@ -448,8 +408,8 @@ export default function Home() {
                     </div>
 
                     <div>
-                      <h3 className="font-600 mb-2 text-noir-profond">Heures d'ouverture</h3>
-                      <div className="space-y-2 text-sm text-muted-foreground">
+                      <h3 className="font-600 mb-4 text-noir">HEURES D'OUVERTURE</h3>
+                      <div className="space-y-3 text-gris-moyen">
                         <div className="flex justify-between">
                           <span>Lundi - Vendredi</span>
                           <span>9h00 - 18h00</span>
@@ -468,13 +428,6 @@ export default function Home() {
                 </div>
               </CardContent>
             </Card>
-          </div>
-        </div>
-        {/* Scroll down indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-          <div className="flex flex-col items-center gap-2 animate-bounce">
-            <ChevronDown className="h-6 w-6 text-vert-emeraude" />
-            <span className="text-xs text-vert-emeraude font-medium">Scrollez</span>
           </div>
         </div>
       </section>

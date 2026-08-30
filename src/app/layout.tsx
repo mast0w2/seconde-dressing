@@ -20,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className={inter.className}>
+    <html lang="fr" className={playfair.className}>
       <body className={inter.className}>
         <div className="flex min-h-screen flex-col">
           <Navbar />

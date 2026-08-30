@@ -16,6 +16,7 @@ import { useToast } from "./ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Leaf } from "lucide-react";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -65,110 +66,49 @@ export function Navbar() {
   const isVendeuse = profile?.role === "vendeuse";
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 max-w-screen-2xl items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="text-xl font-bold text-primary">Seconde</span>
+    <nav className="sticky top-0 z-50 w-full bg-blanc/95 backdrop-blur border-b border-noir/10">
+      <div className="container flex h-16 max-w-screen-2xl items-center justify-between">
+        <div className="flex items-center gap-6">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="w-8 h-8 border border-noir rounded-full flex items-center justify-center">
+              <Leaf className="h-4 w-4 text-noir" />
+            </div>
+            <span className="text-xl font-bold text-noir tracking-wide">SECONDE</span>
           </Link>
 
-          <div className="hidden md:flex md:gap-6">
+          <div className="hidden md:flex md:gap-8">
             <Link
               href="/"
-              className={`text-sm font-medium transition-colors hover:text-primary ${
-                pathname === "/" ? "text-primary" : "text-muted-foreground"
+              className={`text-sm font-medium transition-colors hover:text-noir ${
+                pathname === "/" ? "text-noir" : "text-gris-moyen"
               }`}
             >
-              Accueil
+              ACCUEIL
             </Link>
             <Link
               href="/about"
-              className={`text-sm font-medium transition-colors hover:text-primary ${
-                pathname === "/about" ? "text-primary" : "text-muted-foreground"
+              className={`text-sm font-medium transition-colors hover:text-noir ${
+                pathname === "/about" ? "text-noir" : "text-gris-moyen"
               }`}
             >
-              Le concept
+              LE CONCEPT
             </Link>
             <Link
               href="/reviews"
-              className={`text-sm font-medium transition-colors hover:text-primary ${
-                pathname === "/reviews" ? "text-primary" : "text-muted-foreground"
+              className={`text-sm font-medium transition-colors hover:text-noir ${
+                pathname === "/reviews" ? "text-noir" : "text-gris-moyen"
               }`}
             >
-              Avis clients
+              AVIS CLIENTS
             </Link>
             <Link
               href="/contact"
-              className={`text-sm font-medium transition-colors hover:text-primary ${
-                pathname === "/contact" ? "text-primary" : "text-muted-foreground"
+              className={`text-sm font-medium transition-colors hover:text-noir ${
+                pathname === "/contact" ? "text-noir" : "text-gris-moyen"
               }`}
             >
-              Contact
+              CONTACT
             </Link>
-
-            {user && (
-              <>
-                <Link
-                  href="/dashboard"
-                  className={`text-sm font-medium transition-colors hover:text-primary ${
-                    pathname.startsWith("/dashboard")
-                      ? "text-primary"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  Tableau de bord
-                </Link>
-                {isClient && (
-                  <>
-                    <Link
-                      href="/client/disponibilites"
-                      className={`text-sm font-medium transition-colors hover:text-primary ${
-                        pathname.startsWith("/client/disponibilites")
-                          ? "text-primary"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      Mes disponibilités
-                    </Link>
-                    <Link
-                      href="/client/rdv"
-                      className={`text-sm font-medium transition-colors hover:text-primary ${
-                        pathname.startsWith("/client/rdv")
-                          ? "text-primary"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      Mes rendez-vous
-                    </Link>
-                  </>
-                )}
-
-                {isVendeuse && (
-                  <>
-                    <Link
-                      href="/vendeuse/demandes"
-                      className={`text-sm font-medium transition-colors hover:text-primary ${
-                        pathname.startsWith("/vendeuse/demandes")
-                          ? "text-primary"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      Demandes
-                    </Link>
-                    <Link
-                      href="/vendeuse/agenda"
-                      className={`text-sm font-medium transition-colors hover:text-primary ${
-                        pathname.startsWith("/vendeuse/agenda")
-                          ? "text-primary"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      Mon agenda
-                    </Link>
-                  </>
-                )}
-              </>
-            )}
           </div>
         </div>
 
@@ -177,50 +117,75 @@ export function Navbar() {
             <>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <Avatar className="h-8 w-8">
-                      {profile?.photo_url ? (
-                        <AvatarImage
-                          src={profile.photo_url}
-                          alt={profile.prenom}
-                        />
-                      ) : (
-                        <AvatarFallback className="bg-primary text-primary-foreground">
-                          {profile?.prenom?.charAt(0) || "U"}
-                        </AvatarFallback>
-                      )}
+                  <Button
+                    variant="ghost"
+                    className="relative h-10 w-10 rounded-full border border-noir/20"
+                  >
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={profile?.photo_url || undefined} />
+                      <AvatarFallback className="bg-noir text-blanc text-xs font-bold">
+                        {profile?.prenom ? profile.prenom.charAt(0).toUpperCase() : 'U'}
+                      </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuLabel className="font-normal">
+                <DropdownMenuContent className="w-56 bg-blanc border border-noir/10" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal text-noir">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">
-                        {profile?.prenom} {profile?.nom}
-                      </p>
-                      <p className="text-xs leading-none text-muted-foreground">
-                        {profile?.email}
-                      </p>
+                      <p className="text-sm font-medium">{profile?.prenom} {profile?.nom}</p>
+                      <p className="text-xs text-gris-moyen">{profile?.email}</p>
                     </div>
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href={`/${profile?.role}/settings`}>Paramètres</Link>
+                  <DropdownMenuSeparator className="bg-noir/10" />
+                  <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
+                    <Link href={isClient ? "/client/settings" : isVendeuse ? "/vendeuse/settings" : "/"}>
+                      Mon profil
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="text-destructive">
-                    Se déconnecter
+                  {isClient && (
+                    <>
+                      <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
+                        <Link href="/client/disponibilites">Mes disponibilités</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
+                        <Link href="/client/rdv">Mes rendez-vous</Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  {isVendeuse && (
+                    <>
+                      <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
+                        <Link href="/vendeuse/agenda">Mon agenda</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
+                        <Link href="/vendeuse/demandes">Mes demandes</Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  <DropdownMenuSeparator className="bg-noir/10" />
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="focus:bg-noir/5 focus:text-noir text-destructive"
+                  >
+                    Déconnexion
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </>
           ) : (
             <>
-              <Button asChild variant="ghost" size="sm">
+              <Button
+                asChild
+                variant="ghost"
+                className="text-noir hover:bg-noir/5 hover:text-noir transition-colors"
+              >
                 <Link href="/login">Se connecter</Link>
               </Button>
-              <Button asChild size="sm">
-                <Link href="/signup">S&apos;inscrire</Link>
+              <Button
+                asChild
+                className="bg-noir hover:bg-gris-fonce text-blanc px-6 py-2 text-sm font-medium transition-colors"
+              >
+                <Link href="/signup">S'inscrire</Link>
               </Button>
             </>
           )}

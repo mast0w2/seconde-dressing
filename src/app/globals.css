@@ -2,70 +2,67 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
 
 @layer base {
   :root {
-    /* Brand Colors - Seconde Dressing */
-    --vert-pale: #E8F5E8;
-    --vert-pale-accent: #D4EDDA;
-    --vert-fonce: #A8D5BA;
-    --vert-tres-clair: #F0F8F0;
-    --vert-emeraude: #28A745;
-    --vert-emeraude-clair: #5CB85C;
-    --blanc: #FFFFFF;
-    --gris-tres-clair: #F8F9FA;
-    --gris-moyen: #E9ECEF;
-    --noir-profond: #212529;
-    --gris-fonce: #495057;
+    /* Cezanne-inspired Black & White Color Palette */
+    --noir: #000000;
+    --gris-fonce: #1a1a1a;
+    --gris-moyen: #333333;
+    --gris-clair: #f5f5f5;
+    --gris-tres-clair: #fafafa;
+    --blanc: #ffffff;
+    --beige: #f8f6f3;
+    --creme: #f0ede8;
     
     /* Font Families */
-    --font-titres: 'Playfair Display', serif;
-    --font-texte: 'Inter', sans-serif;
+    --font-titres: 'Playfair Display', Georgia, serif;
+    --font-texte: 'Inter', 'Helvetica Neue', sans-serif;
     
     /* Semantic colors for Tailwind */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 0 0% 0%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 0 0% 0%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 120 100% 35%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 0 0% 0%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 120 47.4% 11.2%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 120 40% 96.1%;
-    --muted-foreground: 120 16.3% 46.9%;
-    --accent: 120 40% 96.1%;
-    --accent-foreground: 120 47.4% 11.2%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 0%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
-    --border: 120 31.8% 91.4%;
-    --input: 120 31.8% 91.4%;
-    --ring: 120 84% 4.9%;
-    --radius: 0.5rem;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 0%;
+    --radius: 0px;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 120 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 0%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 4%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 4%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 4%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 100%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 0 0% 14%;
+    --input: 0 0% 14%;
+    --ring: 0 0% 83.9%;
   }
 }
 
@@ -78,17 +75,72 @@
     @apply bg-background text-foreground;
     font-family: var(--font-texte);
     font-size: 18px;
-    line-height: 1.6;
-    color: var(--noir-profond);
+    line-height: 1.8;
+    color: var(--noir);
     background-color: var(--blanc);
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* Full-page scroll sections */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-titres);
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--noir);
+    letter-spacing: -0.02em;
+  }
+
+  h1 {
+    font-size: 48px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+
+  h2 {
+    font-size: 36px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  h3 {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--gris-moyen);
+    letter-spacing: -0.01em;
+  }
+
+  p {
+    font-family: var(--font-texte);
+    font-size: 18px;
+    line-height: 1.8;
+    color: var(--gris-moyen);
+  }
+
+  .text-secondary {
+    font-family: var(--font-texte);
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--gris-moyen);
+  }
+
+  .caption {
+    font-family: var(--font-texte);
+    font-size: 14px;
+    color: var(--gris-moyen);
+    letter-spacing: 0.02em;
+  }
+
+  input, textarea, select {
+    color: var(--noir);
+    font-family: var(--font-texte);
+    font-size: 16px;
+  }
+
+  /* Scroll Section Styles */
   .scroll-section {
     min-height: 100vh;
     width: 100%;
     scroll-snap-align: start;
+    position: relative;
   }
 
   html {
@@ -96,127 +148,91 @@
     overflow-y: scroll;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-texte);
-    font-weight: 600;
-    line-height: 1.2;
-    color: var(--noir-profond);
-  }
-
-  h1 {
-    font-size: 48px;
-  }
-
-  h2 {
-    font-size: 36px;
-    font-weight: 500;
-  }
-
-  h3 {
-    font-size: 28px;
-    font-weight: 500;
-    color: var(--gris-fonce);
-  }
-
-  p {
-    font-family: var(--font-texte);
-    font-size: 18px;
-    line-height: 1.6;
-    color: var(--noir-profond);
-  }
-
-  .text-secondary {
-    font-family: var(--font-texte);
-    font-size: 16px;
-    font-weight: 300;
-    color: var(--gris-fonce);
-  }
-
-  .caption {
-    font-family: var(--font-texte);
-    font-size: 14px;
-    color: #6C757D;
-  }
-
-  input, textarea, select {
-    color: var(--noir-profond);
-    font-family: var(--font-texte);
-  }
-
-  /* Button Styles */
+  /* Button Styles - Cezanne Minimalist */
   .btn-primary {
-    background-color: var(--vert-emeraude);
+    background-color: var(--noir);
     color: var(--blanc);
     padding: 16px 32px;
-    border-radius: 8px;
     border: none;
     cursor: pointer;
     font-family: var(--font-texte);
     font-size: 16px;
     font-weight: 500;
-    transition: all 0.2s ease;
+    letter-spacing: 0.05em;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
   }
 
   .btn-primary:hover {
-    background-color: var(--vert-emeraude-clair);
-    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.15);
+    background-color: var(--gris-fonce);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 
   .btn-secondary {
     background-color: transparent;
-    color: var(--vert-emeraude);
-    border: 1px solid var(--vert-emeraude);
+    color: var(--noir);
+    border: 1px solid var(--noir);
     padding: 16px 32px;
-    border-radius: 8px;
     cursor: pointer;
     font-family: var(--font-texte);
     font-size: 16px;
     font-weight: 500;
-    transition: all 0.2s ease;
+    letter-spacing: 0.05em;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
   }
 
   .btn-secondary:hover {
-    background-color: var(--vert-tres-clair);
-    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.1);
+    background-color: var(--noir);
+    color: var(--blanc);
+    transform: translateY(-2px);
   }
 
-  /* Card Styles */
-  .card-brand {
+  /* Card Styles - Cezanne Minimalist */
+  .card-cezanne {
     background: var(--blanc);
-    border: 1px solid var(--vert-pale);
-    border-radius: 12px;
-    padding: 32px;
-    box-shadow: 0 2px 8px rgba(232, 245, 232, 0.5);
+    border: none;
+    border-radius: 0px;
+    padding: 40px;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .card-cezanne:hover {
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   }
 
   /* Form Styles */
-  .form-input {
-    border: 1px solid var(--gris-moyen);
-    border-radius: 8px;
-    padding: 12px 16px;
+  .form-input-cezanne {
+    border: none;
+    border-bottom: 1px solid var(--noir);
+    border-radius: 0px;
+    padding: 12px 0;
     font-family: var(--font-texte);
     font-size: 16px;
-    transition: border-color 0.2s ease;
+    background: transparent;
+    transition: border-color 0.3s ease;
+    outline: none;
   }
 
-  .form-input:focus {
-    border-color: var(--vert-emeraude);
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.1);
+  .form-input-cezanne:focus {
+    border-bottom-color: var(--noir);
+    box-shadow: none;
   }
 
   /* Spacing utilities */
   .section-spacing {
-    padding: 80px 0;
+    padding: 100px 0;
   }
 
   .element-spacing {
-    margin: 40px 0;
+    margin: 60px 0;
   }
 
   @media (max-width: 768px) {
     .section-spacing {
-      padding: 48px 0;
+      padding: 60px 0;
     }
     
     h1 {
@@ -233,10 +249,29 @@
     
     body {
       font-size: 16px;
+      line-height: 1.7;
     }
   }
 }
 
+/* Custom scrollbar for Cezanne aesthetic */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--creme);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gris-moyen);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--noir);
+}
+
 tailwindcss-animate {
-  @apply animate-in fade-in duration-200;
+  @apply animate-in fade-in duration-300;
 }
