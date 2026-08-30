@@ -29,13 +29,13 @@ export default function Home() {
       <section 
         className="relative py-20 md:py-32 scroll-section bg-creme"
         style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')",
+          backgroundImage: "url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundAttachment: "fixed"
         }}
       >
-        <div className="absolute inset-0 bg-creme/80 backdrop-blur-sm"></div>
+        <div className="absolute inset-0 bg-creme/70 backdrop-blur-sm"></div>
         <div className="container relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             <div className="mb-12">

@@ -447,77 +447,71 @@ export function ProgressiveEstimationForm() {
   // Render main form
   if (!isComplete) {
     return (
-      <Card className="w-full max-w-2xl mx-auto">
-        <CardHeader>
-          <CardTitle className="text-center">
+      <div className="w-full max-w-2xl mx-auto space-y-6">
+        {renderProgress()}
+        
+        <div className="space-y-2">
+          <h2 className="text-2xl md:text-3xl font-600 text-noir">
             {currentQuestion.question}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {renderProgress()}
-          
-          <div className="space-y-4">
-            <Label htmlFor={currentQuestion.id} className="sr-only">
-              {currentQuestion.question}
-            </Label>
-            {renderInput()}
-            {errors[currentQuestion.id] && (
-              <p className="text-sm text-destructive">{errors[currentQuestion.id]}</p>
-            )}
-            {renderEstimation()}
-          </div>
+          </h2>
+          {renderInput()}
+          {errors[currentQuestion.id] && (
+            <p className="text-sm text-destructive">{errors[currentQuestion.id]}</p>
+          )}
+          {renderEstimation()}
+        </div>
 
-          <div className="flex justify-between items-center pt-4">
-            {currentStep > 0 && (
-              <Button
-                variant="outline"
-                onClick={handlePrevious}
-                disabled={isSubmitting}
-                className="min-w-[120px]"
-              >
-                Précédent
-              </Button>
-            )}
-            {currentStep < QUESTIONS.length - 1 ? (
-              <Button
-                onClick={handleNext}
-                disabled={isSubmitting}
-                className="min-w-[120px] ml-auto"
-              >
-                Suivant
-              </Button>
-            ) : (
-              <Button
-                onClick={handleNext}
-                disabled={isSubmitting}
-                className="min-w-[120px] ml-auto"
-              >
-                {isSubmitting ? "Envoi en cours..." : "Envoyer ma demande"}
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+        <div className="flex items-center justify-between">
+          {currentStep > 0 && (
+            <button
+              onClick={handlePrevious}
+              disabled={isSubmitting}
+              className="text-noir underline hover:no-underline transition-all"
+            >
+              Précédent
+            </button>
+          )}
+          <div className="flex-1"></div>
+          {currentStep < QUESTIONS.length - 1 ? (
+            <button
+              onClick={handleNext}
+              disabled={isSubmitting}
+              className="text-noir hover:text-gris-moyen transition-all text-2xl"
+              aria-label="Suivant"
+            >
+              →
+            </button>
+          ) : (
+            <button
+              onClick={handleNext}
+              disabled={isSubmitting}
+              className="text-noir hover:text-gris-moyen transition-all text-2xl"
+              aria-label="Envoyer"
+            >
+              →
+            </button>
+          )}
+        </div>
+      </div>
     );
   }
 
   // Render completion state
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="text-center text-vert-emeraude">
-          Demande envoyée avec succès !
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="text-center space-y-6">
-        <p className="text-lg">
-          OK, on va bien vous contacter ! Merci ! Nous allons vous recontacter sous 24h pour définir votre rendez-vous.
-        </p>
-        <Button onClick={handleReset} className="min-w-[200px]">
-          Faire une nouvelle demande
-        </Button>
-      </CardContent>
-    </Card>
+    <div className="w-full max-w-2xl mx-auto text-center space-y-6">
+      <h2 className="text-2xl md:text-3xl font-600 text-vert-emeraude">
+        Demande envoyée avec succès !
+      </h2>
+      <p className="text-lg">
+        OK, on va bien vous contacter ! Merci ! Nous allons vous recontacter sous 24h pour définir votre rendez-vous.
+      </p>
+      <button
+        onClick={handleReset}
+        className="text-noir underline hover:no-underline transition-all text-lg"
+      >
+        Faire une nouvelle demande
+      </button>
+    </div>
   );
 }
 
