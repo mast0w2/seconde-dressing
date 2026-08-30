@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProgressiveEstimationForm } from "@/components/Form/ProgressiveEstimationForm";
@@ -12,21 +12,22 @@ import { Mail, Phone, Check, Users, Calendar, Sparkles, Leaf, Target, Euro, Hear
 
 export default function Home() {
   const [showForm, setShowForm] = useState(false);
+  const conceptRef = useRef<HTMLDivElement>(null);
+  const howItWorksRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to form
-  const scrollToForm = () => {
-    setShowForm(true);
-    const formElement = document.getElementById("estimation-form");
-    if (formElement) {
-      formElement.scrollIntoView({ behavior: "smooth", block: "start" });
+  // Scroll to section
+  const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
+    if (ref.current) {
+      ref.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
   // Render
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Hero Section - Brand Guidelines */}
-      <section className="relative bg-gradient-to-br from-vert-tres-clair to-vert-pale py-20 md:py-32">
+      {/* Hero Section - Full page */}
+      <section className="relative bg-gradient-to-br from-vert-tres-clair to-vert-pale py-20 md:py-32 scroll-section">
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
             <div className="mb-8">
@@ -77,8 +78,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Concept Presentation Section */}
-      <section className="py-16 md:py-24 bg-white">
+      {/* Concept Section - Full page */}
+      <section 
+        ref={conceptRef}
+        className="py-16 md:py-24 bg-white scroll-section"
+      >
         <div className="container">
           <div className="max-w-6xl mx-auto">
             {/* Main Concept Card */}
@@ -276,10 +280,96 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Progressive Form Section */}
+      {/* How It Works Section - Full page */}
       <section 
+        ref={howItWorksRef}
+        className="py-16 md:py-24 bg-vert-tres-clair scroll-section"
+      >
+        <div className="container">
+          <div className="max-w-6xl mx-auto">
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-3xl text-center text-noir-profond">
+                  Comment ça fonctionne ?
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-8">
+                  <div className="flex gap-4">
+                    <div className="flex-shrink-0 w-10 h-10 bg-vert-emeraude text-white rounded-full flex items-center justify-center font-600">
+                      1
+                    </div>
+                    <div>
+                      <h4 className="font-600 mb-2 text-noir-profond">
+                        Estimation en ligne
+                      </h4>
+                      <p className="text-gris-fonce">
+                        Remplissez notre formulaire pour obtenir une estimation personnalisée
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <div className="flex-shrink-0 w-10 h-10 bg-vert-emeraude text-white rounded-full flex items-center justify-center font-600">
+                      2
+                    </div>
+                    <div>
+                      <h4 className="font-600 mb-2 text-noir-profond">Contact rapide</h4>
+                      <p className="text-gris-fonce">
+                        Nous vous contactons sous 24h pour organiser un rendez-vous
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <div className="flex-shrink-0 w-10 h-10 bg-vert-emeraude text-white rounded-full flex items-center justify-center font-600">
+                      3
+                    </div>
+                    <div>
+                      <h4 className="font-600 mb-2 text-noir-profond">Récupération à domicile</h4>
+                      <p className="text-gris-fonce">
+                        Nous venons récupérer vos vêtements directement chez vous
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <div className="flex-shrink-0 w-10 h-10 bg-vert-emeraude text-white rounded-full flex items-center justify-center font-600">
+                      4
+                    </div>
+                    <div>
+                      <h4 className="font-600 mb-2 text-noir-profond">Mise en vente</h4>
+                      <p className="text-gris-fonce">
+                        Vos vêtements sont photographiés, décrits et mis en
+                        ligne sur nos plateformes partenaires
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <div className="flex-shrink-0 w-10 h-10 bg-vert-emeraude text-white rounded-full flex items-center justify-center font-600">
+                      5
+                    </div>
+                    <div>
+                      <h4 className="font-600 mb-2 text-noir-profond">Paiement</h4>
+                      <p className="text-gris-fonce">
+                        Recevez votre paiement (40% du prix de vente) directement sur votre compte
+                        bancaire après la vente
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Progressive Form Section - Full page */}
+      <section 
+        ref={formRef}
         id="estimation-form"
-        className="py-16 md:py-24 bg-gradient-to-br from-vert-tres-clair to-vert-pale"
+        className="py-16 md:py-24 bg-gradient-to-br from-vert-tres-clair to-vert-pale scroll-section"
       >
         <div className="container">
           <div className="max-w-4xl mx-auto">
@@ -300,8 +390,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 md:py-24 bg-white">
+      {/* CTA Section - Full page */}
+      <section className="py-16 md:py-24 bg-white scroll-section">
         <div className="container">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-600 mb-6 text-noir-profond">
@@ -312,7 +402,7 @@ export default function Home() {
               Seconde.
             </p>
             <Button 
-              onClick={scrollToForm}
+              onClick={() => scrollToSection(formRef)}
               className="bg-vert-emeraude hover:bg-vert-emeraude-clair text-white px-8 py-4 rounded-lg text-lg font-500 transition-all duration-200"
             >
               Commencer l'estimation
@@ -321,8 +411,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Contact Information Section */}
-      <section className="py-16 md:py-24 bg-vert-tres-clair">
+      {/* Contact Information Section - Full page */}
+      <section className="py-16 md:py-24 bg-vert-tres-clair scroll-section">
         <div className="container">
           <div className="max-w-4xl mx-auto">
             <Card className="shadow-lg">
