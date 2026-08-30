@@ -34,17 +34,17 @@ export default function Home() {
                 Seconde
               </h1>
               <p className="text-xl md:text-2xl text-gris-moyen mb-16 max-w-3xl mx-auto">
-                On vous aide à vendre vos vêtements, donnez-leur une seconde vie!
+                On vous aide à vendre vos vêtements, donnez-leur une seconde vie !
               </p>
               
               {/* Avantages avec icônes - Style Cezanne */}
-              <div className="flex flex-col sm:flex-row gap-8 md:gap-12 justify-center">
+              <div className="flex flex-col sm:flex-row gap-8 md:gap-12 justify-center items-center">
                 {/* Gain de temps */}
                 <div className="flex flex-col items-center gap-4">
                   <div className="w-16 h-16 border border-noir rounded-full flex items-center justify-center">
                     <TrendingUp className="h-8 w-8 text-noir" />
                   </div>
-                  <span className="text-base md:text-lg font-500 text-noir tracking-wide">
+                  <span className="text-base md:text-lg font-500 text-noir tracking-wide text-center">
                     GAIN DE TEMPS
                   </span>
                 </div>
@@ -54,7 +54,7 @@ export default function Home() {
                   <div className="w-16 h-16 border border-noir rounded-full flex items-center justify-center">
                     <Euro className="h-8 w-8 text-noir" />
                   </div>
-                  <span className="text-base md:text-lg font-500 text-noir tracking-wide">
+                  <span className="text-base md:text-lg font-500 text-noir tracking-wide text-center">
                     GAIN D'ARGENT
                   </span>
                 </div>
@@ -64,7 +64,7 @@ export default function Home() {
                   <div className="w-16 h-16 border border-noir rounded-full flex items-center justify-center">
                     <Leaf className="h-8 w-8 text-noir" />
                   </div>
-                  <span className="text-base md:text-lg font-500 text-noir tracking-wide">
+                  <span className="text-base md:text-lg font-500 text-noir tracking-wide text-center">
                     DONNEZ-LEUR UNE SECONDE VIE
                   </span>
                 </div>
@@ -96,9 +96,6 @@ export default function Home() {
                 <CardTitle className="text-4xl md:text-5xl font-700 text-noir mb-4">
                   NOTRE CONCEPT
                 </CardTitle>
-                <CardDescription className="text-lg text-gris-moyen">
-                  Une solution unique pour vendre vos vêtements de qualité
-                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="max-w-4xl mx-auto">
