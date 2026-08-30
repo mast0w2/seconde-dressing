@@ -438,95 +438,112 @@ export default function Home() {
       </section>
 
       {/* Contact Form Section */}
-      <section className="py-16 bg-gradient-to-br from-primary/5 to-secondary/5">
+      <section className="py-16">
         <div className="container">
           <div className="max-w-4xl mx-auto">
+            {/* Section Title */}
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">Intéressé ? Contactez-nous</h2>
+              <p className="text-xl text-muted-foreground">
+                Remplissez le formulaire ci-dessous et nous vous contacterons
+                rapidement
+              </p>
+            </div>
+
+            {/* Contact Form Card */}
             <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl text-center">
-                  Intéressé ? Contactez-nous
-                </CardTitle>
-                <CardDescription className="text-center">
-                  Remplissez le formulaire ci-dessous et nous vous contacterons
-                  rapidement pour discuter de vos besoins
-                </CardDescription>
-              </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Name and Email */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Nom complet *</Label>
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        placeholder="Votre nom complet"
-                        disabled={isSubmitting}
-                        required
-                      />
+                <form onSubmit={handleSubmit} className="space-y-8 pt-6">
+                  {/* Personal Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-muted-foreground">
+                      Vos informations
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="name">Nom complet *</Label>
+                        <Input
+                          id="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          placeholder="Votre nom complet"
+                          disabled={isSubmitting}
+                          required
+                          className="w-full"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Adresse email *</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          placeholder="votre@email.com"
+                          disabled={isSubmitting}
+                          required
+                          className="w-full"
+                        />
+                      </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="email">Adresse email *</Label>
+                      <Label htmlFor="phone">Téléphone (optionnel)</Label>
                       <Input
-                        id="email"
-                        type="email"
-                        value={formData.email}
+                        id="phone"
+                        value={formData.phone}
                         onChange={handleChange}
-                        placeholder="votre@email.com"
+                        placeholder="+33 1 23 45 67 89"
                         disabled={isSubmitting}
-                        required
+                        className="w-full"
                       />
                     </div>
                   </div>
 
-                  {/* Phone */}
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Téléphone (optionnel)</Label>
-                    <Input
-                      id="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      placeholder="+33 1 23 45 67 89"
-                      disabled={isSubmitting}
-                    />
-                  </div>
-
-                  {/* Subject */}
-                  <div className="space-y-2">
-                    <Label htmlFor="subject">Sujet *</Label>
-                    <Input
-                      id="subject"
-                      value={formData.subject}
-                      onChange={handleChange}
-                      placeholder="Sujet de votre message"
-                      disabled={isSubmitting}
-                      required
-                    />
-                  </div>
-
-                  {/* Message */}
-                  <div className="space-y-2">
-                    <Label htmlFor="message">Message *</Label>
-                    <Textarea
-                      id="message"
-                      value={formData.message}
-                      onChange={handleChange}
-                      placeholder="Décrivez votre demande ou posez votre question..."
-                      rows={6}
-                      disabled={isSubmitting}
-                      required
-                    />
+                  {/* Message Section */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-muted-foreground">
+                      Votre message
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="subject">Sujet *</Label>
+                        <Input
+                          id="subject"
+                          value={formData.subject}
+                          onChange={handleChange}
+                          placeholder="Sujet de votre message"
+                          disabled={isSubmitting}
+                          required
+                          className="w-full"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="message">Message *</Label>
+                        <Textarea
+                          id="message"
+                          value={formData.message}
+                          onChange={handleChange}
+                          placeholder="Décrivez votre demande ou posez votre question..."
+                          rows={6}
+                          disabled={isSubmitting}
+                          required
+                          className="w-full"
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   {/* Submit Button */}
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full"
-                  >
-                    {isSubmitting ? "Envoi en cours..." : "Envoyer le message"}
-                  </Button>
+                  <div className="pt-4">
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full md:w-auto min-w-[200px]"
+                      size="lg"
+                    >
+                      {isSubmitting ? "Envoi en cours..." : "Envoyer le message"}
+                    </Button>
+                  </div>
                 </form>
               </CardContent>
             </Card>
