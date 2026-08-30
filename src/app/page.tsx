@@ -38,9 +38,9 @@ export default function Home() {
               </p>
               
               {/* Avantages avec icônes - Style Cezanne */}
-              <div className="flex flex-col sm:flex-row gap-8 md:gap-12 justify-center items-center">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 md:gap-12 justify-items-center">
                 {/* Gain de temps */}
-                <div className="flex flex-col items-center gap-4 min-w-[120px]">
+                <div className="flex flex-col items-center gap-4">
                   <div className="w-16 h-16 border border-noir rounded-full flex items-center justify-center">
                     <TrendingUp className="h-8 w-8 text-noir" />
                   </div>
@@ -50,7 +50,7 @@ export default function Home() {
                 </div>
                 
                 {/* Gain d'argent */}
-                <div className="flex flex-col items-center gap-4 min-w-[120px]">
+                <div className="flex flex-col items-center gap-4">
                   <div className="w-16 h-16 border border-noir rounded-full flex items-center justify-center">
                     <Euro className="h-8 w-8 text-noir" />
                   </div>
@@ -60,7 +60,7 @@ export default function Home() {
                 </div>
                 
                 {/* Donnez-leur une seconde vie */}
-                <div className="flex flex-col items-center gap-4 min-w-[120px]">
+                <div className="flex flex-col items-center gap-4">
                   <div className="w-16 h-16 border border-noir rounded-full flex items-center justify-center">
                     <Leaf className="h-8 w-8 text-noir" />
                   </div>
