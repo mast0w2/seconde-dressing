@@ -36,9 +36,47 @@ export default function Home() {
               <h1 className="text-4xl md:text-6xl font-600 text-noir-profond mb-6">
                 Seconde
               </h1>
-              <p className="text-xl md:text-2xl text-gris-fonce mb-8 max-w-3xl mx-auto">
-                Nous rachetons et revendons vos vêtements de marque pour vous
+              <p className="text-xl md:text-2xl text-gris-fonce mb-12 max-w-3xl mx-auto">
+                Donner une seconde vie à vos vêtements
               </p>
+              
+              {/* Avantages avec icônes */}
+              <div className="flex flex-col sm:flex-row gap-6 md:gap-8 justify-center mb-12">
+                {/* Circularité et Écologie */}
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-16 h-16 bg-vert-tres-clair rounded-2xl flex items-center justify-center border border-vert-pale">
+                    <div className="relative">
+                      <div className="w-8 h-8 border-2 border-vert-emeraude rounded-full"></div>
+                      <div className="absolute -top-1 -right-1 w-6 h-6 bg-vert-emeraude rounded-full"></div>
+                      <div className="absolute -bottom-1 -left-1 w-6 h-6 bg-vert-emeraude rounded-full"></div>
+                    </div>
+                  </div>
+                  <span className="text-sm md:text-base font-500 text-noir-profond">
+                    Circularité et écologie
+                  </span>
+                </div>
+                
+                {/* Aspect Financier */}
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-16 h-16 bg-vert-tres-clair rounded-2xl flex items-center justify-center border border-vert-pale">
+                    <Euro className="h-8 w-8 text-vert-emeraude" />
+                  </div>
+                  <span className="text-sm md:text-base font-500 text-noir-profond">
+                    Aspect financier
+                  </span>
+                </div>
+                
+                {/* Gagner du temps */}
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-16 h-16 bg-vert-tres-clair rounded-2xl flex items-center justify-center border border-vert-pale">
+                    <Calendar className="h-8 w-8 text-vert-emeraude" />
+                  </div>
+                  <span className="text-sm md:text-base font-500 text-noir-profond">
+                    Gagner du temps
+                  </span>
+                </div>
+              </div>
+              
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button 
                   onClick={scrollToForm}
