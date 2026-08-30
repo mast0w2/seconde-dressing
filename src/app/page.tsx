@@ -37,7 +37,7 @@ export default function Home() {
                 Seconde
               </h1>
               <p className="text-xl md:text-2xl text-gris-moyen mb-16 max-w-3xl mx-auto">
-                Donner une seconde vie à vos vêtements
+                On vous aide à vendre vos vêtements, donnez-leur une seconde vie.
               </p>
               
               {/* Avantages avec icônes - Style Cezanne */}
@@ -77,9 +77,8 @@ export default function Home() {
         </div>
         {/* Scroll down indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-          <div className="flex flex-col items-center gap-2 animate-bounce">
+          <div className="animate-bounce">
             <ChevronDown className="h-6 w-6 text-noir" />
-            <span className="text-xs text-noir font-medium tracking-widest">SCROLLEZ</span>
           </div>
         </div>
       </section>
@@ -202,9 +201,8 @@ export default function Home() {
         </div>
         {/* Scroll down indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-          <div className="flex flex-col items-center gap-2 animate-bounce">
+          <div className="animate-bounce">
             <ChevronDown className="h-6 w-6 text-noir" />
-            <span className="text-xs text-noir font-medium tracking-widest">SCROLLEZ</span>
           </div>
         </div>
       </section>
@@ -292,9 +290,8 @@ export default function Home() {
         </div>
         {/* Scroll down indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-          <div className="flex flex-col items-center gap-2 animate-bounce">
+          <div className="animate-bounce">
             <ChevronDown className="h-6 w-6 text-noir" />
-            <span className="text-xs text-noir font-medium tracking-widest">SCROLLEZ</span>
           </div>
         </div>
       </section>
@@ -326,9 +323,8 @@ export default function Home() {
         </div>
         {/* Scroll down indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-          <div className="flex flex-col items-center gap-2 animate-bounce">
+          <div className="animate-bounce">
             <ChevronDown className="h-6 w-6 text-noir" />
-            <span className="text-xs text-noir font-medium tracking-widest">SCROLLEZ</span>
           </div>
         </div>
       </section>
@@ -354,9 +350,8 @@ export default function Home() {
         </div>
         {/* Scroll down indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-          <div className="flex flex-col items-center gap-2 animate-bounce">
+          <div className="animate-bounce">
             <ChevronDown className="h-6 w-6 text-noir" />
-            <span className="text-xs text-noir font-medium tracking-widest">SCROLLEZ</span>
           </div>
         </div>
       </section>
