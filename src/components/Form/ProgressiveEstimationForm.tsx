@@ -68,14 +68,15 @@ const QUESTIONS: Question[] = [
     type: "tel",
     placeholder: "+33 1 23 45 67 89",
     required: true,
-  },
-  {
+  },  {
     id: "nombreVetements",
     question: "Combien de vêtements souhaitez-vous vendre ?",
-    type: "number",
-    placeholder: "Nombre de vêtements",
-    required: true,
+    type: "slider",
     min: 1,
+    max: 50,
+    step: 1,
+    unit: "",
+    required: true,
   },
   {
     id: "valeurMoyenne",
@@ -368,10 +369,10 @@ export function ProgressiveEstimationForm() {
             </div>
             <div className="flex justify-between text-sm text-muted-foreground">
               <span>{currentQuestion.min}{currentQuestion.unit}</span>
-              <span className="font-semibold text-vert-emeraude">
-                {value}{currentQuestion.unit}
+              <span className="font-bold text-xl text-noir bg-blanc px-4 py-2 rounded-lg border-2 border-noir">
+                {value}{currentQuestion.unit}{value === currentQuestion.max && currentQuestion.max === 50 ? "+" : ""}
               </span>
-              <span>{currentQuestion.max}{currentQuestion.unit}</span>
+              <span>{currentQuestion.max}{currentQuestion.unit}{currentQuestion.max === 50 ? "+" : ""}</span>
             </div>
           </div>
         );
