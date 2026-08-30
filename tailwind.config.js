@@ -11,11 +11,28 @@ module.exports = {
       center: true,
       padding: "2rem",
       screens: {
-        "2xl": "1400px",
+        "2xl": "1200px",
       },
     },
     extend: {
+      fontFamily: {
+        serif: ['Playfair Display', 'serif'],
+        sans: ['Inter', 'sans-serif'],
+      },
       colors: {
+        // Brand Colors - Seconde Dressing
+        'vert-pale': '#E8F5E8',
+        'vert-pale-accent': '#D4EDDA',
+        'vert-fonce': '#A8D5BA',
+        'vert-tres-clair': '#F0F8F0',
+        'vert-emeraude': '#28A745',
+        'vert-emeraude-clair': '#5CB85C',
+        'noir-profond': '#212529',
+        'gris-fonce': '#495057',
+        'gris-moyen': '#E9ECEF',
+        'gris-tres-clair': '#F8F9FA',
+        
+        // Semantic colors
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -54,6 +71,17 @@ module.exports = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        'brand': '12px',
+        'brand-lg': '16px',
+      },
+      spacing: {
+        'brand-xs': '8px',
+        'brand-sm': '16px',
+        'brand-md': '24px',
+        'brand-lg': '32px',
+        'brand-xl': '40px',
+        'brand-2xl': '48px',
+        'brand-3xl': '80px',
       },
       keyframes: {
         "accordion-down": {

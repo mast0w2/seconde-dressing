@@ -12,8 +12,8 @@ export * from './database';
 export interface UserSession {
   id: string;
   email: string;
-  role: Role;
-  profile?: Profile;
+  role: 'client' | 'vendeuse';
+  profile?: any;
   token: string;
   expiresAt: Date;
 }
@@ -145,8 +145,8 @@ export interface DashboardWidget {
 
 /** User preferences for UI */
 export interface UserPreferences {
-  theme: Theme;
-  language: Langue;
+  theme: 'clair' | 'sombre';
+  language: 'FR' | 'EN';
   notifications: {
     email: boolean;
     push: boolean;

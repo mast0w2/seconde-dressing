@@ -240,6 +240,8 @@ export interface Preference {
   langue: Langue;
   theme: Theme;
   notifications_email: boolean;
+  notifications_sms?: boolean;
+  fuseau_horaire?: string;
   created_at: string;
 }
 
@@ -249,6 +251,8 @@ export interface InsertPreference {
   langue?: Langue;
   theme?: Theme;
   notifications_email?: boolean;
+  notifications_sms?: boolean;
+  fuseau_horaire?: string;
   created_at?: string;
 }
 
@@ -258,6 +262,8 @@ export interface UpdatePreference {
   langue?: Langue;
   theme?: Theme;
   notifications_email?: boolean;
+  notifications_sms?: boolean;
+  fuseau_horaire?: string;
   created_at?: string;
 }
 

@@ -246,22 +246,22 @@ export function deepMerge<T extends object, U extends object>(target: T, source:
   
   for (const key in source) {
     if (Object.prototype.hasOwnProperty.call(source, key)) {
-      const sourceValue = source[key as keyof U];
-      const targetValue = output[key as keyof T & U];
+      const sourceValue = (source as any)[key];
+      const targetValue = (output as any)[key];
       
       if (sourceValue && typeof sourceValue === 'object' && !Array.isArray(sourceValue)) {
         if (targetValue && typeof targetValue === 'object' && !Array.isArray(targetValue)) {
-          output[key as keyof T & U] = deepMerge(targetValue, sourceValue) as any;
+          (output as any)[key] = deepMerge(targetValue, sourceValue);
         } else {
-          output[key as keyof T & U] = sourceValue as any;
+          (output as any)[key] = sourceValue;
         }
       } else {
-        output[key as keyof T & U] = sourceValue as any;
+        (output as any)[key] = sourceValue;
       }
     }
   }
   
-  return output;
+  return output as T & U;
 }
 
 /**
@@ -283,7 +283,7 @@ export function pick<T extends object, K extends keyof T>(obj: T, keys: K[]): Pi
 export function omit<T extends object, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
   const result = { ...obj } as Omit<T, K>;
   keys.forEach((key) => {
-    delete result[key];
+    delete (result as any)[key];
   });
   return result;
 }
@@ -318,7 +318,7 @@ export async function retryWithBackoff<T>(
     backoffFactor = 2,
   } = options;
 
-  let lastError: Error;
+  let lastError: Error | undefined;
   let delay = initialDelay;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {

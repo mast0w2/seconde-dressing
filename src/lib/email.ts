@@ -618,5 +618,4 @@ class NotificationService {
 export const emailService = EmailService.getInstance();
 export const notificationService = new NotificationService();
 
-// Re-export types
-export type { EmailSendResult, AppointmentNotificationData, ContactFormData };
+// Re-export types are already exported above, so no need to re-export
