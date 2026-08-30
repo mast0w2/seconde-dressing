@@ -1,41 +1,37 @@
 # Seconde Dressing
 
-> **Seconde Dressing** est une plateforme de mise en relation entre clients et vendeuses professionnelles pour la vente de vtements d'occasion. Ce projet est construit avec Next.js 14, TypeScript, et Supabase pour offrir une exprience utilisateur fluide et scurise.
+> **Seconde Dressing** est une plateforme de mise en relation entre clients et vendeuses professionnelles pour la vente de vêtements d'occasion. Ce projet est construit avec Next.js 14, TypeScript, et Supabase pour offrir une expérience utilisateur fluide et sécurisée.
 
 ---
 
-## [32m[1m[4m[24m[39m[22m[39m[22m
+## ✨ Fonctionnalités
 
-## 0[38;5;208m[38;5;214m[39m[38;5;220m  [38;5;196m✨ [38;5;226mFonctionnalités [38;5;220m  [38;5;196m✨[39m
+### Pour les Clients :
+- ✓ Création de compte et gestion de profil
+- ✓ Recherche et sélection de vendeuses
+- ✓ Prise de rendez-vous en ligne
+- ✓ Suivi des rendez-vous et historique
+- ✓ Soumission d'avis et notation
 
-### [38;5;39mPour les Clients :[39m
-- [38;5;40m✓[39m Cration de compte et gestion de profil
-- [38;5;40m✓[39m Recherche et slection de vendeuses
-- [38;5;40m✓[39m Prise de rendez-vous en ligne
-- [38;5;40m✓[39m Suivi des rendez-vous et historique
-- [38;5;40m✓[39m Soumission d'avis et notation
+### Pour les Vendeuses :
+- ✓ Gestion de profil professionnel
+- ✓ Configuration des disponibilités
+- ✓ Réception et gestion des demandes de RDV
+- ✓ Acceptation/Refus des rendez-vous
+- ✓ Tableau de bord avec statistiques
 
-### [38;5;39mPour les Vendeuses :[39m
-- [38;5;40m✓[39m Gestion de profil professionnel
-- [38;5;40m✓[39m Configuration des disponibilits
-- [38;5;40m✓[39m Rception et gestion des demandes de RDV
-- [38;5;40m✓[39m Acceptation/Refus des rendez-vous
-- [38;5;40m✓[39m Tableau de bord avec statistiques
-
-### [38;5;39mFonctionnalités Système :[39m
-- [38;5;40m✓[39m Système de notification par email (Brevo)
-- [38;5;40m✓[39m Authentification scurisee (Supabase Auth)
-- [38;5;40m✓[39m Gestion des formulaires de contact
-- [38;5;40m✓[39m Design responsive (Mobile-first)
-- [38;5;40m✓[39m Interface multilingue (Franais)
+### Fonctionnalités Système :
+- ✓ Système de notification par email (Brevo)
+- ✓ Authentification sécurisée (Supabase Auth)
+- ✓ Gestion des formulaires de contact
+- ✓ Design responsive (Mobile-first)
+- ✓ Interface multilingue (Français)
 
 ---
 
-## [34m[1m[4m[24m[39m[22m[39m[22m
+## 🚀 Démarrage Rapide
 
-## 0[38;5;208m[38;5;214m[39m[38;5;220m  [38;5;196m🚀 [38;5;226mDémarrage Rapide [38;5;220m  [38;5;196m🚀[39m
-
-### [38;5;39mPrérequis :[39m
+### Prérequis :
 
 - [Node.js](https://nodejs.org/) v18.17 ou supérieur
 - [npm](https://www.npmjs.com/) v9 ou supérieur (ou [yarn](https://yarnpkg.com/))
@@ -45,7 +41,7 @@
 
 ---
 
-### [38;5;39m1. Cloner le dépôt :[39m
+### 1. Cloner le dépôt :
 
 ```bash
 # HTTPS
@@ -59,7 +55,7 @@ cd seconde-dressing
 
 ---
 
-### [38;5;39m2. Installer les dépendances :[39m
+### 2. Installer les dépendances :
 
 ```bash
 # Avec npm
@@ -69,11 +65,11 @@ npm install
 # yarn install
 ```
 
-> [33m⚠️[39m **Note** : L'installation peut prendre quelques minutes selon votre connexion internet.
+> ⚠️ **Note** : L'installation peut prendre quelques minutes selon votre connexion internet.
 
 ---
 
-### [38;5;39m3. Configurer les variables d'environnement :[39m
+### 3. Configurer les variables d'environnement :
 
 Copiez le fichier d'exemple et configurez vos variables :
 
@@ -85,7 +81,7 @@ cp .env.local.example .env.local
 nano .env.local  # ou utilisez votre éditeur préféré
 ```
 
-#### [38;5;39mVariables requises dans `.env.local` :[39m
+#### Variables requises dans `.env.local` :
 
 ```env
 # ============================================================================
@@ -97,7 +93,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 # ============================================================================
 # Brevo (Sendinblue) Email Service (Required for email functionality)
 # ============================================================================
-BREVO_API_KEY=your_brevo_api_key
+BREVO_API_KEY=your_brevo_smtp_api_key
 EMAIL_FROM="Seconde Dressing <no-reply@your-domain.com>"
 
 # ============================================================================
@@ -106,18 +102,18 @@ EMAIL_FROM="Seconde Dressing <no-reply@your-domain.com>"
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
-#### [38;5;39mOù trouver ces informations :[39m
+#### Où trouver ces informations :
 
 | Variable | Source | Comment l'obtenir |
 |----------|--------|-------------------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase Dashboard | Paramtres > API > URL du projet |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Dashboard | Paramtres > API > Cl anonyme |
-| `BREVO_API_KEY` | [Brevo Dashboard](https://app.brevo.com) | Paramtres > Cls API > Crer une cl SMTP |
-| `EMAIL_FROM` | Votre domaine | Email vrifi dans Brevo |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase Dashboard | Paramètres > API > URL du projet |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Dashboard | Paramètres > API > Clé anonyme |
+| `BREVO_API_KEY` | [Brevo Dashboard](https://app.brevo.com) | Paramètres > Clés API > Créer une clé SMTP |
+| `EMAIL_FROM` | Votre domaine | Email vérifié dans Brevo |
 
 ---
 
-### [38;5;39m4. Configurer Supabase :[39m
+### 4. Configurer Supabase :
 
 1. **Créer un projet Supabase** : [https://supabase.com/dashboard](https://supabase.com/dashboard)
 2. **Créer les tables** : Exécutez les requêtes SQL suivantes dans l'interface SQL de Supabase :
@@ -199,14 +195,14 @@ CREATE TABLE IF NOT EXISTS preferences (
 ```
 
 3. **Configurer l'authentification** :
-   - Allez dans **Auth > Paramtres**
+   - Allez dans **Auth > Paramètres**
    - Activez **Email/Password** auth
    - Activez **Email confirmations**
    - Configurez votre **Site URL** : `http://localhost:3000` (ou votre URL de production)
 
 ---
 
-### [38;5;39m5. Démarrer l'application :[39m
+### 5. Démarrer l'application :
 
 ```bash
 # Mode développement
@@ -221,9 +217,7 @@ L'application sera disponible à l'adresse : [http://localhost:3000](http://loca
 
 ---
 
-## [36m[1m[4m[24m[39m[22m[39m[22m
-
-## 0[38;5;208m[38;5;214m[39m[38;5;220m  [38;5;196m📁 [38;5;226mStructure du Projet [38;5;220m  [38;5;196m📁[39m
+## 📁 Structure du Projet
 
 ```
 seconde-dressing/
@@ -260,9 +254,7 @@ seconde-dressing/
 
 ---
 
-## [35m[1m[4m[24m[39m[22m[39m[22m
-
-## 0[38;5;208m[38;5;214m[39m[38;5;220m  [38;5;196m📦 [38;5;226mDépendances Principales [38;5;220m  [38;5;196m📦[39m
+## 📦 Dépendances Principales
 
 | Dépendance | Version | Usage |
 |------------|---------|-------|
@@ -280,11 +272,9 @@ seconde-dressing/
 
 ---
 
-## [31m[1m[4m[24m[39m[22m[39m[22m
+## ⚙️ Configuration
 
-## 0[38;5;208m[38;5;214m[39m[38;5;220m  [38;5;196m⚙️ [38;5;226mConfiguration [38;5;220m  [38;5;196m⚙️[39m
-
-### [38;5;39mVariables d'Environnement :[39m
+### Variables d'Environnement :
 
 | Variable | Description | Requise | Valeur par défaut |
 |----------|-------------|---------|------------------|
@@ -296,7 +286,7 @@ seconde-dressing/
 
 ---
 
-### [38;5;39mConfiguration de Brevo :[39m
+### Configuration de Brevo :
 
 Pour activer l'envoi d'emails :
 
@@ -312,29 +302,27 @@ Pour activer l'envoi d'emails :
 
 ---
 
-## [32m[1m[4m[24m[39m[22m[39m[22m
+## 🎯 Bonnes Pratiques de Développement
 
-## 0[38;5;208m[38;5;214m[39m[38;5;220m  [38;5;196m🎯 [38;5;226mBonnes Pratiques de Développement [38;5;220m  [38;5;196m🎯[39m
-
-### [38;5;39mArchitecture :[39m
+### Architecture :
 - **SOLID Principles** : Chaque classe a une responsabilité unique
 - **Separation of Concerns** : Séparation claire entre UI, logique métier et données
 - **Singleton Pattern** : Services partagés (email, Supabase) en singleton
 - **Dependency Injection** : Injection de dépendances pour les tests
 
-### [38;5;39mCode Quality :[39m
+### Code Quality :
 - **TypeScript** : Typage strict partout
 - **ESLint & Prettier** : Formatage et linting cohérent
 - **Clean Code** : Noms explicites, fonctions courtes, commentaires utiles
 - **Error Handling** : Gestion d'erreurs robuste avec try/catch
 
-### [38;5;39mSécurité :[39m
+### Sécurité :
 - **Validation** : Toutes les entrées utilisateur sont validées (Zod)
 - **Sanitization** : Échappement HTML pour éviter XSS
 - **Authentification** : Supabase Auth avec JWT
 - **Variables d'environnement** : Aucune clé sensible dans le code
 
-### [38;5;39mPerformance :[39m
+### Performance :
 - **Lazy Loading** : Chargement différé des composants lourds
 - **Caching** : Mémoïsation des requêtes fréquentes
 - **Optimized Build** : Bundle optimisé avec Next.js
@@ -342,9 +330,7 @@ Pour activer l'envoi d'emails :
 
 ---
 
-## [34m[1m[4m[24m[39m[22m[39m[22m
-
-## 0[38;5;208m[38;5;214m[39m[38;5;220m  [38;5;196m🚀 [38;5;226mScripts Disponibles [38;5;220m  [38;5;196m🚀[39m
+## 🚀 Scripts Disponibles
 
 | Script | Description |
 |--------|-------------|
@@ -357,9 +343,7 @@ Pour activer l'envoi d'emails :
 
 ---
 
-## [36m[1m[4m[24m[39m[22m[39m[22m
-
-## 0[38;5;208m[38;5;214m[39m[38;5;220m  [38;5;196m🤝 [38;5;226mContribution [38;5;220m  [38;5;196m🤝[39m
+## 🤝 Contribution
 
 Les contributions sont les bienvenues ! Veuillez suivre ces étapes :
 
@@ -371,17 +355,13 @@ Les contributions sont les bienvenues ! Veuillez suivre ces étapes :
 
 ---
 
-## [31m[1m[4m[24m[39m[22m[39m[22m
-
-## 0[38;5;208m[38;5;214m[39m[38;5;220m  [38;5;196m📜 [38;5;226mLicence [38;5;220m  [38;5;196m📜[39m
+## 📜 Licence
 
 Ce projet est sous licence **MIT**. Voir [LICENSE](LICENSE) pour plus de détails.
 
 ---
 
-## [33m[1m[4m[24m[39m[22m[39m[22m
-
-## 0[38;5;208m[38;5;214m[39m[38;5;220m  [38;5;196m🙏 [38;5;226mRemerciements [38;5;220m  [38;5;196m🙏[39m
+## 🙏 Remerciements
 
 - [Next.js](https://nextjs.org/) - Le framework React
 - [Supabase](https://supabase.com/) - La base de données open-source
@@ -391,7 +371,7 @@ Ce projet est sous licence **MIT**. Voir [LICENSE](LICENSE) pour plus de détail
 
 ---
 
-## [38;5;202m[38;5;208m[38;5;214m[38;5;220m[38;5;226m✨[39m
+## ✨
 
 > **Seconde Dressing** - Vendre et acheter des vêtements d'occasion n'a jamais été aussi simple !
 
