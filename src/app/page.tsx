@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProgressiveEstimationForm } from "@/components/Form/ProgressiveEstimationForm";
-import { Mail, Phone, Check, Users, Calendar, Euro, Sparkles, Leaf, TrendingUp, Heart } from "lucide-react";
+import { Mail, Phone, Check, Users, Calendar, Euro, Sparkles, Leaf, TrendingUp, Heart, Target, Recycle } from "lucide-react";
 
 // ============================================================================
 // Component
@@ -42,37 +42,33 @@ export default function Home() {
               
               {/* Avantages avec icônes */}
               <div className="flex flex-col sm:flex-row gap-6 md:gap-8 justify-center mb-12">
-                {/* Circularité et Écologie */}
+                {/* Vendez sans effort */}
                 <div className="flex flex-col items-center gap-3">
                   <div className="w-16 h-16 bg-vert-tres-clair rounded-2xl flex items-center justify-center border border-vert-pale">
-                    <div className="relative">
-                      <div className="w-8 h-8 border-2 border-vert-emeraude rounded-full"></div>
-                      <div className="absolute -top-1 -right-1 w-6 h-6 bg-vert-emeraude rounded-full"></div>
-                      <div className="absolute -bottom-1 -left-1 w-6 h-6 bg-vert-emeraude rounded-full"></div>
-                    </div>
+                    <Target className="h-8 w-8 text-vert-emeraude" />
                   </div>
                   <span className="text-sm md:text-base font-500 text-noir-profond">
-                    Circularité et écologie
+                    Vendez sans effort
                   </span>
                 </div>
                 
-                {/* Aspect Financier */}
+                {/* Rentabilisez vos vêtements */}
                 <div className="flex flex-col items-center gap-3">
                   <div className="w-16 h-16 bg-vert-tres-clair rounded-2xl flex items-center justify-center border border-vert-pale">
                     <Euro className="h-8 w-8 text-vert-emeraude" />
                   </div>
                   <span className="text-sm md:text-base font-500 text-noir-profond">
-                    Aspect financier
+                    Rentabilisez vos vêtements
                   </span>
                 </div>
                 
-                {/* Gagner du temps */}
+                {/* Limitez votre impact écologique */}
                 <div className="flex flex-col items-center gap-3">
                   <div className="w-16 h-16 bg-vert-tres-clair rounded-2xl flex items-center justify-center border border-vert-pale">
-                    <Calendar className="h-8 w-8 text-vert-emeraude" />
+                    <Recycle className="h-8 w-8 text-vert-emeraude" />
                   </div>
                   <span className="text-sm md:text-base font-500 text-noir-profond">
-                    Gagner du temps
+                    Limitez votre impact écologique
                   </span>
                 </div>
               </div>
