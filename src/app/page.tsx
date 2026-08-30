@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProgressiveEstimationForm } from "@/components/Form/ProgressiveEstimationForm";
-import { Mail, Phone, Check, Users, Calendar, Sparkles, Leaf, Target, Euro, Heart, TrendingUp } from "lucide-react";
+import { Mail, Phone, Check, Users, Calendar, Sparkles, Leaf, Target, Euro, Heart, TrendingUp, ChevronDown } from "lucide-react";
 
 // ============================================================================
 // Component
@@ -73,6 +73,13 @@ export default function Home() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+        {/* Scroll down indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+          <div className="flex flex-col items-center gap-2 animate-bounce">
+            <ChevronDown className="h-6 w-6 text-vert-emeraude" />
+            <span className="text-xs text-vert-emeraude font-medium">Scrollez</span>
           </div>
         </div>
       </section>
@@ -205,6 +212,20 @@ export default function Home() {
             </Card>
           </div>
         </div>
+        {/* Scroll down indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+          <div className="flex flex-col items-center gap-2 animate-bounce">
+            <ChevronDown className="h-6 w-6 text-vert-emeraude" />
+            <span className="text-xs text-vert-emeraude font-medium">Scrollez</span>
+          </div>
+        </div>
+        {/* Scroll down indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+          <div className="flex flex-col items-center gap-2 animate-bounce">
+            <ChevronDown className="h-6 w-6 text-vert-emeraude" />
+            <span className="text-xs text-vert-emeraude font-medium">Scrollez</span>
+          </div>
+        </div>
       </section>
 
       {/* How It Works Section - Full page */}
@@ -290,6 +311,20 @@ export default function Home() {
             </Card>
           </div>
         </div>
+        {/* Scroll down indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+          <div className="flex flex-col items-center gap-2 animate-bounce">
+            <ChevronDown className="h-6 w-6 text-vert-emeraude" />
+            <span className="text-xs text-vert-emeraude font-medium">Scrollez</span>
+          </div>
+        </div>
+        {/* Scroll down indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+          <div className="flex flex-col items-center gap-2 animate-bounce">
+            <ChevronDown className="h-6 w-6 text-vert-emeraude" />
+            <span className="text-xs text-vert-emeraude font-medium">Scrollez</span>
+          </div>
+        </div>
       </section>
 
       {/* Progressive Form Section - Full page */}
@@ -308,11 +343,25 @@ export default function Home() {
                 Remplissez notre formulaire et découvrez combien vous pourriez gagner
               </p>
               <p className="text-sm text-muted-foreground mt-4">
+        {/* Scroll down indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+          <div className="flex flex-col items-center gap-2 animate-bounce">
+            <ChevronDown className="h-6 w-6 text-vert-emeraude" />
+            <span className="text-xs text-vert-emeraude font-medium">Scrollez</span>
+          </div>
+        </div>
                 Vous toucherez 40% du prix de vente estimé
               </p>
             </div>
 
             <ProgressiveEstimationForm />
+          </div>
+        </div>
+        {/* Scroll down indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+          <div className="flex flex-col items-center gap-2 animate-bounce">
+            <ChevronDown className="h-6 w-6 text-vert-emeraude" />
+            <span className="text-xs text-vert-emeraude font-medium">Scrollez</span>
           </div>
         </div>
       </section>
@@ -322,6 +371,13 @@ export default function Home() {
         <div className="container">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-600 mb-6 text-noir-profond">
+        {/* Scroll down indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+          <div className="flex flex-col items-center gap-2 animate-bounce">
+            <ChevronDown className="h-6 w-6 text-vert-emeraude" />
+            <span className="text-xs text-vert-emeraude font-medium">Scrollez</span>
+          </div>
+        </div>
               Prêt à donner une seconde vie à vos vêtements ?
             </h2>
             <p className="text-xl text-gris-fonce mb-8">
@@ -334,6 +390,13 @@ export default function Home() {
             >
               Commencer l'estimation
             </Button>
+          </div>
+        </div>
+        {/* Scroll down indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+          <div className="flex flex-col items-center gap-2 animate-bounce">
+            <ChevronDown className="h-6 w-6 text-vert-emeraude" />
+            <span className="text-xs text-vert-emeraude font-medium">Scrollez</span>
           </div>
         </div>
       </section>
@@ -405,6 +468,13 @@ export default function Home() {
                 </div>
               </CardContent>
             </Card>
+          </div>
+        </div>
+        {/* Scroll down indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+          <div className="flex flex-col items-center gap-2 animate-bounce">
+            <ChevronDown className="h-6 w-6 text-vert-emeraude" />
+            <span className="text-xs text-vert-emeraude font-medium">Scrollez</span>
           </div>
         </div>
       </section>
