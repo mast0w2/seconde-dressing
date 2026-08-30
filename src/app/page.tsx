@@ -40,7 +40,7 @@ export default function Home() {
               {/* Avantages avec icônes - Style Cezanne */}
               <div className="flex flex-col sm:flex-row gap-8 md:gap-12 justify-center items-center">
                 {/* Gain de temps */}
-                <div className="flex flex-col items-center gap-4">
+                <div className="flex flex-col items-center gap-4 min-w-[120px]">
                   <div className="w-16 h-16 border border-noir rounded-full flex items-center justify-center">
                     <TrendingUp className="h-8 w-8 text-noir" />
                   </div>
@@ -50,7 +50,7 @@ export default function Home() {
                 </div>
                 
                 {/* Gain d'argent */}
-                <div className="flex flex-col items-center gap-4">
+                <div className="flex flex-col items-center gap-4 min-w-[120px]">
                   <div className="w-16 h-16 border border-noir rounded-full flex items-center justify-center">
                     <Euro className="h-8 w-8 text-noir" />
                   </div>
@@ -60,7 +60,7 @@ export default function Home() {
                 </div>
                 
                 {/* Donnez-leur une seconde vie */}
-                <div className="flex flex-col items-center gap-4">
+                <div className="flex flex-col items-center gap-4 min-w-[120px]">
                   <div className="w-16 h-16 border border-noir rounded-full flex items-center justify-center">
                     <Leaf className="h-8 w-8 text-noir" />
                   </div>
@@ -100,7 +100,7 @@ export default function Home() {
               <CardContent>
                 <div className="max-w-4xl mx-auto">
                   <p className="mb-12 text-lg text-gris-moyen leading-relaxed text-center">
-                    Confiez-nous vos vêtements, on s'occupe du reste!
+                    Confiez-nous vos vêtements, on s'occupe du reste !
                   </p>
 
                   <h3 className="text-2xl md:text-3xl font-600 mb-12 text-noir">

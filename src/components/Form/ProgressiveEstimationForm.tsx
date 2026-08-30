@@ -369,7 +369,7 @@ export function ProgressiveEstimationForm() {
             </div>
             <div className="flex justify-between text-sm text-muted-foreground">
               <span>{currentQuestion.min}{currentQuestion.unit}</span>
-              <span className="font-bold text-xl text-noir bg-blanc px-4 py-2 rounded-lg border-2 border-noir">
+              <span className="font-bold text-xl text-noir bg-blanc px-4 py-2 rounded-full border-2 border-noir">
                 {value}{currentQuestion.unit}{value === currentQuestion.max && currentQuestion.max === 50 ? "+" : ""}
               </span>
               <span>{currentQuestion.max}{currentQuestion.unit}{currentQuestion.max === 50 ? "+" : ""}</span>
