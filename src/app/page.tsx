@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProgressiveEstimationForm } from "@/components/Form/ProgressiveEstimationForm";
-import { Mail, Phone, Check, Users, Calendar, Euro, Sparkles, Leaf, TrendingUp, Heart, Target, Recycle } from "lucide-react";
+import { Mail, Phone, Check, Users, Calendar, Sparkles, Leaf, Target, Euro, Heart } from "lucide-react";
 
 // ============================================================================
 // Component
@@ -62,30 +62,15 @@ export default function Home() {
                   </span>
                 </div>
                 
-                {/* Limitez votre impact écologique */}
+                {/* Circularité */}
                 <div className="flex flex-col items-center gap-3">
                   <div className="w-16 h-16 bg-vert-tres-clair rounded-2xl flex items-center justify-center border border-vert-pale">
-                    <Recycle className="h-8 w-8 text-vert-emeraude" />
+                    <Leaf className="h-8 w-8 text-vert-emeraude" />
                   </div>
                   <span className="text-sm md:text-base font-500 text-noir-profond">
-                    Limitez votre impact écologique
+                    Circularité
                   </span>
                 </div>
-              </div>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  onClick={scrollToForm}
-                  className="bg-vert-emeraude hover:bg-vert-emeraude-clair text-white px-8 py-3 rounded-lg text-lg font-500 transition-all duration-200"
-                >
-                  Commencer l'estimation
-                </Button>
-                <Button 
-                  variant="outline"
-                  className="border-vert-emeraude text-vert-emeraude hover:bg-vert-tres-clair px-8 py-3 rounded-lg text-lg font-500 transition-all duration-200"
-                >
-                  En savoir plus
-                </Button>
               </div>
             </div>
           </div>
@@ -287,51 +272,6 @@ export default function Home() {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Values Section */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-              <Card className="shadow-lg">
-                <CardHeader>
-                  <CardTitle className="text-xl text-center text-noir-profond">
-                    Transparence
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gris-fonce text-center">
-                    Nous croyons en la transparence totale. Vous savez toujours
-                    où en sont vos vêtements et combien vous allez gagner.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="shadow-lg">
-                <CardHeader>
-                  <CardTitle className="text-xl text-center text-noir-profond">
-                    Professionnalisme
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gris-fonce text-center">
-                    Nos vendeuses sont sélectionnées pour leur expertise et leur
-                    sens du service client.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="shadow-lg">
-                <CardHeader>
-                  <CardTitle className="text-xl text-center text-noir-profond">
-                    Satisfaction
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gris-fonce text-center">
-                    Votre satisfaction est notre priorité. Nous nous engageons à
-                    offrir un service de qualité.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
           </div>
         </div>
       </section>
