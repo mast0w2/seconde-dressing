@@ -312,6 +312,13 @@ export function ProgressiveEstimationForm() {
     setErrors({});
   };
 
+  // Handle key press for Enter key
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleNext();
+    }
+  };
+
   // Render input based on type
   const renderInput = () => {
     const value = formData[currentQuestion.id as keyof FormData];
@@ -325,6 +332,7 @@ export function ProgressiveEstimationForm() {
             type={currentQuestion.type}
             value={value as string}
             onChange={(e) => handleChange(e.target.value)}
+            onKeyPress={handleKeyPress}
             placeholder={currentQuestion.placeholder}
             disabled={isSubmitting}
             className="w-full"
@@ -337,6 +345,7 @@ export function ProgressiveEstimationForm() {
             type="number"
             value={value as number}
             onChange={(e) => handleChange(Number(e.target.value))}
+            onKeyPress={handleKeyPress}
             placeholder={currentQuestion.placeholder}
             min={currentQuestion.min}
             disabled={isSubmitting}
@@ -347,14 +356,16 @@ export function ProgressiveEstimationForm() {
       case "slider":
         return (
           <div className="space-y-4">
-            <Slider
-              value={[value as number]}
-              onValueChange={(v) => handleChange(v[0])}
-              min={currentQuestion.min}
-              max={currentQuestion.max}
-              step={currentQuestion.step}
-              className="w-full"
-            />
+            <div onKeyDown={(e) => { if (e.key === "Enter") handleNext(); }}>
+              <Slider
+                value={[value as number]}
+                onValueChange={(v) => handleChange(v[0])}
+                min={currentQuestion.min}
+                max={currentQuestion.max}
+                step={currentQuestion.step}
+                className="w-full"
+              />
+            </div>
             <div className="flex justify-between text-sm text-muted-foreground">
               <span>{currentQuestion.min}{currentQuestion.unit}</span>
               <span className="font-semibold text-vert-emeraude">
@@ -370,6 +381,7 @@ export function ProgressiveEstimationForm() {
           <textarea
             value={value as string}
             onChange={(e) => handleChange(e.target.value)}
+            onKeyPress={handleKeyPress}
             placeholder={currentQuestion.placeholder}
             disabled={isSubmitting}
             rows={4}
@@ -383,6 +395,7 @@ export function ProgressiveEstimationForm() {
             type="text"
             value={value as string}
             onChange={(e) => handleChange(e.target.value)}
+            onKeyPress={handleKeyPress}
             placeholder={currentQuestion.placeholder}
             disabled={isSubmitting}
             className="w-full"
