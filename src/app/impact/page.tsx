@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Leaf, Factory, TrendingDown, Recycle, Globe, Droplets, Tree } from "lucide-react";
+import { Leaf, Factory, TrendingDown, Recycle, Globe, Droplets, Tree, Users } from "lucide-react";
 
 export default function ImpactPage() {
   return (
