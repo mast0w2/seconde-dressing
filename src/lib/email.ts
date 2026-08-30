@@ -74,6 +74,7 @@ export const env = {
   },
   email: {
     from: process.env.EMAIL_FROM || 'Seconde <no-reply@brevo.com>',
+    admin: process.env.CONTACT_ADMIN_EMAIL || '',
   },
   app: {
     url: process.env.NEXT_PUBLIC_SITE_URL || 'https://seconde.fr',
@@ -500,7 +501,7 @@ class NotificationService {
   public async sendContactNotification(
     data: ContactFormData
   ): Promise<EmailSendResult> {
-    const adminEmail = 'admin@seconde.fr';
+    const adminEmail = env.email.admin;
     const clientSubject = `✅ Nous avons reçu votre message - ${data.subject}`;
     const adminSubject = `📧 Nouveau message de contact: ${data.subject}`;
 
@@ -542,8 +543,8 @@ class NotificationService {
       clientHtml
     );
 
-    // Send to admin (only if different from client)
-    if (data.email.toLowerCase() !== adminEmail.toLowerCase()) {
+    // Send to admin (only if admin email is configured and different from client)
+    if (adminEmail && data.email.toLowerCase() !== adminEmail.toLowerCase()) {
       const adminResult = await this.emailService.sendEmailWithFallback(
         adminEmail,
         adminSubject,
