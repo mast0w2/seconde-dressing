@@ -42,36 +42,52 @@ export default function Home() {
               
               {/* Avantages avec icônes - Style Cezanne */}
               <div className="flex flex-col sm:flex-row gap-8 md:gap-12 justify-center">
-                {/* Vendez sans effort */}
+                {/* Notre concept */}
                 <div className="flex flex-col items-center gap-4">
                   <div className="w-16 h-16 border border-noir rounded-full flex items-center justify-center">
-                    <Target className="h-8 w-8 text-noir" />
+                    <Sparkles className="h-8 w-8 text-noir" />
                   </div>
                   <span className="text-base md:text-lg font-500 text-noir tracking-wide">
-                    VENDEZ SANS EFFORT
+                    NOTRE CONCEPT
                   </span>
                 </div>
                 
-                {/* Rentabilisez vos vêtements */}
+                {/* Gain de temps */}
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-16 h-16 border border-noir rounded-full flex items-center justify-center">
+                    <TrendingUp className="h-8 w-8 text-noir" />
+                  </div>
+                  <span className="text-base md:text-lg font-500 text-noir tracking-wide">
+                    GAIN DE TEMPS
+                  </span>
+                </div>
+                
+                {/* Gain d'argent */}
                 <div className="flex flex-col items-center gap-4">
                   <div className="w-16 h-16 border border-noir rounded-full flex items-center justify-center">
                     <Euro className="h-8 w-8 text-noir" />
                   </div>
                   <span className="text-base md:text-lg font-500 text-noir tracking-wide">
-                    RENTABILISEZ VOS VÊTEMENTS
+                    GAIN D'ARGENT
                   </span>
                 </div>
                 
-                {/* Circularité */}
+                {/* Donnez-leur une seconde vie */}
                 <div className="flex flex-col items-center gap-4">
                   <div className="w-16 h-16 border border-noir rounded-full flex items-center justify-center">
                     <Leaf className="h-8 w-8 text-noir" />
                   </div>
                   <span className="text-base md:text-lg font-500 text-noir tracking-wide">
-                    CIRCULARITÉ
+                    DONNEZ-LEUR UNE SECONDE VIE
                   </span>
                 </div>
               </div>
+              <Button 
+                onClick={() => scrollToSection(formRef)}
+                className="mt-12 bg-noir hover:bg-gris-fonce text-blanc px-12 py-4 rounded-none text-lg font-500 transition-all duration-300 tracking-widest"
+              >
+                DEMANDEZ UN RENDEZ-VOUS
+              </Button>
             </div>
           </div>
         </div>
@@ -100,10 +116,8 @@ export default function Home() {
               <CardContent>
                 <div className="max-w-4xl mx-auto">
                   <p className="mb-12 text-lg text-gris-moyen leading-relaxed">
-                    <strong className="font-700 text-noir">Seconde</strong> est une plateforme
-                    innovante qui vous permet de vendre vos vêtements de marque sans vous en occuper.
-                    Notre mission est de simplifier le processus de revente tout en
-                    garantissant une expérience de qualité.
+                    <strong className="font-700 text-noir">Seconde</strong> est une solution qui vous permet de vendre vos vêtements sans effort.
+                    Notre mission est de vous aider à vendre vos vêtements sans effort.
                   </p>
 
                   <h3 className="text-2xl md:text-3xl font-600 mb-12 text-noir">
@@ -278,8 +292,7 @@ export default function Home() {
                     <div>
                       <h4 className="font-600 mb-3 text-noir">PAIEMENT</h4>
                       <p className="text-gris-moyen">
-                        Recevez votre paiement (40% du prix de vente) directement sur votre compte
-                        bancaire après la vente
+                        Recevez votre paiement directement sur votre compte bancaire après la vente
                       </p>
                     </div>
                   </div>
@@ -306,14 +319,8 @@ export default function Home() {
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-700 mb-6 text-noir">
-                OBTENEZ UNE ESTIMATION GRATUITE
+                DEMANDEZ UN RENDEZ-VOUS
               </h2>
-              <p className="text-xl text-gris-moyen mb-4">
-                Remplissez notre formulaire et découvrez combien vous pourriez gagner
-              </p>
-              <p className="text-sm text-gris-moyen tracking-wide">
-                VOUS TOUCHEREZ 40% DU PRIX DE VENTE ESTIMÉ
-              </p>
             </div>
 
             <div className="max-w-2xl mx-auto">
@@ -329,103 +336,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section - Full page - Cezanne Style */}
-      <section className="py-16 md:py-24 bg-creme scroll-section">
-        <div className="container">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-4xl md:text-5xl font-700 mb-8 text-noir">
-              PRÊT À DONNER UNE SECONDE VIE À VOS VÊTEMENTS ?
-            </h2>
-            <p className="text-xl text-gris-moyen mb-12">
-              Contactez-nous dès maintenant et commencez votre expérience avec
-              Seconde.
-            </p>
-            <Button 
-              onClick={() => scrollToSection(formRef)}
-              className="bg-noir hover:bg-gris-fonce text-blanc px-12 py-4 rounded-none text-lg font-500 transition-all duration-300 tracking-widest"
-            >
-              COMMENCER L'ESTIMATION
-            </Button>
-          </div>
-        </div>
-        {/* Scroll down indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-          <div className="animate-bounce">
-            <ChevronDown className="h-6 w-6 text-noir" />
-          </div>
-        </div>
-      </section>
 
-      {/* Contact Information Section - Full page - Cezanne Style */}
-      <section className="py-16 md:py-24 bg-blanc scroll-section">
-        <div className="container">
-          <div className="max-w-4xl mx-auto">
-            <Card className="shadow-none border-0">
-              <CardHeader className="text-center pb-0">
-                <CardTitle className="text-3xl text-center text-noir">
-                  AUTRES MOYENS DE CONTACT
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                  <div className="space-y-8">
-                    <div className="flex items-start gap-6">
-                      <div className="flex-shrink-0 w-12 h-12 border border-noir rounded-full flex items-center justify-center">
-                        <Mail className="h-6 w-6 text-noir" />
-                      </div>
-                      <div>
-                        <h3 className="font-600 mb-2 text-noir">EMAIL</h3>
-                        <p className="text-gris-moyen">
-                          contact@seconde-dressing.fr
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-6">
-                      <div className="flex-shrink-0 w-12 h-12 border border-noir rounded-full flex items-center justify-center">
-                        <Phone className="h-6 w-6 text-noir" />
-                      </div>
-                      <div>
-                        <h3 className="font-600 mb-2 text-noir">TÉLÉPHONE</h3>
-                        <p className="text-gris-moyen">+33 1 23 45 67 89</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-8">
-                    <div>
-                      <h3 className="font-600 mb-4 text-noir">ADRESSE</h3>
-                      <p className="text-gris-moyen">
-                        123 Rue de la Mode
-                        <br />
-                        75000 Paris, France
-                      </p>
-                    </div>
-
-                    <div>
-                      <h3 className="font-600 mb-4 text-noir">HEURES D'OUVERTURE</h3>
-                      <div className="space-y-3 text-gris-moyen">
-                        <div className="flex justify-between">
-                          <span>Lundi - Vendredi</span>
-                          <span>9h00 - 18h00</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Samedi</span>
-                          <span>10h00 - 16h00</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Dimanche</span>
-                          <span>Fermé</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
