@@ -311,14 +311,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-        {/* Scroll down indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-          <div className="animate-bounce">
-            <ChevronDown className="h-6 w-6 text-noir" />
-          </div>
-        </div>
       </section>
-
 
     </div>
   );
