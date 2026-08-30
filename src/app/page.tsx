@@ -26,8 +26,17 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-blanc text-noir">
       {/* Hero Section - Full page - Cezanne Style */}
-      <section className="relative py-20 md:py-32 scroll-section bg-creme">
-        <div className="container">
+      <section 
+        className="relative py-20 md:py-32 scroll-section bg-creme"
+        style={{
+          backgroundImage: "url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed"
+        }}
+      >
+        <div className="absolute inset-0 bg-creme/80 backdrop-blur-sm"></div>
+        <div className="container relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             <div className="mb-12">
               <h1 className="text-5xl md:text-7xl font-700 text-noir mb-8 leading-tight">
