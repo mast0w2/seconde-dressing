@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Leaf, Factory, TrendingDown, Recycle, Globe, Droplets, Tree, Users } from "lucide-react";
+import { Leaf, Factory, TrendingDown, Recycle, Globe, Droplets, Trees, Users } from "lucide-react";
 
 export default function ImpactPage() {
   return (
@@ -104,7 +104,7 @@ export default function ImpactPage() {
                       soit assez pour qu'une personne boive pendant 2,5 ans.
                     </p>
                     <div className="mt-4">
-                      <Tree className="h-8 w-8 text-noir mx-auto" />
+                      <Trees className="h-8 w-8 text-noir mx-auto" />
                     </div>
                   </div>
 
@@ -256,7 +256,7 @@ export default function ImpactPage() {
                       <Card className="border-noir/20">
                         <CardHeader>
                           <CardTitle className="text-xl flex items-center gap-2">
-                            <Tree className="h-5 w-5" />
+                            <Trees className="h-5 w-5" />
                             Promotion de la durabilité
                           </CardTitle>
                         </CardHeader>

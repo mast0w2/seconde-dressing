@@ -9,6 +9,9 @@ const inter = Inter({ subsets: ["latin"] });
 const playfair = Playfair_Display({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  icons: {
+    icon: "/favicon.svg",
+  },
   title: "Seconde - Plateforme de revente de vêtements",
   description:
     "Seconde connecte les clients avec des vendeuses professionnelles pour vendre vos vêtements.",
