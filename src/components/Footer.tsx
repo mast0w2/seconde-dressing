@@ -23,7 +23,10 @@ export function Footer() {
             <Link href="/">Accueil</Link>
           </Button>
           <Button asChild variant="ghost" size="sm" className="text-gris-moyen hover:text-noir hover:bg-noir/5">
-            <Link href="/about">Le concept</Link>
+            <Link href="/concept">Notre concept</Link>
+          </Button>
+          <Button asChild variant="ghost" size="sm" className="text-gris-moyen hover:text-noir hover:bg-noir/5">
+            <Link href="/impact">Notre impact</Link>
           </Button>
           <Button asChild variant="ghost" size="sm" className="text-gris-moyen hover:text-noir hover:bg-noir/5">
             <Link href="/contact">Contact</Link>

@@ -86,12 +86,20 @@ export function Navbar() {
               ACCUEIL
             </Link>
             <Link
-              href="/about"
+              href="/concept"
               className={`text-sm font-medium transition-colors hover:text-noir ${
-                pathname === "/about" ? "text-noir" : "text-gris-moyen"
+                pathname === "/concept" ? "text-noir" : "text-gris-moyen"
               }`}
             >
-              LE CONCEPT
+              NOTRE CONCEPT
+            </Link>
+            <Link
+              href="/impact"
+              className={`text-sm font-medium transition-colors hover:text-noir ${
+                pathname === "/impact" ? "text-noir" : "text-gris-moyen"
+              }`}
+            >
+              NOTRE IMPACT
             </Link>
             <Link
               href="/reviews"
