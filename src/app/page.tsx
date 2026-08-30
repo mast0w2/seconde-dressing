@@ -12,7 +12,6 @@ import { Mail, Phone, Check, Users, Calendar, Sparkles, Leaf, Target, Euro, Hear
 
 export default function Home() {
   const [showForm, setShowForm] = useState(false);
-  const conceptRef = useRef<HTMLDivElement>(null);
   const howItWorksRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
 
@@ -79,10 +78,7 @@ export default function Home() {
       </section>
 
       {/* Concept Section - Full page */}
-      <section 
-        ref={conceptRef}
-        className="py-16 md:py-24 bg-white scroll-section"
-      >
+      <section className="py-16 md:py-24 bg-white scroll-section">
         <div className="container">
           <div className="max-w-6xl mx-auto">
             {/* Main Concept Card */}
@@ -200,75 +196,6 @@ export default function Home() {
                         <p className="text-sm text-gris-fonce">
                           En donnant une seconde vie à vos vêtements, vous
                           contribuez à une mode plus durable et responsable
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <h3 className="text-2xl md:text-3xl font-500 mb-8 text-noir-profond">
-                    Comment ça fonctionne ?
-                  </h3>
-                  <div className="space-y-6">
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0 w-10 h-10 bg-vert-emeraude text-white rounded-full flex items-center justify-center font-600">
-                        1
-                      </div>
-                      <div>
-                        <h4 className="font-600 mb-2 text-noir-profond">
-                          Estimation en ligne
-                        </h4>
-                        <p className="text-gris-fonce">
-                          Remplissez notre formulaire pour obtenir une estimation personnalisée
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0 w-10 h-10 bg-vert-emeraude text-white rounded-full flex items-center justify-center font-600">
-                        2
-                      </div>
-                      <div>
-                        <h4 className="font-600 mb-2 text-noir-profond">Contact rapide</h4>
-                        <p className="text-gris-fonce">
-                          Nous vous contactons sous 24h pour organiser un rendez-vous
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0 w-10 h-10 bg-vert-emeraude text-white rounded-full flex items-center justify-center font-600">
-                        3
-                      </div>
-                      <div>
-                        <h4 className="font-600 mb-2 text-noir-profond">Récupération à domicile</h4>
-                        <p className="text-gris-fonce">
-                          Nous venons récupérer vos vêtements directement chez vous
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0 w-10 h-10 bg-vert-emeraude text-white rounded-full flex items-center justify-center font-600">
-                        4
-                      </div>
-                      <div>
-                        <h4 className="font-600 mb-2 text-noir-profond">Mise en vente</h4>
-                        <p className="text-gris-fonce">
-                          Vos vêtements sont photographiés, décrits et mis en
-                          ligne sur nos plateformes partenaires
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0 w-10 h-10 bg-vert-emeraude text-white rounded-full flex items-center justify-center font-600">
-                        5
-                      </div>
-                      <div>
-                        <h4 className="font-600 mb-2 text-noir-profond">Paiement</h4>
-                        <p className="text-gris-fonce">
-                          Recevez votre paiement (40% du prix de vente) directement sur votre compte
-                          bancaire après la vente
                         </p>
                       </div>
                     </div>
