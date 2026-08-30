@@ -131,7 +131,7 @@ export default function RolePage() {
         <CardHeader>
           <CardTitle className="text-2xl">Choisir votre rôle</CardTitle>
           <CardDescription>
-            Sélectionnez votre rôle pour continuer sur Seconde Dressing
+            Sélectionnez votre rôle pour continuer sur Seconde
           </CardDescription>
         </CardHeader>
 

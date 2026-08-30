@@ -104,7 +104,7 @@ export default function SignupPage() {
         <CardHeader>
           <CardTitle className="text-2xl">Créer un compte</CardTitle>
           <CardDescription>
-            Inscrivez-vous pour commencer à utiliser Seconde Dressing
+            Inscrivez-vous pour commencer à utiliser Seconde
           </CardDescription>
         </CardHeader>
 

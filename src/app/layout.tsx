@@ -9,9 +9,9 @@ const inter = Inter({ subsets: ["latin"] });
 const playfair = Playfair_Display({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Seconde Dressing - Plateforme de revente de vêtements",
+  title: "Seconde - Plateforme de revente de vêtements",
   description:
-    "Seconde Dressing connecte les clients avec des vendeuses professionnelles pour vendre vos vêtements.",
+    "Seconde connecte les clients avec des vendeuses professionnelles pour vendre vos vêtements.",
 };
 
 export default function RootLayout({

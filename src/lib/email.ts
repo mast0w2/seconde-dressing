@@ -55,10 +55,10 @@ export interface ContactFormData {
 
 const EMAIL_CONFIG = {
   sender: {
-    name: 'Seconde Dressing',
-    email: process.env.EMAIL_FROM || 'Seconde Dressing <no-reply@brevo.com>',
+    name: 'Seconde',
+    email: process.env.EMAIL_FROM || 'Seconde <no-reply@brevo.com>',
   },
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://seconde-dressing.fr',
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://seconde.fr',
 } as const;
 
 // ============================================================================
@@ -73,10 +73,10 @@ export const env = {
     apiKey: process.env.BREVO_API_KEY || '',
   },
   email: {
-    from: process.env.EMAIL_FROM || 'Seconde Dressing <no-reply@brevo.com>',
+    from: process.env.EMAIL_FROM || 'Seconde <no-reply@brevo.com>',
   },
   app: {
-    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://seconde-dressing.fr',
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://seconde.fr',
   },
 } as const;
 
@@ -287,13 +287,13 @@ class EmailTemplateService {
         <body>
           <div class="container">
             <div class="header">
-              <h1>Seconde Dressing</h1>
+              <h1>Seconde</h1>
             </div>
             <div class="content">
               ${content}
             </div>
             <div class="footer">
-              <p>© ${new Date().getFullYear()} Seconde Dressing. Tous droits réservés.</p>
+              <p>© ${new Date().getFullYear()} Seconde. Tous droits réservés.</p>
               <p>
                 <a href="${EMAIL_CONFIG.siteUrl}">Visitez notre site</a>
               </p>
@@ -500,7 +500,7 @@ class NotificationService {
   public async sendContactNotification(
     data: ContactFormData
   ): Promise<EmailSendResult> {
-    const adminEmail = 'admin@seconde-dressing.fr';
+    const adminEmail = 'admin@seconde.fr';
     const clientSubject = `✅ Nous avons reçu votre message - ${data.subject}`;
     const adminSubject = `📧 Nouveau message de contact: ${data.subject}`;
 
@@ -565,7 +565,7 @@ class NotificationService {
     name: string,
     role: 'client' | 'vendeuse'
   ): Promise<EmailSendResult> {
-    const subject = '🎉 Bienvenue sur Seconde Dressing !';
+    const subject = '🎉 Bienvenue sur Seconde !';
 
     const roleSpecificContent = role === 'client'
       ? `
@@ -593,7 +593,7 @@ class NotificationService {
 
     const content = `
       <h2>🎉 Bienvenue, ${name} !</h2>
-      <p>Merci de vous être inscrit(e) sur <strong>Seconde Dressing</strong> !</p>
+      <p>Merci de vous être inscrit(e) sur <strong>Seconde</strong> !</p>
       <p>Nous sommes ravis de vous compter parmi nous.</p>
       
       ${roleSpecificContent}
@@ -602,7 +602,7 @@ class NotificationService {
       <a href="${EMAIL_CONFIG.siteUrl}/about">page de concept</a> ou à nous contacter via 
       <a href="${EMAIL_CONFIG.siteUrl}/contact">notre formulaire</a>.</p>
       
-      <p>Bonne aventure avec Seconde Dressing !</p>
+      <p>Bonne aventure avec Seconde !</p>
     `;
 
     const html = this.templateService.generateBaseTemplate(content, subject);

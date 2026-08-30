@@ -69,7 +69,7 @@ export function Navbar() {
       <div className="container flex h-14 max-w-screen-2xl items-center justify-between">
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-xl font-bold text-primary">Seconde Dressing</span>
+            <span className="text-xl font-bold text-primary">Seconde</span>
           </Link>
 
           <div className="hidden md:flex md:gap-6">

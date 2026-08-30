@@ -34,7 +34,7 @@ export default function Home() {
                 <Leaf className="h-8 w-8 text-white" />
               </div>
               <h1 className="text-4xl md:text-6xl font-600 text-noir-profond mb-6">
-                Seconde Dressing
+                Seconde
               </h1>
               <p className="text-xl md:text-2xl text-gris-fonce mb-8 max-w-3xl mx-auto">
                 Nous rachetons et revendons vos vêtements de marque pour vous
@@ -75,14 +75,14 @@ export default function Home() {
               <CardContent>
                 <div className="prose prose-lg max-w-none">
                   <p className="mb-6 text-lg text-noir-profond">
-                    <strong className="font-600">Seconde Dressing</strong> est une plateforme
+                    <strong className="font-600">Seconde</strong> est une plateforme
                     innovante qui vous permet de vendre vos vêtements de marque sans vous en occuper.
                     Notre mission est de simplifier le processus de revente tout en
                     garantissant une expérience de qualité.
                   </p>
 
                   <h3 className="text-2xl md:text-3xl font-500 mb-8 text-noir-profond">
-                    Pourquoi choisir Seconde Dressing ?
+                    Pourquoi choisir Seconde ?
                   </h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
@@ -335,7 +335,7 @@ export default function Home() {
             </h2>
             <p className="text-xl text-gris-fonce mb-8">
               Contactez-nous dès maintenant et commencez votre expérience avec
-              Seconde Dressing.
+              Seconde.
             </p>
             <Button 
               onClick={scrollToForm}

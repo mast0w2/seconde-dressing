@@ -12,7 +12,7 @@ export default function AboutPage() {
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 text-primary">
-              Découvrez Seconde Dressing
+              Découvrez Seconde
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
               La plateforme innovante qui révolutionne la revente de vêtements
@@ -37,10 +37,10 @@ export default function AboutPage() {
               <CardContent>
                 <div className="prose prose-lg max-w-none">
                   <p className="mb-6">
-                    <strong>Seconde Dressing</strong> est une plateforme innovante qui met en relation des clients souhaitant vendre leurs vêtements avec des vendeuses professionnelles. Notre mission est de simplifier le processus de revente tout en garantissant une expérience de qualité pour toutes les parties prenantes.
+                    <strong>Seconde</strong> est une plateforme innovante qui met en relation des clients souhaitant vendre leurs vêtements avec des vendeuses professionnelles. Notre mission est de simplifier le processus de revente tout en garantissant une expérience de qualité pour toutes les parties prenantes.
                   </p>
 
-                  <h3 className="text-2xl font-semibold mb-4">Pourquoi choisir Seconde Dressing ?</h3>
+                  <h3 className="text-2xl font-semibold mb-4">Pourquoi choisir Seconde ?</h3>
                   <ul className="space-y-4 mb-8">
                     <li className="flex items-start gap-3">
                       <span className="text-primary mt-1">✓</span>

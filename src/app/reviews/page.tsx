@@ -169,7 +169,7 @@ export default function ReviewsPage() {
               Avis Clients
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
-              Découvrez ce que nos clients pensent de Seconde Dressing
+              Découvrez ce que nos clients pensent de Seconde
             </p>
           </div>
         </div>
@@ -258,7 +258,7 @@ export default function ReviewsPage() {
               <CardHeader>
                 <CardTitle className="text-2xl">Laissez votre avis</CardTitle>
                 <CardDescription>
-                  Partagez votre expérience avec Seconde Dressing
+                  Partagez votre expérience avec Seconde
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -303,7 +303,7 @@ export default function ReviewsPage() {
                       id="comment"
                       value={comment}
                       onChange={(e) => setComment(e.target.value)}
-                      placeholder="Décrivez votre expérience avec Seconde Dressing..."
+                      placeholder="Décrivez votre expérience avec Seconde..."
                       rows={5}
                       disabled={isSubmitting}
                       required
