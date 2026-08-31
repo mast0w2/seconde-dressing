@@ -89,7 +89,7 @@ export const env = {
   },
   email: {
     from: process.env.EMAIL_FROM || 'Seconde <no-reply@brevo.com>',
-    admin: process.env.CONTACT_ADMIN_EMAIL || '',
+    admin: process.env.CONTACT_ADMIN_EMAILS ? process.env.CONTACT_ADMIN_EMAILS.split(',').map(e => e.trim()).filter(e => e) : [],
   },
   app: {
     url: process.env.NEXT_PUBLIC_SITE_URL || 'https://seconde.fr',
@@ -516,7 +516,7 @@ class NotificationService {
   public async sendContactNotification(
     data: ContactFormData
   ): Promise<EmailSendResult> {
-    const adminEmail = env.email.admin;
+    const adminEmails = env.email.admin;
     const clientSubject = `\u2705 Nous avons reçu votre message - ${data.subject}`;
     const adminSubject = `\ud83d\udce7 Nouveau message de contact: ${data.subject}`;
 
@@ -558,15 +558,17 @@ class NotificationService {
       clientHtml
     );
 
-    // Send to admin (only if admin email is configured and different from client)
-    if (adminEmail && data.email.toLowerCase() !== adminEmail.toLowerCase()) {
-      const adminResult = await this.emailService.sendEmailWithFallback(
-        adminEmail,
-        adminSubject,
-        adminHtml
-      );
-      if (!adminResult.success) {
-        console.error('[NotificationService] Failed to send admin notification');
+    // Send to all admin emails (only if configured and different from client)
+    for (const adminEmail of adminEmails) {
+      if (adminEmail && data.email.toLowerCase() !== adminEmail.toLowerCase()) {
+        const adminResult = await this.emailService.sendEmailWithFallback(
+          adminEmail,
+          adminSubject,
+          adminHtml
+        );
+        if (!adminResult.success) {
+          console.error('[NotificationService] Failed to send admin notification to:', adminEmail);
+        }
       }
     }
 
@@ -631,7 +633,7 @@ class NotificationService {
   public async sendEstimationNotification(
     data: EstimationFormData
   ): Promise<EmailSendResult> {
-    const adminEmail = env.email.admin;
+    const adminEmails = env.email.admin;
     const clientSubject = '\u2705 Demande d\'estimation reçue';
     const adminSubject = `\ud83d\udce7 Nouvelle demande d\'estimation - ${data.prenom} ${data.nom}`;
 
@@ -700,15 +702,17 @@ class NotificationService {
       clientHtml
     );
 
-    // Send to admin (only if admin email is configured and different from client)
-    if (adminEmail && data.email.toLowerCase() !== adminEmail.toLowerCase()) {
-      const adminResult = await this.emailService.sendEmailWithFallback(
-        adminEmail,
-        adminSubject,
-        adminHtml
-      );
-      if (!adminResult.success) {
-        console.error('[NotificationService] Failed to send admin estimation notification');
+    // Send to all admin emails (only if configured and different from client)
+    for (const adminEmail of adminEmails) {
+      if (adminEmail && data.email.toLowerCase() !== adminEmail.toLowerCase()) {
+        const adminResult = await this.emailService.sendEmailWithFallback(
+          adminEmail,
+          adminSubject,
+          adminHtml
+        );
+        if (!adminResult.success) {
+          console.error('[NotificationService] Failed to send admin estimation notification to:', adminEmail);
+        }
       }
     }
 
