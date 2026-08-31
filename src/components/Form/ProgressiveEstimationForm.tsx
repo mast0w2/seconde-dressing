@@ -42,17 +42,17 @@ interface Question {
 
 const QUESTIONS: Question[] = [
   {
-    id: "nom",
-    question: "Quel est votre nom ?",
-    type: "text",
-    placeholder: "Votre nom",
-    required: true,
-  },
-  {
     id: "prenom",
     question: "Quel est votre prénom ?",
     type: "text",
     placeholder: "Votre prénom",
+    required: true,
+  },
+  {
+    id: "nom",
+    question: "Quel est votre nom ?",
+    type: "text",
+    placeholder: "Votre nom",
     required: true,
   },
   {
