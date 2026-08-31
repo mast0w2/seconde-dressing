@@ -336,7 +336,7 @@ export function ProgressiveEstimationForm() {
             onKeyPress={handleKeyPress}
             placeholder={currentQuestion.placeholder}
             disabled={isSubmitting}
-            className="w-full"
+            className="w-full pr-12"
           />
         );
 
@@ -350,13 +350,13 @@ export function ProgressiveEstimationForm() {
             placeholder={currentQuestion.placeholder}
             min={currentQuestion.min}
             disabled={isSubmitting}
-            className="w-full"
+            className="w-full pr-12"
           />
         );
 
       case "slider":
         return (
-          <div className="space-y-4">
+          <div className="space-y-4 px-8">
             <div onKeyDown={(e) => { if (e.key === "Enter") handleNext(); }}>
               <Slider
                 value={[value as number]}
@@ -386,7 +386,7 @@ export function ProgressiveEstimationForm() {
             placeholder={currentQuestion.placeholder}
             disabled={isSubmitting}
             rows={4}
-            className="w-full p-4 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-vert-emeraude focus:border-transparent"
+            className="w-full p-4 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-vert-emeraude focus:border-transparent pr-12"
           />
         );
 
@@ -399,7 +399,7 @@ export function ProgressiveEstimationForm() {
             onKeyPress={handleKeyPress}
             placeholder={currentQuestion.placeholder}
             disabled={isSubmitting}
-            className="w-full"
+            className="w-full pr-12"
           />
         );
     }
@@ -407,19 +407,14 @@ export function ProgressiveEstimationForm() {
 
   // Render progress indicator
   const renderProgress = () => (
-    <div className="flex justify-between items-center mb-8">
-      <span className="text-sm text-muted-foreground">
-        Question {currentStep + 1} sur {QUESTIONS.length}
-      </span>
-      <div className="flex space-x-2">
-        {QUESTIONS.map((_, index) => (
-          <div
-            key={index}
-            className={`w-2 h-2 rounded-full ${
-              index <= currentStep ? "bg-vert-emeraude" : "bg-gray-300"
-            }`}
-          />
-        ))}
+    <div className="mb-8">
+      <div className="w-full bg-gray-200 rounded-full h-2">
+        <div
+          className="bg-vert-emeraude h-2 rounded-full"
+          style={{
+            width: `${((currentStep + 1) / QUESTIONS.length) * 100}%`,
+          }}
+        ></div>
       </div>
     </div>
   );
@@ -430,13 +425,10 @@ export function ProgressiveEstimationForm() {
       return (
         <div className="mt-6 p-4 bg-vert-tres-clair rounded-lg border border-vert-pale">
           <p className="text-sm text-muted-foreground mb-2">
-            Estimation après commission (40%):
+            Estimation après commission
           </p>
           <p className="text-2xl font-bold text-vert-emeraude">
-            {estimation.toFixed(0)} €
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Vous toucherez 40% du prix de vente estimé
+            40% de {formData.valeurMoyenne}€
           </p>
         </div>
       );
@@ -454,43 +446,46 @@ export function ProgressiveEstimationForm() {
           <h2 className="text-2xl md:text-3xl font-600 text-noir">
             {currentQuestion.question}
           </h2>
-          {renderInput()}
+          <div className="relative">
+            {renderInput()}
+            <div className="absolute right-0 top-1/2 transform -translate-y-1/2">
+              {currentStep < QUESTIONS.length - 1 ? (
+                <button
+                  onClick={handleNext}
+                  disabled={isSubmitting}
+                  className="text-noir hover:text-gris-moyen transition-all text-2xl"
+                  aria-label="Suivant"
+                >
+                  →
+                </button>
+              ) : (
+                <button
+                  onClick={handleNext}
+                  disabled={isSubmitting}
+                  className="text-noir hover:text-gris-moyen transition-all text-2xl"
+                  aria-label="Envoyer"
+                >
+                  →
+                </button>
+              )}
+            </div>
+            {currentStep > 0 && (
+              <div className="absolute left-0 top-1/2 transform -translate-y-1/2">
+                <button
+                  onClick={handlePrevious}
+                  disabled={isSubmitting}
+                  className="text-noir hover:text-gris-moyen transition-all text-2xl"
+                  aria-label="Précédent"
+                >
+                  ←
+                </button>
+              </div>
+            )}
+          </div>
           {errors[currentQuestion.id] && (
             <p className="text-sm text-destructive">{errors[currentQuestion.id]}</p>
           )}
           {renderEstimation()}
-        </div>
-
-        <div className="flex items-center justify-between">
-          {currentStep > 0 && (
-            <button
-              onClick={handlePrevious}
-              disabled={isSubmitting}
-              className="text-noir underline hover:no-underline transition-all"
-            >
-              Précédent
-            </button>
-          )}
-          <div className="flex-1"></div>
-          {currentStep < QUESTIONS.length - 1 ? (
-            <button
-              onClick={handleNext}
-              disabled={isSubmitting}
-              className="text-noir hover:text-gris-moyen transition-all text-2xl"
-              aria-label="Suivant"
-            >
-              →
-            </button>
-          ) : (
-            <button
-              onClick={handleNext}
-              disabled={isSubmitting}
-              className="text-noir hover:text-gris-moyen transition-all text-2xl"
-              aria-label="Envoyer"
-            >
-              →
-            </button>
-          )}
         </div>
       </div>
     );
