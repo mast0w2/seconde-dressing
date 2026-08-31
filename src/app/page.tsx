@@ -29,7 +29,7 @@ export default function Home() {
       <section 
         className="relative py-20 md:py-32 scroll-section bg-creme"
         style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')",
+          backgroundImage: "url('/background.jpg')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundAttachment: "fixed"
