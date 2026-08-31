@@ -727,6 +727,3 @@ class NotificationService {
 // Export singleton instances for use throughout the application
 export const emailService = EmailService.getInstance();
 export const notificationService = new NotificationService();
-
-// Re-export types
-export type { EmailSendResult, AppointmentNotificationData, ContactFormData, EstimationFormData };
