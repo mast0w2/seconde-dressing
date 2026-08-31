@@ -336,7 +336,7 @@ export function ProgressiveEstimationForm() {
             onKeyPress={handleKeyPress}
             placeholder={currentQuestion.placeholder}
             disabled={isSubmitting}
-            className="w-full pr-12"
+            className="w-full max-w-lg mx-auto border-2 border-noir rounded-full px-6 py-3 text-lg"
           />
         );
 
@@ -350,13 +350,13 @@ export function ProgressiveEstimationForm() {
             placeholder={currentQuestion.placeholder}
             min={currentQuestion.min}
             disabled={isSubmitting}
-            className="w-full pr-12"
+            className="w-full max-w-lg mx-auto border-2 border-noir rounded-full px-6 py-3 text-lg"
           />
         );
 
       case "slider":
         return (
-          <div className="space-y-4 px-8">
+          <div className="space-y-4">
             <div onKeyDown={(e) => { if (e.key === "Enter") handleNext(); }}>
               <Slider
                 value={[value as number]}
@@ -364,10 +364,10 @@ export function ProgressiveEstimationForm() {
                 min={currentQuestion.min}
                 max={currentQuestion.max}
                 step={currentQuestion.step}
-                className="w-full"
+                className="w-full max-w-lg mx-auto"
               />
             </div>
-            <div className="flex justify-between text-sm text-muted-foreground">
+            <div className="flex justify-between text-sm text-muted-foreground max-w-lg mx-auto">
               <span>{currentQuestion.min}{currentQuestion.unit}</span>
               <span className="font-bold text-xl text-noir bg-blanc px-4 py-2 rounded-full border-2 border-noir">
                 {value}{currentQuestion.unit}{value === currentQuestion.max && currentQuestion.max === 50 ? "+" : ""}
@@ -386,7 +386,7 @@ export function ProgressiveEstimationForm() {
             placeholder={currentQuestion.placeholder}
             disabled={isSubmitting}
             rows={4}
-            className="w-full p-4 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-vert-emeraude focus:border-transparent pr-12"
+            className="w-full max-w-lg mx-auto p-4 border-2 border-noir rounded-3xl focus:outline-none focus:ring-2 focus:ring-vert-emeraude focus:border-transparent"
           />
         );
 
@@ -399,7 +399,7 @@ export function ProgressiveEstimationForm() {
             onKeyPress={handleKeyPress}
             placeholder={currentQuestion.placeholder}
             disabled={isSubmitting}
-            className="w-full pr-12"
+            className="w-full max-w-lg mx-auto border-2 border-noir rounded-full px-6 py-3 text-lg"
           />
         );
     }
@@ -425,10 +425,10 @@ export function ProgressiveEstimationForm() {
       return (
         <div className="mt-6 p-4 bg-vert-tres-clair rounded-lg border border-vert-pale">
           <p className="text-sm text-muted-foreground mb-2">
-            Estimation après commission
+            Ce que vous recevrez après commission
           </p>
           <p className="text-2xl font-bold text-vert-emeraude">
-            40% de {formData.valeurMoyenne}€
+            {(formData.valeurMoyenne * COMMISSION_RATE).toFixed(0)}€
           </p>
         </div>
       );
@@ -446,46 +446,46 @@ export function ProgressiveEstimationForm() {
           <h2 className="text-2xl md:text-3xl font-600 text-noir">
             {currentQuestion.question}
           </h2>
-          <div className="relative">
+          <div>
             {renderInput()}
-            <div className="absolute right-0 top-1/2 transform -translate-y-1/2">
-              {currentStep < QUESTIONS.length - 1 ? (
-                <button
-                  onClick={handleNext}
-                  disabled={isSubmitting}
-                  className="text-noir hover:text-gris-moyen transition-all text-2xl"
-                  aria-label="Suivant"
-                >
-                  →
-                </button>
-              ) : (
-                <button
-                  onClick={handleNext}
-                  disabled={isSubmitting}
-                  className="text-noir hover:text-gris-moyen transition-all text-2xl"
-                  aria-label="Envoyer"
-                >
-                  →
-                </button>
-              )}
-            </div>
-            {currentStep > 0 && (
-              <div className="absolute left-0 top-1/2 transform -translate-y-1/2">
-                <button
-                  onClick={handlePrevious}
-                  disabled={isSubmitting}
-                  className="text-noir hover:text-gris-moyen transition-all text-2xl"
-                  aria-label="Précédent"
-                >
-                  ←
-                </button>
-              </div>
-            )}
           </div>
           {errors[currentQuestion.id] && (
             <p className="text-sm text-destructive">{errors[currentQuestion.id]}</p>
           )}
           {renderEstimation()}
+          
+          <div className="flex items-center justify-between mt-4">
+            {currentStep > 0 && (
+              <button
+                onClick={handlePrevious}
+                disabled={isSubmitting}
+                className="text-noir hover:text-gris-moyen transition-all text-2xl"
+                aria-label="Précédent"
+              >
+                ←
+              </button>
+            )}
+            <div className="flex-1"></div>
+            {currentStep < QUESTIONS.length - 1 ? (
+              <button
+                onClick={handleNext}
+                disabled={isSubmitting}
+                className="text-noir hover:text-gris-moyen transition-all text-2xl"
+                aria-label="Suivant"
+              >
+                →
+              </button>
+            ) : (
+              <button
+                onClick={handleNext}
+                disabled={isSubmitting}
+                className="text-noir hover:text-gris-moyen transition-all text-2xl"
+                aria-label="Envoyer"
+              >
+                →
+              </button>
+            )}
+          </div>
         </div>
       </div>
     );
