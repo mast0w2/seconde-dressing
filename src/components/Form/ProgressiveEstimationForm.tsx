@@ -336,7 +336,7 @@ export function ProgressiveEstimationForm() {
             onKeyPress={handleKeyPress}
             placeholder={currentQuestion.placeholder}
             disabled={isSubmitting}
-            className="w-full border-4 border-noir rounded-xl px-8 py-5 text-xl"
+            className="w-full border border-noir rounded-xl px-8 py-5 text-xl"
           />
         );
 
@@ -350,7 +350,7 @@ export function ProgressiveEstimationForm() {
             placeholder={currentQuestion.placeholder}
             min={currentQuestion.min}
             disabled={isSubmitting}
-            className="w-full border-4 border-noir rounded-xl px-8 py-5 text-xl"
+            className="w-full border border-noir rounded-xl px-8 py-5 text-xl"
           />
         );
 
@@ -369,7 +369,7 @@ export function ProgressiveEstimationForm() {
             </div>
             <div className="flex justify-between text-sm text-muted-foreground">
               <span>{currentQuestion.min}{currentQuestion.unit}</span>
-              <span className="font-bold text-xl text-noir bg-blanc px-6 py-3 rounded-xl border-4 border-noir">
+              <span className="font-bold text-xl text-noir bg-blanc px-6 py-3 rounded-xl border border-noir">
                 {value}{currentQuestion.unit}{value === currentQuestion.max && currentQuestion.max === 50 ? "+" : ""}
               </span>
               <span>{currentQuestion.max}{currentQuestion.unit}{currentQuestion.max === 50 ? "+" : ""}</span>
@@ -386,7 +386,7 @@ export function ProgressiveEstimationForm() {
             placeholder={currentQuestion.placeholder}
             disabled={isSubmitting}
             rows={4}
-            className="w-full p-6 border-4 border-noir rounded-xl focus:outline-none focus:ring-2 focus:ring-vert-emeraude focus:border-transparent text-lg"
+            className="w-full p-6 border border-noir rounded-xl focus:outline-none focus:ring-2 focus:ring-vert-emeraude focus:border-transparent text-lg"
           />
         );
 
@@ -399,7 +399,7 @@ export function ProgressiveEstimationForm() {
             onKeyPress={handleKeyPress}
             placeholder={currentQuestion.placeholder}
             disabled={isSubmitting}
-            className="w-full border-4 border-noir rounded-xl px-8 py-5 text-xl"
+            className="w-full border border-noir rounded-xl px-8 py-5 text-xl"
           />
         );
     }

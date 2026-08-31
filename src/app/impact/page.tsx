@@ -30,7 +30,7 @@ export default function ImpactPage() {
             </h1>
             <p className="text-xl text-gris-moyen mb-8 max-w-3xl mx-auto">
               L'industrie textile est l'une des plus polluantes au monde. 
-              Découvrez comment Seconde contribue à réduire cet impact.
+              Découvrez comment vous pouvez contribuer à réduire cet impact.
             </p>
           </div>
         </div>
