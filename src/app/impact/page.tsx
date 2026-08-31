@@ -10,12 +10,11 @@ export default function ImpactPage() {
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
       <section 
-        className="relative py-20 md:py-32 scroll-section bg-creme"
+        className="relative py-20 md:py-32 bg-creme"
         style={{
           backgroundImage: "url('/textile.png')",
           backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundAttachment: "fixed"
+          backgroundPosition: "center"
         }}
       >
         <div className="absolute inset-0 bg-creme/70 backdrop-blur-sm"></div>
