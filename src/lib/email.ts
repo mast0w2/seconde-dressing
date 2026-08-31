@@ -49,6 +49,21 @@ export interface ContactFormData {
   message: string;
 }
 
+/**
+ * Estimation form data
+ */
+export interface EstimationFormData {
+  nom: string;
+  prenom: string;
+  email: string;
+  telephone: string;
+  nombreVetements: number;
+  valeurMoyenne: number;
+  marques: string;
+  description?: string;
+  estimation: number;
+}
+
 // ============================================================================
 // Configuration
 // ============================================================================
@@ -352,9 +367,9 @@ class NotificationService {
   public async sendAppointmentConfirmation(
     data: AppointmentNotificationData
   ): Promise<EmailSendResult> {
-    const subject = '✅ Confirmation de votre rendez-vous';
+    const subject = '\u2705 Confirmation de votre rendez-vous';
     const content = `
-      <h2>✅ Votre rendez-vous est confirmé</h2>
+      <h2>\u2705 Votre rendez-vous est confirmé</h2>
       <p>Bonjour,</p>
       <p>Votre rendez-vous avec <strong>${data.vendeuseNom}</strong> a été confirmé avec succès.</p>
       
@@ -381,9 +396,9 @@ class NotificationService {
   public async sendNewAppointmentRequest(
     data: AppointmentNotificationData
   ): Promise<EmailSendResult> {
-    const subject = '📅 Nouvelle demande de rendez-vous';
+    const subject = '\ud83d\udcc5 Nouvelle demande de rendez-vous';
     const content = `
-      <h2>📅 Nouvelle demande reçue</h2>
+      <h2>\ud83d\udcc5 Nouvelle demande reçue</h2>
       <p>Bonjour,</p>
       <p>Vous avez reçu une nouvelle demande de rendez-vous de la part de <strong>${data.clientNom}</strong>.</p>
       
@@ -410,9 +425,9 @@ class NotificationService {
   public async sendAppointmentCancellation(
     data: AppointmentNotificationData
   ): Promise<EmailSendResult> {
-    const subject = '❌ Annulation de rendez-vous';
+    const subject = '\u274c Annulation de rendez-vous';
     const content = `
-      <h2>❌ Rendez-vous annulé</h2>
+      <h2>\u274c Rendez-vous annulé</h2>
       <p>Bonjour ${data.clientNom || ''},</p>
       <p>Votre rendez-vous prévu le <strong>${this.templateService.formatDate(data.date)} à ${data.heure}</strong> a été annulé.</p>
       
@@ -436,9 +451,9 @@ class NotificationService {
   public async sendAppointmentAccepted(
     data: AppointmentNotificationData
   ): Promise<EmailSendResult> {
-    const subject = '✅ Votre demande de rendez-vous a été acceptée';
+    const subject = '\u2705 Votre demande de rendez-vous a été acceptée';
     const content = `
-      <h2>✅ Demande acceptée</h2>
+      <h2>\u2705 Demande acceptée</h2>
       <p>Bonjour,</p>
       <p>Votre demande de rendez-vous avec <strong>${data.vendeuseNom}</strong> a été acceptée.</p>
       
@@ -471,9 +486,9 @@ class NotificationService {
   public async sendAppointmentRejected(
     data: AppointmentNotificationData
   ): Promise<EmailSendResult> {
-    const subject = '❌ Votre demande de rendez-vous a été refusée';
+    const subject = '\u274c Votre demande de rendez-vous a été refusée';
     const content = `
-      <h2>❌ Demande refusée</h2>
+      <h2>\u274c Demande refusée</h2>
       <p>Bonjour,</p>
       <p>Malheureusement, votre demande de rendez-vous avec <strong>${data.vendeuseNom}</strong> 
       pour le <strong>${this.templateService.formatDate(data.date)} à ${data.heure}</strong> a été refusée.</p>
@@ -502,12 +517,12 @@ class NotificationService {
     data: ContactFormData
   ): Promise<EmailSendResult> {
     const adminEmail = env.email.admin;
-    const clientSubject = `✅ Nous avons reçu votre message - ${data.subject}`;
-    const adminSubject = `📧 Nouveau message de contact: ${data.subject}`;
+    const clientSubject = `\u2705 Nous avons reçu votre message - ${data.subject}`;
+    const adminSubject = `\ud83d\udce7 Nouveau message de contact: ${data.subject}`;
 
     // Email to client (confirmation)
     const clientContent = `
-      <h2>✅ Message reçu</h2>
+      <h2>\u2705 Message reçu</h2>
       <p>Bonjour ${data.name},</p>
       <p>Nous avons bien reçu votre message concernant : <strong>${data.subject}</strong>.</p>
       <p>Notre équipe vous répondra dans les plus brefs délais (généralement sous 24-48h).</p>
@@ -516,7 +531,7 @@ class NotificationService {
 
     // Email to admin
     const adminContent = `
-      <h2>📧 Nouveau message de contact</h2>
+      <h2>\ud83d\udce7 Nouveau message de contact</h2>
       <p><strong>De:</strong> ${data.name} &lt;${data.email}&gt;</p>
       <p><strong>Sujet:</strong> ${data.subject}</p>
       <p><strong>Téléphone:</strong> ${data.phone || 'Non fourni'}</p>
@@ -566,7 +581,7 @@ class NotificationService {
     name: string,
     role: 'client' | 'vendeuse'
   ): Promise<EmailSendResult> {
-    const subject = '🎉 Bienvenue sur Seconde !';
+    const subject = '\ud83c\udf89 Bienvenue sur Seconde !';
 
     const roleSpecificContent = role === 'client'
       ? `
@@ -593,7 +608,7 @@ class NotificationService {
       `;
 
     const content = `
-      <h2>🎉 Bienvenue, ${name} !</h2>
+      <h2>\ud83c\udf89 Bienvenue, ${name} !</h2>
       <p>Merci de vous être inscrit(e) sur <strong>Seconde</strong> !</p>
       <p>Nous sommes ravis de vous compter parmi nous.</p>
       
@@ -609,6 +624,96 @@ class NotificationService {
     const html = this.templateService.generateBaseTemplate(content, subject);
     return this.emailService.sendEmailWithFallback(email, subject, html);
   }
+
+  /**
+   * Send estimation form notification to admin with all details
+   */
+  public async sendEstimationNotification(
+    data: EstimationFormData
+  ): Promise<EmailSendResult> {
+    const adminEmail = env.email.admin;
+    const clientSubject = '\u2705 Demande d\'estimation reçue';
+    const adminSubject = `\ud83d\udce7 Nouvelle demande d\'estimation - ${data.prenom} ${data.nom}`;
+
+    // Email to client (confirmation)
+    const clientContent = `
+      <h2>\u2705 Demande reçue</h2>
+      <p>Bonjour ${data.prenom} ${data.nom},</p>
+      <p>Nous avons bien reçu votre demande d'estimation.</p>
+      <p>Notre équipe vous recontactera sous 24h pour définir votre rendez-vous.</p>
+      
+      <div class="highlight">
+        <p><strong>Votre estimation:</strong> ${data.estimation.toFixed(0)}€</p>
+        <p><strong>Nombre de vêtements:</strong> ${data.nombreVetements}</p>
+        <p><strong>Valeur moyenne par vêtement:</strong> ${data.valeurMoyenne}€</p>
+      </div>
+      
+      <p>Merci de votre confiance !</p>
+    `;
+
+    // Email to admin with ALL details
+    const adminContent = `
+      <h2>\ud83d\udce7 Nouvelle demande d'estimation</h2>
+      
+      <h3>Informations du client:</h3>
+      <p><strong>Nom:</strong> ${data.nom}</p>
+      <p><strong>Prénom:</strong> ${data.prenom}</p>
+      <p><strong>Email:</strong> ${data.email}</p>
+      <p><strong>Téléphone:</strong> ${data.telephone}</p>
+      
+      <h3>Détails de l'estimation:</h3>
+      <p><strong>Nombre de vêtements:</strong> ${data.nombreVetements}</p>
+      <p><strong>Valeur moyenne par vêtement:</strong> ${data.valeurMoyenne}€</p>
+      <p><strong>Marques:</strong> ${data.marques}</p>
+      <p><strong>Estimation totale (40% commission):</strong> ${data.estimation.toFixed(0)}€</p>
+      
+      <h3>Description supplémentaire:</h3>
+      <div class="highlight">
+        <p>${data.description || 'Aucune description supplémentaire'}</p>
+      </div>
+      
+      <p><strong>Date de la demande:</strong> ${new Date().toLocaleDateString('fr-FR', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })}</p>
+      
+      <p>Contactez rapidement ce client pour organiser un rendez-vous.</p>
+    `;
+
+    const clientHtml = this.templateService.generateBaseTemplate(
+      clientContent,
+      clientSubject
+    );
+    const adminHtml = this.templateService.generateBaseTemplate(
+      adminContent,
+      adminSubject
+    );
+
+    // Send to client
+    const clientResult = await this.emailService.sendEmailWithFallback(
+      data.email,
+      clientSubject,
+      clientHtml
+    );
+
+    // Send to admin (only if admin email is configured and different from client)
+    if (adminEmail && data.email.toLowerCase() !== adminEmail.toLowerCase()) {
+      const adminResult = await this.emailService.sendEmailWithFallback(
+        adminEmail,
+        adminSubject,
+        adminHtml
+      );
+      if (!adminResult.success) {
+        console.error('[NotificationService] Failed to send admin estimation notification');
+      }
+    }
+
+    return clientResult;
+  }
 }
 
 // ============================================================================
@@ -619,4 +724,5 @@ class NotificationService {
 export const emailService = EmailService.getInstance();
 export const notificationService = new NotificationService();
 
-// Re-export types are already exported above, so no need to re-export
+// Re-export types
+export { EmailSendResult, AppointmentNotificationData, ContactFormData, EstimationFormData };

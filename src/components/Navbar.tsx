@@ -16,7 +16,7 @@ import { useToast } from "./ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Leaf } from "lucide-react";
+import { Leaf, Menu, X } from "lucide-react";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -25,6 +25,7 @@ export function Navbar() {
   const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const getUser = async () => {
@@ -120,6 +121,15 @@ export function Navbar() {
           </div>
         </div>
 
+        <button
+          className="md:hidden p-2 rounded-md border border-noir/10 hover:bg-noir/5 transition-colors"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          aria-label="Toggle menu"
+          aria-expanded={isMenuOpen}
+        >
+          {isMenuOpen ? <X className="h-6 w-6 text-noir" /> : <Menu className="h-6 w-6 text-noir" />}
+        </button>
+
         <div className="flex items-center gap-4">
           {user ? (
             <>
@@ -198,6 +208,58 @@ export function Navbar() {
             </>
           )}
         </div>
+
+        {isMenuOpen && (
+          <div className="md:hidden absolute top-16 left-0 right-0 bg-blanc border-b border-noir/10 z-40">
+            <div className="flex flex-col gap-4 p-6">
+              <Link
+                href="/"
+                className={`text-sm font-medium transition-colors hover:text-noir ${
+                  pathname === "/" ? "text-noir" : "text-gris-moyen"
+                }`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                ACCUEIL
+              </Link>
+              <Link
+                href="/concept"
+                className={`text-sm font-medium transition-colors hover:text-noir ${
+                  pathname === "/concept" ? "text-noir" : "text-gris-moyen"
+                }`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                NOTRE CONCEPT
+              </Link>
+              <Link
+                href="/impact"
+                className={`text-sm font-medium transition-colors hover:text-noir ${
+                  pathname === "/impact" ? "text-noir" : "text-gris-moyen"
+                }`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                NOTRE IMPACT
+              </Link>
+              <Link
+                href="/reviews"
+                className={`text-sm font-medium transition-colors hover:text-noir ${
+                  pathname === "/reviews" ? "text-noir" : "text-gris-moyen"
+                }`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                AVIS CLIENTS
+              </Link>
+              <Link
+                href="/contact"
+                className={`text-sm font-medium transition-colors hover:text-noir ${
+                  pathname === "/contact" ? "text-noir" : "text-gris-moyen"
+                }`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                CONTACT
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );

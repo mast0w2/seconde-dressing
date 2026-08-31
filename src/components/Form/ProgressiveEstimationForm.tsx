@@ -145,19 +145,21 @@ function validateField(field: string, value: any, type?: string): string | null 
 
 async function submitForm(data: FormData): Promise<{ success: boolean; message?: string }> {
   try {
-    const response = await fetch("/api/contact", {
+    const response = await fetch("/api/estimation", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        name: `${data.prenom} ${data.nom}`,
+        nom: data.nom,
+        prenom: data.prenom,
         email: data.email,
-        phone: data.telephone,
-        subject: `Demande d'estimation - ${data.nombreVetements} vêtements`,
-        message: `Estimation: ${data.nombreVetements * data.valeurMoyenne * COMMISSION_RATE}€
-Marques: ${data.marques}
-Description: ${data.description || "Aucune"}`,
+        telephone: data.telephone,
+        nombreVetements: data.nombreVetements,
+        valeurMoyenne: data.valeurMoyenne,
+        marques: data.marques,
+        description: data.description,
+        estimation: data.nombreVetements * data.valeurMoyenne * COMMISSION_RATE,
       }),
     });
 
