@@ -9,11 +9,20 @@ export default function ImpactPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-beige to-creme py-20">
-        <div className="container">
+      <section 
+        className="relative py-20 md:py-32 scroll-section bg-creme"
+        style={{
+          backgroundImage: "url('/textile.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed"
+        }}
+      >
+        <div className="absolute inset-0 bg-creme/70 backdrop-blur-sm"></div>
+        <div className="container relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 border-2 border-noir rounded-full flex items-center justify-center">
+              <div className="w-16 h-16 border-2 border-noir rounded-full flex items-center justify-center bg-blanc/80">
                 <Globe className="h-8 w-8 text-noir" />
               </div>
             </div>
