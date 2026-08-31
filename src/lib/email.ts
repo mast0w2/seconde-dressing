@@ -725,4 +725,4 @@ export const emailService = EmailService.getInstance();
 export const notificationService = new NotificationService();
 
 // Re-export types
-export { EmailSendResult, AppointmentNotificationData, ContactFormData, EstimationFormData };
+export type { EmailSendResult, AppointmentNotificationData, ContactFormData, EstimationFormData };
