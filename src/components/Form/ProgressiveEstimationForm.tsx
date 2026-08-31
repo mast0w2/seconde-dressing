@@ -336,7 +336,7 @@ export function ProgressiveEstimationForm() {
             onKeyPress={handleKeyPress}
             placeholder={currentQuestion.placeholder}
             disabled={isSubmitting}
-            className="w-full max-w-lg mx-auto border-2 border-noir rounded-full px-6 py-3 text-lg"
+            className="w-full border-2 border-noir rounded-lg px-6 py-4 text-lg"
           />
         );
 
@@ -350,7 +350,7 @@ export function ProgressiveEstimationForm() {
             placeholder={currentQuestion.placeholder}
             min={currentQuestion.min}
             disabled={isSubmitting}
-            className="w-full max-w-lg mx-auto border-2 border-noir rounded-full px-6 py-3 text-lg"
+            className="w-full border-2 border-noir rounded-lg px-6 py-4 text-lg"
           />
         );
 
@@ -364,12 +364,12 @@ export function ProgressiveEstimationForm() {
                 min={currentQuestion.min}
                 max={currentQuestion.max}
                 step={currentQuestion.step}
-                className="w-full max-w-lg mx-auto"
+                className="w-full"
               />
             </div>
-            <div className="flex justify-between text-sm text-muted-foreground max-w-lg mx-auto">
+            <div className="flex justify-between text-sm text-muted-foreground">
               <span>{currentQuestion.min}{currentQuestion.unit}</span>
-              <span className="font-bold text-xl text-noir bg-blanc px-4 py-2 rounded-full border-2 border-noir">
+              <span className="font-bold text-xl text-noir bg-blanc px-4 py-2 rounded-lg border-2 border-noir">
                 {value}{currentQuestion.unit}{value === currentQuestion.max && currentQuestion.max === 50 ? "+" : ""}
               </span>
               <span>{currentQuestion.max}{currentQuestion.unit}{currentQuestion.max === 50 ? "+" : ""}</span>
@@ -386,7 +386,7 @@ export function ProgressiveEstimationForm() {
             placeholder={currentQuestion.placeholder}
             disabled={isSubmitting}
             rows={4}
-            className="w-full max-w-lg mx-auto p-4 border-2 border-noir rounded-3xl focus:outline-none focus:ring-2 focus:ring-vert-emeraude focus:border-transparent"
+            className="w-full p-4 border-2 border-noir rounded-lg focus:outline-none focus:ring-2 focus:ring-vert-emeraude focus:border-transparent"
           />
         );
 
@@ -399,7 +399,7 @@ export function ProgressiveEstimationForm() {
             onKeyPress={handleKeyPress}
             placeholder={currentQuestion.placeholder}
             disabled={isSubmitting}
-            className="w-full max-w-lg mx-auto border-2 border-noir rounded-full px-6 py-3 text-lg"
+            className="w-full border-2 border-noir rounded-lg px-6 py-4 text-lg"
           />
         );
     }
@@ -442,7 +442,7 @@ export function ProgressiveEstimationForm() {
       <div className="w-full max-w-2xl mx-auto space-y-6">
         {renderProgress()}
         
-        <div className="space-y-2">
+        <div className="space-y-4">
           <h2 className="text-2xl md:text-3xl font-600 text-noir">
             {currentQuestion.question}
           </h2>
@@ -454,7 +454,7 @@ export function ProgressiveEstimationForm() {
           )}
           {renderEstimation()}
           
-          <div className="flex items-center justify-between mt-4">
+          <div className="flex items-center justify-between pt-4">
             {currentStep > 0 && (
               <button
                 onClick={handlePrevious}
