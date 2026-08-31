@@ -22,7 +22,7 @@ export default function ConceptPage() {
             </h1>
             <p className="text-xl text-gris-moyen mb-8 max-w-3xl mx-auto">
               Chez Seconde, nous croyons en une mode plus durable et accessible. 
-              Découvrez comment notre plateforme crée de la valeur pour tous.
+              Découvrez comment on vous aide à vider votre dressing.
             </p>
           </div>
         </div>
@@ -35,68 +35,42 @@ export default function ConceptPage() {
             <Card className="mb-12">
               <CardHeader>
                 <CardTitle className="text-3xl font-bold text-center">
-                  Deux niveaux de service pour s'adapter à vos besoins
+                  Un service unique pour vendre vos vêtements
                 </CardTitle>
                 <CardDescription className="text-center text-lg">
-                  Que vous souhaitiez simplement donner vos vêtements ou bénéficier d'un accompagnement personnalisé, 
-                  nous avons la solution qu'il vous faut.
+                  Confiez vos vêtements de valeur à nos Dressing Angels pour une vente optimisée.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-                  {/* Service 1: Simple Pickup */}
-                  <div className="border border-noir/20 p-8 rounded-lg">
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="w-12 h-12 bg-noir/10 rounded-full flex items-center justify-center">
-                        <Home className="h-6 w-6 text-noir" />
-                      </div>
-                      <h3 className="text-2xl font-bold text-noir">Réception à domicile</h3>
-                    </div>
-                    <p className="text-gris-moyen mb-6">
-                      Vous avez des vêtements à donner une seconde vie ? Une Dressing Angel passe chez vous 
-                      récupérer vos vêtements. C'est simple, rapide et sans effort de votre part.
-                    </p>
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3">
-                        <span className="text-primary">✓</span>
-                        <span className="text-gris-moyen">Pas besoin de trier vos vêtements</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-primary">✓</span>
-                        <span className="text-gris-moyen">La Dressing Angel s'occupe de tout</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-primary">✓</span>
-                        <span className="text-gris-moyen">Vos vêtements sont vendus au meilleur prix</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Service 2: Full Service */}
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-8 mt-8">
+                  {/* Single Service */}
                   <div className="border border-noir/20 p-8 rounded-lg">
                     <div className="flex items-center gap-4 mb-6">
                       <div className="w-12 h-12 bg-noir/10 rounded-full flex items-center justify-center">
                         <Users className="h-6 w-6 text-noir" />
                       </div>
-                      <h3 className="text-2xl font-bold text-noir">Accompagnement personnalisé</h3>
+                      <h3 className="text-2xl font-bold text-noir">Service complet de vente</h3>
                     </div>
                     <p className="text-gris-moyen mb-6">
-                      Vous avez besoin d'aide pour faire le tri dans votre dressing ? Une Dressing Angel vient chez vous 
-                      pour vous accompagner dans le tri de vos vêtements et sélectionner ensemble les pièces 
-                      qui peuvent être vendues à plus de 20€.
+                      Vous confiez vos vêtements valant plus de 20€ à une Dressing Angel. Elle s'occupe de tout : 
+                      photographie, mise en ligne et vente. Vous recevez votre paiement dans les 60 jours au plus tard.
                     </p>
                     <div className="space-y-4">
                       <div className="flex items-center gap-3">
                         <span className="text-primary">✓</span>
-                        <span className="text-gris-moyen">Conseils personnalisés pour optimiser vos ventes</span>
+                        <span className="text-gris-moyen">Vos vêtements doivent valoir plus de 20€</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-primary">✓</span>
-                        <span className="text-gris-moyen">Sélection des pièces à forte valeur</span>
+                        <span className="text-gris-moyen">La Dressing Angel gère tout le processus de vente</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-primary">✓</span>
-                        <span className="text-gris-moyen">Expérience conviviale et sans stress</span>
+                        <span className="text-gris-moyen">Paiement sous 60 jours maximum</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-primary">✓</span>
+                        <span className="text-gris-moyen">40% de commission sur chaque vente</span>
                       </div>
                     </div>
                   </div>
@@ -283,13 +257,13 @@ export default function ConceptPage() {
                     </div>
                   </div>
 
-                  {/* Concrete Examples */}
+                  {/* Concrete Example */}
                   <div>
-                    <h3 className="text-2xl font-semibold mb-6 text-center">Exemples concrets</h3>
+                    <h3 className="text-2xl font-semibold mb-6 text-center">Exemple concret</h3>
                     <div className="space-y-6">
                       <Card className="border-noir/20">
                         <CardHeader>
-                          <CardTitle className="text-lg">Exemple 1 : Veste en cuir vendue 200€</CardTitle>
+                          <CardTitle className="text-lg">Veste en cuir vendue 200€</CardTitle>
                         </CardHeader>
                         <CardContent>
                           <div className="space-y-3">
@@ -312,61 +286,9 @@ export default function ConceptPage() {
                           </div>
                         </CardContent>
                       </Card>
-
-                      <Card className="border-noir/20">
-                        <CardHeader>
-                          <CardTitle className="text-lg">Exemple 2 : Robe de soirée vendue 150€</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-3">
-                            <div className="flex justify-between py-2 border-b border-noir/10">
-                              <span className="text-gris-moyen">Client</span>
-                              <span className="font-semibold">60€</span>
-                            </div>
-                            <div className="flex justify-between py-2 border-b border-noir/10">
-                              <span className="text-gris-moyen">Dressing Angel</span>
-                              <span className="font-semibold">60€</span>
-                            </div>
-                            <div className="flex justify-between py-2 border-b border-noir/10">
-                              <span className="text-gris-moyen">Plateforme</span>
-                              <span className="font-semibold">30€</span>
-                            </div>
-                            <div className="flex justify-between py-2 font-bold">
-                              <span>Total</span>
-                              <span>150€</span>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      <Card className="border-noir/20">
-                        <CardHeader>
-                          <CardTitle className="text-lg">Exemple 3 : Lot de 10 vêtements vendus 500€</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-3">
-                            <div className="flex justify-between py-2 border-b border-noir/10">
-                              <span className="text-gris-moyen">Client</span>
-                              <span className="font-semibold">200€</span>
-                            </div>
-                            <div className="flex justify-between py-2 border-b border-noir/10">
-                              <span className="text-gris-moyen">Dressing Angel</span>
-                              <span className="font-semibold">200€</span>
-                            </div>
-                            <div className="flex justify-between py-2 border-b border-noir/10">
-                              <span className="text-gris-moyen">Plateforme</span>
-                              <span className="font-semibold">100€</span>
-                            </div>
-                            <div className="flex justify-between py-2 font-bold">
-                              <span>Total</span>
-                              <span>500€</span>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
                     </div>
                     <p className="text-center text-gris-moyen mt-6">
-                      Ces exemples montrent comment chaque vente crée de la valeur pour tous les acteurs 
+                      Cet exemple montre comment chaque vente crée de la valeur pour tous les acteurs 
                       de notre écosystème.
                     </p>
                   </div>
