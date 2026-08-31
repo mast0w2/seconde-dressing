@@ -73,6 +73,43 @@ CREATE TABLE IF NOT EXISTS preferences (
 -- Indexes for preferences
 CREATE INDEX IF NOT EXISTS idx_preferences_user_id ON preferences(user_id);
 
+-- Contact messages table
+CREATE TABLE IF NOT EXISTS contact_messages (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT,
+  subject TEXT NOT NULL,
+  message TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'read', 'archived')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Indexes for contact_messages
+CREATE INDEX IF NOT EXISTS idx_contact_messages_email ON contact_messages(email);
+CREATE INDEX IF NOT EXISTS idx_contact_messages_status ON contact_messages(status);
+
+-- Estimation requests table
+CREATE TABLE IF NOT EXISTS estimation_requests (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  nom TEXT NOT NULL,
+  prenom TEXT NOT NULL,
+  email TEXT NOT NULL,
+  telephone TEXT NOT NULL,
+  nombre_vetements INTEGER NOT NULL,
+  valeur_moyenne DECIMAL(10, 2) NOT NULL,
+  marques TEXT NOT NULL,
+  description TEXT,
+  estimation DECIMAL(10, 2) NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'contacted', 'converted', 'rejected')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Indexes for estimation_requests
+CREATE INDEX IF NOT EXISTS idx_estimation_requests_email ON estimation_requests(email);
+CREATE INDEX IF NOT EXISTS idx_estimation_requests_status ON estimation_requests(status);
+CREATE INDEX IF NOT EXISTS idx_estimation_requests_created_at ON estimation_requests(created_at);
+
 -- Function to update mis_a_jour_le timestamp
 CREATE OR REPLACE FUNCTION update_mis_a_jour_le()
 RETURNS TRIGGER AS $$
