@@ -47,44 +47,53 @@ export default function Home() {
               </p>
               
               {/* Avantages avec icônes - Style Cezanne */}
-              <div className="flex flex-wrap justify-center gap-3 sm:gap-4 md:gap-8 max-w-3xl mx-auto">
+              <div className="flex justify-center items-center gap-2 sm:gap-4 md:gap-6 max-w-4xl mx-auto flex-wrap">
                 {/* Videz votre dressing */}
-                <div className="flex flex-col items-center gap-1 sm:gap-2">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 border border-noir rounded-full flex items-center justify-center">
-                    <Leaf className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-noir" />
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 border border-noir rounded-full flex items-center justify-center flex-shrink-0">
+                    <Leaf className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-noir" />
                   </div>
-                  <span className="text-xs sm:text-xs md:text-sm font-500 text-noir tracking-wide text-center uppercase">
+                  <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide whitespace-nowrap">
                     Videz votre dressing
                   </span>
                 </div>
                 
+                {/* Separator */}
+                <span className="text-noir text-lg sm:text-xl md:text-2xl font-light hidden sm:inline">•</span>
+                
                 {/* Sans effort */}
-                <div className="flex flex-col items-center gap-1 sm:gap-2">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 border border-noir rounded-full flex items-center justify-center">
-                    <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-noir" />
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 border border-noir rounded-full flex items-center justify-center flex-shrink-0">
+                    <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-noir" />
                   </div>
-                  <span className="text-xs sm:text-xs md:text-sm font-500 text-noir tracking-wide text-center uppercase">
-                    Sans effort
+                  <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide whitespace-nowrap">
+                    sans effort
                   </span>
                 </div>
+                
+                {/* Separator */}
+                <span className="text-noir text-lg sm:text-xl md:text-2xl font-light hidden sm:inline">•</span>
                 
                 {/* En gagnant de l'argent */}
-                <div className="flex flex-col items-center gap-1 sm:gap-2">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 border border-noir rounded-full flex items-center justify-center">
-                    <Euro className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-noir" />
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 border border-noir rounded-full flex items-center justify-center flex-shrink-0">
+                    <Euro className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-noir" />
                   </div>
-                  <span className="text-xs sm:text-xs md:text-sm font-500 text-noir tracking-wide text-center uppercase">
-                    En gagnant de l'argent
+                  <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide whitespace-nowrap">
+                    en gagnant de l'argent
                   </span>
                 </div>
                 
+                {/* Separator */}
+                <span className="text-noir text-lg sm:text-xl md:text-2xl font-light hidden sm:inline">•</span>
+                
                 {/* Grâce à l'économie circulaire */}
-                <div className="flex flex-col items-center gap-1 sm:gap-2">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 border border-noir rounded-full flex items-center justify-center">
-                    <Recycle className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-noir" />
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 border border-noir rounded-full flex items-center justify-center flex-shrink-0">
+                    <Recycle className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-noir" />
                   </div>
-                  <span className="text-xs sm:text-xs md:text-sm font-500 text-noir tracking-wide text-center uppercase">
-                    Grâce à l'économie circulaire
+                  <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide whitespace-nowrap">
+                    grâce à l'économie circulaire
                   </span>
                 </div>
               </div>
