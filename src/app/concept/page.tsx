@@ -70,7 +70,7 @@ export default function ConceptPage() {
                       </div>
                       <div className="flex items-center gap-2 sm:gap-3">
                         <span className="text-primary">✓</span>
-                        <span className="text-xs sm:text-sm text-gris-moyen">40% de commission sur chaque vente</span>
+                        <span className="text-xs sm:text-sm text-gris-moyen">Gagner de l'argent : vous récupérez une partie du prix de vente de vos articles</span>
                       </div>
                     </div>
                   </div>
