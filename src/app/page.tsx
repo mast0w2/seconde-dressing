@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProgressiveEstimationForm } from "@/components/Form/ProgressiveEstimationForm";
-import { Mail, Phone, Check, Calendar, Leaf, Target, Euro, ChevronDown, TrendingUp, Heart, Sparkles, Users } from "lucide-react";
+import { Mail, Phone, Check, Calendar, Leaf, Target, Euro, ChevronDown, TrendingUp, Heart, Sparkles, Users, Recycle } from "lucide-react";
 
 // ============================================================================
 // Component
