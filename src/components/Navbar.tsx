@@ -69,9 +69,9 @@ export function Navbar() {
   return (
     <nav className="sticky top-0 z-50 w-full bg-blanc/95 backdrop-blur border-b border-noir/10">
       <div className="container flex h-16 max-w-screen-2xl items-center">
-        {/* Menu hamburger - extrême gauche sur mobile */}
+        {/* Menu hamburger - extrême gauche sur tous les écrans */}
         <button
-          className="md:hidden p-2 rounded-md border border-noir/10 hover:bg-noir/5 transition-colors"
+          className="p-2 rounded-md border border-noir/10 hover:bg-noir/5 transition-colors"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           aria-label="Toggle menu"
           aria-expanded={isMenuOpen}
@@ -97,7 +97,7 @@ export function Navbar() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="relative h-8 w-8 sm:h-10 sm:w-10 rounded-full border border-noir/20 hidden md:flex"
+                    className="relative h-8 w-8 sm:h-10 sm:w-10 rounded-full border border-noir/20"
                   >
                     <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
                       <AvatarImage src={profile?.photo_url || undefined} />
@@ -167,7 +167,7 @@ export function Navbar() {
         </div>
 
         {isMenuOpen && (
-          <div className="md:hidden absolute top-16 left-0 right-0 bg-blanc border-b border-noir/10 z-50">
+          <div className="absolute top-16 left-0 right-0 bg-blanc border-b border-noir/10 z-50">
             <div className="flex flex-col gap-3 p-4 sm:p-6">
               <Link
                 href="/"
@@ -194,7 +194,7 @@ export function Navbar() {
                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                NOTRE IMPACT
+                ÉCONOMIE CIRCULAIRE
               </Link>
               <Link
                 href="/reviews"

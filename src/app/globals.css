@@ -148,6 +148,17 @@
     overflow-y: scroll;
   }
 
+  @media (max-width: 768px) {
+    html {
+      scroll-snap-type: none;
+    }
+    
+    .scroll-section {
+      scroll-snap-align: none;
+      min-height: auto;
+    }
+  }
+
   /* Button Styles - Cezanne Minimalist */
   .btn-primary {
     background-color: var(--noir);
