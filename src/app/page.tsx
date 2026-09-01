@@ -47,34 +47,44 @@ export default function Home() {
               </p>
               
               {/* Avantages avec icônes - Style Cezanne */}
-              <div className="grid grid-cols-3 gap-4 md:gap-8 lg:gap-12 justify-items-center max-w-2xl mx-auto">
-                {/* Gain de temps */}
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 border border-noir rounded-full flex items-center justify-center">
-                    <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
-                  </div>
-                  <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide text-center uppercase">
-                    Gain de temps
-                  </span>
-                </div>
-                
-                {/* Gain d'argent */}
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 border border-noir rounded-full flex items-center justify-center">
-                    <Euro className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
-                  </div>
-                  <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide text-center uppercase">
-                    Gain d'argent
-                  </span>
-                </div>
-                
-                {/* Donnez-leur une seconde vie */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-8 lg:gap-12 justify-items-center max-w-3xl mx-auto">
+                {/* Videz votre dressing */}
                 <div className="flex flex-col items-center gap-2">
                   <div className="w-12 h-12 sm:w-16 sm:h-16 border border-noir rounded-full flex items-center justify-center">
                     <Leaf className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
                   </div>
                   <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide text-center uppercase">
-                    Seconde vie
+                    Videz votre dressing
+                  </span>
+                </div>
+                
+                {/* Sans effort */}
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 border border-noir rounded-full flex items-center justify-center">
+                    <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
+                  </div>
+                  <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide text-center uppercase">
+                    Sans effort
+                  </span>
+                </div>
+                
+                {/* En gagnant de l'argent */}
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 border border-noir rounded-full flex items-center justify-center">
+                    <Euro className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
+                  </div>
+                  <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide text-center uppercase">
+                    En gagnant de l'argent
+                  </span>
+                </div>
+                
+                {/* Grâce à l'économie circulaire */}
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 border border-noir rounded-full flex items-center justify-center">
+                    <Recycle className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
+                  </div>
+                  <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide text-center uppercase">
+                    Grâce à l'économie circulaire
                   </span>
                 </div>
               </div>
