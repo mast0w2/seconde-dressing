@@ -16,7 +16,7 @@ import { useToast } from "./ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Leaf, Menu, X } from "lucide-react";
+import { Leaf, Menu, X, Users } from "lucide-react";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -68,7 +68,7 @@ export function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-blanc/95 backdrop-blur border-b border-noir/10">
-      <div className="container flex h-16 max-w-screen-2xl items-center justify-between">
+      <div className="container flex h-16 max-w-screen-2xl items-center">
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-3">
             <div className="w-8 h-8 border border-noir rounded-full flex items-center justify-center">
@@ -121,7 +121,7 @@ export function Navbar() {
           </div>
         </div>
 
-        <div className="flex-1 flex justify-start items-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <button
             className="md:hidden p-2 rounded-md border border-noir/10 hover:bg-noir/5 transition-colors"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -137,7 +137,7 @@ export function Navbar() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="relative h-8 w-8 sm:h-10 sm:w-10 rounded-full border border-noir/20"
+                    className="relative h-8 w-8 sm:h-10 sm:w-10 rounded-full border border-noir/20 hidden md:flex"
                   >
                     <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
                       <AvatarImage src={profile?.photo_url || undefined} />
@@ -195,22 +195,19 @@ export function Navbar() {
               <Button
                 asChild
                 variant="ghost"
-                className="text-xs sm:text-sm text-noir hover:bg-noir/5 hover:text-noir transition-colors px-2 sm:px-3 py-1 sm:py-2"
+                className="h-8 w-8 sm:h-10 sm:w-10 p-0 rounded-full border border-noir/20"
+                aria-label="Se connecter ou s'inscrire"
               >
-                <Link href="/login">Se connecter</Link>
-              </Button>
-              <Button
-                asChild
-                className="bg-noir hover:bg-gris-fonce text-blanc px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium transition-colors"
-              >
-                <Link href="/signup">S'inscrire</Link>
+                <Link href="/login">
+                  <Users className="h-5 w-5 sm:h-6 sm:w-6 text-noir" />
+                </Link>
               </Button>
             </>
           )}
         </div>
 
         {isMenuOpen && (
-          <div className="md:hidden absolute top-16 left-0 right-0 bg-blanc border-b border-noir/10 z-40">
+          <div className="md:hidden absolute top-16 left-0 right-0 bg-blanc border-b border-noir/10 z-50">
             <div className="flex flex-col gap-3 p-4 sm:p-6">
               <Link
                 href="/"
@@ -257,6 +254,24 @@ export function Navbar() {
               >
                 CONTACT
               </Link>
+              {!user && (
+                <>
+                  <Link
+                    href="/login"
+                    className="text-sm font-medium transition-colors hover:text-noir text-gris-moyen"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Se connecter
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="text-sm font-medium transition-colors hover:text-noir text-gris-moyen"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    S'inscrire
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}
