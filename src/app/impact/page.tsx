@@ -30,7 +30,7 @@ export default function ImpactPage() {
             </h1>
             <p className="text-lg sm:text-xl text-gris-moyen mb-6 sm:mb-8 max-w-3xl mx-auto">
               L'industrie textile est l'une des plus polluantes au monde. 
-              Découvrez comment <strong>VOUS</strong> pouvez contribuer à réduire cet impact.
+              Découvrez comment vous pouvez contribuer à réduire cet impact.
             </p>
           </div>
         </div>
@@ -145,106 +145,35 @@ export default function ImpactPage() {
                   La puissance de l'économie circulaire
                 </CardTitle>
                 <CardDescription className="text-center text-base sm:text-lg">
-                  L'intérêt de l'économie circulaire, c'est d'user les vêtements jusqu'au bout de leur cycle de vie
+                  Comment chacun peut agir concrètement pour réduire son empreinte environnementale
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-8 sm:space-y-10">
                   <div className="max-w-4xl mx-auto">
                     <p className="text-base sm:text-lg text-gris-moyen leading-relaxed mb-8">
-                      Même si un produit a une empreinte environnementale élevée, le fait de l'utiliser jusqu'au bout 
-                      va au final réduire son impact. L'idée n'est pas forcément d'avoir des vêtements qui coûtent peu 
-                      à produire en termes d'environnement, mais plutôt de faire en sorte que tous les vêtements 
-                      aillent au bout de leur cycle de vie.
+                      L'économie circulaire repose sur un principe simple mais révolutionnaire : 
+                      <strong>utiliser chaque produit jusqu'au bout de son cycle de vie</strong>.
                     </p>
-                    
-                    <div className="bg-creme p-6 sm:p-8 rounded-lg border border-noir/10 mb-8">
-                      <h4 className="text-lg sm:text-xl font-semibold mb-4 text-center">
-                        Un levier actionnable et puissant
-                      </h4>
-                      <p className="text-base sm:text-lg text-gris-moyen text-center mb-6">
-                        Si on part du principe que les vêtements sont jetés alors qu'ils ne sont qu'à un quart 
-                        de leur durée de vie, on pourrait réduire <strong>par 4</strong> l'impact environnemental de 
-                        l'ensemble de l'industrie textile et de la mode, simplement en portant plus longtemps 
-                        les vêtements jusqu'au bout de leur vie.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-xl sm:text-2xl font-semibold mb-6 text-center">
-                      Pourquoi l'économie circulaire est la solution
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
-                      <Card className="border-noir/20">
-                        <CardHeader>
-                          <CardTitle className="text-xl flex items-center gap-2">
-                            <Recycle className="h-5 w-5" />
-                            Réutilisation
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-gris-moyen">
-                            En donnant une seconde vie à vos vêtements, nous évitons qu'ils ne finissent 
-                            en décharge. Chaque vêtement vendu, c'est un vêtement qui n'a pas besoin 
-                            d'être produit.
-                          </p>
-                          <div className="mt-4 bg-noir/5 p-4 rounded">
-                            <p className="text-sm">
-                              <strong>Saviez-vous ?</strong> Doubler la durée de vie d'un vêtement réduit son impact 
-                              environnemental de 44%.
-                            </p>
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      <Card className="border-noir/20">
-                        <CardHeader>
-                          <CardTitle className="text-xl flex items-center gap-2">
-                            <TrendingDown className="h-5 w-5" />
-                            Réduction des déchets
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-gris-moyen">
-                            Chaque année, des millions de tonnes de vêtements sont jetées. En facilitant 
-                            la revente, nous aidons à réduire ce gaspillage.
-                          </p>
-                          <div className="mt-4 bg-noir/5 p-4 rounded">
-                            <p className="text-sm">
-                              <strong>Impact :</strong> Chaque tonne de vêtements recyclés économise 2,5 tonnes 
-                              de CO2.
-                            </p>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </div>
-
-                  <div className="max-w-4xl mx-auto">
                     <p className="text-base sm:text-lg text-gris-moyen leading-relaxed mb-8">
-                      Même si un produit a une empreinte environnementale élevée, le fait de l'utiliser jusqu'au bout 
-                      va au final réduire son impact. L'idée n'est pas forcément d'avoir des vêtements qui coûtent peu 
-                      à produire en termes d'environnement, mais plutôt de faire en sorte que tous les vêtements 
-                      aillent au bout de leur cycle de vie.
+                      L'enjeu n'est pas de se contenter de vêtements à faible impact environnemental, 
+                      mais de <strong>maximiser l'utilisation de chaque pièce</strong> déjà produite. 
+                      Un vêtement porté jusqu'à usure complète, quel que soit son impact initial, 
+                      voit son empreinte environnementale globale considérablement réduite.
                     </p>
                     
-                    <div className="bg-creme p-6 sm:p-8 rounded-lg border border-noir/10 mb-8">
-                      <h4 className="text-lg sm:text-xl font-semibold mb-4 text-center">
-                        Un levier actionnable et puissant
-                      </h4>
+                    <div className="bg-creme p-6 sm:p-8 rounded-lg border border-noir/10">
                       <p className="text-base sm:text-lg text-gris-moyen text-center mb-6">
-                        Si on part du principe que les vêtements sont jetés alors qu'ils ne sont qu'à un quart 
-                        de leur durée de vie, on pourrait réduire <strong>par 4</strong> l'impact environnemental de 
-                        l'ensemble de l'industrie textile et de la mode, simplement en portant plus longtemps 
-                        les vêtements jusqu'au bout de leur vie.
+                        Si les vêtements étaient utilisés jusqu'à la fin de leur durée de vie 
+                        au lieu d'être jetés après seulement un quart de celle-ci, 
+                        <strong>l'impact environnemental de l'industrie textile pourrait être divisé par 4</strong>.
                       </p>
                     </div>
                   </div>
 
                   <div>
                     <h3 className="text-xl sm:text-2xl font-semibold mb-6 text-center">
-                      Pourquoi l'économie circulaire est la solution
+                      Comment agir concrètement ?
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
                       <Card className="border-noir/20">
