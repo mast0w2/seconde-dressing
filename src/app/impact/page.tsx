@@ -26,11 +26,11 @@ export default function ImpactPage() {
               </div>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6 text-noir">
-              Notre Impact Environnemental
+              Impact environnemental
             </h1>
             <p className="text-lg sm:text-xl text-gris-moyen mb-6 sm:mb-8 max-w-3xl mx-auto">
               L'industrie textile est l'une des plus polluantes au monde. 
-              Découvrez comment vous pouvez contribuer à réduire cet impact.
+              Découvrez comment <strong>VOUS</strong> pouvez contribuer à réduire cet impact.
             </p>
           </div>
         </div>
@@ -135,27 +135,47 @@ export default function ImpactPage() {
         </div>
       </section>
 
-      {/* Our Impact Section */}
+      {/* Circular Economy Section */}
       <section className="py-12 sm:py-16 bg-gris-tres-clair">
         <div className="container">
           <div className="max-w-6xl mx-auto">
             <Card>
               <CardHeader>
                 <CardTitle className="text-2xl sm:text-3xl font-bold text-center">
-                  Comment Seconde réduit cet impact
+                  La puissance de l'économie circulaire
                 </CardTitle>
                 <CardDescription className="text-center text-base sm:text-lg">
-                  Chaque action compte. Voici comment notre plateforme contribue à un avenir plus durable.
+                  L'intérêt de l'économie circulaire, c'est d'user les vêtements jusqu'au bout de leur cycle de vie
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-10 sm:space-y-12">
-                  {/* Extension of Life */}
+                <div className="space-y-8 sm:space-y-10">
+                  <div className="max-w-4xl mx-auto">
+                    <p className="text-base sm:text-lg text-gris-moyen leading-relaxed mb-8">
+                      Même si un produit a une empreinte environnementale élevée, le fait de l'utiliser jusqu'au bout 
+                      va au final réduire son impact. L'idée n'est pas forcément d'avoir des vêtements qui coûtent peu 
+                      à produire en termes d'environnement, mais plutôt de faire en sorte que tous les vêtements 
+                      aillent au bout de leur cycle de vie.
+                    </p>
+                    
+                    <div className="bg-creme p-6 sm:p-8 rounded-lg border border-noir/10 mb-8">
+                      <h4 className="text-lg sm:text-xl font-semibold mb-4 text-center">
+                        Un levier actionnable et puissant
+                      </h4>
+                      <p className="text-base sm:text-lg text-gris-moyen text-center mb-6">
+                        Si on part du principe que les vêtements sont jetés alors qu'ils ne sont qu'à un quart 
+                        de leur durée de vie, on pourrait réduire <strong>par 4</strong> l'impact environnemental de 
+                        l'ensemble de l'industrie textile et de la mode, simplement en portant plus longtemps 
+                        les vêtements jusqu'au bout de leur vie.
+                      </p>
+                    </div>
+                  </div>
+
                   <div>
                     <h3 className="text-xl sm:text-2xl font-semibold mb-6 text-center">
-                      Prolonger la durée de vie des vêtements
+                      Pourquoi l'économie circulaire est la solution
                     </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6 sm:gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
                       <Card className="border-noir/20">
                         <CardHeader>
                           <CardTitle className="text-xl flex items-center gap-2">
@@ -201,81 +221,88 @@ export default function ImpactPage() {
                     </div>
                   </div>
 
-                  {/* Circular Economy */}
+                  <div className="max-w-4xl mx-auto">
+                    <p className="text-base sm:text-lg text-gris-moyen leading-relaxed mb-8">
+                      Même si un produit a une empreinte environnementale élevée, le fait de l'utiliser jusqu'au bout 
+                      va au final réduire son impact. L'idée n'est pas forcément d'avoir des vêtements qui coûtent peu 
+                      à produire en termes d'environnement, mais plutôt de faire en sorte que tous les vêtements 
+                      aillent au bout de leur cycle de vie.
+                    </p>
+                    
+                    <div className="bg-creme p-6 sm:p-8 rounded-lg border border-noir/10 mb-8">
+                      <h4 className="text-lg sm:text-xl font-semibold mb-4 text-center">
+                        Un levier actionnable et puissant
+                      </h4>
+                      <p className="text-base sm:text-lg text-gris-moyen text-center mb-6">
+                        Si on part du principe que les vêtements sont jetés alors qu'ils ne sont qu'à un quart 
+                        de leur durée de vie, on pourrait réduire <strong>par 4</strong> l'impact environnemental de 
+                        l'ensemble de l'industrie textile et de la mode, simplement en portant plus longtemps 
+                        les vêtements jusqu'au bout de leur vie.
+                      </p>
+                    </div>
+                  </div>
+
                   <div>
-                    <h3 className="text-2xl font-semibold mb-6 text-center">
-                      Favoriser l'économie circulaire
+                    <h3 className="text-xl sm:text-2xl font-semibold mb-6 text-center">
+                      Pourquoi l'économie circulaire est la solution
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
                       <Card className="border-noir/20">
                         <CardHeader>
-                          <CardTitle className="text-xl flex items-center gap-2">
-                            <Leaf className="h-5 w-5" />
-                            Réduction de la production
+                          <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+                            <Recycle className="h-5 w-5" />
+                            Aller au bout du cycle
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-gris-moyen">
-                            Moins de vêtements finissent en décharge, donc moins de vêtements doivent 
-                            être produits. Cela réduit la consommation de ressources naturelles 
-                            (eau, terres agricoles, etc.).
+                          <p className="text-sm sm:text-base text-gris-moyen">
+                            L'économie circulaire permet de maximiser l'utilisation de chaque vêtement, 
+                            évitant ainsi le gaspillage prématuré.
                           </p>
                         </CardContent>
                       </Card>
 
                       <Card className="border-noir/20">
                         <CardHeader>
-                          <CardTitle className="text-xl flex items-center gap-2">
-                            <Globe className="h-5 w-5" />
-                            Réduction des émissions
+                          <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+                            <TrendingDown className="h-5 w-5" />
+                            Réduction des déchets
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-gris-moyen">
-                            En réduisant la production de vêtements neufs, nous diminuons les émissions 
-                            de CO2 associées à leur fabrication et leur transport.
+                          <p className="text-sm sm:text-base text-gris-moyen">
+                            Moins de vêtements jetés = moins de déchets textiles. Chaque année, des millions 
+                            de tonnes de vêtements pourraient être sauvés.
+                          </p>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="border-noir/20">
+                        <CardHeader>
+                          <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+                            <Leaf className="h-5 w-5" />
+                            Optimisation des ressources
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-sm sm:text-base text-gris-moyen">
+                            En utilisant pleinement ce qui existe déjà, nous réduisons le besoin de produire 
+                            de nouveaux vêtements et l'impact qui va avec.
                           </p>
                         </CardContent>
                       </Card>
                     </div>
                   </div>
 
-                  {/* Awareness */}
-                  <div>
-                    <h3 className="text-2xl font-semibold mb-6 text-center">
-                      Sensibiliser et éduquer
+                  <div className="max-w-4xl mx-auto">
+                    <h3 className="text-xl sm:text-2xl font-semibold mb-6 text-center">
+                      Notre rôle chez Seconde
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      <Card className="border-noir/20">
-                        <CardHeader>
-                          <CardTitle className="text-xl flex items-center gap-2">
-                            <Users className="h-5 w-5" />
-                            Changement des mentalités
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-gris-moyen">
-                            En rendant la revente facile et accessible, nous encourageons une consommation 
-                            plus responsable. Les clients prennent conscience de la valeur de leurs vêtements.
-                          </p>
-                        </CardContent>
-                      </Card>
-
-                      <Card className="border-noir/20">
-                        <CardHeader>
-                          <CardTitle className="text-xl flex items-center gap-2">
-                            <Trees className="h-5 w-5" />
-                            Promotion de la durabilité
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-gris-moyen">
-                            Nous mettons en avant les vêtements de qualité qui durent dans le temps, 
-                            encourageant ainsi une mode plus durable.
-                          </p>
-                        </CardContent>
-                      </Card>
-                    </div>
+                    <p className="text-base sm:text-lg text-gris-moyen leading-relaxed text-center">
+                      Chez Seconde, nous facilitons la revente de vos vêtements pour qu'ils trouvent une nouvelle vie 
+                      plutôt que de finir en décharge. C'est notre contribution concrète à l'économie circulaire 
+                      et à la réduction de l'impact environnemental de la mode.
+                    </p>
                   </div>
                 </div>
               </CardContent>
