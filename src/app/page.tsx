@@ -42,45 +42,45 @@ export default function Home() {
               <h1 className="text-5xl md:text-7xl font-700 text-noir mb-8 leading-tight">
                 Seconde
               </h1>
-              <p className="text-xl md:text-2xl text-gris-moyen mb-16 max-w-3xl mx-auto">
+              <p className="text-lg sm:text-xl md:text-2xl text-gris-moyen mb-12 max-w-3xl mx-auto">
                 On vous aide à vendre vos vêtements, donnez-leur une seconde vie !
               </p>
               
               {/* Avantages avec icônes - Style Cezanne */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 md:gap-12 justify-items-center">
+              <div className="grid grid-cols-3 gap-4 md:gap-8 lg:gap-12 justify-items-center max-w-2xl mx-auto">
                 {/* Gain de temps */}
-                <div className="flex flex-col items-center gap-4">
-                  <div className="w-16 h-16 border border-noir rounded-full flex items-center justify-center">
-                    <TrendingUp className="h-8 w-8 text-noir" />
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 border border-noir rounded-full flex items-center justify-center">
+                    <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
                   </div>
-                  <span className="text-base md:text-lg font-500 text-noir tracking-wide text-center">
-                    GAIN DE TEMPS
+                  <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide text-center uppercase">
+                    Gain de temps
                   </span>
                 </div>
                 
                 {/* Gain d'argent */}
-                <div className="flex flex-col items-center gap-4">
-                  <div className="w-16 h-16 border border-noir rounded-full flex items-center justify-center">
-                    <Euro className="h-8 w-8 text-noir" />
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 border border-noir rounded-full flex items-center justify-center">
+                    <Euro className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
                   </div>
-                  <span className="text-base md:text-lg font-500 text-noir tracking-wide text-center">
-                    GAIN D'ARGENT
+                  <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide text-center uppercase">
+                    Gain d'argent
                   </span>
                 </div>
                 
                 {/* Donnez-leur une seconde vie */}
-                <div className="flex flex-col items-center gap-4">
-                  <div className="w-16 h-16 border border-noir rounded-full flex items-center justify-center">
-                    <Leaf className="h-8 w-8 text-noir" />
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 border border-noir rounded-full flex items-center justify-center">
+                    <Leaf className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
                   </div>
-                  <span className="text-base md:text-lg font-500 text-noir tracking-wide text-center">
-                    DONNEZ-LEUR UNE SECONDE VIE
+                  <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide text-center uppercase">
+                    Seconde vie
                   </span>
                 </div>
               </div>
               <Button 
                 onClick={() => scrollToSection(formRef)}
-                className="mt-12 bg-noir hover:bg-gris-fonce text-blanc px-12 py-4 rounded-none text-lg font-500 transition-all duration-300 tracking-widest"
+                className="mt-10 bg-noir hover:bg-gris-fonce text-blanc px-8 sm:px-12 py-3 sm:py-4 rounded-none text-sm sm:text-lg font-500 transition-all duration-300 tracking-widest"
               >
                 DEMANDEZ UN RENDEZ-VOUS
               </Button>
@@ -96,35 +96,35 @@ export default function Home() {
       </section>
 
       {/* Concept Section - Full page - Cezanne Style */}
-      <section className="py-16 md:py-24 bg-blanc scroll-section">
+      <section className="py-12 sm:py-16 md:py-24 bg-blanc scroll-section">
         <div className="container">
           <div className="max-w-6xl mx-auto">
             {/* Main Concept Card */}
-            <Card className="mb-16 shadow-none border-0">
+            <Card className="mb-12 sm:mb-16 shadow-none border-0">
               <CardHeader className="text-center pb-0">
-                <CardTitle className="text-4xl md:text-5xl font-700 text-noir mb-4">
+                <CardTitle className="text-3xl sm:text-4xl md:text-5xl font-700 text-noir mb-4">
                   NOTRE CONCEPT
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="max-w-4xl mx-auto">
-                  <p className="mb-12 text-lg text-gris-moyen leading-relaxed text-center">
+                  <p className="mb-10 sm:mb-12 text-base sm:text-lg text-gris-moyen leading-relaxed text-center">
                     Confiez-nous vos vêtements, on s'occupe du reste !
                   </p>
 
-                  <h3 className="text-2xl md:text-3xl font-600 mb-12 text-noir">
+                  <h3 className="text-xl sm:text-2xl md:text-3xl font-600 mb-10 sm:mb-12 text-noir">
                     POURQUOI CHOISIR SECONDE ?
                   </h3>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                     {/* Benefit 1 */}
-                    <div className="flex items-start gap-6 p-6 border-t border-noir/10">
-                      <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center">
-                        <TrendingUp className="h-8 w-8 text-noir" />
+                    <div className="flex items-start gap-4 p-4 sm:p-6 border-t border-noir/10">
+                      <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+                        <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
                       </div>
                       <div>
-                        <h4 className="font-600 mb-3 text-noir">GAIN DE TEMPS</h4>
-                        <p className="text-sm text-gris-moyen">
+                        <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">GAIN DE TEMPS</h4>
+                        <p className="text-xs sm:text-sm text-gris-moyen">
                           Plus besoin de gérer les annonces, les rendez-vous ou
                           les négociations
                         </p>
@@ -132,26 +132,26 @@ export default function Home() {
                     </div>
 
                     {/* Benefit 2 */}
-                    <div className="flex items-start gap-6 p-6 border-t border-noir/10">
-                      <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center">
-                        <Euro className="h-8 w-8 text-noir" />
+                    <div className="flex items-start gap-4 p-4 sm:p-6 border-t border-noir/10">
+                      <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+                        <Euro className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
                       </div>
                       <div>
-                        <h4 className="font-600 mb-3 text-noir">40% DE COMMISSION</h4>
-                        <p className="text-sm text-gris-moyen">
+                        <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">40% DE COMMISSION</h4>
+                        <p className="text-xs sm:text-sm text-gris-moyen">
                           Vous récupérez 40% du prix de vente de vos articles
                         </p>
                       </div>
                     </div>
 
                     {/* Benefit 3 */}
-                    <div className="flex items-start gap-6 p-6 border-t border-noir/10">
-                      <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center">
-                        <Calendar className="h-8 w-8 text-noir" />
+                    <div className="flex items-start gap-4 p-4 sm:p-6 border-t border-noir/10">
+                      <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+                        <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
                       </div>
                       <div>
-                        <h4 className="font-600 mb-3 text-noir">FLEXIBILITÉ</h4>
-                        <p className="text-sm text-gris-moyen">
+                        <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">FLEXIBILITÉ</h4>
+                        <p className="text-xs sm:text-sm text-gris-moyen">
                           Choisissez le moment qui vous convient pour les
                           rendez-vous
                         </p>
@@ -159,13 +159,13 @@ export default function Home() {
                     </div>
 
                     {/* Benefit 4 */}
-                    <div className="flex items-start gap-6 p-6 border-t border-noir/10">
-                      <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center">
-                        <Check className="h-8 w-8 text-noir" />
+                    <div className="flex items-start gap-4 p-4 sm:p-6 border-t border-noir/10">
+                      <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+                        <Check className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
                       </div>
                       <div>
-                        <h4 className="font-600 mb-3 text-noir">SERVICE CLÉ EN MAIN</h4>
-                        <p className="text-sm text-gris-moyen">
+                        <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">SERVICE CLÉ EN MAIN</h4>
+                        <p className="text-xs sm:text-sm text-gris-moyen">
                           Nous nous occupons de tout : récupération, photographie,
                           mise en ligne et vente
                         </p>
@@ -173,13 +173,13 @@ export default function Home() {
                     </div>
 
                     {/* Benefit 5 */}
-                    <div className="flex items-start gap-6 p-6 border-t border-noir/10">
-                      <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center">
-                        <Sparkles className="h-8 w-8 text-noir" />
+                    <div className="flex items-start gap-4 p-4 sm:p-6 border-t border-noir/10">
+                      <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+                        <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
                       </div>
                       <div>
-                        <h4 className="font-600 mb-3 text-noir">SÉCURITÉ</h4>
-                        <p className="text-sm text-gris-moyen">
+                        <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">SÉCURITÉ</h4>
+                        <p className="text-xs sm:text-sm text-gris-moyen">
                           Transactions sécurisées et suivi transparent de vos
                           ventes
                         </p>
@@ -187,13 +187,13 @@ export default function Home() {
                     </div>
 
                     {/* Benefit 6 */}
-                    <div className="flex items-start gap-6 p-6 border-t border-noir/10">
-                      <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center">
-                        <Heart className="h-8 w-8 text-noir" />
+                    <div className="flex items-start gap-4 p-4 sm:p-6 border-t border-noir/10">
+                      <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+                        <Heart className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
                       </div>
                       <div>
-                        <h4 className="font-600 mb-3 text-noir">DURABILITÉ</h4>
-                        <p className="text-sm text-gris-moyen">
+                        <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">DURABILITÉ</h4>
+                        <p className="text-xs sm:text-sm text-gris-moyen">
                           En donnant une seconde vie à vos vêtements, vous
                           contribuez à une mode plus durable et responsable
                         </p>
@@ -216,74 +216,74 @@ export default function Home() {
       {/* How It Works Section - Full page - Cezanne Style */}
       <section 
         ref={howItWorksRef}
-        className="py-16 md:py-24 bg-creme scroll-section"
+        className="py-12 sm:py-16 md:py-24 bg-creme scroll-section"
       >
         <div className="container">
           <div className="max-w-6xl mx-auto">
             <Card className="shadow-none border-0">
               <CardHeader className="text-center pb-0">
-                <CardTitle className="text-4xl md:text-5xl font-700 text-noir mb-8">
+                <CardTitle className="text-3xl sm:text-4xl md:text-5xl font-700 text-noir mb-6 sm:mb-8">
                   COMMENT ÇA FONCTIONNE ?
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="max-w-4xl mx-auto space-y-10">
-                  <div className="flex gap-6">
-                    <div className="flex-shrink-0 w-12 h-12 bg-noir text-blanc rounded-full flex items-center justify-center font-700">
+                <div className="max-w-4xl mx-auto space-y-8 sm:space-y-10">
+                  <div className="flex gap-4 sm:gap-6">
+                    <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-noir text-blanc rounded-full flex items-center justify-center font-600 sm:font-700 text-sm sm:text-base">
                       1
                     </div>
                     <div>
-                      <h4 className="font-600 mb-3 text-noir">ESTIMATION EN LIGNE</h4>
-                      <p className="text-gris-moyen">
+                      <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">ESTIMATION EN LIGNE</h4>
+                      <p className="text-xs sm:text-sm text-gris-moyen">
                         Remplissez notre formulaire pour obtenir une estimation personnalisée
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex gap-6">
-                    <div className="flex-shrink-0 w-12 h-12 bg-noir text-blanc rounded-full flex items-center justify-center font-700">
+                  <div className="flex gap-4 sm:gap-6">
+                    <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-noir text-blanc rounded-full flex items-center justify-center font-600 sm:font-700 text-sm sm:text-base">
                       2
                     </div>
                     <div>
-                      <h4 className="font-600 mb-3 text-noir">CONTACT RAPIDE</h4>
-                      <p className="text-gris-moyen">
+                      <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">CONTACT RAPIDE</h4>
+                      <p className="text-xs sm:text-sm text-gris-moyen">
                         Nous vous contactons sous 24h pour organiser un rendez-vous
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex gap-6">
-                    <div className="flex-shrink-0 w-12 h-12 bg-noir text-blanc rounded-full flex items-center justify-center font-700">
+                  <div className="flex gap-4 sm:gap-6">
+                    <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-noir text-blanc rounded-full flex items-center justify-center font-600 sm:font-700 text-sm sm:text-base">
                       3
                     </div>
                     <div>
-                      <h4 className="font-600 mb-3 text-noir">RÉCUPÉRATION À DOMICILE</h4>
-                      <p className="text-gris-moyen">
+                      <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">RÉCUPÉRATION À DOMICILE</h4>
+                      <p className="text-xs sm:text-sm text-gris-moyen">
                         Nous venons récupérer vos vêtements directement chez vous
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex gap-6">
-                    <div className="flex-shrink-0 w-12 h-12 bg-noir text-blanc rounded-full flex items-center justify-center font-700">
+                  <div className="flex gap-4 sm:gap-6">
+                    <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-noir text-blanc rounded-full flex items-center justify-center font-600 sm:font-700 text-sm sm:text-base">
                       4
                     </div>
                     <div>
-                      <h4 className="font-600 mb-3 text-noir">MISE EN VENTE</h4>
-                      <p className="text-gris-moyen">
+                      <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">MISE EN VENTE</h4>
+                      <p className="text-xs sm:text-sm text-gris-moyen">
                         Vos vêtements sont photographiés, décrits et mis en
                         ligne sur nos plateformes partenaires
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex gap-6">
-                    <div className="flex-shrink-0 w-12 h-12 bg-noir text-blanc rounded-full flex items-center justify-center font-700">
+                  <div className="flex gap-4 sm:gap-6">
+                    <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-noir text-blanc rounded-full flex items-center justify-center font-600 sm:font-700 text-sm sm:text-base">
                       5
                     </div>
                     <div>
-                      <h4 className="font-600 mb-3 text-noir">PAIEMENT</h4>
-                      <p className="text-gris-moyen">
+                      <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">PAIEMENT</h4>
+                      <p className="text-xs sm:text-sm text-gris-moyen">
                         Recevez votre paiement directement sur votre compte bancaire après la vente
                       </p>
                     </div>
@@ -305,12 +305,12 @@ export default function Home() {
       <section 
         ref={formRef}
         id="estimation-form"
-        className="py-16 md:py-24 bg-blanc scroll-section"
+        className="py-12 sm:py-16 md:py-24 bg-blanc scroll-section"
       >
         <div className="container">
           <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-700 mb-6 text-noir">
+            <div className="text-center mb-12 sm:mb-16">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-700 mb-4 sm:mb-6 text-noir">
                 DEMANDEZ UN RENDEZ-VOUS
               </h2>
             </div>

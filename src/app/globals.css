@@ -232,24 +232,63 @@
 
   @media (max-width: 768px) {
     .section-spacing {
-      padding: 60px 0;
+      padding: 40px 0;
     }
     
     h1 {
-      font-size: 36px;
+      font-size: 32px;
     }
     
     h2 {
-      font-size: 28px;
-    }
-    
-    h3 {
       font-size: 24px;
     }
     
+    h3 {
+      font-size: 20px;
+    }
+    
+    h4 {
+      font-size: 18px;
+    }
+    
     body {
-      font-size: 16px;
-      line-height: 1.7;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    
+    p {
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    
+    .text-xl {
+      font-size: 18px !important;
+    }
+    
+    .text-2xl {
+      font-size: 20px !important;
+    }
+  }
+  
+  @media (max-width: 640px) {
+    h1 {
+      font-size: 28px;
+    }
+    
+    h2 {
+      font-size: 22px;
+    }
+    
+    h3 {
+      font-size: 18px;
+    }
+    
+    .text-xl {
+      font-size: 16px !important;
+    }
+    
+    .text-2xl {
+      font-size: 18px !important;
     }
   }
 }

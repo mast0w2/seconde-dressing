@@ -9,18 +9,18 @@ export default function ConceptPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-beige to-creme py-20">
+      <section className="relative bg-gradient-to-br from-beige to-creme py-16 sm:py-20">
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 border-2 border-noir rounded-full flex items-center justify-center">
-                <Recycle className="h-8 w-8 text-noir" />
+            <div className="flex justify-center mb-4 sm:mb-6">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 border-2 border-noir rounded-full flex items-center justify-center">
+                <Recycle className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
               </div>
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-noir">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6 text-noir">
               Notre Concept
             </h1>
-            <p className="text-xl text-gris-moyen mb-8 max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl text-gris-moyen mb-6 sm:mb-8 max-w-3xl mx-auto">
               Chez Seconde, nous croyons en une mode plus durable et accessible. 
               Découvrez comment on vous aide à vider votre dressing.
             </p>
@@ -29,48 +29,48 @@ export default function ConceptPage() {
       </section>
 
       {/* Service Levels Section */}
-      <section className="py-16">
+      <section className="py-12 sm:py-16">
         <div className="container">
           <div className="max-w-6xl mx-auto">
-            <Card className="mb-12">
+            <Card className="mb-10 sm:mb-12">
               <CardHeader>
-                <CardTitle className="text-3xl font-bold text-center">
+                <CardTitle className="text-2xl sm:text-3xl font-bold text-center">
                   Un service unique pour vendre vos vêtements
                 </CardTitle>
-                <CardDescription className="text-center text-lg">
+                <CardDescription className="text-center text-base sm:text-lg">
                   Confiez vos vêtements de valeur à nos Dressing Angels pour une vente optimisée.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-1 gap-8 mt-8">
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-6 sm:gap-8 mt-6 sm:mt-8">
                   {/* Single Service */}
-                  <div className="border border-noir/20 p-8 rounded-lg">
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="w-12 h-12 bg-noir/10 rounded-full flex items-center justify-center">
-                        <Users className="h-6 w-6 text-noir" />
+                  <div className="border border-noir/20 p-6 sm:p-8 rounded-lg">
+                    <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-noir/10 rounded-full flex items-center justify-center">
+                        <Users className="h-5 w-5 sm:h-6 sm:w-6 text-noir" />
                       </div>
-                      <h3 className="text-2xl font-bold text-noir">Service complet de vente</h3>
+                      <h3 className="text-xl sm:text-2xl font-bold text-noir">Service complet de vente</h3>
                     </div>
-                    <p className="text-gris-moyen mb-6">
+                    <p className="text-sm sm:text-base text-gris-moyen mb-4 sm:mb-6">
                       Vous confiez vos vêtements valant plus de 20€ à une Dressing Angel. Elle s'occupe de tout : 
                       photographie, mise en ligne et vente. Vous recevez votre paiement dans les 60 jours au plus tard.
                     </p>
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3">
+                    <div className="space-y-3 sm:space-y-4">
+                      <div className="flex items-center gap-2 sm:gap-3">
                         <span className="text-primary">✓</span>
-                        <span className="text-gris-moyen">Vos vêtements doivent valoir plus de 20€</span>
+                        <span className="text-xs sm:text-sm text-gris-moyen">Vos vêtements doivent valoir plus de 20€</span>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 sm:gap-3">
                         <span className="text-primary">✓</span>
-                        <span className="text-gris-moyen">La Dressing Angel gère tout le processus de vente</span>
+                        <span className="text-xs sm:text-sm text-gris-moyen">La Dressing Angel gère tout le processus de vente</span>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 sm:gap-3">
                         <span className="text-primary">✓</span>
-                        <span className="text-gris-moyen">Paiement sous 60 jours maximum</span>
+                        <span className="text-xs sm:text-sm text-gris-moyen">Paiement sous 60 jours maximum</span>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 sm:gap-3">
                         <span className="text-primary">✓</span>
-                        <span className="text-gris-moyen">40% de commission sur chaque vente</span>
+                        <span className="text-xs sm:text-sm text-gris-moyen">40% de commission sur chaque vente</span>
                       </div>
                     </div>
                   </div>
@@ -82,28 +82,28 @@ export default function ConceptPage() {
       </section>
 
       {/* Business Model Section */}
-      <section className="py-16 bg-gris-tres-clair">
+      <section className="py-12 sm:py-16 bg-gris-tres-clair">
         <div className="container">
           <div className="max-w-6xl mx-auto">
             <Card>
               <CardHeader>
-                <CardTitle className="text-3xl font-bold text-center">
+                <CardTitle className="text-2xl sm:text-3xl font-bold text-center">
                   Un business model transparent et équitable
                 </CardTitle>
-                <CardDescription className="text-center text-lg">
+                <CardDescription className="text-center text-base sm:text-lg">
                   Nous croyons que la transparence est la clé de la confiance. 
                   Voici comment la valeur est répartie.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-12">
+                <div className="space-y-10 sm:space-y-12">
                   {/* Value Distribution */}
                   <div className="text-center">
-                    <h3 className="text-2xl font-semibold mb-8">Répartition des revenus</h3>
-                    <div className="flex flex-col md:flex-row items-center justify-center gap-8">
+                    <h3 className="text-xl sm:text-2xl font-semibold mb-6 sm:mb-8">Répartition des revenus</h3>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8">
                       <div className="flex flex-col items-center">
-                        <div className="relative w-32 h-32 mb-4">
-                          <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 36 36">
+                        <div className="relative w-24 h-24 sm:w-32 sm:h-32 mb-3 sm:mb-4">
+                          <svg className="w-24 h-24 sm:w-32 sm:h-32 transform -rotate-90" viewBox="0 0 36 36">
                             <path
                               d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                               fill="none"
@@ -120,18 +120,18 @@ export default function ConceptPage() {
                             />
                           </svg>
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-2xl font-bold">40%</span>
+                            <span className="text-xl sm:text-2xl font-bold">40%</span>
                           </div>
                         </div>
-                        <p className="font-semibold text-noir">Client</p>
-                        <p className="text-sm text-gris-moyen max-w-xs">
+                        <p className="font-semibold text-sm sm:text-base text-noir">Client</p>
+                        <p className="text-xs sm:text-sm text-gris-moyen max-w-xs">
                           Vous récupérez 40% du montant de la vente sans faire d'effort.
                         </p>
                       </div>
 
                       <div className="flex flex-col items-center">
-                        <div className="relative w-32 h-32 mb-4">
-                          <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 36 36">
+                        <div className="relative w-24 h-24 sm:w-32 sm:h-32 mb-3 sm:mb-4">
+                          <svg className="w-24 h-24 sm:w-32 sm:h-32 transform -rotate-90" viewBox="0 0 36 36">
                             <path
                               d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                               fill="none"
@@ -149,18 +149,18 @@ export default function ConceptPage() {
                             />
                           </svg>
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-2xl font-bold">40%</span>
+                            <span className="text-xl sm:text-2xl font-bold">40%</span>
                           </div>
                         </div>
-                        <p className="font-semibold text-noir">Dressing Angel</p>
-                        <p className="text-sm text-gris-moyen max-w-xs">
+                        <p className="font-semibold text-sm sm:text-base text-noir">Dressing Angel</p>
+                        <p className="text-xs sm:text-sm text-gris-moyen max-w-xs">
                           La vendeuse professionnelle reçoit 40% pour son expertise et son travail.
                         </p>
                       </div>
 
                       <div className="flex flex-col items-center">
-                        <div className="relative w-32 h-32 mb-4">
-                          <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 36 36">
+                        <div className="relative w-24 h-24 sm:w-32 sm:h-32 mb-3 sm:mb-4">
+                          <svg className="w-24 h-24 sm:w-32 sm:h-32 transform -rotate-90" viewBox="0 0 36 36">
                             <path
                               d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                               fill="none"
@@ -178,11 +178,11 @@ export default function ConceptPage() {
                             />
                           </svg>
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-2xl font-bold">20%</span>
+                            <span className="text-xl sm:text-2xl font-bold">20%</span>
                           </div>
                         </div>
-                        <p className="font-semibold text-noir">Plateforme</p>
-                        <p className="text-sm text-gris-moyen max-w-xs">
+                        <p className="font-semibold text-sm sm:text-base text-noir">Plateforme</p>
+                        <p className="text-xs sm:text-sm text-gris-moyen max-w-xs">
                           20% pour la plateforme afin de rémunérer les développeurs et gérer les litiges.
                         </p>
                       </div>
@@ -191,8 +191,8 @@ export default function ConceptPage() {
 
                   {/* Why This Model */}
                   <div>
-                    <h3 className="text-2xl font-semibold mb-6 text-center">Pourquoi ce modèle ?</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <h3 className="text-xl sm:text-2xl font-semibold mb-6 text-center">Pourquoi ce modèle ?</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6 sm:gap-8">
                       <Card className="border-noir/20">
                         <CardHeader>
                           <CardTitle className="text-xl flex items-center gap-2">

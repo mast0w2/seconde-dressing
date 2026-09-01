@@ -10,7 +10,7 @@ export default function ImpactPage() {
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
       <section 
-        className="relative py-20 md:py-32 bg-creme"
+        className="relative py-16 sm:py-20 md:py-32 bg-creme"
         style={{
           backgroundImage: "url('/textile.png')",
           backgroundSize: "cover",
@@ -20,15 +20,15 @@ export default function ImpactPage() {
         <div className="absolute inset-0 bg-creme/70 backdrop-blur-sm"></div>
         <div className="container relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 border-2 border-noir rounded-full flex items-center justify-center bg-blanc/80">
-                <Globe className="h-8 w-8 text-noir" />
+            <div className="flex justify-center mb-4 sm:mb-6">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 border-2 border-noir rounded-full flex items-center justify-center bg-blanc/80">
+                <Globe className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
               </div>
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-noir">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6 text-noir">
               Notre Impact Environnemental
             </h1>
-            <p className="text-xl text-gris-moyen mb-8 max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl text-gris-moyen mb-6 sm:mb-8 max-w-3xl mx-auto">
               L'industrie textile est l'une des plus polluantes au monde. 
               Découvrez comment vous pouvez contribuer à réduire cet impact.
             </p>
@@ -37,95 +37,95 @@ export default function ImpactPage() {
       </section>
 
       {/* Industry Facts Section */}
-      <section className="py-16">
+      <section className="py-12 sm:py-16">
         <div className="container">
           <div className="max-w-6xl mx-auto">
-            <Card className="mb-12">
+            <Card className="mb-10 sm:mb-12">
               <CardHeader>
-                <CardTitle className="text-3xl font-bold text-center">
+                <CardTitle className="text-2xl sm:text-3xl font-bold text-center">
                   L'impact de l'industrie textile
                 </CardTitle>
-                <CardDescription className="text-center text-lg">
+                <CardDescription className="text-center text-base sm:text-lg">
                   Quelques chiffres qui montrent l'urgence d'agir
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                   {/* Fact 1 */}
-                  <div className="text-center border border-noir/20 p-8 rounded-lg">
-                    <div className="text-5xl font-bold mb-4 text-noir">10%</div>
-                    <p className="font-semibold mb-2">des émissions mondiales de CO2</p>
-                    <p className="text-sm text-gris-moyen">
+                  <div className="text-center border border-noir/20 p-6 sm:p-8 rounded-lg">
+                    <div className="text-4xl sm:text-5xl font-bold mb-3 sm:mb-4 text-noir">10%</div>
+                    <p className="font-semibold mb-2 text-sm sm:text-base">des émissions mondiales de CO2</p>
+                    <p className="text-xs sm:text-sm text-gris-moyen">
                       L'industrie textile est responsable de 10% des émissions mondiales de CO2, 
                       soit plus que les vols internationaux et le transport maritime réunis.
                     </p>
-                    <div className="mt-4">
-                      <Factory className="h-8 w-8 text-noir mx-auto" />
+                    <div className="mt-3 sm:mt-4">
+                      <Factory className="h-6 w-6 sm:h-8 sm:w-8 text-noir mx-auto" />
                     </div>
                   </div>
 
                   {/* Fact 2 */}
-                  <div className="text-center border border-noir/20 p-8 rounded-lg">
-                    <div className="text-5xl font-bold mb-4 text-noir">20%</div>
-                    <p className="font-semibold mb-2">des eaux usées industrielles</p>
-                    <p className="text-sm text-gris-moyen">
+                  <div className="text-center border border-noir/20 p-6 sm:p-8 rounded-lg">
+                    <div className="text-4xl sm:text-5xl font-bold mb-3 sm:mb-4 text-noir">20%</div>
+                    <p className="font-semibold mb-2 text-sm sm:text-base">des eaux usées industrielles</p>
+                    <p className="text-xs sm:text-sm text-gris-moyen">
                       La production textile représente 20% des eaux usées industrielles dans le monde. 
                       La teinture des vêtements est particulièrement polluante.
                     </p>
-                    <div className="mt-4">
-                      <Droplets className="h-8 w-8 text-noir mx-auto" />
+                    <div className="mt-3 sm:mt-4">
+                      <Droplets className="h-6 w-6 sm:h-8 sm:w-8 text-noir mx-auto" />
                     </div>
                   </div>
 
                   {/* Fact 3 */}
-                  <div className="text-center border border-noir/20 p-8 rounded-lg">
-                    <div className="text-5xl font-bold mb-4 text-noir">300M</div>
-                    <p className="font-semibold mb-2">de tonnes de CO2 par an</p>
-                    <p className="text-sm text-gris-moyen">
+                  <div className="text-center border border-noir/20 p-6 sm:p-8 rounded-lg">
+                    <div className="text-4xl sm:text-5xl font-bold mb-3 sm:mb-4 text-noir">300M</div>
+                    <p className="font-semibold mb-2 text-sm sm:text-base">de tonnes de CO2 par an</p>
+                    <p className="text-xs sm:text-sm text-gris-moyen">
                       L'industrie de la mode émet environ 300 millions de tonnes de CO2 chaque année, 
                       soit l'équivalent des émissions annuelles de la France.
                     </p>
-                    <div className="mt-4">
-                      <TrendingDown className="h-8 w-8 text-noir mx-auto" />
+                    <div className="mt-3 sm:mt-4">
+                      <TrendingDown className="h-6 w-6 sm:h-8 sm:w-8 text-noir mx-auto" />
                     </div>
                   </div>
 
                   {/* Fact 4 */}
-                  <div className="text-center border border-noir/20 p-8 rounded-lg">
-                    <div className="text-5xl font-bold mb-4 text-noir">70%</div>
-                    <p className="font-semibold mb-2">des vêtements finissent en décharge</p>
-                    <p className="text-sm text-gris-moyen">
+                  <div className="text-center border border-noir/20 p-6 sm:p-8 rounded-lg">
+                    <div className="text-4xl sm:text-5xl font-bold mb-3 sm:mb-4 text-noir">70%</div>
+                    <p className="font-semibold mb-2 text-sm sm:text-base">des vêtements finissent en décharge</p>
+                    <p className="text-xs sm:text-sm text-gris-moyen">
                       70% des vêtements produits finissent en décharge ou sont incinérés. 
                       Moins de 1% des vêtements sont recyclés en nouveaux vêtements.
                     </p>
-                    <div className="mt-4">
-                      <Recycle className="h-8 w-8 text-noir mx-auto" />
+                    <div className="mt-3 sm:mt-4">
+                      <Recycle className="h-6 w-6 sm:h-8 sm:w-8 text-noir mx-auto" />
                     </div>
                   </div>
 
                   {/* Fact 5 */}
-                  <div className="text-center border border-noir/20 p-8 rounded-lg">
-                    <div className="text-5xl font-bold mb-4 text-noir">2.7K</div>
-                    <p className="font-semibold mb-2">litres d'eau par t-shirt</p>
-                    <p className="text-sm text-gris-moyen">
+                  <div className="text-center border border-noir/20 p-6 sm:p-8 rounded-lg">
+                    <div className="text-4xl sm:text-5xl font-bold mb-3 sm:mb-4 text-noir">2.7K</div>
+                    <p className="font-semibold mb-2 text-sm sm:text-base">litres d'eau par t-shirt</p>
+                    <p className="text-xs sm:text-sm text-gris-moyen">
                       Il faut environ 2 700 litres d'eau pour produire un seul t-shirt en coton, 
                       soit assez pour qu'une personne boive pendant 2,5 ans.
                     </p>
-                    <div className="mt-4">
-                      <Trees className="h-8 w-8 text-noir mx-auto" />
+                    <div className="mt-3 sm:mt-4">
+                      <Trees className="h-6 w-6 sm:h-8 sm:w-8 text-noir mx-auto" />
                     </div>
                   </div>
 
                   {/* Fact 6 */}
-                  <div className="text-center border border-noir/20 p-8 rounded-lg">
-                    <div className="text-5xl font-bold mb-4 text-noir">50%</div>
-                    <p className="font-semibold mb-2">de microplastiques dans les océans</p>
-                    <p className="text-sm text-gris-moyen">
+                  <div className="text-center border border-noir/20 p-6 sm:p-8 rounded-lg">
+                    <div className="text-4xl sm:text-5xl font-bold mb-3 sm:mb-4 text-noir">50%</div>
+                    <p className="font-semibold mb-2 text-sm sm:text-base">de microplastiques dans les océans</p>
+                    <p className="text-xs sm:text-sm text-gris-moyen">
                       Le lavage des vêtements synthétiques libère des microplastiques qui représentent 
                       50% de la pollution microplastique des océans.
                     </p>
-                    <div className="mt-4">
-                      <Globe className="h-8 w-8 text-noir mx-auto" />
+                    <div className="mt-3 sm:mt-4">
+                      <Globe className="h-6 w-6 sm:h-8 sm:w-8 text-noir mx-auto" />
                     </div>
                   </div>
                 </div>
@@ -136,26 +136,26 @@ export default function ImpactPage() {
       </section>
 
       {/* Our Impact Section */}
-      <section className="py-16 bg-gris-tres-clair">
+      <section className="py-12 sm:py-16 bg-gris-tres-clair">
         <div className="container">
           <div className="max-w-6xl mx-auto">
             <Card>
               <CardHeader>
-                <CardTitle className="text-3xl font-bold text-center">
+                <CardTitle className="text-2xl sm:text-3xl font-bold text-center">
                   Comment Seconde réduit cet impact
                 </CardTitle>
-                <CardDescription className="text-center text-lg">
+                <CardDescription className="text-center text-base sm:text-lg">
                   Chaque action compte. Voici comment notre plateforme contribue à un avenir plus durable.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-12">
+                <div className="space-y-10 sm:space-y-12">
                   {/* Extension of Life */}
                   <div>
-                    <h3 className="text-2xl font-semibold mb-6 text-center">
+                    <h3 className="text-xl sm:text-2xl font-semibold mb-6 text-center">
                       Prolonger la durée de vie des vêtements
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6 sm:gap-8">
                       <Card className="border-noir/20">
                         <CardHeader>
                           <CardTitle className="text-xl flex items-center gap-2">
