@@ -69,68 +69,28 @@ export function Navbar() {
   return (
     <nav className="sticky top-0 z-50 w-full bg-blanc/95 backdrop-blur border-b border-noir/10">
       <div className="container flex h-16 max-w-screen-2xl items-center">
-        <div className="flex items-center gap-6">
+        {/* Menu hamburger - extrême gauche sur mobile */}
+        <button
+          className="md:hidden p-2 rounded-md border border-noir/10 hover:bg-noir/5 transition-colors"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          aria-label="Toggle menu"
+          aria-expanded={isMenuOpen}
+        >
+          {isMenuOpen ? <X className="h-5 w-5 sm:h-6 sm:w-6 text-noir" /> : <Menu className="h-5 w-5 sm:h-6 sm:w-6 text-noir" />}
+        </button>
+
+        {/* Logo SECONDE - centré */}
+        <div className="flex-1 flex justify-center">
           <Link href="/" className="flex items-center gap-3">
             <div className="w-8 h-8 border border-noir rounded-full flex items-center justify-center">
               <Leaf className="h-4 w-4 text-noir" />
             </div>
             <span className="text-xl font-bold text-noir tracking-wide">SECONDE</span>
           </Link>
-
-          <div className="hidden md:flex md:gap-8">
-            <Link
-              href="/"
-              className={`text-sm font-medium transition-colors hover:text-noir ${
-                pathname === "/" ? "text-noir" : "text-gris-moyen"
-              }`}
-            >
-              ACCUEIL
-            </Link>
-            <Link
-              href="/concept"
-              className={`text-sm font-medium transition-colors hover:text-noir ${
-                pathname === "/concept" ? "text-noir" : "text-gris-moyen"
-              }`}
-            >
-              NOTRE CONCEPT
-            </Link>
-            <Link
-              href="/impact"
-              className={`text-sm font-medium transition-colors hover:text-noir ${
-                pathname === "/impact" ? "text-noir" : "text-gris-moyen"
-              }`}
-            >
-              NOTRE IMPACT
-            </Link>
-            <Link
-              href="/reviews"
-              className={`text-sm font-medium transition-colors hover:text-noir ${
-                pathname === "/reviews" ? "text-noir" : "text-gris-moyen"
-              }`}
-            >
-              AVIS CLIENTS
-            </Link>
-            <Link
-              href="/contact"
-              className={`text-sm font-medium transition-colors hover:text-noir ${
-                pathname === "/contact" ? "text-noir" : "text-gris-moyen"
-              }`}
-            >
-              CONTACT
-            </Link>
-          </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-4">
-          <button
-            className="md:hidden p-2 rounded-md border border-noir/10 hover:bg-noir/5 transition-colors"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Toggle menu"
-            aria-expanded={isMenuOpen}
-          >
-            {isMenuOpen ? <X className="h-5 w-5 sm:h-6 sm:w-6 text-noir" /> : <Menu className="h-5 w-5 sm:h-6 sm:w-6 text-noir" />}
-          </button>
-          
+        {/* Icône de connexion - extrême droite */}
+        <div className="flex items-center">
           {user ? (
             <>
               <DropdownMenu>

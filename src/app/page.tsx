@@ -47,43 +47,43 @@ export default function Home() {
               </p>
               
               {/* Avantages avec icônes - Style Cezanne */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-8 lg:gap-12 justify-items-center max-w-3xl mx-auto">
+              <div className="flex flex-wrap justify-center gap-3 sm:gap-4 md:gap-8 max-w-3xl mx-auto">
                 {/* Videz votre dressing */}
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 border border-noir rounded-full flex items-center justify-center">
-                    <Leaf className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
+                <div className="flex flex-col items-center gap-1 sm:gap-2">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 border border-noir rounded-full flex items-center justify-center">
+                    <Leaf className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-noir" />
                   </div>
-                  <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide text-center uppercase">
+                  <span className="text-xs sm:text-xs md:text-sm font-500 text-noir tracking-wide text-center uppercase">
                     Videz votre dressing
                   </span>
                 </div>
                 
                 {/* Sans effort */}
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 border border-noir rounded-full flex items-center justify-center">
-                    <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
+                <div className="flex flex-col items-center gap-1 sm:gap-2">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 border border-noir rounded-full flex items-center justify-center">
+                    <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-noir" />
                   </div>
-                  <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide text-center uppercase">
+                  <span className="text-xs sm:text-xs md:text-sm font-500 text-noir tracking-wide text-center uppercase">
                     Sans effort
                   </span>
                 </div>
                 
                 {/* En gagnant de l'argent */}
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 border border-noir rounded-full flex items-center justify-center">
-                    <Euro className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
+                <div className="flex flex-col items-center gap-1 sm:gap-2">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 border border-noir rounded-full flex items-center justify-center">
+                    <Euro className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-noir" />
                   </div>
-                  <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide text-center uppercase">
+                  <span className="text-xs sm:text-xs md:text-sm font-500 text-noir tracking-wide text-center uppercase">
                     En gagnant de l'argent
                   </span>
                 </div>
                 
                 {/* Grâce à l'économie circulaire */}
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 border border-noir rounded-full flex items-center justify-center">
-                    <Recycle className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
+                <div className="flex flex-col items-center gap-1 sm:gap-2">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 border border-noir rounded-full flex items-center justify-center">
+                    <Recycle className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-noir" />
                   </div>
-                  <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide text-center uppercase">
+                  <span className="text-xs sm:text-xs md:text-sm font-500 text-noir tracking-wide text-center uppercase">
                     Grâce à l'économie circulaire
                   </span>
                 </div>
