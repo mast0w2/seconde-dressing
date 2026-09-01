@@ -47,27 +47,14 @@ export default function Home() {
               </p>
               
               {/* Avantages avec icônes - Style Cezanne */}
-              <div className="w-full max-w-4xl mx-auto">
-                {/* Ligne des icônes */}
-                <div className="flex justify-center gap-2 sm:gap-4 md:gap-6">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 border border-noir rounded-full flex items-center justify-center flex-shrink-0">
-                    <Leaf className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-noir" />
-                  </div>
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 border border-noir rounded-full flex items-center justify-center flex-shrink-0">
-                    <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-noir" />
-                  </div>
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 border border-noir rounded-full flex items-center justify-center flex-shrink-0">
-                    <Euro className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-noir" />
-                  </div>
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 border border-noir rounded-full flex items-center justify-center flex-shrink-0">
-                    <Recycle className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-noir" />
-                  </div>
-                </div>
-                
-                {/* Ligne du texte */}
-                <p className="text-center text-xs sm:text-sm md:text-base mt-3 sm:mt-4 tracking-wide font-500 text-noir">
-                  Videz votre dressing sans effort en gagnant de l&apos;argent grâce à l&apos;économie circulaire
-                </p>
+              <div className="w-full max-w-4xl mx-auto flex justify-center items-center gap-1 sm:gap-2 md:gap-3 flex-wrap">
+                <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide whitespace-nowrap">Videz votre dressing</span>
+                <span className="text-noir text-sm sm:text-base md:text-lg font-light mx-1">•</span>
+                <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide whitespace-nowrap">sans effort</span>
+                <span className="text-noir text-sm sm:text-base md:text-lg font-light mx-1">•</span>
+                <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide whitespace-nowrap">en gagnant de l&apos;argent</span>
+                <span className="text-noir text-sm sm:text-base md:text-lg font-light mx-1">•</span>
+                <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide whitespace-nowrap">grâce à l&apos;économie circulaire</span>
               </div>
               <Button 
                 onClick={() => scrollToSection(formRef)}
