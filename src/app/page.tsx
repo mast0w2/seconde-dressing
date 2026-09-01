@@ -46,20 +46,27 @@ export default function Home() {
                 On vous aide à vendre vos vêtements, donnez-leur une seconde vie !
               </p>
               
-              {/* Avantages avec badges groupés - Variante D */}
-              <div className="w-full max-w-4xl mx-auto text-center space-y-3">
+              {/* Avantages avec hiérarchie - Variante A */}
+              <div className="w-full max-w-4xl mx-auto text-center space-y-2 sm:space-y-3">
+                {/* Titre principal */}
                 <h3 className="text-lg sm:text-xl md:text-2xl font-600 text-noir tracking-wide">
                   Videz votre dressing
                 </h3>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {["sans effort", "en gagnant de l'argent", "grâce à l'économie circulaire"].map((text, index) => (
-                    <span
-                      key={index}
-                      className="bg-gris-clair/30 px-3 py-1 sm:px-4 sm:py-2 rounded-full text-sm sm:text-base font-400 text-noir whitespace-nowrap"
-                    >
-                      {text}
-                    </span>
-                  ))}
+                
+                {/* Sous-éléments alignés */}
+                <div className="flex flex-wrap justify-center gap-1 sm:gap-2">
+                  <span className="text-noir/60">•</span>
+                  <span className="text-base sm:text-lg font-400 text-noir whitespace-nowrap">
+                    sans effort
+                  </span>
+                  <span className="text-noir/60 mx-1">•</span>
+                  <span className="text-base sm:text-lg font-400 text-noir whitespace-nowrap">
+                    en gagnant de l&apos;argent
+                  </span>
+                  <span className="text-noir/60 mx-1">•</span>
+                  <span className="text-base sm:text-lg font-400 text-noir whitespace-nowrap">
+                    grâce à l&apos;économie circulaire
+                  </span>
                 </div>
               </div>
               <Button 
