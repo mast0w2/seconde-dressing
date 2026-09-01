@@ -47,55 +47,27 @@ export default function Home() {
               </p>
               
               {/* Avantages avec icônes - Style Cezanne */}
-              <div className="flex justify-center items-center gap-2 sm:gap-4 md:gap-6 max-w-4xl mx-auto flex-wrap">
-                {/* Videz votre dressing */}
-                <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="w-full max-w-4xl mx-auto">
+                {/* Ligne des icônes */}
+                <div className="flex justify-center gap-2 sm:gap-4 md:gap-6">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 border border-noir rounded-full flex items-center justify-center flex-shrink-0">
                     <Leaf className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-noir" />
                   </div>
-                  <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide whitespace-nowrap">
-                    Videz votre dressing
-                  </span>
-                </div>
-                
-                {/* Separator */}
-                <span className="text-noir text-lg sm:text-xl md:text-2xl font-light hidden sm:inline">•</span>
-                
-                {/* Sans effort */}
-                <div className="flex items-center gap-1.5 sm:gap-2">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 border border-noir rounded-full flex items-center justify-center flex-shrink-0">
                     <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-noir" />
                   </div>
-                  <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide whitespace-nowrap">
-                    sans effort
-                  </span>
-                </div>
-                
-                {/* Separator */}
-                <span className="text-noir text-lg sm:text-xl md:text-2xl font-light hidden sm:inline">•</span>
-                
-                {/* En gagnant de l'argent */}
-                <div className="flex items-center gap-1.5 sm:gap-2">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 border border-noir rounded-full flex items-center justify-center flex-shrink-0">
                     <Euro className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-noir" />
                   </div>
-                  <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide whitespace-nowrap">
-                    en gagnant de l'argent
-                  </span>
-                </div>
-                
-                {/* Separator */}
-                <span className="text-noir text-lg sm:text-xl md:text-2xl font-light hidden sm:inline">•</span>
-                
-                {/* Grâce à l'économie circulaire */}
-                <div className="flex items-center gap-1.5 sm:gap-2">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 border border-noir rounded-full flex items-center justify-center flex-shrink-0">
                     <Recycle className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-noir" />
                   </div>
-                  <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide whitespace-nowrap">
-                    grâce à l'économie circulaire
-                  </span>
                 </div>
+                
+                {/* Ligne du texte */}
+                <p className="text-center text-xs sm:text-sm md:text-base mt-3 sm:mt-4 tracking-wide font-500 text-noir">
+                  Videz votre dressing sans effort en gagnant de l&apos;argent grâce à l&apos;économie circulaire
+                </p>
               </div>
               <Button 
                 onClick={() => scrollToSection(formRef)}
@@ -156,9 +128,9 @@ export default function Home() {
                         <Euro className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
                       </div>
                       <div>
-                        <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">40% DE COMMISSION</h4>
+                        <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">GAGNER DE L'ARGENT</h4>
                         <p className="text-xs sm:text-sm text-gris-moyen">
-                          Vous récupérez 40% du prix de vente de vos articles
+                          Vos vêtements sont vendus au meilleur prix et vous récupérez une partie du prix de vente de vos articles
                         </p>
                       </div>
                     </div>
