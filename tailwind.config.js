@@ -29,6 +29,10 @@ module.exports = {
         'blanc': '#ffffff',
         'beige': '#f8f6f3',
         'creme': '#f0ede8',
+        // Accent colors
+        'vert': '#10b981',
+        'or': '#f59e0b',
+        'bleu': '#3b82f6',
         
         // Semantic colors
         border: "hsl(var(--border))",

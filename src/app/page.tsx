@@ -46,26 +46,26 @@ export default function Home() {
                 On vous aide à vendre vos vêtements, donnez-leur une seconde vie !
               </p>
               
-              {/* Avantages avec hiérarchie - Variante A */}
-              <div className="w-full max-w-4xl mx-auto text-center space-y-2 sm:space-y-3">
-                {/* Titre principal */}
-                <h3 className="text-lg sm:text-xl md:text-2xl font-600 text-noir tracking-wide">
+              {/* Avantages avec hiérarchie - Option 1 */}
+              <div className="w-full max-w-4xl mx-auto text-center space-y-4">
+                {/* Titre principal - Gros et impactant */}
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-noir tracking-tight">
                   Videz votre dressing
-                </h3>
-                
-                {/* Sous-éléments alignés */}
-                <div className="flex flex-wrap justify-center gap-1 sm:gap-2">
-                  <span className="text-noir/60">•</span>
-                  <span className="text-base sm:text-lg font-400 text-noir whitespace-nowrap">
+                </h2>
+
+                {/* Sous-éléments - Alignés avec style */}
+                <div className="flex flex-wrap justify-center gap-3 sm:gap-4 text-base sm:text-lg text-gris-moyen">
+                  <span className="flex items-center gap-2">
+                    <Leaf className="h-4 w-4 text-vert" />
                     sans effort
                   </span>
-                  <span className="text-noir/60 mx-1">•</span>
-                  <span className="text-base sm:text-lg font-400 text-noir whitespace-nowrap">
-                    en gagnant de l&apos;argent
+                  <span className="flex items-center gap-2">
+                    <Euro className="h-4 w-4 text-or" />
+                    en gagnant de l'argent
                   </span>
-                  <span className="text-noir/60 mx-1">•</span>
-                  <span className="text-base sm:text-lg font-400 text-noir whitespace-nowrap">
-                    grâce à l&apos;économie circulaire
+                  <span className="flex items-center gap-2">
+                    <Recycle className="h-4 w-4 text-bleu" />
+                    grâce à l'économie circulaire
                   </span>
                 </div>
               </div>

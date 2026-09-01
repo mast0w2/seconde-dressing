@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/components/ui/use-toast";
+import { Check } from "lucide-react";
 
 // ============================================================================
 // Types
@@ -493,23 +494,26 @@ export function ProgressiveEstimationForm() {
     );
   }
 
-  // Render completion state
-  return (
-    <div className="w-full max-w-2xl mx-auto text-center space-y-6">
-      <h2 className="text-2xl md:text-3xl font-600 text-vert-emeraude">
-        Demande envoyée avec succès !
-      </h2>
-      <p className="text-lg">
-        OK, on va bien vous contacter ! Merci ! Nous allons vous recontacter sous 24h pour définir votre rendez-vous.
-      </p>
-      <button
-        onClick={handleReset}
-        className="text-noir underline hover:no-underline transition-all text-lg"
-      >
-        Faire une nouvelle demande
-      </button>
-    </div>
-  );
+    // Render completion state
+    return (
+      <div className="w-full max-w-2xl mx-auto text-center space-y-6">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-vert rounded-full mb-6">
+          <Check className="h-8 w-8 text-blanc" />
+        </div>
+        <h2 className="text-2xl md:text-3xl font-600 text-vert-emeraude">
+          Demande envoyee avec succs !
+        </h2>
+        <p className="text-lg">
+          Nous allons vous contacter dans les deux heures pour dfinir un rendez-vous.
+        </p>
+        <button
+          onClick={handleReset}
+          className="text-noir underline hover:no-underline transition-all text-lg"
+        >
+          Faire une nouvelle demande
+        </button>
+      </div>
+    );
 }
 
 export default ProgressiveEstimationForm;
