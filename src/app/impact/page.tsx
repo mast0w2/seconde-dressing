@@ -26,7 +26,7 @@ export default function ImpactPage() {
               </div>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6 text-noir">
-              Impact environnemental
+              Économie circulaire
             </h1>
             <p className="text-lg sm:text-xl text-gris-moyen mb-6 sm:mb-8 max-w-3xl mx-auto">
               L'industrie textile est l'une des plus polluantes au monde. 
@@ -225,10 +225,10 @@ export default function ImpactPage() {
 
                   <div className="max-w-4xl mx-auto">
                     <h3 className="text-xl sm:text-2xl font-semibold mb-6 text-center">
-                      Notre rôle chez Seconde
+                      Grâce à vous et Seconde
                     </h3>
                     <p className="text-base sm:text-lg text-gris-moyen leading-relaxed text-center">
-                      Chez Seconde, nous facilitons la revente de vos vêtements pour qu'ils trouvent une nouvelle vie 
+                      En utilisant Seconde, vous facilitez la revente de vos vêtements pour qu'ils trouvent une nouvelle vie 
                       plutôt que de finir en décharge. C'est notre contribution concrète à l'économie circulaire 
                       et à la réduction de l'impact environnemental de la mode.
                     </p>
