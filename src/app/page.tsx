@@ -224,9 +224,9 @@ export default function Home() {
                       1
                     </div>
                     <div>
-                      <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">ESTIMATION EN LIGNE</h4>
+                      <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">PRENEZ RENDEZ-VOUS</h4>
                       <p className="text-xs sm:text-sm text-gris-moyen">
-                        Remplissez notre formulaire pour obtenir une estimation personnalisée
+                        Remplissez notre formulaire pour qu'on vous contacte
                       </p>
                     </div>
                   </div>
@@ -238,7 +238,7 @@ export default function Home() {
                     <div>
                       <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">CONTACT RAPIDE</h4>
                       <p className="text-xs sm:text-sm text-gris-moyen">
-                        Nous vous contactons sous 24h pour organiser un rendez-vous
+                        Nous vous contactons dans les deux heures pour organiser un rendez-vous
                       </p>
                     </div>
                   </div>
