@@ -121,25 +121,25 @@ export function Navbar() {
           </div>
         </div>
 
-        <button
-          className="md:hidden p-2 rounded-md border border-noir/10 hover:bg-noir/5 transition-colors"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-label="Toggle menu"
-          aria-expanded={isMenuOpen}
-        >
-          {isMenuOpen ? <X className="h-6 w-6 text-noir" /> : <Menu className="h-6 w-6 text-noir" />}
-        </button>
-
-        <div className="flex items-center gap-4">
+        <div className="flex-1 flex justify-start items-center gap-2 sm:gap-4">
+          <button
+            className="md:hidden p-2 rounded-md border border-noir/10 hover:bg-noir/5 transition-colors"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle menu"
+            aria-expanded={isMenuOpen}
+          >
+            {isMenuOpen ? <X className="h-5 w-5 sm:h-6 sm:w-6 text-noir" /> : <Menu className="h-5 w-5 sm:h-6 sm:w-6 text-noir" />}
+          </button>
+          
           {user ? (
             <>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="relative h-10 w-10 rounded-full border border-noir/20"
+                    className="relative h-8 w-8 sm:h-10 sm:w-10 rounded-full border border-noir/20"
                   >
-                    <Avatar className="h-10 w-10">
+                    <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
                       <AvatarImage src={profile?.photo_url || undefined} />
                       <AvatarFallback className="bg-noir text-blanc text-xs font-bold">
                         {profile?.prenom ? profile.prenom.charAt(0).toUpperCase() : 'U'}
@@ -147,7 +147,7 @@ export function Navbar() {
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-blanc border border-noir/10" align="end" forceMount>
+                <DropdownMenuContent className="w-52 sm:w-56 bg-blanc border border-noir/10" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal text-noir">
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium">{profile?.prenom} {profile?.nom}</p>
@@ -195,13 +195,13 @@ export function Navbar() {
               <Button
                 asChild
                 variant="ghost"
-                className="text-noir hover:bg-noir/5 hover:text-noir transition-colors"
+                className="text-xs sm:text-sm text-noir hover:bg-noir/5 hover:text-noir transition-colors px-2 sm:px-3 py-1 sm:py-2"
               >
                 <Link href="/login">Se connecter</Link>
               </Button>
               <Button
                 asChild
-                className="bg-noir hover:bg-gris-fonce text-blanc px-6 py-2 text-sm font-medium transition-colors"
+                className="bg-noir hover:bg-gris-fonce text-blanc px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium transition-colors"
               >
                 <Link href="/signup">S'inscrire</Link>
               </Button>
@@ -211,7 +211,7 @@ export function Navbar() {
 
         {isMenuOpen && (
           <div className="md:hidden absolute top-16 left-0 right-0 bg-blanc border-b border-noir/10 z-40">
-            <div className="flex flex-col gap-4 p-6">
+            <div className="flex flex-col gap-3 p-4 sm:p-6">
               <Link
                 href="/"
                 className={`text-sm font-medium transition-colors hover:text-noir ${
