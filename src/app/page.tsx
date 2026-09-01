@@ -46,15 +46,21 @@ export default function Home() {
                 On vous aide à vendre vos vêtements, donnez-leur une seconde vie !
               </p>
               
-              {/* Avantages avec icônes - Style Cezanne */}
-              <div className="w-full max-w-4xl mx-auto flex justify-center items-center gap-1 sm:gap-2 md:gap-3 flex-wrap">
-                <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide whitespace-nowrap">Videz votre dressing</span>
-                <span className="text-noir text-sm sm:text-base md:text-lg font-light mx-1">•</span>
-                <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide whitespace-nowrap">sans effort</span>
-                <span className="text-noir text-sm sm:text-base md:text-lg font-light mx-1">•</span>
-                <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide whitespace-nowrap">en gagnant de l&apos;argent</span>
-                <span className="text-noir text-sm sm:text-base md:text-lg font-light mx-1">•</span>
-                <span className="text-xs sm:text-sm md:text-base font-500 text-noir tracking-wide whitespace-nowrap">grâce à l&apos;économie circulaire</span>
+              {/* Avantages avec badges groupés - Variante D */}
+              <div className="w-full max-w-4xl mx-auto text-center space-y-3">
+                <h3 className="text-lg sm:text-xl md:text-2xl font-600 text-noir tracking-wide">
+                  Videz votre dressing
+                </h3>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {["sans effort", "en gagnant de l'argent", "grâce à l'économie circulaire"].map((text, index) => (
+                    <span
+                      key={index}
+                      className="bg-gris-clair/30 px-3 py-1 sm:px-4 sm:py-2 rounded-full text-sm sm:text-base font-400 text-noir whitespace-nowrap"
+                    >
+                      {text}
+                    </span>
+                  ))}
+                </div>
               </div>
               <Button 
                 onClick={() => scrollToSection(formRef)}
