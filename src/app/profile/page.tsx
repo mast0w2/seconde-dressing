@@ -13,7 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/components/ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
 import { Profile } from "@/types/database";
-import { Mail, Phone, User, ArrowLeft } from "lucide-react";
+import { Mail, Phone, User, Home, MapPin, ArrowLeft, Edit, Save, X } from "lucide-react";
 import Link from "next/link";
 
 const profileFormSchema = z.object({
@@ -21,6 +21,10 @@ const profileFormSchema = z.object({
   prenom: z.string().min(2, "Le prénom est requis"),
   telephone: z.string().optional(),
   bio: z.string().optional(),
+  adresse_rue: z.string().optional(),
+  adresse_ville: z.string().optional(),
+  adresse_code_postal: z.string().optional(),
+  adresse_pays: z.string().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -41,6 +45,10 @@ export default function ProfilePage() {
       prenom: "",
       telephone: "",
       bio: "",
+      adresse_rue: "",
+      adresse_ville: "",
+      adresse_code_postal: "",
+      adresse_pays: "",
     },
   });
 
@@ -82,6 +90,10 @@ export default function ProfilePage() {
             prenom: profileData.prenom || "",
             telephone: profileData.telephone || "",
             bio: profileData.bio || "",
+            adresse_rue: profileData.adresse_rue || "",
+            adresse_ville: profileData.adresse_ville || "",
+            adresse_code_postal: profileData.adresse_code_postal || "",
+            adresse_pays: profileData.adresse_pays || "",
           });
         } else {
           // Create a basic profile if it doesn't exist
@@ -128,7 +140,7 @@ export default function ProfilePage() {
         throw new Error("User not found");
       }
 
-      // Prepare profile data - only include fields that exist in the form
+      // Prepare profile data - include address fields
       const profileData: any = {
         id: user.id,
         email: user.email,
@@ -136,6 +148,10 @@ export default function ProfilePage() {
         prenom: data.prenom,
         telephone: data.telephone || null,
         bio: data.bio || null,
+        adresse_rue: data.adresse_rue || null,
+        adresse_ville: data.adresse_ville || null,
+        adresse_code_postal: data.adresse_code_postal || null,
+        adresse_pays: data.adresse_pays || null,
       };
 
       // Preserve existing fields that shouldn't be modified here
@@ -199,20 +215,31 @@ export default function ProfilePage() {
         prenom: profile.prenom || "",
         telephone: profile.telephone || "",
         bio: profile.bio || "",
+        adresse_rue: profile.adresse_rue || "",
+        adresse_ville: profile.adresse_ville || "",
+        adresse_code_postal: profile.adresse_code_postal || "",
+        adresse_pays: profile.adresse_pays || "",
       });
     }
   };
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-lg">Chargement...</p>
+      <div className="flex min-h-screen items-center justify-center bg-creme">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-noir"></div>
       </div>
     );
   }
 
+  if (!user || !profile) {
+    return null;
+  }
+
+  // Get initials for avatar
+  const initials = (profile.prenom?.[0] || "") + (profile.nom?.[0] || "");
+
   return (
-    <div className="container py-8 max-w-2xl">
+    <div className="container py-8 max-w-3xl">
       <div className="space-y-6">
         {/* Header with back button */}
         <div className="flex items-center gap-4">
@@ -234,98 +261,81 @@ export default function ProfilePage() {
         {/* Profile Card */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-4">
-              <Avatar className="h-16 w-16">
-                <AvatarImage src={profile?.photo_url || undefined} />
-                <AvatarFallback className="text-2xl font-bold">
-                  {profile?.prenom ? profile.prenom.charAt(0).toUpperCase() : 'U'}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <h2 className="text-xl font-semibold">
-                  {profile?.prenom} {profile?.nom}
-                </h2>
-                <p className="text-muted-foreground">{profile?.email}</p>
-              </div>
-            </CardTitle>
+            <CardTitle>Informations personnelles</CardTitle>
+            <CardDescription>
+              Vos informations de base
+            </CardDescription>
           </CardHeader>
 
-          <CardContent className="space-y-6">
-            {/* Profile Information Display */}
-            {!isEditing ? (
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground">
-                      Prénom
-                    </Label>
-                    <p className="text-lg">
-                      {profile?.prenom || <span className="text-muted-foreground italic">Non renseigné</span>}
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground">
-                      Nom
-                    </Label>
-                    <p className="text-lg">
-                      {profile?.nom || <span className="text-muted-foreground italic">Non renseigné</span>}
-                    </p>
-                  </div>
+          <CardContent>
+            <div className="space-y-6">
+              {/* Avatar */}
+              <div className="flex items-center gap-4">
+                <Avatar className="w-24 h-24">
+                  {profile.photo_url ? (
+                    <AvatarImage src={profile.photo_url} alt="Photo de profil" />
+                  ) : (
+                    <AvatarFallback className="text-2xl font-semibold">
+                      {initials.toUpperCase()}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+                <div>
+                  <h2 className="text-2xl font-semibold">
+                    {profile.prenom} {profile.nom}
+                  </h2>
+                  <p className="text-muted-foreground">{profile.email}</p>
+                  {profile.role && (
+                    <Badge className="mt-2">
+                      {profile.role === "client" ? "Client" : "Vendeur"}
+                    </Badge>
+                  )}
                 </div>
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-muted-foreground">
-                    Email
-                  </Label>
-                  <p className="text-lg">{profile?.email}</p>
-                </div>
-
-                {profile?.telephone && (
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground">
-                      Téléphone
-                    </Label>
-                    <p className="text-lg">{profile.telephone}</p>
-                  </div>
-                )}
-
-                {profile?.bio && (
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground">
-                      Bio
-                    </Label>
-                    <p className="text-lg">{profile.bio}</p>
-                  </div>
-                )}
-
-                {profile?.role && (
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground">
-                      Rôle
-                    </Label>
-                    <p className="text-lg capitalize">{profile.role}</p>
-                  </div>
-                )}
-
-                <Button
-                  onClick={() => setIsEditing(true)}
-                  className="w-full md:w-auto"
-                >
-                  Modifier mon profil
-                </Button>
               </div>
-            ) : (
-              /* Profile Edit Form */
+
+              {/* Edit Toggle */}
+              <div className="flex justify-end">
+                {!isEditing ? (
+                  <Button onClick={() => setIsEditing(true)}>
+                    <Edit className="h-4 w-4 mr-2" />
+                    Modifier
+                  </Button>
+                ) : (
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={handleCancelEdit}
+                      disabled={isSubmitting}
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Annuler
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={handleSubmit(onSubmit)}
+                      disabled={isSubmitting}
+                    >
+                      <Save className="h-4 w-4 mr-2" />
+                      {isSubmitting ? "Sauvegarde..." : "Sauvegarder"}
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Profile Form */}
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="prenom">Prénom *</Label>
-                    <Input
-                      id="prenom"
-                      {...register("prenom")}
-                      className={errors.prenom ? "border-destructive" : ""}
-                    />
+                    {isEditing ? (
+                      <Input
+                        id="prenom"
+                        {...register("prenom")}
+                        className={errors.prenom ? "border-destructive" : ""}
+                      />
+                    ) : (
+                      <p className="text-lg">{profile.prenom}</p>
+                    )}
                     {errors.prenom && (
                       <p className="text-sm text-destructive">{errors.prenom.message}</p>
                     )}
@@ -333,11 +343,15 @@ export default function ProfilePage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="nom">Nom *</Label>
-                    <Input
-                      id="nom"
-                      {...register("nom")}
-                      className={errors.nom ? "border-destructive" : ""}
-                    />
+                    {isEditing ? (
+                      <Input
+                        id="nom"
+                        {...register("nom")}
+                        className={errors.nom ? "border-destructive" : ""}
+                      />
+                    ) : (
+                      <p className="text-lg">{profile.nom}</p>
+                    )}
                     {errors.nom && (
                       <p className="text-sm text-destructive">{errors.nom.message}</p>
                     )}
@@ -345,77 +359,141 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <p className="text-lg">{profile.email}</p>
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="telephone">Téléphone</Label>
-                  <Input
-                    id="telephone"
-                    type="tel"
-                    {...register("telephone")}
-                    placeholder="+33 1 23 45 67 89"
-                  />
+                  {isEditing ? (
+                    <Input
+                      id="telephone"
+                      type="tel"
+                      {...register("telephone")}
+                      placeholder="Ex: 06 12 34 56 78"
+                    />
+                  ) : (
+                    <p className="text-lg">{profile.telephone || "Non renseigné"}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="bio">Bio</Label>
-                  <Input
-                    id="bio"
-                    {...register("bio")}
-                    placeholder="Une courte description de vous"
-                  />
-                </div>
-
-                <div className="text-sm text-muted-foreground">
-                  * Ces champs sont obligatoires
-                </div>
-
-                <div className="flex gap-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleCancelEdit}
-                    disabled={isSubmitting}
-                  >
-                    Annuler
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "Enregistrement..." : "Enregistrer"}
-                  </Button>
+                  {isEditing ? (
+                    <Input
+                      id="bio"
+                      {...register("bio")}
+                      placeholder="Ex: Passionné de mode durable..."
+                    />
+                  ) : (
+                    <p className="text-lg">{profile.bio || "Non renseigné"}</p>
+                  )}
                 </div>
               </form>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Paramètres du compte</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">
-                Gérer votre compte et vos préférences
-              </p>
-              <div className="flex gap-4">
-                <Button asChild variant="outline">
-                  <Link href="/preferences">Préférences</Link>
-                </Button>
-                {profile?.role === "client" && (
-                  <Button asChild variant="outline">
-                    <Link href="/client/settings">Paramètres client</Link>
-                  </Button>
-                )}
-                {profile?.role === "vendeuse" && (
-                  <Button asChild variant="outline">
-                    <Link href="/vendeuse/settings">Paramètres vendeuse</Link>
-                  </Button>
-                )}
-              </div>
             </div>
           </CardContent>
         </Card>
+
+        {/* Address Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Adresse</CardTitle>
+            <CardDescription>
+              Votre adresse postale
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="adresse_rue">Rue et numéro</Label>
+                {isEditing ? (
+                  <Input
+                    id="adresse_rue"
+                    {...register("adresse_rue")}
+                    placeholder="Ex: 123 Rue de la République"
+                  />
+                ) : (
+                  <p className="text-lg">{profile.adresse_rue || "Non renseigné"}</p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="adresse_code_postal">Code postal</Label>
+                  {isEditing ? (
+                    <Input
+                      id="adresse_code_postal"
+                      {...register("adresse_code_postal")}
+                      placeholder="Ex: 75001"
+                    />
+                  ) : (
+                    <p className="text-lg">{profile.adresse_code_postal || "Non renseigné"}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="adresse_ville">Ville</Label>
+                  {isEditing ? (
+                    <Input
+                      id="adresse_ville"
+                      {...register("adresse_ville")}
+                      placeholder="Ex: Paris"
+                    />
+                  ) : (
+                    <p className="text-lg">{profile.adresse_ville || "Non renseigné"}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="adresse_pays">Pays</Label>
+                {isEditing ? (
+                  <Input
+                    id="adresse_pays"
+                    {...register("adresse_pays")}
+                    placeholder="Ex: France"
+                  />
+                ) : (
+                  <p className="text-lg">{profile.adresse_pays || "Non renseigné"}</p>
+                )}
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+
+        {/* Vendeur specific info */}
+        {profile.role === "vendeur" && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Informations professionnelles</CardTitle>
+              <CardDescription>
+                Vos informations en tant que vendeur
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Spécialisation</Label>
+                    <p className="text-lg">{profile.specialisation || "Non renseigné"}</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Années d'expérience</Label>
+                    <p className="text-lg">{profile.annees_experience || "Non renseigné"}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Tarif horaire</Label>
+                  <p className="text-lg">{profile.tarif_horaire ? `€${profile.tarif_horaire}/h` : "Non renseigné"}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

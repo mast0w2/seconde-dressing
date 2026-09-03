@@ -64,12 +64,12 @@ export function Navbar() {
   };
 
   const isClient = profile?.role === "client";
-  const isVendeuse = profile?.role === "vendeuse";
+  const isVendeur = profile?.role === "vendeur";
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-blanc/95 backdrop-blur border-b border-noir/10">
       <div className="container flex h-16 max-w-screen-2xl items-center">
-        {/* Menu hamburger - extrême gauche sur tous les écrans */}
+        {/* Menu hamburger - extreme gauche sur tous les écrans */}
         <button
           className="p-2 rounded-md border border-noir/10 hover:bg-noir/5 transition-colors"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -89,7 +89,7 @@ export function Navbar() {
           </Link>
         </div>
 
-        {/* Icône de connexion - extrême droite */}
+        {/* Icône de connexion - extreme droite */}
         <div className="flex items-center">
           {user ? (
             <>
@@ -125,25 +125,24 @@ export function Navbar() {
                       Préférences
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
+                    <Link href="/dashboard">
+                      Tableau de bord
+                    </Link>
+                  </DropdownMenuItem>
                   {isClient && (
-                    <>
-                      <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
-                        <Link href="/client/disponibilites">Mes disponibilités</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
-                        <Link href="/client/rdv">Mes rendez-vous</Link>
-                      </DropdownMenuItem>
-                    </>
+                    <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
+                      <Link href="/demande-rdv">
+                        Demande de RDV
+                      </Link>
+                    </DropdownMenuItem>
                   )}
-                  {isVendeuse && (
-                    <>
-                      <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
-                        <Link href="/vendeuse/agenda">Mon agenda</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
-                        <Link href="/vendeuse/demandes">Mes demandes</Link>
-                      </DropdownMenuItem>
-                    </>
+                  {isVendeur && (
+                    <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
+                      <Link href="/vendeur">
+                        Espace Vendeur
+                      </Link>
+                    </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator className="bg-noir/10" />
                   <DropdownMenuItem
@@ -199,16 +198,16 @@ export function Navbar() {
                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                ÉCONOMIE CIRCULAIRE
+                NOTRE IMPACT
               </Link>
               <Link
-                href="/reviews"
+                href="/blog"
                 className={`text-sm font-medium transition-colors hover:text-noir ${
-                  pathname === "/reviews" ? "text-noir" : "text-gris-moyen"
+                  pathname === "/blog" ? "text-noir" : "text-gris-moyen"
                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                AVIS CLIENTS
+                BLOG
               </Link>
               <Link
                 href="/contact"
@@ -219,24 +218,58 @@ export function Navbar() {
               >
                 CONTACT
               </Link>
-              {!user && (
-                <>
-                  <Link
-                    href="/login"
-                    className="text-sm font-medium transition-colors hover:text-noir text-gris-moyen"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Se connecter
-                  </Link>
-                  <Link
-                    href="/signup"
-                    className="text-sm font-medium transition-colors hover:text-noir text-gris-moyen"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    S'inscrire
-                  </Link>
-                </>
-              )}
+
+              {/* Auth links in mobile menu */}
+              <div className="pt-4 border-t border-noir/10">
+                {user ? (
+                  <>
+                    <Link
+                      href="/dashboard"
+                      className={`text-sm font-medium transition-colors hover:text-noir ${
+                        pathname === "/dashboard" ? "text-noir" : "text-gris-moyen"
+                      }`}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      TABLEAU DE BORD
+                    </Link>
+                    {isClient && (
+                      <Link
+                        href="/demande-rdv"
+                        className={`text-sm font-medium transition-colors hover:text-noir ${
+                          pathname === "/demande-rdv" ? "text-noir" : "text-gris-moyen"
+                        }`}
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        DEMANDE DE RDV
+                      </Link>
+                    )}
+                    <Button
+                      variant="ghost"
+                      onClick={handleLogout}
+                      className="text-sm font-medium text-destructive"
+                    >
+                      DÉCONNEXION
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/login"
+                      className="text-sm font-medium text-noir"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      SE CONNECTER
+                    </Link>
+                    <Link
+                      href="/signup"
+                      className="text-sm font-medium text-noir"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      S'INSCRIRE
+                    </Link>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         )}

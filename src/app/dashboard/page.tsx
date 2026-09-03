@@ -1,375 +1,504 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { createBrowserClient } from "@supabase/ssr";
-import { format } from "date-fns";
-import { fr } from 'date-fns/locale';
 import { useToast } from "@/components/ui/use-toast";
-import { Calendar, Package, Euro, Users, Clock, CheckCircle, XCircle } from "lucide-react";
+import { createBrowserClient } from "@supabase/ssr";
+import { Demande, StatutDemande, Profile } from "@/types/database";
+import { Calendar, Clock, Mail, Phone, CheckCircle, XCircle, RefreshCw, Package, Euro, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-interface Order {
-  id: string;
-  order_number: string;
-  client_name: string;
-  vendeuse_name: string;
-  items_count: number;
-  total_amount: number;
-  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
-  created_at: string;
-  updated_at: string;
-}
-
-interface Stats {
-  totalOrders: number;
-  totalRevenue: number;
-  pendingOrders: number;
-  completedOrders: number;
-}
+// Status display configuration
+const statutConfig: Record<StatutDemande, { label: string; color: string; icon: React.ReactNode }> = {
+  en_attente: {
+    label: "En attente",
+    color: "bg-yellow-100 text-yellow-800",
+    icon: <Clock className="h-4 w-4" />,
+  },
+  acceptee: {
+    label: "Acceptée",
+    color: "bg-blue-100 text-blue-800",
+    icon: <CheckCircle className="h-4 w-4" />,
+  },
+  refusee: {
+    label: "Refusée",
+    color: "bg-red-100 text-red-800",
+    icon: <XCircle className="h-4 w-4" />,
+  },
+  articles_recuperes: {
+    label: "Articles récupérés",
+    color: "bg-purple-100 text-purple-800",
+    icon: <Package className="h-4 w-4" />,
+  },
+  articles_en_vente: {
+    label: "Articles en vente",
+    color: "bg-orange-100 text-orange-800",
+    icon: <Euro className="h-4 w-4" />,
+  },
+  terminee: {
+    label: "Terminée",
+    color: "bg-green-100 text-green-800",
+    icon: <CheckCircle className="h-4 w-4" />,
+  },
+};
 
 export default function DashboardPage() {
-  const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+  const router = useRouter();
   const { toast } = useToast();
+  const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
   const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [stats, setStats] = useState<Stats>({
-    totalOrders: 0,
-    totalRevenue: 0,
-    pendingOrders: 0,
-    completedOrders: 0,
-  });
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("all");
-
-  const fetchOrders = async () => {
-    if (!user || !profile) return;
-    
-    try {
-      setLoading(true);
-      let query = supabase
-        .from("orders")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      // Filter by user role
-      if (profile?.role === "client") {
-        query = query.eq("client_id", user?.id);
-      } else if (profile?.role === "vendeuse") {
-        query = query.eq("vendeuse_id", user?.id);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      setOrders(data || []);
-
-      // Calculate stats
-      const totalOrders = data?.length || 0;
-      const totalRevenue = data?.reduce((sum, order) => sum + order.total_amount, 0) || 0;
-      const pendingOrders = data?.filter(order => order.status === "pending" || order.status === "processing").length || 0;
-      const completedOrders = data?.filter(order => order.status === "shipped" || order.status === "delivered").length || 0;
-
-      setStats({
-        totalOrders,
-        totalRevenue,
-        pendingOrders,
-        completedOrders,
-      });
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les commandes. Veuillez reessayer.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [demandes, setDemandes] = useState<Demande[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"all" | "en_attente" | "acceptee" | "refusee" | "en_cours" | "terminee">("all");
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
+    const fetchData = async () => {
+      try {
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        
+        if (!currentUser) {
+          router.push("/login");
+          return;
+        }
 
-      if (user) {
+        setUser(currentUser);
+
         const { data: profile } = await supabase
           .from("profiles")
           .select("*")
-          .eq("id", user.id)
+          .eq("id", currentUser.id)
           .single();
+
+        if (!profile) {
+          router.push("/signup");
+          return;
+        }
+
         setProfile(profile);
+
+        // Fetch demandes based on role
+        let query = supabase.from("demandes").select("*");
+
+        if (profile.role === "client") {
+          // Clients see only their own demandes
+          query = query.eq("client_id", currentUser.id);
+        } else if (profile.role === "vendeur") {
+          // Vendeurs see all demandes (that are not already assigned to someone else)
+          query = query.or("vendeur_id.is.null,vendeur_id.eq.${currentUser.id}");
+        }
+
+        query = query.order("created_at", { ascending: false });
+
+        const { data: demandesData, error } = await query;
+
+        if (error) {
+          throw error;
+        }
+
+        setDemandes(demandesData || []);
+      } catch (error: any) {
+        toast({
+          title: "Erreur",
+          description: error.message || "Impossible de charger les demandes.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    checkUser();
-  }, [supabase, toast]);
+    fetchData();
+  }, [supabase, router, toast]);
 
-  useEffect(() => {
-    if (user && profile) fetchOrders();
-  }, [user, profile, activeTab]);
+  // Handle vendeur actions
+  const handleAcceptDemande = async (demandeId: string) => {
+    try {
+      const { error } = await supabase
+        .from("demandes")
+        .update({
+          statut: "acceptee",
+          vendeur_id: user.id,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", demandeId);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "processing":
-        return "bg-blue-100 text-blue-800";
-      case "shipped":
-        return "bg-purple-100 text-purple-800";
-      case "delivered":
-        return "bg-green-100 text-green-800";
-      case "cancelled":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+      if (error) {
+        throw error;
+      }
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "pending":
-        return <Clock className="h-4 w-4" />;
-      case "processing":
-        return <Package className="h-4 w-4" />;
-      case "shipped":
-        return <Clock className="h-4 w-4" />;
-      case "delivered":
-        return <CheckCircle className="h-4 w-4" />;
-      case "cancelled":
-        return <XCircle className="h-4 w-4" />;
-      default:
-        return <Calendar className="h-4 w-4" />;
-    }
-  };
+      // Refresh data
+      const { data: updatedDemandes } = await supabase
+        .from("demandes")
+        .select("*")
+        .or("vendeur_id.is.null,vendeur_id.eq.${user.id}")
+        .order("created_at", { ascending: false });
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "En attente";
-      case "processing":
-        return "En cours";
-      case "shipped":
-        return "Expedie";
-      case "delivered":
-        return "Livre";
-      case "cancelled":
-        return "Annule";
-      default:
-        return status;
-    }
-  };
+      setDemandes(updatedDemandes || []);
 
-  const filteredOrders = activeTab === "all" 
-    ? orders 
-    : orders.filter(order => {
-        if (activeTab === "pending") return order.status === "pending" || order.status === "processing";
-        if (activeTab === "completed") return order.status === "shipped" || order.status === "delivered";
-        if (activeTab === "cancelled") return order.status === "cancelled";
-        return true;
+      toast({
+        title: "Demande acceptée",
+        description: "Vous avez accepté cette demande. Le client a été notifié.",
       });
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue.",
+        variant: "destructive",
+      });
+    }
+  };
 
-  if (loading) {
+  const handleRefuseDemande = async (demandeId: string) => {
+    try {
+      const { error } = await supabase
+        .from("demandes")
+        .update({
+          statut: "refusee",
+          vendeur_id: null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", demandeId);
+
+      if (error) {
+        throw error;
+      }
+
+      // Refresh data
+      const { data: updatedDemandes } = await supabase
+        .from("demandes")
+        .select("*")
+        .or("vendeur_id.is.null,vendeur_id.eq.${user.id}")
+        .order("created_at", { ascending: false });
+
+      setDemandes(updatedDemandes || []);
+
+      toast({
+        title: "Demande refusée",
+        description: "Vous avez refusé cette demande.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUpdateStatut = async (demandeId: string, newStatut: StatutDemande) => {
+    try {
+      const { error } = await supabase
+        .from("demandes")
+        .update({
+          statut: newStatut,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", demandeId);
+
+      if (error) {
+        throw error;
+      }
+
+      // Refresh data
+      const { data: updatedDemandes } = await supabase
+        .from("demandes")
+        .select("*")
+        .eq("client_id", user.id)
+        .order("created_at", { ascending: false });
+
+      setDemandes(updatedDemandes || []);
+
+      toast({
+        title: "Statut mis à jour",
+        description: `La demande a été passée en "${statutConfig[newStatut].label}".`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Filter demandes based on active tab
+  const filteredDemandes = demandes.filter((demande) => {
+    if (activeTab === "all") return true;
+    if (activeTab === "en_attente") return demande.statut === "en_attente";
+    if (activeTab === "acceptee") return demande.statut === "acceptee";
+    if (activeTab === "refusee") return demande.statut === "refusee";
+    if (activeTab === "en_cours") 
+      return ["articles_recuperes", "articles_en_vente"].includes(demande.statut);
+    if (activeTab === "terminee") return demande.statut === "terminee";
+    return true;
+  });
+
+  // Count demandes by status
+  const counts = {
+    all: demandes.length,
+    en_attente: demandes.filter(d => d.statut === "en_attente").length,
+    acceptee: demandes.filter(d => d.statut === "acceptee").length,
+    refusee: demandes.filter(d => d.statut === "refusee").length,
+    en_cours: demandes.filter(d => ["articles_recuperes", "articles_en_vente"].includes(d.statut)).length,
+    terminee: demandes.filter(d => d.statut === "terminee").length,
+  };
+
+  if (isLoading) {
     return (
-      <div className="container py-8">
-        <div className="text-center">Chargement du tableau de bord...</div>
+      <div className="flex min-h-screen items-center justify-center bg-creme">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-noir"></div>
       </div>
     );
   }
 
+  if (!user || !profile) {
+    return null;
+  }
+
   return (
-    <div className="container py-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="container py-8 max-w-6xl">
+      <div className="space-y-6">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Tableau de bord</h1>
-          <p className="text-muted-foreground">
-            Bienvenue, {profile?.prenom || user?.email || "utilisateur"}!
-          </p>
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            onClick={() => router.back()}
+            className="h-10 w-10 p-0"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold">Tableau de bord</h1>
+            <p className="text-muted-foreground">
+              {profile.role === "client" 
+                ? "Suivez l'état de vos demandes de rendez-vous"
+                : "Gérez les demandes des clients"}
+            </p>
+          </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <Card 
+            className={`cursor-pointer transition-shadow ${activeTab === "all" ? "ring-2 ring-primary" : ""}`}
+            onClick={() => setActiveTab("all")}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Commandes totales</CardTitle>
-              <Package className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Total</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalOrders}</div>
-              <p className="text-xs text-muted-foreground">
-                +0% depuis le mois dernier
-              </p>
+              <div className="text-2xl font-bold">{counts.all}</div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Revenu total</CardTitle>
-              <Euro className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(stats.totalRevenue)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Sur toutes les commandes
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
+          <Card 
+            className={`cursor-pointer transition-shadow ${activeTab === "en_attente" ? "ring-2 ring-primary" : ""}`}
+            onClick={() => setActiveTab("en_attente")}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">En attente</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.pendingOrders}</div>
-              <p className="text-xs text-muted-foreground">
-                Commandes a traiter
-              </p>
+              <div className="text-2xl font-bold">{counts.en_attente}</div>
             </CardContent>
           </Card>
 
-          <Card>
+          {profile.role === "vendeur" && (
+            <Card 
+              className={`cursor-pointer transition-shadow ${activeTab === "acceptee" ? "ring-2 ring-primary" : ""}`}
+              onClick={() => setActiveTab("acceptee")}
+            >
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Acceptées</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{counts.acceptee}</div>
+              </CardContent>
+            </Card>
+          )}
+
+          <Card 
+            className={`cursor-pointer transition-shadow ${activeTab === "refusee" ? "ring-2 ring-primary" : ""}`}
+            onClick={() => setActiveTab("refusee")}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Terminees</CardTitle>
-              <CheckCircle className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Refusées</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.completedOrders}</div>
-              <p className="text-xs text-muted-foreground">
-                Commandes livrees
-              </p>
+              <div className="text-2xl font-bold">{counts.refusee}</div>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className={`cursor-pointer transition-shadow ${activeTab === "en_cours" ? "ring-2 ring-primary" : ""}`}
+            onClick={() => setActiveTab("en_cours")}
+          >
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">En cours</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{counts.en_cours}</div>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className={`cursor-pointer transition-shadow ${activeTab === "terminee" ? "ring-2 ring-primary" : ""}`}
+            onClick={() => setActiveTab("terminee")}
+          >
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Terminées</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{counts.terminee}</div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Orders Table */}
+        {/* Demandes List */}
         <Card>
           <CardHeader>
-            <CardTitle>Mes commandes</CardTitle>
+            <CardTitle>
+              {profile.role === "client" ? "Mes demandes" : "Demandes des clients"}
+            </CardTitle>
             <CardDescription>
-              Liste de toutes vos commandes recentes
+              {profile.role === "client" 
+                ? "Suivez l'état de vos demandes de rendez-vous"
+                : "Acceptez ou refusez les demandes, et gérez le processus de vente"}
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            {/* Tabs */}
-            <div className="flex space-x-2 mb-6">
-              <Button
-                variant={activeTab === "all" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setActiveTab("all")}
-              >
-                Toutes ({orders.length})
-              </Button>
-              <Button
-                variant={activeTab === "pending" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setActiveTab("pending")}
-              >
-                En attente ({stats.pendingOrders})
-              </Button>
-              <Button
-                variant={activeTab === "completed" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setActiveTab("completed")}
-              >
-                Terminees ({stats.completedOrders})
-              </Button>
-              <Button
-                variant={activeTab === "cancelled" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setActiveTab("cancelled")}
-              >
-                Annulees
-              </Button>
-            </div>
 
-            {filteredOrders.length === 0 ? (
+          <CardContent>
+            {filteredDemandes.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
-                Aucune commande trouvee.
+                <p className="mb-4">Aucune demande trouvée.</p>
+                {profile.role === "client" && (
+                  <Button asChild>
+                    <Link href="/demande-rdv">
+                      Faire une nouvelle demande
+                    </Link>
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="space-y-4">
-                {filteredOrders.map((order) => (
-                  <Card key={order.id} className="border-0 shadow-none">
-                    <CardContent className="p-0">
-                      <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-4">
-                          <div className={getStatusColor(order.status)}>
-                            {getStatusIcon(order.status)}
-                          </div>
-                          <div>
-                            <div className="font-semibold">{order.order_number}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {format(new Date(order.created_at), "dd MMMM yyyy", { locale: fr })}
+                {filteredDemandes.map((demande) => {
+                  const statutInfo = statutConfig[demande.statut];
+                  const isVendeurView = profile.role === "vendeur";
+                  const isAssignedToMe = demande.vendeur_id === user.id;
+                  const canAccept = isVendeurView && !demande.vendeur_id;
+                  const canRefuse = isVendeurView && !demande.vendeur_id;
+                  const canUpdateStatut = isVendeurView && isAssignedToMe && 
+                    demande.statut !== "terminee" && demande.statut !== "refusee";
+
+                  return (
+                    <Card key={demande.id} className="border-0 shadow-none">
+                      <CardContent className="p-0">
+                        <div className="flex items-start justify-between p-4 border rounded-lg">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className={`p-2 rounded-full ${statutInfo.color}`}>
+                                {statutInfo.icon}
+                              </div>
+                              <div>
+                                <div className="font-semibold">
+                                  Demande #{demande.id.slice(0, 8)}
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  {new Date(demande.created_at).toLocaleDateString("fr-FR")}
+                                </div>
+                              </div>
                             </div>
+
+                            <div className="text-sm text-muted-foreground mb-2">
+                              {demande.client_prenom} {demande.client_nom}
+                            </div>
+
+                            <div className="text-sm text-muted-foreground mb-3">
+                              {demande.client_email}
+                            </div>
+
+                            <Badge className={statutInfo.color}>
+                              {statutInfo.label}
+                            </Badge>
+
+                            {demande.message && (
+                              <div className="mt-3 p-3 bg-muted/50 rounded">
+                                <p className="text-sm">{demande.message}</p>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex flex-col gap-2 ml-4">
+                            {canAccept && (
+                              <Button
+                                size="sm"
+                                onClick={() => handleAcceptDemande(demande.id)}
+                                className="h-8 px-3"
+                              >
+                                Accepter
+                              </Button>
+                            )}
+
+                            {canRefuse && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleRefuseDemande(demande.id)}
+                                className="h-8 px-3"
+                              >
+                                Refuser
+                              </Button>
+                            )}
+
+                            {canUpdateStatut && (
+                              <div className="flex flex-col gap-1">
+                                {demande.statut === "acceptee" && (
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => handleUpdateStatut(demande.id, "articles_recuperes")}
+                                    className="h-7 px-2 text-xs"
+                                  >
+                                    Articles récupérés
+                                  </Button>
+                                )}
+                                {demande.statut === "articles_recuperes" && (
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => handleUpdateStatut(demande.id, "articles_en_vente")}
+                                    className="h-7 px-2 text-xs"
+                                  >
+                                    Articles en vente
+                                  </Button>
+                                )}
+                                {demande.statut === "articles_en_vente" && (
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => handleUpdateStatut(demande.id, "terminee")}
+                                    className="h-7 px-2 text-xs"
+                                  >
+                                    Terminée
+                                  </Button>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="font-semibold">
-                            {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(order.total_amount)}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            {order.items_count} articles
-                          </div>
-                        </div>
-                        <div>
-                          <Badge className={getStatusColor(order.status)}>
-                            {getStatusLabel(order.status)}
-                          </Badge>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </CardContent>
         </Card>
-
-        {/* Quick Actions */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-          {profile?.role === "client" && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Actions rapides</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button asChild className="w-full">
-                  <Link href="/client/rdv">Prendre un nouveau rendez-vous</Link>
-                </Button>
-                <Button variant="outline" asChild className="w-full">
-                  <Link href="/client/settings">Modifier mon profil</Link>
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          {profile?.role === "vendeuse" && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Actions rapides</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button asChild className="w-full">
-                  <Link href="/vendeuse/demandes">Voir les demandes de RDV</Link>
-                </Button>
-                <Button asChild className="w-full">
-                  <Link href="/vendeuse/agenda">Gerer mon agenda</Link>
-                </Button>
-                <Button variant="outline" asChild className="w-full">
-                  <Link href="/vendeuse/settings">Modifier mon profil</Link>
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </div>
       </div>
     </div>
   );

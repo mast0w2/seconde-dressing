@@ -27,19 +27,21 @@ export async function GET(request: Request) {
 
       if (profile) {
         // Profile exists, check if it's complete
-        if (!profile.nom || !profile.prenom) {
-          // Profile incomplete, redirect to complete profile
-          return NextResponse.redirect(new URL("/complete-profile", requestUrl.origin).toString());
+        if (!profile.nom || !profile.prenom || !profile.role) {
+          // Profile incomplete, redirect to signup to complete
+          return NextResponse.redirect(new URL("/signup", requestUrl.origin).toString());
         }
         
-        // Profile is complete, check if role is set
-        if (!profile.role) {
-          // Role not set, redirect to role selection
-          return NextResponse.redirect(new URL("/role", requestUrl.origin).toString());
+        // Profile is complete, redirect based on role
+        if (profile.role === "vendeur") {
+          return NextResponse.redirect(new URL("/vendeur", requestUrl.origin).toString());
+        } else {
+          // Default to home for clients
+          return NextResponse.redirect(new URL("/", requestUrl.origin).toString());
         }
       } else {
-        // No profile exists, redirect to complete profile
-        return NextResponse.redirect(new URL("/complete-profile", requestUrl.origin).toString());
+        // No profile exists, redirect to signup
+        return NextResponse.redirect(new URL("/signup", requestUrl.origin).toString());
       }
     }
   }
