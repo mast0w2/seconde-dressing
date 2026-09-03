@@ -107,7 +107,7 @@ export function Navbar() {
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-52 sm:w-56 bg-blanc border border-noir/10" align="end" forceMount>
+                <DropdownMenuContent className="w-52 sm:w-56 bg-blanc border border-noir/10" align="end">
                   <DropdownMenuLabel className="font-normal text-noir">
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium">{profile?.prenom} {profile?.nom}</p>
@@ -118,6 +118,11 @@ export function Navbar() {
                   <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
                     <Link href="/profile">
                       Mon profil
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
+                    <Link href="/preferences">
+                      Préférences
                     </Link>
                   </DropdownMenuItem>
                   {isClient && (

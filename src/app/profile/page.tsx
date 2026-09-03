@@ -128,44 +128,64 @@ export default function ProfilePage() {
         throw new Error("User not found");
       }
 
-      const { error } = await supabase
+      // Prepare profile data - only include fields that exist in the form
+      const profileData: any = {
+        id: user.id,
+        email: user.email,
+        nom: data.nom,
+        prenom: data.prenom,
+        telephone: data.telephone || null,
+        bio: data.bio || null,
+      };
+
+      // Preserve existing fields that shouldn't be modified here
+      if (profile) {
+        profileData.role = profile.role;
+        profileData.photo_url = profile.photo_url;
+        profileData.specialisation = profile.specialisation;
+        profileData.tarif_horaire = profile.tarif_horaire;
+        profileData.annees_experience = profile.annees_experience;
+      }
+
+      const { error, data: upsertResult } = await supabase
         .from("profiles")
-        .upsert([{
-          id: user.id,
-          email: user.email,
-          nom: data.nom,
-          prenom: data.prenom,
-          telephone: data.telephone || null,
-          bio: data.bio || null,
-          role: profile?.role || null,
-          photo_url: profile?.photo_url || null,
-          specialisation: profile?.specialisation || null,
-          tarif_horaire: profile?.tarif_horaire || null,
-          annees_experience: profile?.annees_experience || null,
-        }], { onConflict: "id" });
+        .upsert([profileData], { onConflict: "id", ignoreDuplicates: false });
 
       if (error) {
+        console.error("Upsert error:", error);
         throw error;
       }
 
+      console.log("Upsert result:", upsertResult);
+
       // Refresh profile data
-      const { data: updatedProfile } = await supabase
+      const { data: updatedProfile, error: fetchError } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user.id)
         .single();
+
+      if (fetchError) {
+        console.error("Fetch error:", fetchError);
+        throw fetchError;
+      }
+
+      if (!updatedProfile) {
+        throw new Error("Profile not found after update");
+      }
 
       setProfile(updatedProfile);
       setIsEditing(false);
 
       toast({
         title: "Profil mis à jour",
-        description: "Vos informations personnelles ont été enregistrées.",
+        description: `Vos informations ont été enregistrées : ${updatedProfile.prenom} ${updatedProfile.nom}`,
       });
     } catch (error: any) {
+      console.error("Profile update error:", error);
       toast({
         title: "Erreur",
-        description: error.message || "Une erreur est survenue.",
+        description: error.message || "Une erreur est survenue lors de la mise à jour.",
         variant: "destructive",
       });
     }
