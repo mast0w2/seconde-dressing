@@ -6,12 +6,12 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Profiles table
 CREATE TABLE IF NOT EXISTS profiles (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  nom TEXT NOT NULL,
-  prenom TEXT NOT NULL,
+  nom TEXT,
+  prenom TEXT,
   email TEXT NOT NULL UNIQUE,
   telephone TEXT,
   photo_url TEXT,
-  role TEXT NOT NULL CHECK (role IN ('client', 'vendeuse')),
+  role TEXT CHECK (role IN ('client', 'vendeuse')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   bio TEXT,
   specialisation TEXT,
