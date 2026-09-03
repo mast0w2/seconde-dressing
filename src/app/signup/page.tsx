@@ -12,7 +12,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/components/ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
 import { Role } from "@/types/database";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ChevronLeft, User, Mail, Phone, Home, MapPin } from "lucide-react";
+import { useState, useEffect } from "react";
+
+type FormValues = {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  nom: string;
+  prenom: string;
+  telephone: string;
+  adresse_rue: string;
+  adresse_ville: string;
+  adresse_code_postal: string;
+  role: Role;
+};
 
 const formSchema = z.object({
   email: z.string().email("Adresse email invalide"),
@@ -32,12 +46,21 @@ const formSchema = z.object({
   path: ["confirmPassword"],
 });
 
-type FormValues = z.infer<typeof formSchema>;
-
 export default function SignupPage() {
   const router = useRouter();
   const { toast } = useToast();
   const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+
+  // Get pre-selected role from sessionStorage or query params
+  const [preSelectedRole, setPreSelectedRole] = useState<Role | null>(null);
+
+  useEffect(() => {
+    // Check sessionStorage first
+    const storedRole = sessionStorage.getItem("selectedRole") as Role | null;
+    if (storedRole) {
+      setPreSelectedRole(storedRole);
+    }
+  }, []);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -51,13 +74,20 @@ export default function SignupPage() {
       adresse_rue: "",
       adresse_ville: "",
       adresse_code_postal: "",
-      role: "client",
+      role: preSelectedRole || "client",
     },
   });
 
-  const { handleSubmit, register, formState, watch } = form;
+  const { handleSubmit, register, formState, watch, setValue } = form;
   const { errors, isSubmitting } = formState;
   const role = watch("role");
+
+  // Update role when preSelectedRole changes
+  useEffect(() => {
+    if (preSelectedRole) {
+      setValue("role", preSelectedRole);
+    }
+  }, [preSelectedRole, setValue]);
 
   const onSubmit = async (data: FormValues) => {
     try {
@@ -167,17 +197,33 @@ export default function SignupPage() {
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 p-4">
       <Card className="w-full max-w-2xl">
         <CardHeader>
-          <CardTitle className="text-2xl">Créer un compte</CardTitle>
-          <CardDescription>
-            Inscrivez-vous pour commencer à utiliser Seconde
-          </CardDescription>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              onClick={() => router.back()}
+              className="h-10 w-10 p-0"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <CardTitle className="text-2xl">Créer un compte</CardTitle>
+              <CardDescription>
+                {preSelectedRole === "vendeur" 
+                  ? "Devenez vendeur et commencez à gagner de l'argent"
+                  : "Inscrivez-vous pour commencer à utiliser Seconde"}
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
 
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Personal Information */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Informations personnelles</h3>
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Informations personnelles
+              </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -238,7 +284,10 @@ export default function SignupPage() {
 
             {/* Address Information */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Adresse</h3>
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Home className="h-5 w-5" />
+                Adresse
+              </h3>
               
               <div className="space-y-2">
                 <Label htmlFor="adresse_rue">Rue et numéro *</Label>
@@ -284,14 +333,17 @@ export default function SignupPage() {
 
             {/* Password */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Mot de passe</h3>
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Mail className="h-5 w-5" />
+                Mot de passe
+              </h3>
               
               <div className="space-y-2">
                 <Label htmlFor="password">Mot de passe *</Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="••••••••••••"
                   {...register("password")}
                   className={errors.password ? "border-destructive" : ""}
                 />
@@ -305,7 +357,7 @@ export default function SignupPage() {
                 <Input
                   id="confirmPassword"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="••••••••••••"
                   {...register("confirmPassword")}
                   className={errors.confirmPassword ? "border-destructive" : ""}
                 />
@@ -315,52 +367,81 @@ export default function SignupPage() {
               </div>
             </div>
 
-            {/* Role Selection */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Quel est votre rôle ? *</h3>
-              
-              <RadioGroup
-                onValueChange={(value) => form.setValue("role", value as Role)}
-                value={role}
-                className="space-y-4"
-              >
-                <div className="flex items-center space-x-3">
-                  <RadioGroupItem value="client" id="client" />
-                  <Label htmlFor="client" className="cursor-pointer">
-                    <div className="font-medium">Client - Je veux vendre mes vêtements</div>
-                    <div className="text-sm text-muted-foreground">
-                      Vous souhaitez vendre vos vêtements et avoir de l'aide pour les écouler
+            {/* Role Selection - Only shown if not pre-selected */}
+            {!preSelectedRole && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Quel est votre rôle ? *
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                      role === "client" 
+                        ? "border-primary bg-primary/5" 
+                        : "border-noir/20 hover:border-noir/40"
+                    }`}
+                    onClick={() => setValue("role", "client")}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                        role === "client" ? "bg-primary" : "bg-noir/10"
+                      }`}>
+                        {role === "client" && <div className="w-3 h-3 bg-blanc rounded-full" />}
+                      </div>
+                      <div>
+                        <div className="font-medium">Client</div>
+                        <div className="text-sm text-muted-foreground">
+                          Je veux vendre mes vêtements
+                        </div>
+                      </div>
                     </div>
-                  </Label>
-                </div>
+                  </div>
 
-                <div className="flex items-center space-x-3">
-                  <RadioGroupItem value="vendeur" id="vendeur" />
-                  <Label htmlFor="vendeur" className="cursor-pointer">
-                    <div className="font-medium">Vendeur - J'aide à vendre des vêtements</div>
-                    <div className="text-sm text-muted-foreground">
-                      Vous êtes professionnel et aidez les clients à vendre leurs vêtements
+                  <div
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                      role === "vendeur" 
+                        ? "border-primary bg-primary/5" 
+                        : "border-noir/20 hover:border-noir/40"
+                    }`}
+                    onClick={() => setValue("role", "vendeur")}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                        role === "vendeur" ? "bg-primary" : "bg-noir/10"
+                      }`}>
+                        {role === "vendeur" && <div className="w-3 h-3 bg-blanc rounded-full" />}
+                      </div>
+                      <div>
+                        <div className="font-medium">Vendeur</div>
+                        <div className="text-sm text-muted-foreground">
+                          J'aide à vendre des vêtements
+                        </div>
+                      </div>
                     </div>
-                  </Label>
+                  </div>
                 </div>
-              </RadioGroup>
-              
-              {errors.role && (
-                <p className="text-sm text-destructive">{errors.role.message}</p>
-              )}
-            </div>
+                
+                {errors.role && (
+                  <p className="text-sm text-destructive">{errors.role.message}</p>
+                )}
+              </div>
+            )}
 
+            {/* Submit Button */}
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Inscription..." : "S'inscrire"}
+              {isSubmitting ? "Création..." : "Créer mon compte"}
             </Button>
-          </form>
 
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            Vous avez déjà un compte ?{" "}
-            <Link href="/login" className="text-primary hover:underline">
-              Se connecter
-            </Link>
-          </p>
+            {/* Login Link */}
+            <p className="text-center text-sm text-muted-foreground">
+              Vous avez déjà un compte ?{" "}
+              <Link href="/login" className="text-primary hover:underline">
+                Se connecter
+              </Link>
+            </p>
+          </form>
         </CardContent>
       </Card>
     </div>
