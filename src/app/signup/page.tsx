@@ -70,7 +70,7 @@ export default function SignupPage() {
         description: "Veuillez vérifier votre email pour confirmer votre compte.",
       });
 
-      router.push("/role");
+      router.push("/complete-profile");
     } catch (error: any) {
       toast({
         title: "Erreur d'inscription",

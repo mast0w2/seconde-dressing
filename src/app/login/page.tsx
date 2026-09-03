@@ -46,6 +46,49 @@ export default function LoginPage() {
         throw error;
       }
 
+      // Check user profile
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+
+        if (profileError && profileError.code !== "PGRST116") {
+          throw profileError;
+        }
+
+        if (profile) {
+          // Profile exists, check if it's complete
+          if (!profile.nom || !profile.prenom) {
+            // Profile incomplete, redirect to complete profile
+            toast({
+              title: "Bienvenue",
+              description: "Veuillez compléter vos informations personnelles.",
+            });
+            router.push("/complete-profile");
+            return;
+          }
+          
+          // Profile is complete, check if role is set
+          if (!profile.role) {
+            // Role not set, redirect to role selection
+            router.push("/role");
+            return;
+          }
+        } else {
+          // No profile exists, redirect to complete profile
+          toast({
+            title: "Bienvenue",
+            description: "Veuillez compléter vos informations personnelles.",
+          });
+          router.push("/complete-profile");
+          return;
+        }
+      }
+
       toast({
         title: "Connexion réussie",
         description: "Vous êtes maintenant connecté.",

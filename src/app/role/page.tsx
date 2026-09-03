@@ -26,14 +26,38 @@ export default function RolePage() {
       }
 
       // Check if user already has a profile
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user.id)
         .single();
 
-      if (profile) {
+      if (profileError && profileError.code !== "PGRST116") {
+        toast({
+          title: "Erreur",
+          description: "Impossible de vérifier votre profil.",
+          variant: "destructive",
+        });
         router.push("/");
+        return;
+      }
+
+      if (profile) {
+        // Profile exists, check if it's complete
+        if (!profile.nom || !profile.prenom) {
+          // Profile incomplete, redirect to complete profile
+          router.push("/complete-profile");
+          return;
+        }
+        
+        // Profile is complete, check if role is set
+        if (profile.role) {
+          router.push("/");
+          return;
+        }
+      } else {
+        // No profile exists, redirect to complete profile
+        router.push("/complete-profile");
         return;
       }
 
@@ -41,7 +65,7 @@ export default function RolePage() {
     };
 
     checkUser();
-  }, [supabase, router]);
+  }, [supabase, router, toast]);
 
   const handleSelectRole = async (role: Role) => {
     try {
@@ -72,6 +96,21 @@ export default function RolePage() {
         tarif_horaire: null,
         annees_experience: null,
       };
+
+      // Validate that nom and prenom are present
+      if (!profileData.nom || !profileData.prenom) {
+        // Store role in temp data for after profile completion
+        sessionStorage.setItem("tempUser", JSON.stringify({
+          ...tempData,
+          role: role,
+        }));
+        toast({
+          title: "Informations manquantes",
+          description: "Veuillez d'abord compléter vos informations personnelles.",
+        });
+        router.push("/complete-profile");
+        return;
+      }
 
       const { error } = await supabase
         .from("profiles")
