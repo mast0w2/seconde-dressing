@@ -45,8 +45,8 @@ export default function RolePage() {
       if (profile) {
         // Profile exists, check if it's complete
         if (!profile.nom || !profile.prenom) {
-          // Profile incomplete, redirect to complete profile
-          router.push("/complete-profile");
+          // Profile incomplete, redirect to profile page to complete
+          router.push("/profile");
           return;
         }
         
@@ -56,8 +56,8 @@ export default function RolePage() {
           return;
         }
       } else {
-        // No profile exists, redirect to complete profile
-        router.push("/complete-profile");
+        // No profile exists, redirect to profile page to create
+        router.push("/profile");
         return;
       }
 
@@ -83,18 +83,25 @@ export default function RolePage() {
       const tempUser = sessionStorage.getItem("tempUser");
       const tempData = tempUser ? JSON.parse(tempUser) : null;
 
+      // Check if profile already exists and has nom/prenom
+      const { data: existingProfile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
       const profileData = {
         id: user.id,
-        email: tempData?.email || user.email,
-        nom: tempData?.nom || "",
-        prenom: tempData?.prenom || "",
+        email: user.email,
+        nom: existingProfile?.nom || tempData?.nom || null,
+        prenom: existingProfile?.prenom || tempData?.prenom || null,
         role,
-        telephone: null,
-        photo_url: null,
-        bio: null,
-        specialisation: null,
-        tarif_horaire: null,
-        annees_experience: null,
+        telephone: existingProfile?.telephone || null,
+        photo_url: existingProfile?.photo_url || null,
+        bio: existingProfile?.bio || null,
+        specialisation: existingProfile?.specialisation || null,
+        tarif_horaire: existingProfile?.tarif_horaire || null,
+        annees_experience: existingProfile?.annees_experience || null,
       };
 
       // Validate that nom and prenom are present
@@ -108,33 +115,42 @@ export default function RolePage() {
           title: "Informations manquantes",
           description: "Veuillez d'abord compléter vos informations personnelles.",
         });
-        router.push("/complete-profile");
+        router.push("/profile");
         return;
       }
 
+      // Update or create profile
       const { error } = await supabase
         .from("profiles")
-        .insert([profileData]);
+        .upsert([profileData], { onConflict: "id" });
 
       if (error) {
         throw error;
       }
 
-      // Create default preferences
-      const { error: prefError } = await supabase
+      // Create default preferences if they don't exist
+      const { data: existingPreferences } = await supabase
         .from("preferences")
-        .insert([{
-          user_id: user.id,
-          langue: "FR" as const,
-          fuseau_horaire: "Europe/Paris",
-          theme: "clair" as const,
-          notifications_email: true,
-          notifications_sms: false,
-          preferences_ventes: null,
-        }]);
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
 
-      if (prefError) {
-        console.error("Error creating preferences:", prefError);
+      if (!existingPreferences) {
+        const { error: prefError } = await supabase
+          .from("preferences")
+          .insert([{
+            user_id: user.id,
+            langue: "FR" as const,
+            fuseau_horaire: "Europe/Paris",
+            theme: "clair" as const,
+            notifications_email: true,
+            notifications_sms: false,
+            preferences_ventes: null,
+          }]);
+
+        if (prefError) {
+          console.error("Error creating preferences:", prefError);
+        }
       }
 
       // Clear temp data

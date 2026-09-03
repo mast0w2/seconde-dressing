@@ -116,7 +116,7 @@ export function Navbar() {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-noir/10" />
                   <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
-                    <Link href={isClient ? "/client/settings" : isVendeuse ? "/vendeuse/settings" : "/"}>
+                    <Link href="/profile">
                       Mon profil
                     </Link>
                   </DropdownMenuItem>

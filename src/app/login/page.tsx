@@ -61,30 +61,31 @@ export default function LoginPage() {
         }
 
         if (profile) {
-          // Profile exists, check if it's complete
-          if (!profile.nom || !profile.prenom) {
-            // Profile incomplete, redirect to complete profile
-            toast({
-              title: "Bienvenue",
-              description: "Veuillez compléter vos informations personnelles.",
-            });
-            router.push("/complete-profile");
-            return;
-          }
-          
-          // Profile is complete, check if role is set
+          // Profile exists, check if role is set
           if (!profile.role) {
             // Role not set, redirect to role selection
             router.push("/role");
             return;
           }
         } else {
-          // No profile exists, redirect to complete profile
-          toast({
-            title: "Bienvenue",
-            description: "Veuillez compléter vos informations personnelles.",
-          });
-          router.push("/complete-profile");
+          // This shouldn't happen with the new flow, but handle it gracefully
+          // Create a basic profile
+          const { error: createError } = await supabase
+            .from("profiles")
+            .insert([{
+              id: user.id,
+              email: user.email,
+              nom: null,
+              prenom: null,
+              role: null,
+            }]);
+          
+          if (createError) {
+            console.error("Error creating profile:", createError);
+          }
+          
+          // Redirect to role selection (which will handle missing profile info)
+          router.push("/role");
           return;
         }
       }
@@ -96,10 +97,21 @@ export default function LoginPage() {
 
       router.push("/");
     } catch (error: any) {
+      // Check if it's an "user not found" error
+      const isUserNotFound = error.message?.toLowerCase().includes("user not found") || 
+                             error.message?.toLowerCase().includes("invalid login credentials");
+      
       toast({
         title: "Erreur de connexion",
-        description: error.message || "Email ou mot de passe incorrect.",
+        description: isUserNotFound 
+          ? "Aucun compte trouvé avec cette adresse email. "
+          : error.message || "Email ou mot de passe incorrect.",
         variant: "destructive",
+        action: isUserNotFound ? (
+          <Link href="/signup" className="text-primary hover:underline font-medium">
+            Créer un compte
+          </Link>
+        ) : undefined,
       });
     }
   };

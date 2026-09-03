@@ -46,6 +46,7 @@ export default function SignupPage() {
 
   const onSubmit = async (data: FormValues) => {
     try {
+      // First, create the auth user
       const { error: authError } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
@@ -55,22 +56,45 @@ export default function SignupPage() {
         throw authError;
       }
 
-      // Store user info temporarily in session storage
-      sessionStorage.setItem(
-        "tempUser",
-        JSON.stringify({
-          email: data.email,
-          prenom: data.prenom,
+      // Get the user to create the profile
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        throw userError;
+      }
+
+      if (!user) {
+        throw new Error("User not found after signup");
+      }
+
+      // Create the profile directly with nom and prenom
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .insert([{
+          id: user.id,
+          email: user.email,
           nom: data.nom,
-        })
-      );
+          prenom: data.prenom,
+          telephone: null,
+          photo_url: null,
+          role: null,
+          bio: null,
+          specialisation: null,
+          tarif_horaire: null,
+          annees_experience: null,
+        }]);
+
+      if (profileError) {
+        throw profileError;
+      }
 
       toast({
         title: "Inscription réussie",
         description: "Veuillez vérifier votre email pour confirmer votre compte.",
       });
 
-      router.push("/complete-profile");
+      // Redirect to role selection
+      router.push("/role");
     } catch (error: any) {
       toast({
         title: "Erreur d'inscription",
