@@ -14,8 +14,10 @@ export const metadata: Metadata = {
   },
   title: "Seconde - Plateforme de revente de vêtements",
   description:
-    "Seconde connecte les clients avec des vendeuses professionnelles pour vendre vos vêtements.",
+    "Seconde connecte les clients avec des vendeurs professionnels pour vendre vos vêtements.",
 };
+
+export const dynamic = 'force-dynamic';
 
 export default function RootLayout({
   children,

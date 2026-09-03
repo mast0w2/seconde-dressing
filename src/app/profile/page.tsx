@@ -14,6 +14,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
 import { Profile } from "@/types/database";
 import { Mail, Phone, User, Home, MapPin, ArrowLeft, Edit, Save, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
 const profileFormSchema = z.object({

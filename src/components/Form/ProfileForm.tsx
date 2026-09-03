@@ -21,7 +21,7 @@ const clientSchema = z.object({
   bio: z.string().optional(),
 });
 
-const vendeuseSchema = z.object({
+const vendeurSchema = z.object({
   nom: z.string().min(2, "Le nom est requis"),
   prenom: z.string().min(2, "Le prénom est requis"),
   telephone: z.string().optional(),
@@ -41,7 +41,7 @@ export function ProfileForm({ profile, role, onSuccess }: ProfileFormProps) {
   const { toast } = useToast();
   const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
-  const schema = role === "vendeuse" ? vendeuseSchema : clientSchema;
+  const schema = role === "vendeur" ? vendeurSchema : clientSchema;
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
@@ -50,7 +50,7 @@ export function ProfileForm({ profile, role, onSuccess }: ProfileFormProps) {
       prenom: profile?.prenom || "",
       telephone: profile?.telephone || "",
       bio: profile?.bio || "",
-      ...(role === "vendeuse" && {
+      ...(role === "vendeur" && {
         specialisation: profile?.specialisation || "",
         tarif_horaire: profile?.tarif_horaire || 0,
         annees_experience: profile?.annees_experience || 0,
@@ -86,11 +86,11 @@ export function ProfileForm({ profile, role, onSuccess }: ProfileFormProps) {
         role,
       };
 
-      if (role === "vendeuse" && "specialisation" in data) {
-        const vendeuseData = data as z.infer<typeof vendeuseSchema>;
-        profileData.specialisation = vendeuseData.specialisation;
-        profileData.tarif_horaire = vendeuseData.tarif_horaire;
-        profileData.annees_experience = vendeuseData.annees_experience;
+      if (role === "vendeur" && "specialisation" in data) {
+        const vendeurData = data as z.infer<typeof vendeurSchema>;
+        profileData.specialisation = vendeurData.specialisation;
+        profileData.tarif_horaire = vendeurData.tarif_horaire;
+        profileData.annees_experience = vendeurData.annees_experience;
       }
 
       const { error } = await supabase
@@ -170,7 +170,7 @@ export function ProfileForm({ profile, role, onSuccess }: ProfileFormProps) {
         )}
       </div>
 
-      {role === "vendeuse" && (
+      {role === "vendeur" && (
         <>
           <div className="space-y-2">
             <Label htmlFor="specialisation">Spécialisation</Label>
