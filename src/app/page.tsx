@@ -1,318 +1,281 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useRef } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProgressiveEstimationForm } from "@/components/Form/ProgressiveEstimationForm";
-import { Mail, Phone, Check, Calendar, Leaf, Target, Euro, ChevronDown, TrendingUp, Heart, Sparkles, Users, Recycle } from "lucide-react";
+import { Clock, Euro, Calendar, Truck, ShieldCheck, Leaf } from "lucide-react";
+
+// ============================================================================
+// Data
+// ============================================================================
+
+const BENEFITS = [
+  {
+    icon: Clock,
+    title: "Gain de temps",
+    text: "Plus besoin de gérer les annonces, les rendez-vous ou les négociations.",
+  },
+  {
+    icon: Euro,
+    title: "Gagner de l'argent",
+    text: "Vos vêtements sont vendus au meilleur prix, et vous récupérez une part de chaque vente.",
+  },
+  {
+    icon: Calendar,
+    title: "Flexibilité",
+    text: "Choisissez le moment qui vous convient pour les rendez-vous.",
+  },
+  {
+    icon: Truck,
+    title: "Service clé en main",
+    text: "Récupération, photographie, mise en ligne et vente : on s'occupe de tout.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Sécurité",
+    text: "Transactions sécurisées et suivi transparent de vos ventes.",
+  },
+  {
+    icon: Leaf,
+    title: "Durabilité",
+    text: "Une seconde vie pour vos vêtements, c'est une mode plus durable et responsable.",
+  },
+];
+
+const STEPS = [
+  {
+    n: "01",
+    title: "Prenez rendez-vous",
+    text: "Remplissez le formulaire pour qu'on vous contacte.",
+  },
+  {
+    n: "02",
+    title: "Contact rapide",
+    text: "Nous vous appelons dans les deux heures pour organiser la collecte.",
+  },
+  {
+    n: "03",
+    title: "Récupération à domicile",
+    text: "Nous venons chercher vos vêtements directement chez vous.",
+  },
+  {
+    n: "04",
+    title: "Mise en vente",
+    text: "Vos pièces sont photographiées, décrites et mises en ligne sur nos plateformes partenaires.",
+  },
+  {
+    n: "05",
+    title: "Paiement",
+    text: "Vous recevez votre part sur votre compte bancaire après la vente.",
+  },
+];
 
 // ============================================================================
 // Component
 // ============================================================================
 
 export default function Home() {
-  const [showForm, setShowForm] = useState(false);
-  const howItWorksRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to section
-  const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
-    if (ref.current) {
-      ref.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+  const scrollToForm = () => {
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  // Render
   return (
-    <div className="flex flex-col min-h-screen bg-blanc text-noir">
-      {/* Hero Section - Full page - Cezanne Style */}
-      <section 
-        className="relative py-20 md:py-32 scroll-section bg-creme"
-        style={{
-          backgroundImage: "url('/background.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundAttachment: "fixed"
-        }}
-      >
-        <div className="absolute inset-0 bg-creme/70 backdrop-blur-sm"></div>
-        <div className="container relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="mb-12">
-              <h1 className="text-5xl md:text-7xl font-700 text-noir mb-8 leading-tight">
-                Seconde
-              </h1>
-              <p className="text-lg sm:text-xl md:text-2xl text-gris-moyen mb-12 max-w-3xl mx-auto">
-                On vous aide à vendre vos vêtements, donnez-leur une seconde vie !
-              </p>
-              
-              {/* Avantages avec hiérarchie - Variante A */}
-              <div className="w-full max-w-4xl mx-auto text-center space-y-2 sm:space-y-3">
-                {/* Titre principal */}
-                <h3 className="text-lg sm:text-xl md:text-2xl font-600 text-noir tracking-wide">
-                  Videz votre dressing
-                </h3>
-                
-                {/* Sous-éléments alignés */}
-                <div className="flex flex-wrap justify-center gap-1 sm:gap-2">
-                  <span className="text-noir/60">•</span>
-                  <span className="text-base sm:text-lg font-400 text-noir whitespace-nowrap">
-                    sans effort
-                  </span>
-                  <span className="text-noir/60 mx-1">•</span>
-                  <span className="text-base sm:text-lg font-400 text-noir whitespace-nowrap">
-                    en gagnant de l&apos;argent
-                  </span>
-                  <span className="text-noir/60 mx-1">•</span>
-                  <span className="text-base sm:text-lg font-400 text-noir whitespace-nowrap">
-                    grâce à l&apos;économie circulaire
-                  </span>
-                </div>
-              </div>
-              <Button 
-                onClick={() => scrollToSection(formRef)}
-                className="mt-10 bg-noir hover:bg-gris-fonce text-blanc px-8 sm:px-12 py-3 sm:py-4 rounded-none text-sm sm:text-lg font-500 transition-all duration-300 tracking-widest"
+    <div className="bg-creme text-noir">
+      {/* ================= HERO ================= */}
+      <section className="px-6 sm:px-10 lg:px-[76px] pt-16 sm:pt-20 pb-16 sm:pb-20">
+        <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_470px] gap-10 lg:gap-16 items-center">
+          <div className="flex flex-col gap-6 sm:gap-7">
+            <div className="eyebrow">Conciergerie de seconde main</div>
+            <h1 className="text-4xl sm:text-5xl lg:text-[56px] leading-[1.12]">
+              On vous aide à vendre vos vêtements,
+              <br />
+              <span className="italic text-sauge-fonce">donnez-leur une seconde vie.</span>
+            </h1>
+            <p className="text-base sm:text-lg text-gris-moyen max-w-[480px]">
+              Vous nous ouvrez votre dressing. On vient le chercher chez vous, on trie, on
+              photographie, on vend. Vous n&apos;avez rien à gérer.
+            </p>
+
+            <div className="flex flex-wrap items-center gap-3 text-[10px] sm:text-[11px] tracking-[0.18em] uppercase text-sauge-fonce">
+              <span>Videz votre dressing</span>
+              <Leaf className="h-3 w-3 text-sauge-clair" />
+              <span>Sans effort</span>
+              <Leaf className="h-3 w-3 text-sauge-clair" />
+              <span>En gagnant de l&apos;argent</span>
+              <Leaf className="h-3 w-3 text-sauge-clair" />
+              <span>Économie circulaire</span>
+            </div>
+
+            <div className="flex items-center gap-5 mt-1">
+              <Button
+                onClick={scrollToForm}
+                className="bg-noir hover:bg-transparent hover:text-noir border border-noir text-blanc rounded-none px-8 py-6 text-[11px] tracking-[0.2em] uppercase"
               >
-                DEMANDEZ UN RENDEZ-VOUS
+                Demandez un rendez-vous
               </Button>
+              <span className="text-xs text-gris-moyen">Réponse sous 2h · Gratuit</span>
+            </div>
+          </div>
+
+          <div className="relative">
+            <div className="absolute -inset-x-6 -top-6 -bottom-10 bg-sauge-clair/45 rounded-[240px_240px_40px_40px]" />
+            <div className="relative w-full h-[360px] sm:h-[440px] lg:h-[520px] rounded-[235px_235px_16px_16px] overflow-hidden">
+              <Image
+                src="/dressing-sort-1.jpg"
+                alt="Deux femmes trient des vêtements devant un portant"
+                fill
+                sizes="(max-width: 1024px) 100vw, 470px"
+                className="object-cover"
+                priority
+              />
             </div>
           </div>
         </div>
-        {/* Scroll down indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-          <div className="animate-bounce">
-            <ChevronDown className="h-6 w-6 text-noir" />
+      </section>
+
+      {/* ================= NOTRE CONCEPT ================= */}
+      <section id="concept" className="bg-gris-clair py-16 sm:py-20 lg:py-24">
+        <div className="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-[76px] grid grid-cols-1 lg:grid-cols-[460px_1fr] gap-10 lg:gap-16 items-center">
+          <div className="relative w-full h-[300px] sm:h-[380px] lg:h-[420px] rounded-xl overflow-hidden">
+            <Image
+              src="/dressing-sort-3.jpg"
+              alt="Des mains plient des pulls sur une table en bois"
+              fill
+              sizes="(max-width: 1024px) 100vw, 460px"
+              className="object-cover"
+            />
+          </div>
+          <div className="flex flex-col gap-5">
+            <div className="eyebrow">Notre concept</div>
+            <h2 className="text-3xl sm:text-4xl leading-[1.18]">
+              Confiez-nous vos vêtements, on s&apos;occupe du reste.
+            </h2>
+            <p className="text-base text-gris-moyen max-w-[460px]">
+              Chaque pièce est triée, photographiée et décrite à la main, puis mise en vente sur
+              nos plateformes partenaires. Pas d&apos;annonces à rédiger, pas de rendez-vous à
+              gérer, pas de négociations.
+            </p>
+            <p className="text-base text-gris-moyen max-w-[460px]">
+              Vous récupérez une part du prix de vente de chaque article. Ce qui ne se vend pas
+              vous revient, ou part vers nos filières de réemploi.
+            </p>
+            <div className="flex items-center gap-3 mt-1">
+              <div className="w-11 h-px bg-sauge-clair" />
+              <span className="text-[11px] tracking-[0.16em] uppercase text-sauge-fonce">
+                Une équipe, pas un algorithme
+              </span>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Concept Section - Full page - Cezanne Style */}
-      <section className="py-12 sm:py-16 md:py-24 bg-blanc scroll-section">
-        <div className="container">
-          <div className="max-w-6xl mx-auto">
-            {/* Main Concept Card */}
-            <Card className="mb-12 sm:mb-16 shadow-none border-0">
-              <CardHeader className="text-center pb-0">
-                <CardTitle className="text-3xl sm:text-4xl md:text-5xl font-700 text-noir mb-4">
-                  NOTRE CONCEPT
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="max-w-4xl mx-auto">
-                  <p className="mb-10 sm:mb-12 text-base sm:text-lg text-gris-moyen leading-relaxed text-center">
-                    Confiez-nous vos vêtements, on s'occupe du reste !
-                  </p>
+      {/* ================= POURQUOI CHOISIR SECONDE ================= */}
+      <section id="pourquoi" className="px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="text-center flex flex-col items-center gap-3 mb-12 sm:mb-14">
+            <div className="eyebrow">Pourquoi choisir Seconde ?</div>
+            <h2 className="text-3xl sm:text-4xl">Ce que vous n&apos;aurez plus à faire</h2>
+          </div>
 
-                  <h3 className="text-xl sm:text-2xl md:text-3xl font-600 mb-10 sm:mb-12 text-noir">
-                    POURQUOI CHOISIR SECONDE ?
-                  </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
+            {BENEFITS.map(({ icon: Icon, title, text }) => (
+              <div
+                key={title}
+                className="bg-gris-tres-clair border border-gris-clair p-8 flex flex-col gap-3.5"
+              >
+                <Icon className="h-7 w-7 text-sauge" strokeWidth={1.4} />
+                <h3 className="text-xl">{title}</h3>
+                <p className="text-gris-moyen text-sm">{text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-                    {/* Benefit 1 */}
-                    <div className="flex items-start gap-4 p-4 sm:p-6 border-t border-noir/10">
-                      <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
-                        <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
-                      </div>
-                      <div>
-                        <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">GAIN DE TEMPS</h4>
-                        <p className="text-xs sm:text-sm text-gris-moyen">
-                          Plus besoin de gérer les annonces, les rendez-vous ou
-                          les négociations
-                        </p>
-                      </div>
-                    </div>
+      {/* ================= COMMENT ÇA FONCTIONNE ================= */}
+      <section id="etapes" className="bg-noir text-creme py-16 sm:py-20 lg:py-24">
+        <div className="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-[76px] grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-10 lg:gap-16 items-start">
+          <div className="flex flex-col gap-3.5">
+            <div className="text-[10px] tracking-[0.26em] uppercase text-sauge-clair">
+              Comment ça fonctionne ?
+            </div>
+            <h2 className="text-3xl sm:text-4xl text-creme mb-4">Cinq étapes, et c&apos;est réglé.</h2>
 
-                    {/* Benefit 2 */}
-                    <div className="flex items-start gap-4 p-4 sm:p-6 border-t border-noir/10">
-                      <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
-                        <Euro className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
-                      </div>
-                      <div>
-                        <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">GAGNER DE L'ARGENT</h4>
-                        <p className="text-xs sm:text-sm text-gris-moyen">
-                          Vos vêtements sont vendus au meilleur prix et vous récupérez une partie du prix de vente de vos articles
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Benefit 3 */}
-                    <div className="flex items-start gap-4 p-4 sm:p-6 border-t border-noir/10">
-                      <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
-                        <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
-                      </div>
-                      <div>
-                        <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">FLEXIBILITÉ</h4>
-                        <p className="text-xs sm:text-sm text-gris-moyen">
-                          Choisissez le moment qui vous convient pour les
-                          rendez-vous
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Benefit 4 */}
-                    <div className="flex items-start gap-4 p-4 sm:p-6 border-t border-noir/10">
-                      <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
-                        <Check className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
-                      </div>
-                      <div>
-                        <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">SERVICE CLÉ EN MAIN</h4>
-                        <p className="text-xs sm:text-sm text-gris-moyen">
-                          Nous nous occupons de tout : récupération, photographie,
-                          mise en ligne et vente
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Benefit 5 */}
-                    <div className="flex items-start gap-4 p-4 sm:p-6 border-t border-noir/10">
-                      <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
-                        <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
-                      </div>
-                      <div>
-                        <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">SÉCURITÉ</h4>
-                        <p className="text-xs sm:text-sm text-gris-moyen">
-                          Transactions sécurisées et suivi transparent de vos
-                          ventes
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Benefit 6 */}
-                    <div className="flex items-start gap-4 p-4 sm:p-6 border-t border-noir/10">
-                      <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
-                        <Heart className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
-                      </div>
-                      <div>
-                        <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">DURABILITÉ</h4>
-                        <p className="text-xs sm:text-sm text-gris-moyen">
-                          En donnant une seconde vie à vos vêtements, vous
-                          contribuez à une mode plus durable et responsable
-                        </p>
-                      </div>
-                    </div>
+            <div className="flex flex-col">
+              {STEPS.map((step, i) => (
+                <div
+                  key={step.n}
+                  className={`grid grid-cols-[52px_1fr] sm:grid-cols-[62px_1fr] gap-4 sm:gap-5 py-5 ${
+                    i < STEPS.length - 1 ? "border-b border-[#46523f]" : ""
+                  }`}
+                >
+                  <div className="font-serif text-3xl leading-none text-sauge-clair">{step.n}</div>
+                  <div>
+                    <h3 className="text-lg sm:text-xl text-creme mb-1">{step.title}</h3>
+                    <p className="text-[#b9c2b0] text-sm">{step.text}</p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              ))}
+            </div>
           </div>
-        </div>
-        {/* Scroll down indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-          <div className="animate-bounce">
-            <ChevronDown className="h-6 w-6 text-noir" />
-          </div>
-        </div>
-      </section>
 
-      {/* How It Works Section - Full page - Cezanne Style */}
-      <section 
-        ref={howItWorksRef}
-        className="py-12 sm:py-16 md:py-24 bg-creme scroll-section"
-      >
-        <div className="container">
-          <div className="max-w-6xl mx-auto">
-            <Card className="shadow-none border-0">
-              <CardHeader className="text-center pb-0">
-                <CardTitle className="text-3xl sm:text-4xl md:text-5xl font-700 text-noir mb-6 sm:mb-8">
-                  COMMENT ÇA FONCTIONNE ?
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="max-w-4xl mx-auto space-y-8 sm:space-y-10">
-                  <div className="flex gap-4 sm:gap-6">
-                    <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-noir text-blanc rounded-full flex items-center justify-center font-600 sm:font-700 text-sm sm:text-base">
-                      1
-                    </div>
-                    <div>
-                      <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">PRENEZ RENDEZ-VOUS</h4>
-                      <p className="text-xs sm:text-sm text-gris-moyen">
-                        Remplissez notre formulaire pour qu'on vous contacte
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4 sm:gap-6">
-                    <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-noir text-blanc rounded-full flex items-center justify-center font-600 sm:font-700 text-sm sm:text-base">
-                      2
-                    </div>
-                    <div>
-                      <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">CONTACT RAPIDE</h4>
-                      <p className="text-xs sm:text-sm text-gris-moyen">
-                        Nous vous contactons dans les deux heures pour organiser un rendez-vous
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4 sm:gap-6">
-                    <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-noir text-blanc rounded-full flex items-center justify-center font-600 sm:font-700 text-sm sm:text-base">
-                      3
-                    </div>
-                    <div>
-                      <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">RÉCUPÉRATION À DOMICILE</h4>
-                      <p className="text-xs sm:text-sm text-gris-moyen">
-                        Nous venons récupérer vos vêtements directement chez vous
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4 sm:gap-6">
-                    <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-noir text-blanc rounded-full flex items-center justify-center font-600 sm:font-700 text-sm sm:text-base">
-                      4
-                    </div>
-                    <div>
-                      <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">MISE EN VENTE</h4>
-                      <p className="text-xs sm:text-sm text-gris-moyen">
-                        Vos vêtements sont photographiés, décrits et mis en
-                        ligne sur nos plateformes partenaires
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4 sm:gap-6">
-                    <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-noir text-blanc rounded-full flex items-center justify-center font-600 sm:font-700 text-sm sm:text-base">
-                      5
-                    </div>
-                    <div>
-                      <h4 className="font-600 mb-2 sm:mb-3 text-sm sm:text-base text-noir">PAIEMENT</h4>
-                      <p className="text-xs sm:text-sm text-gris-moyen">
-                        Recevez votre paiement directement sur votre compte bancaire après la vente
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-        {/* Scroll down indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-          <div className="animate-bounce">
-            <ChevronDown className="h-6 w-6 text-noir" />
+          <div className="flex flex-col gap-5">
+            <div className="relative w-full h-[340px] sm:h-[420px] lg:h-[480px] rounded-[200px_200px_12px_12px] overflow-hidden">
+              <Image
+                src="/dressing-sort-2.jpg"
+                alt="Une femme choisit une robe dans son dressing"
+                fill
+                sizes="(max-width: 1024px) 100vw, 400px"
+                className="object-cover"
+              />
+            </div>
+            <p className="font-serif italic text-lg sm:text-xl text-[#c3cbb9] leading-relaxed">
+              « Chaque pièce passe entre nos mains — pas dans une machine. »
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Progressive Form Section - Full page - Cezanne Style */}
-      <section 
-        ref={formRef}
-        id="estimation-form"
-        className="py-12 sm:py-16 md:py-24 bg-blanc scroll-section"
-      >
-        <div className="container">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12 sm:mb-16">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-700 mb-4 sm:mb-6 text-noir">
-                DEMANDEZ UN RENDEZ-VOUS
+      {/* ================= DEMANDEZ UN RENDEZ-VOUS ================= */}
+      <section ref={formRef} id="estimation-form" className="px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24">
+        <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_440px] gap-10 lg:gap-16 items-center">
+          <div className="flex flex-col gap-6">
+            <div className="text-center lg:text-left flex flex-col gap-4">
+              <div className="eyebrow">Demandez un rendez-vous</div>
+              <h2 className="text-3xl sm:text-4xl leading-[1.15]">
+                Videz votre dressing, sans effort.
               </h2>
+              <p className="text-gris-moyen max-w-[440px]">
+                Quelques questions, ça prend moins d&apos;une minute. On vous rappelle dans les
+                deux heures.
+              </p>
+              <div className="flex flex-wrap justify-center lg:justify-start gap-6 text-[11px] tracking-[0.14em] uppercase text-sauge-fonce">
+                <span>Gratuit</span>
+                <span>À domicile</span>
+                <span>Sans engagement</span>
+              </div>
             </div>
 
-            <div className="max-w-2xl mx-auto">
-              <ProgressiveEstimationForm />
+            <ProgressiveEstimationForm />
+          </div>
+
+          <div className="relative hidden lg:block">
+            <div className="absolute inset-x-[-28px] top-[30px] bottom-[-26px] bg-sauge-clair/45 rounded-xl" />
+            <div className="relative w-full h-[400px] rounded-xl overflow-hidden">
+              <Image
+                src="/dressing-sort-4.jpg"
+                alt="Une cliente confie un sac de vêtements"
+                fill
+                sizes="440px"
+                className="object-cover"
+              />
             </div>
           </div>
         </div>
       </section>
-
     </div>
   );
 }

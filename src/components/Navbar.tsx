@@ -16,7 +16,8 @@ import { useToast } from "./ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Leaf, Menu, X, Users } from "lucide-react";
+import { Menu, X, Users } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -68,7 +69,7 @@ export function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-blanc/95 backdrop-blur border-b border-noir/10">
-      <div className="container flex h-16 max-w-screen-2xl items-center">
+      <div className="container flex h-20 sm:h-24 max-w-screen-2xl items-center">
         {/* Menu hamburger - extrême gauche sur tous les écrans */}
         <button
           className="p-2 rounded-md border border-noir/10 hover:bg-noir/5 transition-colors"
@@ -81,11 +82,8 @@ export function Navbar() {
 
         {/* Logo SECONDE - centré */}
         <div className="flex-1 flex justify-center">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 border border-noir rounded-full flex items-center justify-center">
-              <Leaf className="h-4 w-4 text-noir" />
-            </div>
-            <span className="text-xl font-bold text-noir tracking-wide">SECONDE</span>
+          <Link href="/" className="flex items-center">
+            <Logo layout="stack" />
           </Link>
         </div>
 
@@ -172,7 +170,7 @@ export function Navbar() {
         </div>
 
         {isMenuOpen && (
-          <div className="absolute top-16 left-0 right-0 bg-blanc border-b border-noir/10 z-50">
+          <div className="absolute top-20 sm:top-24 left-0 right-0 bg-blanc border-b border-noir/10 z-50">
             <div className="flex flex-col gap-3 p-4 sm:p-6">
               <Link
                 href="/"
