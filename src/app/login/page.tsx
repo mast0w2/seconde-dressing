@@ -79,15 +79,19 @@ export default function LoginPage() {
         } else {
           router.push("/");
         }
+        
+        toast({
+          title: "Connexion réussie",
+          description: "Vous êtes maintenant connecté.",
+        });
       } else {
         // This shouldn't happen with the new flow, but handle it gracefully
         router.push("/");
+        toast({
+          title: "Connexion réussie",
+          description: "Vous êtes maintenant connecté.",
+        });
       }
-
-      toast({
-        title: "Connexion réussie",
-        description: "Vous êtes maintenant connecté.",
-      });
     } catch (error: any) {
       console.error("Login error:", error);
       toast({

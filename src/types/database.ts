@@ -115,10 +115,6 @@ export interface UpdateProfile {
 export interface Demande {
   id: string;
   client_id: string;
-  client_nom: string;
-  client_prenom: string;
-  client_email: string;
-  client_telephone: string | null;
   type_demande: string;
   message: string;
   statut: StatutDemande;
@@ -129,15 +125,16 @@ export interface Demande {
   heure_proposee: string | null;
   date_confirmee: string | null;
   heure_confirmee: string | null;
+  // These fields are populated via JOINs with profiles table
+  client_nom?: string;
+  client_prenom?: string;
+  client_email?: string;
+  client_telephone?: string | null;
 }
 
 export interface InsertDemande {
   id?: string;
   client_id: string;
-  client_nom: string;
-  client_prenom: string;
-  client_email: string;
-  client_telephone?: string | null;
   type_demande?: string;
   message: string;
   statut?: StatutDemande;
@@ -153,10 +150,6 @@ export interface InsertDemande {
 export interface UpdateDemande {
   id?: string;
   client_id?: string;
-  client_nom?: string;
-  client_prenom?: string;
-  client_email?: string;
-  client_telephone?: string | null;
   type_demande?: string;
   message?: string;
   statut?: StatutDemande;

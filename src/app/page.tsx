@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -99,11 +100,23 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <div className="max-w-4xl mx-auto">
-                  <p className="mb-10 sm:mb-12 text-base sm:text-lg text-gris-moyen leading-relaxed text-center">
+                  <p className="mb-8 sm:mb-10 text-base sm:text-lg text-gris-moyen leading-relaxed text-center">
                     Confiez-nous vos vêtements, on s'occupe du reste !
                   </p>
+                  
+                  {/* Bouton Devenir Vendeur - Intégré dans la section Concept */}
+                  <div className="flex justify-center mb-10 sm:mb-12">
+                    <Button 
+                      asChild
+                      className="bg-noir hover:bg-gris-fonce text-blanc px-6 sm:px-8 py-2 sm:py-3 rounded-none text-sm sm:text-base font-500 transition-all duration-300"
+                    >
+                      <Link href="/signup?vendeur=true">
+                        DEVENIR VENDEUR
+                      </Link>
+                    </Button>
+                  </div>
 
-                  <h3 className="text-xl sm:text-2xl md:text-3xl font-600 mb-10 sm:mb-12 text-noir">
+                  <h3 className="text-xl sm:text-2xl md:text-3xl font-600 mb-8 sm:mb-10 text-noir">
                     POURQUOI CHOISIR SECONDE ?
                   </h3>
 

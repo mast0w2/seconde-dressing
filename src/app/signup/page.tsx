@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -27,8 +27,12 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+
+  // Check if vendeur=true is in URL
+  const isVendeurSignup = searchParams.get('vendeur') === 'true';
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -67,7 +71,9 @@ export default function SignupPage() {
         throw new Error("User not found after signup");
       }
 
-      // Create the profile directly with nom and prenom
+      // Create the profile with role based on URL param
+      const role = isVendeurSignup ? 'vendeur' : null;
+      
       const { error: profileError } = await supabase
         .from("profiles")
         .insert([{
@@ -77,7 +83,7 @@ export default function SignupPage() {
           prenom: data.prenom,
           telephone: null,
           photo_url: null,
-          role: null,
+          role: role,
           bio: null,
           specialisation: null,
           tarif_horaire: null,
@@ -93,8 +99,12 @@ export default function SignupPage() {
         description: "Veuillez vérifier votre email pour confirmer votre compte.",
       });
 
-      // Redirect to role selection
-      router.push("/role");
+      // Redirect based on role
+      if (role === 'vendeur') {
+        router.push("/vendeur");
+      } else {
+        router.push("/");
+      }
     } catch (error: any) {
       toast({
         title: "Erreur d'inscription",
@@ -126,9 +136,14 @@ export default function SignupPage() {
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl">Créer un compte</CardTitle>
+          <CardTitle className="text-2xl">
+            {isVendeurSignup ? "Devenir Vendeur" : "Créer un compte"}
+          </CardTitle>
           <CardDescription>
-            Inscrivez-vous pour commencer à utiliser Seconde
+            {isVendeurSignup 
+              ? "Inscrivez-vous pour devenir vendeur partenaire" 
+              : "Inscrivez-vous pour commencer à utiliser Seconde"
+            }
           </CardDescription>
         </CardHeader>
 
@@ -205,7 +220,7 @@ export default function SignupPage() {
             </div>
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Inscription..." : "S'inscrire"}
+              {isSubmitting ? "Inscription..." : isVendeurSignup ? "Devenir Vendeur" : "S'inscrire"}
             </Button>
           </form>
 

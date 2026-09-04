@@ -8,45 +8,44 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
 import { Demande, StatutDemande, Profile } from "@/types/database";
-import { Calendar, Clock, Mail, Phone, CheckCircle, XCircle, RefreshCw, Package, Euro, ArrowLeft } from "lucide-react";
+import { Calendar, Clock, Mail, Phone, CheckCircle, XCircle, Package, Euro, ArrowLeft, Plus } from "lucide-react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 // Status display configuration
 const statutConfig: Record<StatutDemande, { label: string; color: string; icon: React.ReactNode }> = {
   en_attente: {
     label: "En attente",
-    color: "bg-yellow-100 text-yellow-800",
+    color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
     icon: <Clock className="h-4 w-4" />,
   },
   acceptee: {
     label: "Acceptée",
-    color: "bg-blue-100 text-blue-800",
+    color: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
     icon: <CheckCircle className="h-4 w-4" />,
   },
   refusee: {
     label: "Refusée",
-    color: "bg-red-100 text-red-800",
+    color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
     icon: <XCircle className="h-4 w-4" />,
   },
   articles_recuperes: {
     label: "Articles récupérés",
-    color: "bg-purple-100 text-purple-800",
+    color: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
     icon: <Package className="h-4 w-4" />,
   },
   articles_en_vente: {
     label: "Articles en vente",
-    color: "bg-orange-100 text-orange-800",
+    color: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
     icon: <Euro className="h-4 w-4" />,
   },
   terminee: {
     label: "Terminée",
-    color: "bg-green-100 text-green-800",
+    color: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
     icon: <CheckCircle className="h-4 w-4" />,
   },
 };
 
-export default function DashboardPage() {
+export default function ClientDashboardPage() {
   const router = useRouter();
   const { toast } = useToast();
   const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
@@ -79,141 +78,39 @@ export default function DashboardPage() {
           return;
         }
 
-        setProfile(profile);
-
-        // Redirect to role-specific dashboard
-        if (profile.role === "client") {
-          router.push("/dashboard/client");
-          return;
-        } else if (profile.role === "vendeur") {
-          router.push("/dashboard/vendeur");
+        // Only clients can access this page
+        if (profile.role !== "client") {
+          router.push("/dashboard");
           return;
         }
 
-        setIsLoading(false);
+        setProfile(profile);
+
+        // Fetch client's demandes
+        const { data: demandesData, error } = await supabase
+          .from("demandes")
+          .select("*")
+          .eq("client_id", currentUser.id)
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          throw error;
+        }
+
+        setDemandes(demandesData || []);
       } catch (error: any) {
         toast({
           title: "Erreur",
-          description: error.message || "Impossible de charger les données.",
+          description: error.message || "Impossible de charger les demandes.",
           variant: "destructive",
         });
+      } finally {
         setIsLoading(false);
       }
     };
 
     fetchData();
   }, [supabase, router, toast]);
-
-  // Handle vendeur actions
-  const handleAcceptDemande = async (demandeId: string) => {
-    try {
-      const { error } = await supabase
-        .from("demandes")
-        .update({
-          statut: "acceptee",
-          vendeur_id: user.id,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", demandeId);
-
-      if (error) {
-        throw error;
-      }
-
-      // Refresh data
-      const { data: updatedDemandes } = await supabase
-        .from("demandes")
-        .select("*")
-        .or("vendeur_id.is.null,vendeur_id.eq.${user.id}")
-        .order("created_at", { ascending: false });
-
-      setDemandes(updatedDemandes || []);
-
-      toast({
-        title: "Demande acceptée",
-        description: "Vous avez accepté cette demande. Le client a été notifié.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleRefuseDemande = async (demandeId: string) => {
-    try {
-      const { error } = await supabase
-        .from("demandes")
-        .update({
-          statut: "refusee",
-          vendeur_id: null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", demandeId);
-
-      if (error) {
-        throw error;
-      }
-
-      // Refresh data
-      const { data: updatedDemandes } = await supabase
-        .from("demandes")
-        .select("*")
-        .or("vendeur_id.is.null,vendeur_id.eq.${user.id}")
-        .order("created_at", { ascending: false });
-
-      setDemandes(updatedDemandes || []);
-
-      toast({
-        title: "Demande refusée",
-        description: "Vous avez refusé cette demande.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleUpdateStatut = async (demandeId: string, newStatut: StatutDemande) => {
-    try {
-      const { error } = await supabase
-        .from("demandes")
-        .update({
-          statut: newStatut,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", demandeId);
-
-      if (error) {
-        throw error;
-      }
-
-      // Refresh data
-      const { data: updatedDemandes } = await supabase
-        .from("demandes")
-        .select("*")
-        .eq("client_id", user.id)
-        .order("created_at", { ascending: false });
-
-      setDemandes(updatedDemandes || []);
-
-      toast({
-        title: "Statut mis à jour",
-        description: `La demande a été passée en "${statutConfig[newStatut].label}".`,
-      });
-    } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue.",
-        variant: "destructive",
-      });
-    }
-  };
 
   // Filter demandes based on active tab
   const filteredDemandes = demandes.filter((demande) => {
@@ -262,11 +159,9 @@ export default function DashboardPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Tableau de bord</h1>
+            <h1 className="text-3xl font-bold">Mon Tableau de Bord</h1>
             <p className="text-muted-foreground">
-              {profile.role === "client" 
-                ? "Suivez l'état de vos demandes de rendez-vous"
-                : "Gérez les demandes des clients"}
+              Suivez l'état de vos demandes de rendez-vous
             </p>
           </div>
         </div>
@@ -297,19 +192,17 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {profile.role === "vendeur" && (
-            <Card 
-              className={`cursor-pointer transition-shadow ${activeTab === "acceptee" ? "ring-2 ring-primary" : ""}`}
-              onClick={() => setActiveTab("acceptee")}
-            >
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Acceptées</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{counts.acceptee}</div>
-              </CardContent>
-            </Card>
-          )}
+          <Card 
+            className={`cursor-pointer transition-shadow ${activeTab === "acceptee" ? "ring-2 ring-primary" : ""}`}
+            onClick={() => setActiveTab("acceptee")}
+          >
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Acceptées</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{counts.acceptee}</div>
+            </CardContent>
+          </Card>
 
           <Card 
             className={`cursor-pointer transition-shadow ${activeTab === "refusee" ? "ring-2 ring-primary" : ""}`}
@@ -350,39 +243,35 @@ export default function DashboardPage() {
 
         {/* Demandes List */}
         <Card>
-          <CardHeader>
-            <CardTitle>
-              {profile.role === "client" ? "Mes demandes" : "Demandes des clients"}
-            </CardTitle>
-            <CardDescription>
-              {profile.role === "client" 
-                ? "Suivez l'état de vos demandes de rendez-vous"
-                : "Acceptez ou refusez les demandes, et gérez le processus de vente"}
-            </CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>Mes demandes</CardTitle>
+              <CardDescription>
+                Suivez l'état de vos demandes de rendez-vous
+              </CardDescription>
+            </div>
+            <Button asChild>
+              <Link href="/demande-rdv">
+                <Plus className="h-4 w-4 mr-2" />
+                Nouvelle demande
+              </Link>
+            </Button>
           </CardHeader>
 
           <CardContent>
             {filteredDemandes.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <p className="mb-4">Aucune demande trouvée.</p>
-                {profile.role === "client" && (
-                  <Button asChild>
-                    <Link href="/demande-rdv">
-                      Faire une nouvelle demande
-                    </Link>
-                  </Button>
-                )}
+                <Button asChild>
+                  <Link href="/demande-rdv">
+                    Faire une nouvelle demande
+                  </Link>
+                </Button>
               </div>
             ) : (
               <div className="space-y-4">
                 {filteredDemandes.map((demande) => {
                   const statutInfo = statutConfig[demande.statut];
-                  const isVendeurView = profile.role === "vendeur";
-                  const isAssignedToMe = demande.vendeur_id === user.id;
-                  const canAccept = isVendeurView && !demande.vendeur_id;
-                  const canRefuse = isVendeurView && !demande.vendeur_id;
-                  const canUpdateStatut = isVendeurView && isAssignedToMe && 
-                    demande.statut !== "terminee" && demande.statut !== "refusee";
 
                   return (
                     <Card key={demande.id} className="border-0 shadow-none">
@@ -403,82 +292,35 @@ export default function DashboardPage() {
                               </div>
                             </div>
 
-                            <div className="text-sm text-muted-foreground mb-2">
-                              {demande.client_prenom} {demande.client_nom}
-                            </div>
-
-                            <div className="text-sm text-muted-foreground mb-3">
-                              {demande.client_email}
-                            </div>
+                            {demande.message && (
+                              <div className="mb-3 p-3 bg-muted/50 rounded">
+                                <p className="text-sm">{demande.message}</p>
+                              </div>
+                            )}
 
                             <Badge className={statutInfo.color}>
                               {statutInfo.label}
                             </Badge>
 
-                            {demande.message && (
+                            {/* Show vendeur info if assigned */}
+                            {demande.vendeur_id && (
                               <div className="mt-3 p-3 bg-muted/50 rounded">
-                                <p className="text-sm">{demande.message}</p>
+                                <p className="text-sm font-medium">Vendeur assigné</p>
+                                <p className="text-sm">
+                                  Cette demande a été acceptée par un vendeur.
+                                </p>
                               </div>
                             )}
                           </div>
 
-                          {/* Actions */}
+                          {/* Status timeline */}
                           <div className="flex flex-col gap-2 ml-4">
-                            {canAccept && (
-                              <Button
-                                size="sm"
-                                onClick={() => handleAcceptDemande(demande.id)}
-                                className="h-8 px-3"
-                              >
-                                Accepter
-                              </Button>
-                            )}
-
-                            {canRefuse && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleRefuseDemande(demande.id)}
-                                className="h-8 px-3"
-                              >
-                                Refuser
-                              </Button>
-                            )}
-
-                            {canUpdateStatut && (
-                              <div className="flex flex-col gap-1">
-                                {demande.statut === "acceptee" && (
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => handleUpdateStatut(demande.id, "articles_recuperes")}
-                                    className="h-7 px-2 text-xs"
-                                  >
-                                    Articles récupérés
-                                  </Button>
-                                )}
-                                {demande.statut === "articles_recuperes" && (
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => handleUpdateStatut(demande.id, "articles_en_vente")}
-                                    className="h-7 px-2 text-xs"
-                                  >
-                                    Articles en vente
-                                  </Button>
-                                )}
-                                {demande.statut === "articles_en_vente" && (
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => handleUpdateStatut(demande.id, "terminee")}
-                                    className="h-7 px-2 text-xs"
-                                  >
-                                    Terminée
-                                  </Button>
-                                )}
-                              </div>
-                            )}
+                            <div className="text-xs text-muted-foreground text-right">
+                              {new Date(demande.created_at).toLocaleTimeString("fr-FR", { 
+                                hour: "2-digit", 
+                                minute: "2-digit" 
+                              })}
+                            </div>
                           </div>
                         </div>
                       </CardContent>

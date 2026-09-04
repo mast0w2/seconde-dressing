@@ -14,45 +14,22 @@ export default function VendeurPage() {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [demandesCount, setDemandesCount] = useState(0);
 
   useEffect(() => {
     const checkUser = async () => {
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       
-      if (!currentUser) {
-        router.push("/login");
-        return;
-      }
+      if (currentUser) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", currentUser.id)
+          .single();
 
-      setUser(currentUser);
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", currentUser.id)
-        .single();
-
-      if (!profile) {
-        router.push("/signup");
-        return;
-      }
-
-      if (profile.role !== "vendeur") {
-        router.push("/");
-        return;
-      }
-
-      setProfile(profile);
-
-      // Get demandes count for this vendeur
-      const { count, error: countError } = await supabase
-        .from("demandes")
-        .select("*", { count: "exact", head: true })
-        .eq("vendeur_id", currentUser.id);
-
-      if (!countError) {
-        setDemandesCount(count || 0);
+        if (profile && profile.role === "vendeur") {
+          setUser(currentUser);
+          setProfile(profile);
+        }
       }
 
       setIsLoading(false);
@@ -71,7 +48,7 @@ export default function VendeurPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-blanc text-noir">
-      {/* Hero Section for Vendeur */}
+      {/* Hero Section for Vendeur Landing Page */}
       <section 
         className="relative py-20 md:py-28 bg-creme"
         style={{
@@ -88,73 +65,47 @@ export default function VendeurPage() {
               <Leaf className="h-8 w-8 text-noir" />
             </div>
             <h1 className="text-4xl md:text-6xl font-700 text-noir mb-6 leading-tight">
-              Espace Vendeur
+              {profile ? `Bienvenue ${profile?.prenom} !` : "Devenez Vendeur Partenaire"}
             </h1>
             <p className="text-lg sm:text-xl text-gris-moyen mb-8 max-w-2xl mx-auto">
-              Bienvenue {profile?.prenom} ! Gagnez de l'argent en aidant les clients à vendre leurs vêtements.
+              {profile 
+                ? "Gagnez de l'argent en aidant les clients à vendre leurs vêtements."
+                : "Rejoignez notre réseau de vendeurs professionnels et bénéficiez de nombreux avantages"
+              }
             </p>
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-              <Card className="border-2 border-noir/20">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Demandes reçues</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{demandesCount}</div>
-                  <p className="text-xs text-muted-foreground">
-                    demandes en attente
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 border-noir/20">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Revenu potentiel</CardTitle>
-                  <Euro className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">~€50-150/jour</div>
-                  <p className="text-xs text-muted-foreground">
-                    selon votre activité
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 border-noir/20">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Prochains RDV</CardTitle>
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">0</div>
-                  <p className="text-xs text-muted-foreground">
-                    rendez-vous confirmés
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                asChild
-                className="bg-noir hover:bg-gris-fonce text-blanc px-8 py-3 rounded-none text-sm sm:text-lg font-500 transition-all duration-300 tracking-widest"
-              >
-                <Link href="/dashboard">
-                  VOIR LES DEMANDES
-                </Link>
-              </Button>
-              <Button 
-                asChild
-                variant="outline"
-                className="border-noir text-noir hover:bg-noir hover:text-blanc px-8 py-3 rounded-none text-sm sm:text-lg font-500 transition-all duration-300 tracking-widest"
-              >
-                <Link href="/profile">
-                  MON PROFIL
-                </Link>
-              </Button>
-            </div>
+            {profile ? (
+              <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+                <Button 
+                  asChild
+                  className="bg-noir hover:bg-gris-fonce text-blanc px-8 py-3 rounded-none text-sm sm:text-lg font-500 transition-all duration-300 tracking-widest"
+                >
+                  <Link href="/dashboard">
+                    VOIR LES DEMANDES
+                  </Link>
+                </Button>
+                <Button 
+                  asChild
+                  variant="outline"
+                  className="border-noir text-noir hover:bg-noir hover:text-blanc px-8 py-3 rounded-none text-sm sm:text-lg font-500 transition-all duration-300 tracking-widest"
+                >
+                  <Link href="/profile">
+                    MON PROFIL
+                  </Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="mt-10 flex justify-center">
+                <Button 
+                  asChild
+                  className="bg-noir hover:bg-gris-fonce text-blanc px-8 py-3 rounded-none text-sm sm:text-lg font-500 transition-all duration-300 tracking-widest"
+                >
+                  <Link href="/signup?vendeur=true">
+                    DEVENIR VENDEUR
+                  </Link>
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -166,7 +117,7 @@ export default function VendeurPage() {
             <Card className="shadow-none border-0">
               <CardHeader className="text-center pb-0">
                 <CardTitle className="text-3xl sm:text-4xl font-700 text-noir mb-4">
-                  COMMENT ÇA MARCHE POUR VOUS
+                  COMMENT CA MARCHE POUR VOUS
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -193,7 +144,7 @@ export default function VendeurPage() {
                       <h3 className="text-2xl font-semibold mb-4">2. Acceptez ou refusez</h3>
                       <p className="text-gris-moyen">
                         Pour chaque demande, vous pouvez accepter (pour prendre en charge le client) 
-                        ou refuser (si vous n'êtes pas disponible).
+                        ou refuser (si vous n'etes pas disponible).
                       </p>
                     </div>
                     <div className="flex justify-center">
@@ -304,16 +255,30 @@ export default function VendeurPage() {
             Prêt à gagner de l'argent ?
           </h2>
           <p className="text-lg text-gris-moyen mb-8 max-w-2xl mx-auto">
-            Commencez dès aujourd'hui à aider les clients à vendre leurs vêtements
+            {profile 
+              ? "Accédez à votre tableau de bord pour voir les demandes en attente"
+              : "Commencez dès aujourd'hui à aider les clients à vendre leurs vêtements"
+            }
           </p>
-          <Button 
-            asChild
-            className="bg-noir hover:bg-gris-fonce text-blanc px-8 py-3 rounded-none text-sm sm:text-lg font-500 transition-all duration-300 tracking-widest"
-          >
-            <Link href="/dashboard">
-              VOIR MES DEMANDES <ChevronRight className="h-4 w-4 ml-2 inline" />
-            </Link>
-          </Button>
+          {profile ? (
+            <Button 
+              asChild
+              className="bg-noir hover:bg-gris-fonce text-blanc px-8 py-3 rounded-none text-sm sm:text-lg font-500 transition-all duration-300 tracking-widest"
+            >
+              <Link href="/dashboard">
+                VOIR MES DEMANDES <ChevronRight className="h-4 w-4 ml-2 inline" />
+              </Link>
+            </Button>
+          ) : (
+            <Button 
+              asChild
+              className="bg-noir hover:bg-gris-fonce text-blanc px-8 py-3 rounded-none text-sm sm:text-lg font-500 transition-all duration-300 tracking-widest"
+            >
+              <Link href="/signup?vendeur=true">
+                DEVENIR VENDEUR
+              </Link>
+            </Button>
+          )}
         </div>
       </section>
     </div>
