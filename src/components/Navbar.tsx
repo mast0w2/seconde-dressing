@@ -69,7 +69,7 @@ export function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-blanc/95 backdrop-blur border-b border-noir/10">
-      <div className="container flex h-20 sm:h-24 max-w-screen-2xl items-center">
+      <div className="container relative flex h-20 sm:h-24 max-w-screen-2xl items-center justify-between">
         {/* Menu hamburger - extrême gauche sur tous les écrans */}
         <button
           className="p-2 rounded-md border border-noir/10 hover:bg-noir/5 transition-colors"
@@ -80,15 +80,24 @@ export function Navbar() {
           {isMenuOpen ? <X className="h-5 w-5 sm:h-6 sm:w-6 text-noir" /> : <Menu className="h-5 w-5 sm:h-6 sm:w-6 text-noir" />}
         </button>
 
-        {/* Logo SECONDE - centré */}
-        <div className="flex-1 flex justify-center">
-          <Link href="/" className="flex items-center">
-            <Logo layout="stack" />
-          </Link>
-        </div>
+        {/* Logo SECONDE - centré optiquement, indépendamment des blocs latéraux */}
+        <Link
+          href="/"
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center"
+        >
+          <Logo layout="stack" />
+        </Link>
 
-        {/* Icône de connexion - extrême droite */}
-        <div className="flex items-center">
+        {/* Devenir vendeuse + icône de connexion - extrême droite */}
+        <div className="flex items-center gap-5 sm:gap-7">
+          {!isVendeuse && (
+            <Button
+              asChild
+              className="hidden sm:inline-flex bg-noir text-blanc border border-noir rounded-none h-9 px-5 text-[10px] font-medium tracking-[0.18em] uppercase hover:bg-transparent hover:text-noir transition-colors"
+            >
+              <Link href="/signup">Devenir vendeuse</Link>
+            </Button>
+          )}
           {user ? (
             <>
               <DropdownMenu>
@@ -169,8 +178,10 @@ export function Navbar() {
           )}
         </div>
 
-        {isMenuOpen && (
-          <div className="absolute top-20 sm:top-24 left-0 right-0 bg-blanc border-b border-noir/10 z-50">
+      </div>
+
+      {isMenuOpen && (
+        <div className="absolute top-20 sm:top-24 left-0 right-0 bg-blanc border-b border-noir/10 z-50">
             <div className="flex flex-col gap-3 p-4 sm:p-6">
               <Link
                 href="/"
@@ -217,28 +228,18 @@ export function Navbar() {
               >
                 CONTACT
               </Link>
-              {!user && (
-                <>
-                  <Link
-                    href="/login"
-                    className="text-sm font-medium transition-colors hover:text-noir text-gris-moyen"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Se connecter
-                  </Link>
-                  <Link
-                    href="/signup"
-                    className="text-sm font-medium transition-colors hover:text-noir text-gris-moyen"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    S'inscrire
-                  </Link>
-                </>
+              {!isVendeuse && (
+                <Link
+                  href="/signup"
+                  className="sm:hidden mt-2 inline-flex items-center justify-center bg-noir text-blanc border border-noir h-11 px-5 text-[11px] font-medium tracking-[0.18em] uppercase"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Devenir vendeuse
+                </Link>
               )}
             </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </nav>
   );
 }

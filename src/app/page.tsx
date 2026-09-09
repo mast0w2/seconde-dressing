@@ -52,7 +52,7 @@ const STEPS = [
   {
     n: "02",
     title: "Contact rapide",
-    text: "Nous vous appelons dans les deux heures pour organiser la collecte.",
+    text: "On vous recontacte dans les 24 heures pour organiser la collecte.",
   },
   {
     n: "03",
@@ -85,7 +85,7 @@ export default function Home() {
   return (
     <div className="bg-creme text-noir">
       {/* ================= HERO ================= */}
-      <section className="px-6 sm:px-10 lg:px-[76px] pt-16 sm:pt-20 pb-16 sm:pb-20">
+      <section className="px-6 sm:px-10 lg:px-[76px] pt-8 sm:pt-10 pb-16 sm:pb-20">
         <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_470px] gap-10 lg:gap-16 items-center">
           <div className="flex flex-col gap-6 sm:gap-7">
             <div className="eyebrow">Conciergerie de seconde main</div>
@@ -95,18 +95,23 @@ export default function Home() {
               <span className="italic text-sauge-fonce">donnez-leur une seconde vie.</span>
             </h1>
             <p className="text-base sm:text-lg text-gris-moyen max-w-[480px]">
-              Vous nous ouvrez votre dressing. On vient le chercher chez vous, on trie, on
+              Vous nous ouvrez votre dressing. On vient jusqu&apos;à vous, on trie, on
               photographie, on vend. Vous n&apos;avez rien à gérer.
             </p>
 
-            <div className="flex flex-wrap items-center gap-3 text-[10px] sm:text-[11px] tracking-[0.18em] uppercase text-sauge-fonce">
-              <span>Videz votre dressing</span>
-              <Leaf className="h-3 w-3 text-sauge-clair" />
-              <span>Sans effort</span>
-              <Leaf className="h-3 w-3 text-sauge-clair" />
-              <span>En gagnant de l&apos;argent</span>
-              <Leaf className="h-3 w-3 text-sauge-clair" />
-              <span>Économie circulaire</span>
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[10px] sm:text-[11px] tracking-[0.18em] uppercase text-sauge-fonce">
+              <span className="inline-flex items-center gap-2">
+                <Leaf className="h-3.5 w-3.5 text-sauge-clair" strokeWidth={1.5} />
+                Sans effort
+              </span>
+              <span className="inline-flex items-center gap-2">
+                <Leaf className="h-3.5 w-3.5 text-sauge-clair" strokeWidth={1.5} />
+                En gagnant de l&apos;argent
+              </span>
+              <span className="inline-flex items-center gap-2">
+                <Leaf className="h-3.5 w-3.5 text-sauge-clair" strokeWidth={1.5} />
+                Grâce à l&apos;économie circulaire
+              </span>
             </div>
 
             <div className="flex items-center gap-5 mt-1">
@@ -116,7 +121,7 @@ export default function Home() {
               >
                 Demandez un rendez-vous
               </Button>
-              <span className="text-xs text-gris-moyen">Réponse sous 2h · Gratuit</span>
+              <span className="text-xs text-gris-moyen">Réponse sous 24 h · Gratuit</span>
             </div>
           </div>
 
@@ -162,12 +167,6 @@ export default function Home() {
               Vous récupérez une part du prix de vente de chaque article. Ce qui ne se vend pas
               vous revient, ou part vers nos filières de réemploi.
             </p>
-            <div className="flex items-center gap-3 mt-1">
-              <div className="w-11 h-px bg-sauge-clair" />
-              <span className="text-[11px] tracking-[0.16em] uppercase text-sauge-fonce">
-                Une équipe, pas un algorithme
-              </span>
-            </div>
           </div>
         </div>
       </section>
@@ -199,10 +198,7 @@ export default function Home() {
       <section id="etapes" className="bg-noir text-creme py-16 sm:py-20 lg:py-24">
         <div className="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-[76px] grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-10 lg:gap-16 items-start">
           <div className="flex flex-col gap-3.5">
-            <div className="text-[10px] tracking-[0.26em] uppercase text-sauge-clair">
-              Comment ça fonctionne ?
-            </div>
-            <h2 className="text-3xl sm:text-4xl text-creme mb-4">Cinq étapes, et c&apos;est réglé.</h2>
+            <h2 className="text-3xl sm:text-4xl text-creme mb-4">Comment ça fonctionne ?</h2>
 
             <div className="flex flex-col">
               {STEPS.map((step, i) => (
@@ -233,14 +229,62 @@ export default function Home() {
               />
             </div>
             <p className="font-serif italic text-lg sm:text-xl text-[#c3cbb9] leading-relaxed">
-              « Chaque pièce passe entre nos mains — pas dans une machine. »
+              « Vos vêtements méritent une seconde histoire. »
             </p>
           </div>
         </div>
       </section>
 
+      {/* ================= CE QUE VOUS TOUCHEZ ================= */}
+      <section
+        id="remuneration"
+        className="bg-gris-clair px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24"
+      >
+        <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-10 lg:gap-16 items-center">
+          <div className="flex flex-col gap-5">
+            <div className="eyebrow">Ce que vous touchez</div>
+            <h2 className="text-3xl sm:text-4xl leading-[1.18]">
+              Vous touchez 40 % de chaque vente.
+            </h2>
+            <p className="text-base text-gris-moyen max-w-[480px]">
+              Votre vendeuse en reçoit 40 % : c&apos;est elle qui trie, photographie, rédige les
+              annonces, répond aux acheteurs et expédie. Les 20 % restants font tourner Seconde —
+              la plateforme, le suivi de vos ventes et les paiements sécurisés.
+            </p>
+            <p className="text-base text-gris-moyen max-w-[480px]">
+              Pas de frais cachés. Seul le rendez-vous est facturé, de 10 à 50 € selon la formule
+              choisie. Ce qui ne se vend pas vous revient, ou part vers nos filières de réemploi.
+            </p>
+          </div>
+
+          <div className="bg-gris-tres-clair border border-noir/15 p-8">
+            <div className="eyebrow mb-6">Exemple</div>
+            <div className="flex items-baseline justify-between pb-4 border-b border-noir/10">
+              <span className="text-gris-moyen">Une veste vendue</span>
+              <span className="font-serif text-2xl text-noir">80 €</span>
+            </div>
+            <div className="flex items-baseline justify-between py-4 border-b border-noir/10">
+              <span className="text-noir">Votre part · 40 %</span>
+              <span className="font-serif text-3xl text-noir">32 €</span>
+            </div>
+            <div className="flex items-baseline justify-between py-4 border-b border-noir/10">
+              <span className="text-gris-moyen">Votre vendeuse · 40 %</span>
+              <span className="font-serif text-2xl text-sauge-fonce">32 €</span>
+            </div>
+            <div className="flex items-baseline justify-between pt-4">
+              <span className="text-gris-moyen">Seconde · 20 %</span>
+              <span className="font-serif text-2xl text-sauge-fonce">16 €</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ================= DEMANDEZ UN RENDEZ-VOUS ================= */}
-      <section ref={formRef} id="estimation-form" className="px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24">
+      <section
+        ref={formRef}
+        id="estimation-form"
+        className="border-t border-noir/10 px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24"
+      >
         <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_440px] gap-10 lg:gap-16 items-center">
           <div className="flex flex-col gap-6">
             <div className="text-center lg:text-left flex flex-col gap-4">
@@ -249,12 +293,10 @@ export default function Home() {
                 Videz votre dressing, sans effort.
               </h2>
               <p className="text-gris-moyen max-w-[440px]">
-                Quelques questions, ça prend moins d&apos;une minute. On vous rappelle dans les
-                deux heures.
+                Quelques questions, ça prend moins d&apos;une minute. On vous recontacte dans les
+                24 heures.
               </p>
               <div className="flex flex-wrap justify-center lg:justify-start gap-6 text-[11px] tracking-[0.14em] uppercase text-sauge-fonce">
-                <span>Gratuit</span>
-                <span>À domicile</span>
                 <span>Sans engagement</span>
               </div>
             </div>

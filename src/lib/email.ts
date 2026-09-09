@@ -662,12 +662,14 @@ class NotificationService {
       <p><strong>Prénom:</strong> ${data.prenom}</p>
       <p><strong>Email:</strong> ${data.email}</p>
       <p><strong>Téléphone:</strong> ${data.telephone}</p>
+      <p><strong>Adresse:</strong> ${(data as any).adresse || 'Non renseignée'}</p>
+      <p><strong>Formule choisie:</strong> ${(data as any).formule || 'Non renseignée'}</p>
       
       <h3>Détails de l'estimation:</h3>
       <p><strong>Nombre de vêtements:</strong> ${data.nombreVetements}</p>
       <p><strong>Valeur moyenne par vêtement:</strong> ${data.valeurMoyenne}€</p>
       <p><strong>Marques:</strong> ${data.marques}</p>
-      <p><strong>Estimation totale (40% commission):</strong> ${data.estimation.toFixed(0)}€</p>
+      <p><strong>Part cliente estimée (40% du prix de vente):</strong> ${data.estimation.toFixed(0)}€</p>
       
       <h3>Description supplémentaire:</h3>
       <div class="highlight">

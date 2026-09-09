@@ -15,6 +15,9 @@ interface EstimationRequest {
   prenom: string;
   email: string;
   telephone: string;
+  adresse: string;
+  conditionsAcceptees?: boolean;
+  formule?: string;
   nombreVetements: number;
   valeurMoyenne: number;
   marques: string;
@@ -55,6 +58,10 @@ function validateEstimationData(data: unknown): { valid: boolean; errors?: strin
     errors.push('Valid phone number is required');
   }
 
+  if (!estimationData.adresse || typeof estimationData.adresse !== 'string' || estimationData.adresse.trim() === '') {
+    errors.push('Adresse is required');
+  }
+
   if (!estimationData.nombreVetements || typeof estimationData.nombreVetements !== 'number' || estimationData.nombreVetements < 1) {
     errors.push('Nombre de vêtements must be a positive number');
   }
@@ -78,6 +85,9 @@ function validateEstimationData(data: unknown): { valid: boolean; errors?: strin
       prenom: (estimationData.prenom as string).trim(),
       email: (estimationData.email as string).trim().toLowerCase(),
       telephone: (estimationData.telephone as string).trim(),
+      adresse: (estimationData.adresse as string).trim(),
+      conditionsAcceptees: estimationData.conditionsAcceptees === true,
+      formule: estimationData.formule ? (estimationData.formule as string).trim() : undefined,
       nombreVetements: estimationData.nombreVetements as number,
       valeurMoyenne: estimationData.valeurMoyenne as number,
       marques: (estimationData.marques as string).trim(),
@@ -106,6 +116,9 @@ async function saveEstimationRequest(data: EstimationRequest) {
         prenom: data.prenom,
         email: data.email,
         telephone: data.telephone,
+        adresse: data.adresse,
+        conditions_acceptees: data.conditionsAcceptees ?? false,
+        formule: data.formule || null,
         nombre_vetements: data.nombreVetements,
         valeur_moyenne: data.valeurMoyenne,
         marques: data.marques,
