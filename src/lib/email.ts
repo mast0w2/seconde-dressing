@@ -94,10 +94,16 @@ const FORMULA_CLIENT_ACTIONS: Record<string, string[]> = {
 // Configuration
 // ============================================================================
 
+const EMAIL_FROM = process.env.EMAIL_FROM || 'support@seconde-dressing.com';
+
+if (!process.env.EMAIL_FROM) {
+  console.warn('[EmailService] EMAIL_FROM is not set; falling back to', EMAIL_FROM);
+}
+
 const EMAIL_CONFIG = {
   sender: {
     name: 'Seconde',
-    email: process.env.EMAIL_FROM || 'Seconde <no-reply@brevo.com>',
+    email: EMAIL_FROM,
   },
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://seconde.fr',
 } as const;
@@ -114,7 +120,7 @@ export const env = {
     apiKey: process.env.BREVO_API_KEY || '',
   },
   email: {
-    from: process.env.EMAIL_FROM || 'Seconde <no-reply@brevo.com>',
+    from: EMAIL_FROM,
     admin: process.env.CONTACT_ADMIN_EMAILS ? process.env.CONTACT_ADMIN_EMAILS.split(',').map(e => e.trim()).filter(e => e) : [],
   },
   app: {
