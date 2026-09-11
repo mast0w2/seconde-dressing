@@ -116,7 +116,7 @@ ON CONFLICT (slug) DO NOTHING;
 -- ============================================================
 CREATE TABLE IF NOT EXISTS requests (
     id                   UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    client_id            UUID NOT NULL REFERENCES profiles (id) ON DELETE CASCADE,
+    client_id            UUID REFERENCES profiles (id) ON DELETE CASCADE, -- nullable: anonymous estimation requests submitted before account creation
     request_type         TEXT NOT NULL DEFAULT 'appointment',
     message              TEXT,
     status               request_status NOT NULL DEFAULT 'pending',
@@ -133,6 +133,12 @@ CREATE TABLE IF NOT EXISTS requests (
     brands               TEXT,
     description          TEXT,
     estimate             DECIMAL(10, 2),
+    -- Anonymous contact details (used when client_id is null, i.e. the
+    -- homepage estimation form submitted before account creation).
+    client_first_name   TEXT,
+    client_last_name     TEXT,
+    client_email         TEXT,
+    client_phone         TEXT,
     created_at           TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at           TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

@@ -236,7 +236,9 @@ function estHorsZone(adresse: string): boolean {
 // API
 // ============================================================================
 
-async function submitForm(data: FormData): Promise<{ success: boolean; message?: string }> {
+async function submitForm(
+  data: FormData
+): Promise<{ success: boolean; message?: string; requestId?: string }> {
   try {
     const response = await fetch("/api/estimation", {
       method: "POST",
@@ -427,6 +429,10 @@ export function ProgressiveEstimationForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [password, setPassword] = useState("");
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
+  // id of the request once it has been submitted anonymously, used to link it
+  // to the account created afterwards.
+  const [submittedRequestId, setSubmittedRequestId] = useState<string | null>(null);
+  const [accountCreated, setAccountCreated] = useState(false);
 
   const currentQuestion = QUESTIONS[currentStep];
   const isLastStep = currentStep === QUESTIONS.length - 1;
@@ -465,9 +471,26 @@ export function ProgressiveEstimationForm() {
 
   const handleSubmit = async () => {
     if (!validateStep()) return;
-    // Move to the account creation step: the request itself is submitted
-    // right after the account is created (see handleCreateAccount).
-    setIsComplete(true);
+    setIsSubmitting(true);
+    try {
+      // The request is submitted anonymously FIRST. Account creation is
+      // proposed afterwards and never conditions the request submission.
+      const result = await submitForm(formData);
+      if (!result.success) {
+        toast({
+          title: "Erreur",
+          description: result.message || "Votre demande n'a pas pu être envoyée.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (result.requestId) {
+        setSubmittedRequestId(result.requestId);
+      }
+      setIsComplete(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCreateAccount = async () => {
@@ -499,7 +522,7 @@ export function ProgressiveEstimationForm() {
         throw new Error("Impossible de créer le compte.");
       }
 
-      // 2. Create the profile with all the information already entered.
+      // 2. Create the profile with the information already entered in the form.
       const { error: profileError } = await supabase.from("profiles").upsert([
         {
           id: user.id,
@@ -516,20 +539,24 @@ export function ProgressiveEstimationForm() {
         throw profileError;
       }
 
-      // 3. Submit the estimation request (now authenticated).
-      const result = await submitForm(formData);
-      if (!result.success) {
-        toast({
-          title: "Compte créé",
-          description: "Votre compte est créé mais la demande n'a pas pu être enregistrée. Vous pouvez la soumettre depuis votre espace.",
-        });
+      // 3. Link the already-submitted anonymous request to the new account.
+      if (submittedRequestId) {
+        const { error: linkError } = await supabase
+          .from("requests")
+          .update({ client_id: user.id })
+          .eq("id", submittedRequestId);
+        if (linkError) {
+          console.warn("[Estimation Form] Could not link request to account:", linkError.message);
+        }
       }
+
+      setAccountCreated(true);
 
       // 4. Redirect to the dashboard (or login if email confirmation is required).
       if (session) {
         toast({
           title: "Bienvenue sur Seconde !",
-          description: "Votre compte est créé et votre demande envoyée.",
+          description: "Votre compte est créé et votre demande est rattachée à votre espace.",
         });
         router.refresh();
         router.push("/dashboard/client");
@@ -556,6 +583,9 @@ export function ProgressiveEstimationForm() {
     setCurrentStep(0);
     setIsComplete(false);
     setErrors({});
+    setSubmittedRequestId(null);
+    setAccountCreated(false);
+    setPassword("");
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -738,34 +768,19 @@ export function ProgressiveEstimationForm() {
 
   if (isComplete) {
     return (
-      <div className="w-full max-w-2xl space-y-5">
-        <h3 className="font-serif text-3xl text-noir">Presque terminé.</h3>
-        <p className="text-gris-moyen">
-          Choisissez un mot de passe pour créer votre compte et suivre votre
-          demande. Toutes vos informations sont déjà enregistrées.
-        </p>
-
-        <div className="space-y-4 pt-2">
-          <div className="space-y-2">
-            <label
-              htmlFor="account-password"
-              className="text-sm font-medium text-noir"
-            >
-              Mot de passe
-            </label>
-            <Input
-              id="account-password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              disabled={isCreatingAccount}
-            />
-            <p className="text-xs text-gris-moyen">
-              Minimum 6 caractères.
-            </p>
+      <div className="w-full max-w-2xl space-y-8">
+        {/* Confirmation : la demande a bien été envoyée (compte optionnel) */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sauge text-2xl">
+              ✅
+            </span>
+            <h3 className="font-serif text-3xl text-noir">Demande envoyée</h3>
           </div>
-
+          <p className="text-gris-moyen">
+            Merci {formData.prenom} ! Votre demande d’estimation a bien été enregistrée.
+            Nous vous recontacterons sous 24 h pour valider la formule et organiser la collecte.
+          </p>
           <div className="text-sm text-gris-moyen bg-gris-tres-clair p-4 border border-noir/10">
             <p className="mb-1">
               <span className="font-medium text-noir">{formData.prenom} {formData.nom}</span>
@@ -774,15 +789,66 @@ export function ProgressiveEstimationForm() {
             <p>{formData.telephone}</p>
             <p>{formData.adresse}</p>
           </div>
-
-          <button
-            onClick={handleCreateAccount}
-            disabled={isCreatingAccount}
-            className="bg-noir text-blanc border border-noir px-8 py-4 text-[11px] tracking-[0.2em] uppercase hover:bg-transparent hover:text-noir transition-colors disabled:opacity-50"
-          >
-            {isCreatingAccount ? "Création en cours…" : "Se créer un compte"}
-          </button>
         </div>
+
+        {/* Création de compte optionnelle pour suivre sa demande */}
+        {accountCreated ? (
+          <div className="border-t border-noir/10 pt-6 space-y-3">
+            <p className="font-serif text-xl text-noir">Compte créé 🎉</p>
+            <p className="text-gris-moyen">
+              Votre demande est désormais rattachée à votre compte. Vous pouvez suivre son
+              statut depuis votre espace personnel.
+            </p>
+          </div>
+        ) : (
+          <div className="border-t border-noir/10 pt-6 space-y-5">
+            <div className="space-y-2">
+              <h3 className="font-serif text-xl text-noir">
+                Souhaitez-vous suivre votre demande&nbsp;?
+              </h3>
+              <p className="text-gris-moyen">
+                Créez un compte avec le même email pour suivre le statut de votre demande à
+                tout moment. C’est facultatif — votre demande est déjà enregistrée. Il vous
+                suffit de choisir un mot de passe.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label
+                  htmlFor="account-password"
+                  className="text-sm font-medium text-noir"
+                >
+                  Mot de passe
+                </label>
+                <Input
+                  id="account-password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  disabled={isCreatingAccount}
+                />
+                <p className="text-xs text-gris-moyen">Minimum 6 caractères.</p>
+              </div>
+
+              <button
+                onClick={handleCreateAccount}
+                disabled={isCreatingAccount}
+                className="bg-noir text-blanc border border-noir px-8 py-4 text-[11px] tracking-[0.2em] uppercase hover:bg-transparent hover:text-noir transition-colors disabled:opacity-50"
+              >
+                {isCreatingAccount ? "Création en cours…" : "Créer mon compte et suivre ma demande"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        <button
+          onClick={handleReset}
+          className="text-[11px] tracking-[0.18em] uppercase text-sauge-fonce hover:text-noir transition-colors"
+        >
+          ← Faire une nouvelle demande
+        </button>
       </div>
     );
   }

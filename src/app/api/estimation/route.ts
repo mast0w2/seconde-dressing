@@ -109,11 +109,11 @@ function validateEstimationData(data: unknown): { valid: boolean; errors?: strin
 async function saveEstimationRequest(data: EstimationRequest) {
   const supabase = createSupabaseServerClient();
 
-  // Estimation requests now require an authenticated client (requests.client_id is NOT NULL).
+  // Estimation requests can be submitted anonymously from the homepage form:
+  // when the submitter is not authenticated, client_id is null and the
+  // contact details are stored in the denormalized client_* columns. If a
+  // logged-in client submits, the request is linked to their profile.
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return { success: false, error: { message: 'Authentication required' } as any };
-  }
 
   // The homepage form sends the French formula id (e.g. 'deja-trie');
   // resolve it to the matching formula UUID via its English slug.
@@ -136,11 +136,11 @@ async function saveEstimationRequest(data: EstimationRequest) {
     }
   }
 
-  const { error } = await supabase
+  const { data: insertedRow, error } = await supabase
     .from('requests')
     .insert([
       {
-        client_id: user.id,
+        client_id: user ? user.id : null,
         request_type: 'estimation',
         message: data.description || null,
         status: 'pending',
@@ -152,10 +152,16 @@ async function saveEstimationRequest(data: EstimationRequest) {
         brands: data.marques,
         description: data.description || null,
         estimate: data.estimation,
+        client_first_name: user ? null : data.prenom,
+        client_last_name: user ? null : data.nom,
+        client_email: user ? null : data.email,
+        client_phone: user ? null : data.telephone,
       },
-    ]);
+    ])
+    .select('id')
+    .single();
 
-  return { success: !error, error };
+  return { success: !error, error, requestId: (insertedRow as { id?: string } | null)?.id ?? null };
 }
 
 // ============================================================================
@@ -204,6 +210,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
+      requestId: dbResult.requestId,
       message: 'Votre demande d\'estimation a été envoyée avec succès. Nous vous recontacterons sous 24h.'
     });
   } catch (error) {

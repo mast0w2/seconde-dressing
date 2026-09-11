@@ -146,7 +146,7 @@ export interface UpdateFormula {
 // ============================================================================
 export interface Request {
   id: string;
-  client_id: string;
+  client_id: string | null;
   request_type: RequestType;
   message: string | null;
   status: RequestStatus;
@@ -163,13 +163,17 @@ export interface Request {
   brands: string | null;
   description: string | null;
   estimate: number | null;
+  client_first_name: string | null;
+  client_last_name: string | null;
+  client_email: string | null;
+  client_phone: string | null;
   created_at: string;
   updated_at: string;
 }
 
 export interface InsertRequest {
   id?: string;
-  client_id: string;
+  client_id?: string | null;
   request_type?: RequestType;
   message?: string | null;
   status?: RequestStatus;
@@ -186,13 +190,17 @@ export interface InsertRequest {
   brands?: string | null;
   description?: string | null;
   estimate?: number | null;
+  client_first_name?: string | null;
+  client_last_name?: string | null;
+  client_email?: string | null;
+  client_phone?: string | null;
   created_at?: string;
   updated_at?: string;
 }
 
 export interface UpdateRequest {
   id?: string;
-  client_id?: string;
+  client_id?: string | null;
   request_type?: RequestType;
   message?: string | null;
   status?: RequestStatus;
@@ -209,6 +217,10 @@ export interface UpdateRequest {
   brands?: string | null;
   description?: string | null;
   estimate?: number | null;
+  client_first_name?: string | null;
+  client_last_name?: string | null;
+  client_email?: string | null;
+  client_phone?: string | null;
   created_at?: string;
   updated_at?: string;
 }
