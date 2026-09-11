@@ -512,6 +512,9 @@ export function ProgressiveEstimationForm() {
       } = await supabase.auth.signUp({
         email: formData.email,
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+        },
       });
 
       if (signUpError) {

@@ -59,6 +59,9 @@ function SignupForm() {
       } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+        },
       });
 
       if (authError) {
