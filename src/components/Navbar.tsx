@@ -90,7 +90,7 @@ export function Navbar() {
 
         {/* Devenir vendeuse + icône de connexion - extrême droite */}
         <div className="flex items-center gap-5 sm:gap-7">
-          {!isVendeuse && (
+          {!isVendeur && (
             <Button
               asChild
               className="hidden sm:inline-flex bg-noir text-blanc border border-noir rounded-none h-9 px-5 text-[10px] font-medium tracking-[0.18em] uppercase hover:bg-transparent hover:text-noir transition-colors"
@@ -227,7 +227,7 @@ export function Navbar() {
               >
                 CONTACT
               </Link>
-              {!isVendeuse && (
+              {!isVendeur && (
                 <Link
                   href="/signup"
                   className="sm:hidden mt-2 inline-flex items-center justify-center bg-noir text-blanc border border-noir h-11 px-5 text-[11px] font-medium tracking-[0.18em] uppercase"
