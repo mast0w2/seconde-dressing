@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,8 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/components/ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
 import { Profile, Role } from "@/types/database";
-import { Mail, Phone, User, Home, MapPin, ArrowLeft, Edit, Save, X } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Mail, Phone, User, Home, MapPin, ArrowLeft, Edit, Save, X, Camera } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import Link from "next/link";
 
@@ -40,6 +39,8 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -238,6 +239,80 @@ export default function ProfilePage() {
     }
   };
 
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validate file type and size (max 5MB)
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez sélectionner une image.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Erreur",
+        description: "L'image doit faire moins de 5 Mo.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsUploadingPhoto(true);
+
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${user.id}.${fileExt}`;
+      const filePath = fileName;
+
+      // Upload to the 'avatars' bucket, replacing any existing photo for this user
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(filePath);
+
+      const photoUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+
+      // Persist the photo URL on the profile
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ photo_url: photoUrl })
+        .eq("id", user.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      setProfile((prev) => (prev ? { ...prev, photo_url: photoUrl } : prev));
+
+      toast({
+        title: "Photo mise à jour",
+        description: "Votre photo de profil a été mise à jour.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Échec de l'upload de la photo.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingPhoto(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-creme">
@@ -284,27 +359,44 @@ export default function ProfilePage() {
 
           <CardContent>
             <div className="space-y-6">
-              {/* Avatar */}
+              {/* Avatar with photo upload */}
               <div className="flex items-center gap-4">
-                <Avatar className="w-24 h-24">
-                  {profile.photo_url ? (
-                    <AvatarImage src={profile.photo_url} alt="Photo de profil" />
-                  ) : (
-                    <AvatarFallback className="text-2xl font-semibold">
-                      {initials.toUpperCase()}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
+                <div className="relative group">
+                  <Avatar className="w-24 h-24">
+                    {profile.photo_url ? (
+                      <AvatarImage src={profile.photo_url} alt="Photo de profil" />
+                    ) : (
+                      <AvatarFallback className="text-2xl font-semibold">
+                        {initials.toUpperCase()}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploadingPhoto}
+                    aria-label="Changer la photo de profil"
+                    className="absolute inset-0 flex items-center justify-center rounded-full bg-noir/0 group-hover:bg-noir/50 transition-colors disabled:opacity-50"
+                  >
+                    {isUploadingPhoto ? (
+                      <span className="h-6 w-6 animate-spin rounded-full border-2 border-blanc border-t-transparent" />
+                    ) : (
+                      <Camera className="h-6 w-6 text-blanc opacity-0 group-hover:opacity-100 transition-opacity" />
+                    )}
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoUpload}
+                    className="hidden"
+                  />
+                </div>
                 <div>
                   <h2 className="text-2xl font-semibold">
                     {profile.first_name} {profile.last_name}
                   </h2>
                   <p className="text-muted-foreground">{profile.email}</p>
-                  {profile.role && (
-                    <Badge className="mt-2">
-                      {profile.role === "client" ? "Client" : "Vendeuse"}
-                    </Badge>
-                  )}
                 </div>
               </div>
 
@@ -378,10 +470,10 @@ export default function ProfilePage() {
                   <p className="text-lg">{profile.email}</p>
                 </div>
 
-                {/* Role selection */}
-                <div className="space-y-3">
-                  <Label>Votre rôle</Label>
-                  {isEditing ? (
+                {/* Role selection - only visible while editing */}
+                {isEditing && (
+                  <div className="space-y-3">
+                    <Label>Votre rôle</Label>
                     <RadioGroup
                       defaultValue={profile.role || "client"}
                       onValueChange={(value) => setValue("role", value as Role)}
@@ -412,17 +504,11 @@ export default function ProfilePage() {
                         </div>
                       </label>
                     </RadioGroup>
-                  ) : (
-                    <p className="text-lg">
-                      {profile.role === "seller"
-                        ? "Je souhaite aider à vendre des vêtements"
-                        : "Je veux vendre mes vêtements"}
-                    </p>
-                  )}
-                  {errors.role && (
-                    <p className="text-sm text-destructive">{errors.role.message}</p>
-                  )}
-                </div>
+                    {errors.role && (
+                      <p className="text-sm text-destructive">{errors.role.message}</p>
+                    )}
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="phone">Téléphone</Label>
