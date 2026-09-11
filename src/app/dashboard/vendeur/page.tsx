@@ -20,7 +20,7 @@ import { ArrowLeft } from "lucide-react";
 import { RequestItemsUploader } from "@/components/RequestItemsUploader";
 
 interface RequestWithRelations extends Request {
-  client: Profile;
+  client: Profile | null;
   formula: Formula | null;
 }
 
@@ -42,7 +42,7 @@ export default function SellerDashboardPage() {
         client:client_id (id, first_name, last_name, email, phone),
         formula:formula_id (id, slug, label, price)
       `)
-      .or(`seller_id.is.null,seller_id.eq.${userId}`)
+      .or(`and(client_id.not.is.null,seller_id.is.null),seller_id.eq.${userId}`)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -267,6 +267,11 @@ export default function SellerDashboardPage() {
                   const canAccept = !request.seller_id;
                   const canRefuse = !request.seller_id;
                   const canAdvance = isAssignedToMe && NEXT_STATUS[request.status];
+                  const clientDisplayName = client
+                    ? `${client.first_name} ${client.last_name}`.trim()
+                    : `${request.client_first_name ?? ""} ${request.client_last_name ?? ""}`.trim();
+                  const clientEmail = client?.email ?? request.client_email ?? null;
+                  const clientPhone = client?.phone ?? request.client_phone ?? null;
 
                   return (
                     <Card key={request.id} className="border-0 shadow-none">
@@ -287,13 +292,17 @@ export default function SellerDashboardPage() {
                               </div>
                             </div>
 
-                            <div className="text-sm text-gris-moyen mb-2">
-                              {client.first_name} {client.last_name}
-                            </div>
-                            <div className="text-sm text-gris-moyen mb-2">
-                              {client.email}
-                              {client.phone ? ` · ${client.phone}` : ""}
-                            </div>
+                            {clientDisplayName && (
+                              <div className="text-sm text-gris-moyen mb-2">
+                                {clientDisplayName}
+                              </div>
+                            )}
+                            {clientEmail && (
+                              <div className="text-sm text-gris-moyen mb-2">
+                                {clientEmail}
+                                {clientPhone ? ` · ${clientPhone}` : ""}
+                              </div>
+                            )}
 
                             {formula && (
                               <div className="text-sm text-gris-moyen mb-3">

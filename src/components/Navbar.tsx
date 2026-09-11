@@ -211,13 +211,13 @@ export function Navbar() {
                 NOTRE IMPACT
               </Link>
               <Link
-                href="/blog"
+                href="/reviews"
                 className={`text-sm font-medium transition-colors hover:text-noir ${
-                  pathname === "/blog" ? "text-noir" : "text-gris-moyen"
+                  pathname === "/reviews" ? "text-noir" : "text-gris-moyen"
                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                BLOG
+                AVIS
               </Link>
               <Link
                 href="/contact"
