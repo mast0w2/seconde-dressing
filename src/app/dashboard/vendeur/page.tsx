@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
 import { isProfileComplete } from "@/lib/profile";
@@ -16,6 +17,7 @@ import {
 } from "@/lib/request-status";
 import { ArrowLeft } from "lucide-react";
 import { RequestItemsUploader } from "@/components/RequestItemsUploader";
+import { RequestAccordion } from "@/components/RequestAccordion";
 
 interface RequestWithRelations extends Request {
   client: Profile | null;
@@ -178,7 +180,37 @@ export default function SellerDashboardPage() {
     }
   };
 
-  const renderRequestCard = (request: RequestWithRelations) => {
+  const renderRequestSummary = (request: RequestWithRelations) => {
+    const statusInfo = requestStatusConfig[request.status];
+    const client = request.client;
+    const formula = request.formula;
+    const clientDisplayName = client
+      ? `${client.first_name} ${client.last_name}`.trim()
+      : `${request.client_first_name ?? ""} ${request.client_last_name ?? ""}`.trim();
+
+    return (
+      <div className="flex flex-wrap items-center gap-3">
+        <div className={`p-2 rounded-full ${statusInfo.color}`}>
+          {statusInfo.icon}
+        </div>
+        <div className="font-semibold">Demande #{request.id.slice(0, 8)}</div>
+        <div className="text-sm text-gris-moyen">
+          {new Date(request.created_at).toLocaleDateString("fr-FR")}
+        </div>
+        {clientDisplayName && (
+          <div className="text-sm text-gris-moyen">· {clientDisplayName}</div>
+        )}
+        {formula && (
+          <div className="text-sm text-gris-moyen">
+            · {formula.label} ({formula.price} €)
+          </div>
+        )}
+        <Badge className={statusInfo.color}>{statusInfo.label}</Badge>
+      </div>
+    );
+  };
+
+  const renderRequestDetails = (request: RequestWithRelations) => {
     const statusInfo = requestStatusConfig[request.status];
     const client = request.client;
     const formula = request.formula;
@@ -193,92 +225,74 @@ export default function SellerDashboardPage() {
     const clientPhone = client?.phone ?? request.client_phone ?? null;
 
     return (
-      <Card key={request.id} className="border-0 shadow-none">
-        <CardContent className="p-0">
-          <div className="flex items-start justify-between p-4 border rounded-lg">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <div className={`p-2 rounded-full ${statusInfo.color}`}>
-                  {statusInfo.icon}
-                </div>
-                <div>
-                  <div className="font-semibold">
-                    Demande #{request.id.slice(0, 8)}
-                  </div>
-                  <div className="text-sm text-gris-moyen">
-                    {new Date(request.created_at).toLocaleDateString("fr-FR")}
-                  </div>
-                </div>
-              </div>
-
-              {clientDisplayName && (
-                <div className="text-sm text-gris-moyen mb-2">
-                  {clientDisplayName}
-                </div>
-              )}
-              {clientEmail && (
-                <div className="text-sm text-gris-moyen mb-2">
-                  {clientEmail}
-                  {clientPhone ? ` · ${clientPhone}` : ""}
-                </div>
-              )}
-
-              {formula && (
-                <div className="text-sm text-gris-moyen mb-3">
-                  Formule : {formula.label} ({formula.price} €)
-                </div>
-              )}
-              {request.address && (
-                <div className="text-sm text-gris-moyen mb-3">
-                  Adresse : {request.address}
-                </div>
-              )}
-
-              <Badge className={statusInfo.color}>{statusInfo.label}</Badge>
-
-              {request.message && (
-                <div className="mt-3 p-3 bg-muted/50 rounded">
-                  <p className="text-sm">{request.message}</p>
-                </div>
-              )}
-
-              <RequestItemsUploader requestId={request.id} />
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1">
+          {clientDisplayName && (
+            <div className="text-sm text-gris-moyen mb-2">
+              {clientDisplayName}
             </div>
-
-            <div className="flex flex-col gap-2 ml-4">
-              {canAccept && (
-                <Button
-                  size="sm"
-                  onClick={() => handleAccept(request.id)}
-                  className="h-8 px-3"
-                >
-                  Accepter
-                </Button>
-              )}
-              {canRefuse && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleRefuse(request.id)}
-                  className="h-8 px-3"
-                >
-                  Refuser
-                </Button>
-              )}
-              {canAdvance && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => handleAdvanceStatus(request.id)}
-                  className="h-8 px-3 text-xs"
-                >
-                  {NEXT_STATUS_LABEL[request.status]}
-                </Button>
-              )}
+          )}
+          {clientEmail && (
+            <div className="text-sm text-gris-moyen mb-2">
+              {clientEmail}
+              {clientPhone ? ` · ${clientPhone}` : ""}
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          )}
+
+          {formula && (
+            <div className="text-sm text-gris-moyen mb-3">
+              Formule : {formula.label} ({formula.price} €)
+            </div>
+          )}
+          {request.address && (
+            <div className="text-sm text-gris-moyen mb-3">
+              Adresse : {request.address}
+            </div>
+          )}
+
+          <Badge className={statusInfo.color}>{statusInfo.label}</Badge>
+
+          {request.message && (
+            <div className="mt-3 p-3 bg-muted/50 rounded">
+              <p className="text-sm">{request.message}</p>
+            </div>
+          )}
+
+          <RequestItemsUploader requestId={request.id} />
+        </div>
+
+        <div className="flex flex-col gap-2 shrink-0">
+          {canAccept && (
+            <Button
+              size="sm"
+              onClick={() => handleAccept(request.id)}
+              className="h-8 px-3"
+            >
+              Accepter
+            </Button>
+          )}
+          {canRefuse && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleRefuse(request.id)}
+              className="h-8 px-3"
+            >
+              Refuser
+            </Button>
+          )}
+          {canAdvance && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleAdvanceStatus(request.id)}
+              className="h-8 px-3 text-xs"
+            >
+              {NEXT_STATUS_LABEL[request.status]}
+            </Button>
+          )}
+        </div>
+      </div>
     );
   };
 
@@ -308,45 +322,50 @@ export default function SellerDashboardPage() {
           </div>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Nouvelles demandes de clients</CardTitle>
-            <CardDescription>
-              Acceptez ou refusez les nouvelles demandes qui vous sont adressées
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+        <Tabs defaultValue="new">
+          <TabsList>
+            <TabsTrigger value="new">
+              Nouvelles demandes ({newRequests.length})
+            </TabsTrigger>
+            <TabsTrigger value="mine">
+              Mes demandes ({myRequests.length})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="new" className="space-y-4">
             {newRequests.length === 0 ? (
               <div className="text-center py-12 text-gris-moyen">
                 <p>Aucune nouvelle demande.</p>
               </div>
             ) : (
-              <div className="space-y-4">
-                {newRequests.map(renderRequestCard)}
-              </div>
+              newRequests.map((request) => (
+                <RequestAccordion
+                  key={request.id}
+                  header={renderRequestSummary(request)}
+                >
+                  {renderRequestDetails(request)}
+                </RequestAccordion>
+              ))
             )}
-          </CardContent>
-        </Card>
+          </TabsContent>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Mes demandes</CardTitle>
-            <CardDescription>
-              Les demandes que vous avez acceptées et le suivi du processus de vente
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+          <TabsContent value="mine" className="space-y-4">
             {myRequests.length === 0 ? (
               <div className="text-center py-12 text-gris-moyen">
                 <p>Aucune demande acceptée pour le moment.</p>
               </div>
             ) : (
-              <div className="space-y-4">
-                {myRequests.map(renderRequestCard)}
-              </div>
+              myRequests.map((request) => (
+                <RequestAccordion
+                  key={request.id}
+                  header={renderRequestSummary(request)}
+                >
+                  {renderRequestDetails(request)}
+                </RequestAccordion>
+              ))
             )}
-          </CardContent>
-        </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

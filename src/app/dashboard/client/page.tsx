@@ -8,12 +8,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
-import type { Request, Profile, Formula, RequestStatus } from "@/types/database";
+import type { Request, Profile, Formula } from "@/types/database";
 import { RequestItemsUploader } from "@/components/RequestItemsUploader";
+import { RequestAccordion } from "@/components/RequestAccordion";
 import {
   requestStatusConfig,
-  RequestFilterTab,
-  IN_PROGRESS_STATUSES,
 } from "@/lib/request-status";
 import { isProfileComplete } from "@/lib/profile";
 import { ArrowLeft } from "lucide-react";
@@ -30,7 +29,6 @@ export default function ClientDashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [requests, setRequests] = useState<RequestWithRelations[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<RequestFilterTab>("all");
 
   const fetchData = useCallback(async () => {
     try {
@@ -94,29 +92,66 @@ export default function ClientDashboardPage() {
     fetchData();
   }, [fetchData]);
 
-  const filteredRequests = requests.filter((request) => {
-    if (activeTab === "all") return true;
-    if (activeTab === "in_progress") return IN_PROGRESS_STATUSES.includes(request.status);
-    return request.status === (activeTab as RequestStatus);
-  });
+  const renderRequestSummary = (request: RequestWithRelations) => {
+    const statusInfo = requestStatusConfig[request.status];
+    const formula = request.formula;
 
-  const counts = {
-    all: requests.length,
-    pending: requests.filter((r) => r.status === "pending").length,
-    accepted: requests.filter((r) => r.status === "accepted").length,
-    refused: requests.filter((r) => r.status === "refused").length,
-    in_progress: requests.filter((r) => IN_PROGRESS_STATUSES.includes(r.status)).length,
-    completed: requests.filter((r) => r.status === "completed").length,
+    return (
+      <div className="flex flex-wrap items-center gap-3">
+        <div className={`p-2 rounded-full ${statusInfo.color}`}>
+          {statusInfo.icon}
+        </div>
+        <div className="font-semibold">Demande #{request.id.slice(0, 8)}</div>
+        <div className="text-sm text-gris-moyen">
+          {new Date(request.created_at).toLocaleDateString("fr-FR")}
+        </div>
+        {formula && (
+          <div className="text-sm text-gris-moyen">
+            · {formula.label} ({formula.price} €)
+          </div>
+        )}
+        <Badge className={statusInfo.color}>{statusInfo.label}</Badge>
+      </div>
+    );
   };
 
-  const statsCards: { key: RequestFilterTab; label: string; value: number }[] = [
-    { key: "all", label: "Total", value: counts.all },
-    { key: "pending", label: "En attente", value: counts.pending },
-    { key: "accepted", label: "Acceptées", value: counts.accepted },
-    { key: "refused", label: "Refusées", value: counts.refused },
-    { key: "in_progress", label: "En cours", value: counts.in_progress },
-    { key: "completed", label: "Terminées", value: counts.completed },
-  ];
+  const renderRequestDetails = (request: RequestWithRelations) => {
+    const statusInfo = requestStatusConfig[request.status];
+    const seller = request.seller;
+    const formula = request.formula;
+
+    return (
+      <div className="space-y-3">
+        {seller && (
+          <div className="text-sm text-gris-moyen">
+            Vendeuse : {seller.first_name} {seller.last_name}
+          </div>
+        )}
+
+        {formula && (
+          <div className="text-sm text-gris-moyen">
+            Formule : {formula.label} ({formula.price} €)
+          </div>
+        )}
+
+        {request.address && (
+          <div className="text-sm text-gris-moyen">
+            Adresse : {request.address}
+          </div>
+        )}
+
+        <Badge className={statusInfo.color}>{statusInfo.label}</Badge>
+
+        {request.message && (
+          <div className="p-3 bg-muted/50 rounded">
+            <p className="text-sm">{request.message}</p>
+          </div>
+        )}
+
+        <RequestItemsUploader requestId={request.id} />
+      </div>
+    );
+  };
 
   if (isLoading) {
     return (
@@ -141,30 +176,13 @@ export default function ClientDashboardPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {statsCards.map((card) => (
-            <Card
-              key={card.key}
-              className={`cursor-pointer transition-shadow ${activeTab === card.key ? "ring-2 ring-primary" : ""}`}
-              onClick={() => setActiveTab(card.key)}
-            >
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{card.label}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{card.value}</div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
         <Card>
           <CardHeader>
             <CardTitle>Mes demandes</CardTitle>
             <CardDescription>Suivez l'état de vos demandes de rendez-vous</CardDescription>
           </CardHeader>
           <CardContent>
-            {filteredRequests.length === 0 ? (
+            {requests.length === 0 ? (
               <div className="text-center py-12 text-gris-moyen">
                 <p className="mb-4">Aucune demande trouvée.</p>
                 <Button asChild>
@@ -173,62 +191,14 @@ export default function ClientDashboardPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                {filteredRequests.map((request) => {
-                  const statusInfo = requestStatusConfig[request.status];
-                  const seller = request.seller;
-                  const formula = request.formula;
-                  return (
-                    <Card key={request.id} className="border-0 shadow-none">
-                      <CardContent className="p-0">
-                        <div className="flex items-start justify-between p-4 border rounded-lg">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <div className={`p-2 rounded-full ${statusInfo.color}`}>
-                                {statusInfo.icon}
-                              </div>
-                              <div>
-                                <div className="font-semibold">
-                                  Demande #{request.id.slice(0, 8)}
-                                </div>
-                                <div className="text-sm text-gris-moyen">
-                                  {new Date(request.created_at).toLocaleDateString("fr-FR")}
-                                </div>
-                              </div>
-                            </div>
-
-                            {seller && (
-                              <div className="text-sm text-gris-moyen mb-2">
-                                Vendeuse : {seller.first_name} {seller.last_name}
-                              </div>
-                            )}
-
-                            {formula && (
-                              <div className="text-sm text-gris-moyen mb-3">
-                                Formule : {formula.label} ({formula.price} €)
-                              </div>
-                            )}
-
-                            {request.address && (
-                              <div className="text-sm text-gris-moyen mb-3">
-                                Adresse : {request.address}
-                              </div>
-                            )}
-
-                            <Badge className={statusInfo.color}>{statusInfo.label}</Badge>
-
-                            {request.message && (
-                              <div className="mt-3 p-3 bg-muted/50 rounded">
-                                <p className="text-sm">{request.message}</p>
-                              </div>
-                            )}
-
-                            <RequestItemsUploader requestId={request.id} />
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
+                {requests.map((request) => (
+                  <RequestAccordion
+                    key={request.id}
+                    header={renderRequestSummary(request)}
+                  >
+                    {renderRequestDetails(request)}
+                  </RequestAccordion>
+                ))}
               </div>
             )}
           </CardContent>
