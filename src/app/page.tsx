@@ -34,7 +34,7 @@ const BENEFITS = [
   {
     icon: Sparkles,
     title: "Expertise",
-    text: "Profitez de l'expertise d'une vendeuse spécialisée qui estime, prépare et vend vos pièces au juste prix, sur les bonnes plateformes, sans que vous ayez à lever le petit doigt.",
+    text: "Profitez de l'expertise d'une vendeuse spécialisée qui saura vous conseiller, estimer, préparer et vendre vos pièces au meilleur prix.",
   },
   {
     icon: Leaf,
