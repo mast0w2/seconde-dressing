@@ -325,9 +325,6 @@ export default function ProfilePage() {
     return null;
   }
 
-  // Get initials for avatar
-  const initials = (profile.first_name?.[0] || "") + (profile.last_name?.[0] || "");
-
   return (
     <div className="container py-8 max-w-3xl">
       <div className="space-y-6">
@@ -362,26 +359,34 @@ export default function ProfilePage() {
               {/* Avatar with photo upload */}
               <div className="flex items-center gap-4">
                 <div className="relative group">
-                  <Avatar className="w-24 h-24">
-                    {profile.photo_url ? (
-                      <AvatarImage src={profile.photo_url} alt="Photo de profil" />
-                    ) : (
-                      <AvatarFallback className="text-2xl font-semibold">
-                        {initials.toUpperCase()}
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploadingPhoto}
                     aria-label="Changer la photo de profil"
-                    className="absolute inset-0 flex items-center justify-center rounded-full bg-noir/0 group-hover:bg-noir/50 transition-colors disabled:opacity-50"
+                    className="relative block rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait"
                   >
-                    {isUploadingPhoto ? (
-                      <span className="h-6 w-6 animate-spin rounded-full border-2 border-blanc border-t-transparent" />
-                    ) : (
-                      <Camera className="h-6 w-6 text-blanc opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <Avatar className="w-24 h-24">
+                      {profile.photo_url ? (
+                        <AvatarImage src={profile.photo_url} alt="Photo de profil" />
+                      ) : (
+                        <AvatarFallback className="bg-creme border-2 border-dashed border-noir/30">
+                          {isUploadingPhoto ? (
+                            <span className="h-6 w-6 animate-spin rounded-full border-2 border-noir border-t-transparent" />
+                          ) : (
+                            <Camera className="h-8 w-8 text-noir/50" />
+                          )}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    {profile.photo_url && (
+                      <span className="absolute inset-0 flex items-center justify-center rounded-full bg-noir/0 group-hover:bg-noir/50 transition-colors">
+                        {isUploadingPhoto ? (
+                          <span className="h-6 w-6 animate-spin rounded-full border-2 border-blanc border-t-transparent" />
+                        ) : (
+                          <Camera className="h-6 w-6 text-blanc opacity-0 group-hover:opacity-100 transition-opacity" />
+                        )}
+                      </span>
                     )}
                   </button>
                   <input
