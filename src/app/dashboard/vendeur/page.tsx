@@ -136,7 +136,7 @@ export default function SellerDashboardPage() {
           updated_at: new Date().toISOString(),
         })
         .eq("id", requestId)
-        .eq("seller_id", null)
+        .is("seller_id", null)
         .eq("status", "pending");
 
       if (error) throw error;
