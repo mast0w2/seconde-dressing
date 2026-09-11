@@ -240,41 +240,21 @@ export default function Home() {
         id="remuneration"
         className="bg-gris-clair px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24"
       >
-        <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-10 lg:gap-16 items-center">
-          <div className="flex flex-col gap-5">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="flex flex-col gap-5 max-w-[480px]">
             <div className="eyebrow">Ce que vous touchez</div>
             <h2 className="text-3xl sm:text-4xl leading-[1.18]">
               Vous touchez 40 % de chaque vente.
             </h2>
-            <p className="text-base text-gris-moyen max-w-[480px]">
+            <p className="text-base text-gris-moyen">
               Votre vendeuse en reçoit 40 % : c&apos;est elle qui trie, photographie, rédige les
               annonces, répond aux acheteurs et expédie. Les 20 % restants font tourner Seconde —
-              la plateforme, le suivi de vos ventes et les paiements sécurisés.
+              la plateforme, le suivi de vos ventes et les paiements.
             </p>
-            <p className="text-base text-gris-moyen max-w-[480px]">
+            <p className="text-base text-gris-moyen">
               Pas de frais cachés. Seul le rendez-vous est facturé, de 10 à 50 € selon la formule
               choisie. Ce qui ne se vend pas vous revient, ou part vers nos filières de réemploi.
             </p>
-          </div>
-
-          <div className="bg-gris-tres-clair border border-noir/15 p-8">
-            <div className="eyebrow mb-6">Exemple</div>
-            <div className="flex items-baseline justify-between pb-4 border-b border-noir/10">
-              <span className="text-gris-moyen">Une veste vendue</span>
-              <span className="font-serif text-2xl text-noir">80 €</span>
-            </div>
-            <div className="flex items-baseline justify-between py-4 border-b border-noir/10">
-              <span className="text-noir">Votre part · 40 %</span>
-              <span className="font-serif text-3xl text-noir">32 €</span>
-            </div>
-            <div className="flex items-baseline justify-between py-4 border-b border-noir/10">
-              <span className="text-gris-moyen">Votre vendeuse · 40 %</span>
-              <span className="font-serif text-2xl text-sauge-fonce">32 €</span>
-            </div>
-            <div className="flex items-baseline justify-between pt-4">
-              <span className="text-gris-moyen">Seconde · 20 %</span>
-              <span className="font-serif text-2xl text-sauge-fonce">16 €</span>
-            </div>
           </div>
         </div>
       </section>

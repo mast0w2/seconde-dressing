@@ -62,7 +62,33 @@ export interface EstimationFormData {
   marques: string;
   description?: string;
   estimation: number;
+  formule?: string;
+  adresse?: string;
 }
+
+const FORMULA_LABELS: Record<string, string> = {
+  'deja-trie': 'Déjà trié',
+  'tri-sur-place': 'Tri sur place',
+  'tri-et-conseil': 'Tri & conseil',
+};
+
+const FORMULA_CLIENT_ACTIONS: Record<string, string[]> = {
+  'deja-trie': [
+    'Mettez de côté les vêtements que vous souhaitez vendre.',
+    'Remplissez vous-même l’inventaire de vos pièces avant notre passage.',
+    'Préparez le sac ou les cartons : on vient simplement les récupérer.',
+  ],
+  'tri-sur-place': [
+    'Mettez de côté ce dont vous ne voulez plus.',
+    'Pas besoin de trier vous-même : on passe 30 min à 1 h chez vous pour repérer les pièces qui se revendront.',
+    'Préparez un espace dégagé pour le tri.',
+  ],
+  'tri-et-conseil': [
+    'Mettez de côté les vêtements que vous voulez vendre.',
+    'Prévoyez 1 h à 1 h 30 : on trie avec vous et on vous conseille.',
+    'Pensez aussi aux pièces dont vous hésitez : on vous dira ce qui vaut le coup d’être vendu.',
+  ],
+};
 
 // ============================================================================
 // Configuration
@@ -638,6 +664,15 @@ class NotificationService {
     const clientSubject = '\u2705 Demande d\'estimation reçue';
     const adminSubject = `\ud83d\udce7 Nouvelle demande d\'estimation - ${data.prenom} ${data.nom}`;
 
+    const formulaSlug = data.formule || '';
+    const formulaLabel = FORMULA_LABELS[formulaSlug] || 'Non renseignée';
+    const clientActions = FORMULA_CLIENT_ACTIONS[formulaSlug] || [];
+    const actionsHtml = clientActions.length
+      ? `<p><strong>Formule choisie :</strong> ${formulaLabel}</p>
+         <p><strong>À faire de votre côté avant le rendez-vous :</strong></p>
+         <ul>${clientActions.map((action) => `<li>${action}</li>`).join('')}</ul>`
+      : '';
+
     // Email to client (confirmation)
     const clientContent = `
       <h2>\u2705 Demande reçue</h2>
@@ -645,11 +680,7 @@ class NotificationService {
       <p>Nous avons bien reçu votre demande d'estimation.</p>
       <p>Notre équipe vous recontactera sous 24h pour définir votre rendez-vous.</p>
       
-      <div class="highlight">
-        <p><strong>Votre estimation:</strong> ${data.estimation.toFixed(0)}€</p>
-        <p><strong>Nombre de vêtements:</strong> ${data.nombreVetements}</p>
-        <p><strong>Valeur moyenne par vêtement:</strong> ${data.valeurMoyenne}€</p>
-      </div>
+      ${actionsHtml}
       
       <p>Merci de votre confiance !</p>
     `;
@@ -663,8 +694,8 @@ class NotificationService {
       <p><strong>Prénom:</strong> ${data.prenom}</p>
       <p><strong>Email:</strong> ${data.email}</p>
       <p><strong>Téléphone:</strong> ${data.telephone}</p>
-      <p><strong>Adresse:</strong> ${(data as any).adresse || 'Non renseignée'}</p>
-      <p><strong>Formule choisie:</strong> ${(data as any).formule || 'Non renseignée'}</p>
+      <p><strong>Adresse:</strong> ${data.adresse || 'Non renseignée'}</p>
+      <p><strong>Formule choisie:</strong> ${formulaLabel}</p>
       
       <h3>Détails de l'estimation:</h3>
       <p><strong>Nombre de vêtements:</strong> ${data.nombreVetements}</p>

@@ -1,6 +1,7 @@
 // src/app/api/estimation/route.ts
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { capitalizeName } from "@/lib/text";
+import { notificationService } from "@/lib/email";
 
 import { NextResponse } from 'next/server';
 
@@ -200,6 +201,24 @@ export async function POST(request: Request) {
         },
         { status: 500 }
       );
+    }
+
+    // Send a confirmation email to the client (and a copy to admins) listing
+    // the actions to take before the appointment, based on the chosen formula.
+    if (process.env.BREVO_API_KEY) {
+      await notificationService.sendEstimationNotification({
+        nom: estimationData.nom,
+        prenom: estimationData.prenom,
+        email: estimationData.email,
+        telephone: estimationData.telephone,
+        adresse: estimationData.adresse,
+        formule: estimationData.formule,
+        nombreVetements: estimationData.nombreVetements,
+        valeurMoyenne: estimationData.valeurMoyenne,
+        marques: estimationData.marques,
+        description: estimationData.description,
+        estimation: estimationData.estimation,
+      });
     }
 
     return NextResponse.json({
