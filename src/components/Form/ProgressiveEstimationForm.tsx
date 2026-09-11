@@ -434,6 +434,30 @@ export function ProgressiveEstimationForm() {
   // to the account created afterwards.
   const [submittedRequestId, setSubmittedRequestId] = useState<string | null>(null);
   const [accountCreated, setAccountCreated] = useState(false);
+  // True when the signed-in user is a seller: they cannot submit a request
+  // (the form is for clients). They must create a separate client account.
+  const [isSeller, setIsSeller] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (cancelled || !user) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+      if (!cancelled && profile?.role === "seller") {
+        setIsSeller(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [supabase]);
 
   const currentQuestion = QUESTIONS[currentStep];
   const isLastStep = currentStep === QUESTIONS.length - 1;
@@ -458,6 +482,7 @@ export function ProgressiveEstimationForm() {
   };
 
   const handleNext = () => {
+    if (isSeller) return;
     if (!validateStep()) return;
     if (!isLastStep) {
       setCurrentStep(currentStep + 1);
@@ -860,6 +885,12 @@ export function ProgressiveEstimationForm() {
       {renderProgress()}
 
       <div className="space-y-4">
+        {isSeller && (
+          <p className="text-sm text-red-600">
+            Vous êtes connectée en tant que vendeuse. Pour vendre vos propres
+            vêtements, créez un autre compte client.
+          </p>
+        )}
         <h3 className="font-serif text-2xl sm:text-3xl text-noir">
           {currentQuestion.question}
         </h3>
@@ -892,7 +923,7 @@ export function ProgressiveEstimationForm() {
           {isLastStep ? (
             <button
               onClick={handleNext}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isSeller}
               className="bg-noir text-blanc border border-noir px-8 py-4 text-[11px] tracking-[0.2em] uppercase hover:bg-transparent hover:text-noir transition-colors disabled:opacity-50"
             >
               {isSubmitting ? "Envoi en cours…" : "Valider ma demande"}
@@ -900,8 +931,8 @@ export function ProgressiveEstimationForm() {
           ) : (
             <button
               onClick={handleNext}
-              disabled={isSubmitting}
-              className="border border-noir px-7 py-4 text-[11px] tracking-[0.2em] uppercase text-noir hover:bg-noir hover:text-blanc transition-colors"
+              disabled={isSubmitting || isSeller}
+              className="border border-noir px-7 py-4 text-[11px] tracking-[0.2em] uppercase text-noir hover:bg-noir hover:text-blanc transition-colors disabled:opacity-50"
             >
               Suivant →
             </button>
