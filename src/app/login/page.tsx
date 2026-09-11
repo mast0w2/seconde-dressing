@@ -66,28 +66,55 @@ function LoginForm() {
         throw new Error("User not found");
       }
 
-      const { data: profile, error: profileError } = await supabase
+      let { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", authData.user.id)
         .single();
 
-      if (profileError && profileError.code !== "PGRST116") {
+      // No profile row yet (e.g. table recreated by the SQL migration, or the
+      // signup profile insert failed): create a minimal one so the user can
+      // land on a dashboard, then complete their details from /profile.
+      if (profileError && profileError.code === "PGRST116") {
+        const { data: newProfile, error: createError } = await supabase
+          .from("profiles")
+          .insert([
+            {
+              id: authData.user.id,
+              email: authData.user.email,
+              first_name: "",
+              last_name: "",
+              role: "client",
+            },
+          ])
+          .select()
+          .single();
+
+        if (createError) {
+          throw createError;
+        }
+
+        profile = newProfile;
+      } else if (profileError) {
         throw profileError;
       }
 
-      const destination =
-        redirectTarget && profile
-          ? redirectTarget
-          : profile
-          ? dashboardForRole(profile.role)
-          : "/";
+      const isProfileComplete =
+        profile && profile.first_name && profile.last_name;
+
+      const destination = redirectTarget
+        ? redirectTarget
+        : isProfileComplete
+        ? dashboardForRole(profile.role)
+        : "/profile";
 
       router.push(destination);
 
       toast({
         title: "Connexion réussie",
-        description: "Vous êtes maintenant connecté.",
+        description: isProfileComplete
+          ? "Vous êtes maintenant connecté."
+          : "Veuillez compléter votre profil pour finaliser votre compte.",
       });
     } catch (error: any) {
       console.error("Login error:", error);
