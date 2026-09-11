@@ -12,3 +12,4 @@ export * from "./use-toast";
 export * from "./avatar";
 export * from "./dropdown-menu";
 export * from "./slider";
+export * from "./info-tooltip";

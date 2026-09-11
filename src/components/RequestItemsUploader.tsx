@@ -5,6 +5,7 @@ import { createBrowserClient } from "@supabase/ssr";
 import { Mic, Upload, X, Loader2, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { InfoTooltip } from "@/components/ui/info-tooltip";
 import { useToast } from "@/components/ui/use-toast";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import type { RequestItem } from "@/types/database";
@@ -159,7 +160,18 @@ export function RequestItemsUploader({ requestId }: RequestItemsUploaderProps) {
   return (
     <div className="space-y-4 mt-4">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium">Vêtements de la demande</h4>
+        <div className="flex items-center gap-2">
+          <h4 className="text-sm font-medium">Inventaire</h4>
+          <span className="text-sm text-gris-moyen">
+            {items.length} {items.length > 1 ? "vêtements" : "vêtement"}
+          </span>
+          <InfoTooltip label="À quoi sert l’inventaire ?" align="left">
+            L’inventaire sert à répertorier vos vêtements pour garder une
+            traçabilité. Les photos ne sont pas utilisées pour la vente&nbsp;:
+            nul besoin de faire de belles photos, un simple cliché suffit pour
+            identifier chaque pièce.
+          </InfoTooltip>
+        </div>
         <Button
           type="button"
           variant="outline"
