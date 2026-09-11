@@ -567,9 +567,9 @@ export function ProgressiveEstimationForm() {
       } else {
         toast({
           title: "Compte créé",
-          description: "Vérifiez votre email pour confirmer votre compte, puis connectez-vous.",
+          description: "N'oubliez pas de confirmer votre adresse e-mail pour activer votre compte.",
         });
-        router.push("/login");
+        router.push("/login?email_pending=1");
       }
     } catch (error: any) {
       toast({

@@ -29,6 +29,7 @@ function LoginForm() {
   const { toast } = useToast();
   const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
   const redirectTarget = searchParams.get("redirect");
+  const showEmailPending = searchParams.get("email_pending") === "1";
   const [loginError, setLoginError] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
@@ -148,6 +149,14 @@ function LoginForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {showEmailPending && (
+            <div className="mb-4 rounded-md border border-sauge/50 bg-sauge-clair/30 p-4">
+              <p className="text-sm text-sauge-fonce">
+                N'oubliez pas de confirmer votre adresse e-mail pour activer votre
+                compte. Cliquez sur le lien reçu par e-mail, puis connectez-vous.
+              </p>
+            </div>
+          )}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>

@@ -100,9 +100,9 @@ function SignupForm() {
       if (!session) {
         toast({
           title: "Inscription réussie",
-          description: "Veuillez vérifier votre email pour confirmer votre compte.",
+          description: "N'oubliez pas de confirmer votre adresse e-mail pour activer votre compte.",
         });
-        router.push("/login");
+        router.push("/login?email_pending=1");
         return;
       }
 
