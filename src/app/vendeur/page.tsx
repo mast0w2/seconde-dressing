@@ -99,11 +99,11 @@ export default function VendeurPage() {
               <Card className="border-2 border-noir/20">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Demandes reçues</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <Users className="h-4 w-4 text-gris-moyen" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{demandesCount}</div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gris-moyen">
                     demandes en attente
                   </p>
                 </CardContent>
@@ -112,11 +112,11 @@ export default function VendeurPage() {
               <Card className="border-2 border-noir/20">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Revenu potentiel</CardTitle>
-                  <Euro className="h-4 w-4 text-muted-foreground" />
+                  <Euro className="h-4 w-4 text-gris-moyen" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">~€50-150/jour</div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gris-moyen">
                     selon votre activité
                   </p>
                 </CardContent>
@@ -125,11 +125,11 @@ export default function VendeurPage() {
               <Card className="border-2 border-noir/20">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Prochains RDV</CardTitle>
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <Calendar className="h-4 w-4 text-gris-moyen" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">0</div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gris-moyen">
                     rendez-vous confirmés
                   </p>
                 </CardContent>

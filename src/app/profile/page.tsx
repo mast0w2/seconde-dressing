@@ -325,7 +325,7 @@ function ProfileForm() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold">Mon profil</h1>
-            <p className="text-muted-foreground">
+            <p className="text-gris-moyen">
               Gérez vos informations personnelles
             </p>
           </div>

@@ -300,7 +300,7 @@ export default function ImpactPage() {
       </section>
 
       {/* Call to Action */}
-      <section className="py-16 bg-gradient-to-br from-beige to-creme">
+      <section className="py-16 bg-creme">
         <div className="container">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-3xl font-bold mb-6 text-noir">

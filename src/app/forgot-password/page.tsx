@@ -72,7 +72,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-creme p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl">Mot de passe oublié ?</CardTitle>
@@ -102,8 +102,8 @@ export default function ForgotPasswordPage() {
             </Button>
           </form>
 
-          <div className="mt-4 text-center text-sm text-muted-foreground">
-            <Link href="/login" className="text-primary hover:underline">
+          <div className="mt-4 text-center text-sm text-gris-moyen">
+            <Link href="/login" className="text-sauge-fonce hover:underline">
               Retour à la connexion
             </Link>
           </div>

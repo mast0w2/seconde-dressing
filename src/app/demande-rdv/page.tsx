@@ -177,7 +177,7 @@ export default function DemandeRdvPage() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold">Demande de rendez-vous</h1>
-            <p className="text-muted-foreground">Décrivez votre besoin de reprise de vêtements</p>
+            <p className="text-gris-moyen">Décrivez votre besoin de reprise de vêtements</p>
           </div>
         </div>
 
@@ -205,7 +205,7 @@ export default function DemandeRdvPage() {
                 <div className="flex items-center gap-1.5">
                   <Label htmlFor="formula_id">Formule de service *</Label>
                   <span className="group relative inline-flex">
-                    <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                    <HelpCircle className="h-4 w-4 text-gris-moyen cursor-help" />
                     <span className="absolute left-1/2 bottom-full z-10 mb-2 hidden -translate-x-1/2 group-hover:block w-64 rounded-md border border-noir/15 bg-blanc p-3 text-xs text-noir shadow-lg">
                       <strong className="block mb-1">Déjà trié (10 €) :</strong>
                       Vos vêtements sont déjà mis de côté, vous remplissez l'inventaire. On vient les récupérer.
@@ -227,7 +227,7 @@ export default function DemandeRdvPage() {
                       title={detail}
                       className={`flex flex-col gap-1 p-4 border rounded-lg cursor-pointer transition-colors ${
                         form.watch("formula_id") === formula.id
-                          ? "border-primary bg-primary/5"
+                          ? "border-noir bg-noir/5"
                           : "hover:bg-muted/50"
                       }`}
                     >
@@ -238,9 +238,9 @@ export default function DemandeRdvPage() {
                         className="sr-only"
                       />
                       <span className="font-medium">{formula.label}</span>
-                      <span className="text-sm text-muted-foreground">{formula.price} €</span>
+                      <span className="text-sm text-gris-moyen">{formula.price} €</span>
                       {detail && (
-                        <span className="text-xs text-muted-foreground mt-1 line-clamp-2">{detail}</span>
+                        <span className="text-xs text-gris-moyen mt-1 line-clamp-2">{detail}</span>
                       )}
                     </label>
                     );
@@ -283,7 +283,7 @@ export default function DemandeRdvPage() {
                     Je confirme que mes pièces respectent les{" "}
                     <span className="group relative inline-flex items-center">
                       <span className="underline underline-offset-2 cursor-help">critères de reprise</span>
-                      <HelpCircle className="inline h-4 w-4 ml-0.5 text-muted-foreground cursor-help" />
+                      <HelpCircle className="inline h-4 w-4 ml-0.5 text-gris-moyen cursor-help" />
                       <span className="absolute left-0 bottom-full z-10 mb-2 hidden group-hover:block w-72 rounded-md border border-noir/15 bg-blanc p-4 text-xs text-noir shadow-lg">
                         {REPRISE_CRITERES.map(({ icon: Icon, texte }) => (
                           <span key={texte} className="flex gap-2 mb-2 last:mb-0">

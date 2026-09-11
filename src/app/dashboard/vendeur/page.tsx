@@ -224,7 +224,7 @@ export default function SellerDashboardPage() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold">Tableau de bord</h1>
-            <p className="text-muted-foreground">Gérez les demandes des clients</p>
+            <p className="text-gris-moyen">Gérez les demandes des clients</p>
           </div>
         </div>
 
@@ -254,7 +254,7 @@ export default function SellerDashboardPage() {
           </CardHeader>
           <CardContent>
             {filteredRequests.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
+              <div className="text-center py-12 text-gris-moyen">
                 <p>Aucune demande trouvée.</p>
               </div>
             ) : (
@@ -281,27 +281,27 @@ export default function SellerDashboardPage() {
                                 <div className="font-semibold">
                                   Demande #{request.id.slice(0, 8)}
                                 </div>
-                                <div className="text-sm text-muted-foreground">
+                                <div className="text-sm text-gris-moyen">
                                   {new Date(request.created_at).toLocaleDateString("fr-FR")}
                                 </div>
                               </div>
                             </div>
 
-                            <div className="text-sm text-muted-foreground mb-2">
+                            <div className="text-sm text-gris-moyen mb-2">
                               {client.first_name} {client.last_name}
                             </div>
-                            <div className="text-sm text-muted-foreground mb-2">
+                            <div className="text-sm text-gris-moyen mb-2">
                               {client.email}
                               {client.phone ? ` · ${client.phone}` : ""}
                             </div>
 
                             {formula && (
-                              <div className="text-sm text-muted-foreground mb-3">
+                              <div className="text-sm text-gris-moyen mb-3">
                                 Formule : {formula.label} ({formula.price} €)
                               </div>
                             )}
                             {request.address && (
-                              <div className="text-sm text-muted-foreground mb-3">
+                              <div className="text-sm text-gris-moyen mb-3">
                                 Adresse : {request.address}
                               </div>
                             )}

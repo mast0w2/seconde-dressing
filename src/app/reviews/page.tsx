@@ -162,13 +162,13 @@ export default function ReviewsPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-purple-50 to-pink-50 py-20">
+      <section className="relative bg-creme py-20">
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-primary">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-noir">
               Avis Clients
             </h1>
-            <p className="text-xl text-muted-foreground mb-8">
+            <p className="text-xl text-gris-moyen mb-8">
               Découvrez ce que nos clients pensent de Seconde
             </p>
           </div>
@@ -193,14 +193,14 @@ export default function ReviewsPage() {
                       return (
                         <Star
                           key={star}
-                          className={`h-8 w-8 ${filled ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+                          className={`h-8 w-8 ${filled ? "text-sauge-fonce fill-sauge-fonce" : "text-gris-clair"}`}
                         />
                       );
                     })}
                   </div>
                 </div>
                 <h2 className="text-4xl font-bold mb-2">{getAverageRating()}/5.0</h2>
-                <p className="text-muted-foreground">
+                <p className="text-gris-moyen">
                   Basé sur {reviews.length} avis
                 </p>
               </CardContent>
@@ -230,7 +230,7 @@ export default function ReviewsPage() {
                             return (
                               <Star
                                 key={star}
-                                className={`h-5 w-5 ${filled ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+                                className={`h-5 w-5 ${filled ? "text-sauge-fonce fill-sauge-fonce" : "text-gris-clair"}`}
                               />
                             );
                           })}
@@ -245,7 +245,7 @@ export default function ReviewsPage() {
               ) : (
                 <Card>
                   <CardContent className="text-center py-8">
-                    <p className="text-muted-foreground">
+                    <p className="text-gris-moyen">
                       Aucun avis pour le moment. Soyez le premier à en laisser un !
                     </p>
                   </CardContent>
@@ -287,12 +287,12 @@ export default function ReviewsPage() {
                           disabled={isSubmitting}
                         >
                           <Star
-                            className={`h-8 w-8 ${star <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+                            className={`h-8 w-8 ${star <= rating ? "text-sauge-fonce fill-sauge-fonce" : "text-gris-clair"}`}
                           />
                         </button>
                       ))}
                     </div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-gris-moyen">
                       Cliquez sur les étoiles pour noter (1 = médiocre, 5 = excellent)
                     </p>
                   </div>

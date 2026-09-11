@@ -154,7 +154,7 @@ export default function PreferencesPage() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold">Préférences</h1>
-            <p className="text-muted-foreground">
+            <p className="text-gris-moyen">
               Configurez vos préférences d&apos;utilisation
             </p>
           </div>
@@ -228,11 +228,11 @@ export default function PreferencesPage() {
                 <div className="flex items-center space-x-3">
                   <div
                     className={`h-6 w-6 rounded-full border-2 flex items-center justify-center cursor-pointer ${
-                      notificationsEmail ? "bg-primary border-primary" : "border-gray-300"
+                      notificationsEmail ? "bg-noir border-noir" : "border-gris-clair"
                     }`}
                     onClick={() => setNotificationsEmail(!notificationsEmail)}
                   >
-                    {notificationsEmail && <Check className="h-4 w-4 text-white" />}
+                    {notificationsEmail && <Check className="h-4 w-4 text-blanc" />}
                   </div>
                   <Label className="text-sm font-medium cursor-pointer" onClick={() => setNotificationsEmail(!notificationsEmail)}>
                     Notifications par email
@@ -242,11 +242,11 @@ export default function PreferencesPage() {
                 <div className="flex items-center space-x-3">
                   <div
                     className={`h-6 w-6 rounded-full border-2 flex items-center justify-center cursor-pointer ${
-                      notificationsSms ? "bg-primary border-primary" : "border-gray-300"
+                      notificationsSms ? "bg-noir border-noir" : "border-gris-clair"
                     }`}
                     onClick={() => setNotificationsSms(!notificationsSms)}
                   >
-                    {notificationsSms && <Check className="h-4 w-4 text-white" />}
+                    {notificationsSms && <Check className="h-4 w-4 text-blanc" />}
                   </div>
                   <Label className="text-sm font-medium cursor-pointer" onClick={() => setNotificationsSms(!notificationsSms)}>
                     Notifications par SMS

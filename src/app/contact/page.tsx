@@ -187,13 +187,13 @@ export default function ContactPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-purple-50 to-pink-50 py-20">
+      <section className="relative bg-creme py-20">
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-primary">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-noir">
               Contactez-nous
             </h1>
-            <p className="text-xl text-muted-foreground mb-8">
+            <p className="text-xl text-gris-moyen mb-8">
               Nous sommes là pour répondre à toutes vos questions
             </p>
           </div>
@@ -300,36 +300,36 @@ export default function ContactPage() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                      <Mail className="h-6 w-6 text-primary" />
+                    <div className="flex-shrink-0 w-12 h-12 bg-sauge/15 rounded-full flex items-center justify-center">
+                      <Mail className="h-6 w-6 text-sauge-fonce" />
                     </div>
                     <div>
                       <h3 className="font-semibold mb-1">Email</h3>
-                      <p className="text-muted-foreground">
+                      <p className="text-gris-moyen">
                         contact@seconde-dressing.fr
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                      <Phone className="h-6 w-6 text-primary" />
+                    <div className="flex-shrink-0 w-12 h-12 bg-sauge/15 rounded-full flex items-center justify-center">
+                      <Phone className="h-6 w-6 text-sauge-fonce" />
                     </div>
                     <div>
                       <h3 className="font-semibold mb-1">Téléphone</h3>
-                      <p className="text-muted-foreground">
+                      <p className="text-gris-moyen">
                         +33 1 23 45 67 89
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                      <MapPin className="h-6 w-6 text-primary" />
+                    <div className="flex-shrink-0 w-12 h-12 bg-sauge/15 rounded-full flex items-center justify-center">
+                      <MapPin className="h-6 w-6 text-sauge-fonce" />
                     </div>
                     <div>
                       <h3 className="font-semibold mb-1">Adresse</h3>
-                      <p className="text-muted-foreground">
+                      <p className="text-gris-moyen">
                         123 Rue de la Mode
                         <br />
                         75000 Paris, France
@@ -348,15 +348,15 @@ export default function ContactPage() {
                   <div className="space-y-4">
                     <div className="flex justify-between">
                       <span className="font-medium">Lundi - Vendredi</span>
-                      <span className="text-muted-foreground">9h00 - 18h00</span>
+                      <span className="text-gris-moyen">9h00 - 18h00</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="font-medium">Samedi</span>
-                      <span className="text-muted-foreground">10h00 - 16h00</span>
+                      <span className="text-gris-moyen">10h00 - 16h00</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="font-medium">Dimanche</span>
-                      <span className="text-muted-foreground">Fermé</span>
+                      <span className="text-gris-moyen">Fermé</span>
                     </div>
                   </div>
                 </CardContent>
@@ -393,10 +393,10 @@ export default function ContactPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 bg-gradient-to-br from-primary/5 to-secondary/5">
+      <section className="py-16 bg-gris-tres-clair">
         <div className="container">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12">
+            <h2 className="text-3xl font-bold text-center mb-12 text-noir">
               Questions Fréquentes
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -405,7 +405,7 @@ export default function ContactPage() {
                   <CardTitle>Comment créer un compte ?</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-gris-moyen">
                     Cliquez sur "S'inscrire" dans le menu, remplissez le formulaire avec vos informations et validez votre adresse email.
                   </p>
                 </CardContent>
@@ -416,7 +416,7 @@ export default function ContactPage() {
                   <CardTitle>Combien coûte le service ?</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-gris-moyen">
                     Notre service est gratuit pour les clients. Les vendeuses paient une commission sur les ventes réalisées.
                   </p>
                 </CardContent>
@@ -427,7 +427,7 @@ export default function ContactPage() {
                   <CardTitle>Comment prendre un rendez-vous ?</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-gris-moyen">
                     Connectez-vous à votre compte, accédez à l'espace client et sélectionnez une vendeuse disponible selon vos préférences.
                   </p>
                 </CardContent>
@@ -438,7 +438,7 @@ export default function ContactPage() {
                   <CardTitle>Comment suis-je payé ?</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-gris-moyen">
                     Les paiements sont traités automatiquement après la vente de vos vêtements. Vous recevez votre part directement sur votre compte bancaire.
                   </p>
                 </CardContent>

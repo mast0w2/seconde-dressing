@@ -140,7 +140,7 @@ function LoginForm() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-creme p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl">Se connecter</CardTitle>
@@ -185,7 +185,7 @@ function LoginForm() {
               )}
             </div>
             <div className="text-right">
-              <Link href="/forgot-password" className="text-sm text-primary hover:underline">
+              <Link href="/forgot-password" className="text-sm text-sauge-fonce hover:underline">
                 Mot de passe oublié ?
               </Link>
             </div>
@@ -198,9 +198,9 @@ function LoginForm() {
               {isSubmitting ? "Connexion..." : "Se connecter"}
             </Button>
           </form>
-          <div className="mt-4 text-center text-sm text-muted-foreground">
+          <div className="mt-4 text-center text-sm text-gris-moyen">
             Vous n&apos;avez pas de compte ?{" "}
-            <Link href="/signup" className="text-primary hover:underline">
+            <Link href="/signup" className="text-sauge-fonce hover:underline">
               S&apos;inscrire
             </Link>
           </div>

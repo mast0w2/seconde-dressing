@@ -18,32 +18,32 @@ export interface StatusConfig {
 export const requestStatusConfig: Record<RequestStatus, StatusConfig> = {
   pending: {
     label: "En attente",
-    color: "bg-yellow-100 text-yellow-800",
+    color: "bg-sauge-clair/40 text-sauge-fonce",
     icon: <Clock className="h-4 w-4" />,
   },
   accepted: {
     label: "Acceptée",
-    color: "bg-blue-100 text-blue-800",
+    color: "bg-sauge/20 text-sauge-fonce",
     icon: <CheckCircle className="h-4 w-4" />,
   },
   refused: {
     label: "Refusée",
-    color: "bg-red-100 text-red-800",
+    color: "bg-red-50 text-red-700",
     icon: <XCircle className="h-4 w-4" />,
   },
   items_collected: {
     label: "Articles récupérés",
-    color: "bg-purple-100 text-purple-800",
+    color: "bg-sauge-clair/30 text-sauge-fonce",
     icon: <Package className="h-4 w-4" />,
   },
   items_on_sale: {
     label: "Articles en vente",
-    color: "bg-orange-100 text-orange-800",
+    color: "bg-sauge/15 text-sauge-fonce",
     icon: <Euro className="h-4 w-4" />,
   },
   completed: {
     label: "Terminée",
-    color: "bg-green-100 text-green-800",
+    color: "bg-sauge-fonce/15 text-sauge-fonce",
     icon: <CheckCircle className="h-4 w-4" />,
   },
 };

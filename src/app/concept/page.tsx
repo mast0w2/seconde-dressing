@@ -9,7 +9,7 @@ export default function ConceptPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-beige to-creme py-16 sm:py-20">
+      <section className="relative bg-creme py-16 sm:py-20">
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
             <div className="flex justify-center mb-4 sm:mb-6">
@@ -57,19 +57,19 @@ export default function ConceptPage() {
                     </p>
                     <div className="space-y-3 sm:space-y-4">
                       <div className="flex items-center gap-2 sm:gap-3">
-                        <span className="text-primary">✓</span>
+                        <span className="text-sauge-fonce">✓</span>
                         <span className="text-xs sm:text-sm text-gris-moyen">Vos vêtements doivent valoir plus de 20€</span>
                       </div>
                       <div className="flex items-center gap-2 sm:gap-3">
-                        <span className="text-primary">✓</span>
+                        <span className="text-sauge-fonce">✓</span>
                         <span className="text-xs sm:text-sm text-gris-moyen">La Dressing Angel gère tout le processus de vente</span>
                       </div>
                       <div className="flex items-center gap-2 sm:gap-3">
-                        <span className="text-primary">✓</span>
+                        <span className="text-sauge-fonce">✓</span>
                         <span className="text-xs sm:text-sm text-gris-moyen">Paiement sous 60 jours maximum</span>
                       </div>
                       <div className="flex items-center gap-2 sm:gap-3">
-                        <span className="text-primary">✓</span>
+                        <span className="text-sauge-fonce">✓</span>
                         <span className="text-xs sm:text-sm text-gris-moyen">Gagner de l'argent : vous récupérez une partie du prix de vente de vos articles</span>
                       </div>
                     </div>
@@ -374,7 +374,7 @@ export default function ConceptPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-br from-beige to-creme">
+      <section className="py-16 bg-creme">
         <div className="container">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-3xl font-bold mb-6 text-noir">

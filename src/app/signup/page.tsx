@@ -136,7 +136,7 @@ function SignupForm() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-creme p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl">
@@ -216,7 +216,7 @@ function SignupForm() {
                     <RadioGroupItem value="client" id="role-client" className="mt-1" />
                     <div className="space-y-1">
                       <span className="block text-sm font-medium">Je veux vendre mes vêtements</span>
-                      <span className="block text-sm text-muted-foreground">
+                      <span className="block text-sm text-gris-moyen">
                         Vous déposez vos pièces pour qu&apos;une vendeuse les reprenne.
                       </span>
                     </div>
@@ -228,7 +228,7 @@ function SignupForm() {
                     <RadioGroupItem value="seller" id="role-seller" className="mt-1" />
                     <div className="space-y-1">
                       <span className="block text-sm font-medium">Je souhaite aider à vendre des vêtements</span>
-                      <span className="block text-sm text-muted-foreground">
+                      <span className="block text-sm text-gris-moyen">
                         Vous triez et accompagnez les clientes dans la reprise de leurs pièces.
                       </span>
                     </div>
@@ -250,7 +250,7 @@ function SignupForm() {
                 <div className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-background text-muted-foreground">ou</span>
+                <span className="px-2 bg-blanc text-gris-moyen">ou</span>
               </div>
             </div>
             <Button
@@ -280,9 +280,9 @@ function SignupForm() {
               S&apos;inscrire avec Google
             </Button>
           </div>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
+          <p className="mt-4 text-center text-sm text-gris-moyen">
             Vous avez déjà un compte ?{" "}
-            <Link href="/login" className="text-primary hover:underline">
+            <Link href="/login" className="text-sauge-fonce hover:underline">
               Se connecter
             </Link>
           </p>
