@@ -11,6 +11,8 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- ============================================================
 -- Drop legacy tables (idempotent)
 -- ============================================================
+DROP TABLE IF EXISTS bookings CASCADE;
+DROP TABLE IF EXISTS orders CASCADE;
 DROP TABLE IF EXISTS rendez_vous CASCADE;
 DROP TABLE IF EXISTS estimation_requests CASCADE;
 DROP TABLE IF EXISTS demandes CASCADE;
