@@ -34,7 +34,7 @@ export default function VendeurPage() {
         .single();
 
       if (!profile) {
-        router.push("/signup");
+        router.push("/signup?vendeur=true");
         return;
       }
 

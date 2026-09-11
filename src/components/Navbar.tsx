@@ -95,7 +95,7 @@ export function Navbar() {
               asChild
               className="hidden sm:inline-flex bg-noir text-blanc border border-noir rounded-none h-9 px-5 text-[10px] font-medium tracking-[0.18em] uppercase hover:bg-transparent hover:text-noir transition-colors"
             >
-              <Link href="/signup">Devenir vendeuse</Link>
+              <Link href="/signup?vendeur=true">Devenir vendeuse</Link>
             </Button>
           )}
           {user ? (
@@ -229,7 +229,7 @@ export function Navbar() {
               </Link>
               {!isSeller && (
                 <Link
-                  href="/signup"
+                  href="/signup?vendeur=true"
                   className="sm:hidden mt-2 inline-flex items-center justify-center bg-noir text-blanc border border-noir h-11 px-5 text-[11px] font-medium tracking-[0.18em] uppercase"
                   onClick={() => setIsMenuOpen(false)}
                 >

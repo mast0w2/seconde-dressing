@@ -10,26 +10,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/components/ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
 import type { Role } from "@/types/database";
 
-const formSchema = z
-  .object({
-    email: z.string().email("Adresse email invalide"),
-    password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
-    confirmPassword: z.string().min(6, "Les mots de passe ne correspondent pas"),
-    prenom: z.string().min(2, "Le prénom est requis"),
-    nom: z.string().min(2, "Le nom est requis"),
-    telephone: z.string().min(10, "Le numéro de téléphone est requis"),
-    rue: z.string().min(5, "L'adresse est requise"),
-    ville: z.string().min(2, "La ville est requise"),
-    codePostal: z.string().min(5, "Le code postal est requis"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Les mots de passe ne correspondent pas",
-    path: ["confirmPassword"],
-  });
+const formSchema = z.object({
+  email: z.string().email("Adresse email invalide"),
+  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+  prenom: z.string().min(2, "Le prénom est requis"),
+  nom: z.string().min(2, "Le nom est requis"),
+  role: z.enum(["client", "seller"], {
+    errorMap: () => ({ message: "Merci d'indiquer votre intention" }),
+  }),
+});
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -38,26 +32,24 @@ function SignupForm() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+
   const isVendeurFlow = searchParams.get("vendeur") === "true";
-  const role: Role = isVendeurFlow ? "seller" : "client";
+  const preselectedRole: Role = isVendeurFlow ? "seller" : "client";
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
       password: "",
-      confirmPassword: "",
       prenom: "",
       nom: "",
-      telephone: "",
-      rue: "",
-      ville: "",
-      codePostal: "",
+      role: preselectedRole,
     },
   });
 
-  const { handleSubmit, register, formState } = form;
+  const { handleSubmit, register, formState, setValue, watch } = form;
   const { errors, isSubmitting } = formState;
+  const selectedRole = watch("role");
 
   const onSubmit = async (data: FormValues) => {
     try {
@@ -83,13 +75,13 @@ function SignupForm() {
           email: user.email,
           first_name: data.prenom,
           last_name: data.nom,
-          phone: data.telephone || null,
+          phone: null,
           photo_url: null,
-          street_address: data.rue || null,
-          city: data.ville || null,
-          postal_code: data.codePostal || null,
+          street_address: null,
+          city: null,
+          postal_code: null,
           country: "France",
-          role,
+          role: data.role,
           bio: null,
           specialization: null,
           hourly_rate: null,
@@ -101,8 +93,6 @@ function SignupForm() {
         throw profileError;
       }
 
-      // When email confirmation is enabled, no session is created yet:
-      // prompt the user to confirm their email before signing in.
       if (!session) {
         toast({
           title: "Inscription réussie",
@@ -113,11 +103,11 @@ function SignupForm() {
       }
 
       toast({
-        title: "Inscription réussie",
-        description: "Votre compte a été créé avec succès.",
+        title: "Bienvenue sur Seconde !",
+        description: "Votre compte a été créé. Complétez votre profil pour finaliser votre inscription.",
       });
 
-      router.push(role === "seller" ? "/vendeur" : "/");
+      router.push("/profile");
     } catch (error: any) {
       toast({
         title: "Erreur d'inscription",
@@ -209,53 +199,46 @@ function SignupForm() {
                 <p className="text-sm text-destructive">{errors.password.message}</p>
               )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                {...register("confirmPassword")}
-                className={errors.confirmPassword ? "border-destructive" : ""}
-              />
-              {errors.confirmPassword && (
-                <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="telephone">Téléphone *</Label>
-              <Input
-                id="telephone"
-                placeholder="06 12 34 56 78"
-                {...register("telephone")}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="rue">Adresse *</Label>
-              <Input
-                id="rue"
-                placeholder="12 rue du Commerce"
-                {...register("rue")}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="ville">Ville *</Label>
-                <Input
-                  id="ville"
-                  placeholder="Paris"
-                  {...register("ville")}
-                />
+
+            {!isVendeurFlow && (
+              <div className="space-y-3">
+                <Label>Votre intention</Label>
+                <RadioGroup
+                  defaultValue={selectedRole}
+                  onValueChange={(value) => setValue("role", value as Role)}
+                  className="grid gap-3 pt-1"
+                >
+                  <label
+                    htmlFor="role-client"
+                    className="flex items-start gap-3 rounded-lg border border-noir/15 p-4 cursor-pointer hover:bg-noir/5 transition-colors"
+                  >
+                    <RadioGroupItem value="client" id="role-client" className="mt-1" />
+                    <div className="space-y-1">
+                      <span className="block text-sm font-medium">Je veux vendre mes vêtements</span>
+                      <span className="block text-sm text-muted-foreground">
+                        Vous déposez vos pièces pour qu&apos;une vendeuse les reprenne.
+                      </span>
+                    </div>
+                  </label>
+                  <label
+                    htmlFor="role-seller"
+                    className="flex items-start gap-3 rounded-lg border border-noir/15 p-4 cursor-pointer hover:bg-noir/5 transition-colors"
+                  >
+                    <RadioGroupItem value="seller" id="role-seller" className="mt-1" />
+                    <div className="space-y-1">
+                      <span className="block text-sm font-medium">Je souhaite aider à vendre des vêtements</span>
+                      <span className="block text-sm text-muted-foreground">
+                        Vous triez et accompagnez les clientes dans la reprise de leurs pièces.
+                      </span>
+                    </div>
+                  </label>
+                </RadioGroup>
+                {errors.role && (
+                  <p className="text-sm text-destructive">{errors.role.message}</p>
+                )}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="codePostal">Code postal *</Label>
-                <Input
-                  id="codePostal"
-                  placeholder="75001"
-                  {...register("codePostal")}
-                />
-              </div>
-            </div>
+            )}
+
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? "Inscription..." : "S'inscrire"}
             </Button>

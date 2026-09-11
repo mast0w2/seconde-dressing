@@ -15,6 +15,7 @@ import { createBrowserClient } from "@supabase/ssr";
 import { Profile, Role } from "@/types/database";
 import { Mail, Phone, User, Home, MapPin, ArrowLeft, Edit, Save, X, Camera } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { AddressInput } from "@/components/ui/address-input";
 import Link from "next/link";
 
 const profileFormSchema = z.object({
@@ -57,8 +58,9 @@ export default function ProfilePage() {
     },
   });
 
-  const { handleSubmit, register, formState, setValue, reset } = form;
+  const { handleSubmit, register, formState, setValue, reset, watch } = form;
   const { errors, isSubmitting } = formState;
+  const streetAddressValue = watch("street_address");
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -560,10 +562,16 @@ export default function ProfilePage() {
               <div className="space-y-2">
                 <Label htmlFor="street_address">Rue et numéro *</Label>
                 {isEditing ? (
-                  <Input
+                  <AddressInput
                     id="street_address"
-                    {...register("street_address")}
-                    placeholder="Ex: 123 Rue de la République"
+                    value={streetAddressValue}
+                    onChange={(v) => setValue("street_address", v, { shouldValidate: false })}
+                    onPick={(picked) => {
+                      setValue("street_address", picked.label, { shouldValidate: true });
+                      setValue("postal_code", picked.postcode, { shouldValidate: true });
+                      setValue("city", picked.city, { shouldValidate: true });
+                    }}
+                    placeholder="Commencez à taper votre adresse…"
                   />
                 ) : (
                   <p className="text-lg">{profile.street_address || "Non renseigné"}</p>
