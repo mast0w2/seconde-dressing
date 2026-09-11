@@ -88,7 +88,7 @@ export default function DemandeRdvPage() {
       }
 
       if (!isProfileComplete(profileData)) {
-        router.push("/profile");
+        router.push("/profile?incomplete=1");
         return;
       }
 

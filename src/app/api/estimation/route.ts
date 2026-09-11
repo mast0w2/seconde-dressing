@@ -1,5 +1,6 @@
 // src/app/api/estimation/route.ts
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { capitalizeName } from "@/lib/text";
 // Estimation form API endpoint for handling detailed estimation requests
 
 import { NextResponse } from 'next/server';
@@ -152,8 +153,8 @@ async function saveEstimationRequest(data: EstimationRequest) {
         brands: data.marques,
         description: data.description || null,
         estimate: data.estimation,
-        client_first_name: user ? null : data.prenom,
-        client_last_name: user ? null : data.nom,
+        client_first_name: user ? null : capitalizeName(data.prenom),
+        client_last_name: user ? null : capitalizeName(data.nom),
         client_email: user ? null : data.email,
         client_phone: user ? null : data.telephone,
       },

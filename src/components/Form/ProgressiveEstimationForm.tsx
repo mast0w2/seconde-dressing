@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/components/ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
+import { capitalizeName } from "@/lib/text";
 import { Users, Sparkles, Gem, Ban } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -530,8 +531,8 @@ export function ProgressiveEstimationForm() {
         {
           id: user.id,
           email: formData.email,
-          first_name: formData.prenom,
-          last_name: formData.nom,
+          first_name: capitalizeName(formData.prenom),
+          last_name: capitalizeName(formData.nom),
           phone: formData.telephone,
           street_address: formData.adresse,
           role: "client",
@@ -781,12 +782,12 @@ export function ProgressiveEstimationForm() {
             <h3 className="font-serif text-3xl text-noir">Demande envoyée</h3>
           </div>
           <p className="text-gris-moyen">
-            Merci {formData.prenom} ! Votre demande d’estimation a bien été enregistrée.
+            Merci {capitalizeName(formData.prenom)} ! Votre demande d’estimation a bien été enregistrée.
             Nous vous recontacterons sous 24 h pour valider la formule et organiser la collecte.
           </p>
           <div className="text-sm text-gris-moyen bg-gris-tres-clair p-4 border border-noir/10">
             <p className="mb-1">
-              <span className="font-medium text-noir">{formData.prenom} {formData.nom}</span>
+              <span className="font-medium text-noir">{capitalizeName(formData.prenom)} {capitalizeName(formData.nom)}</span>
             </p>
             <p>{formData.email}</p>
             <p>{formData.telephone}</p>

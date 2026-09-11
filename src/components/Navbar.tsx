@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Menu, X, Users } from "lucide-react";
 import { Logo } from "@/components/Logo";
+import { capitalizeName } from "@/lib/text";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -117,7 +118,7 @@ export function Navbar() {
                 <DropdownMenuContent className="w-52 sm:w-56 bg-blanc border border-noir/10" align="end">
                   <DropdownMenuLabel className="font-normal text-noir">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium">{profile?.first_name} {profile?.last_name}</p>
+                      <p className="text-sm font-medium">{profile?.first_name ? capitalizeName(profile.first_name) : ""} {profile?.last_name ? capitalizeName(profile.last_name) : ""}</p>
                       <p className="text-xs text-gris-moyen">{profile?.email}</p>
                     </div>
                   </DropdownMenuLabel>

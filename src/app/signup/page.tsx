@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/components/ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
+import { capitalizeName } from "@/lib/text";
 import type { Role } from "@/types/database";
 
 const formSchema = z.object({
@@ -76,8 +77,8 @@ function SignupForm() {
         {
           id: user.id,
           email: user.email,
-          first_name: data.prenom,
-          last_name: data.nom,
+          first_name: capitalizeName(data.prenom),
+          last_name: capitalizeName(data.nom),
           phone: null,
           photo_url: null,
           street_address: null,

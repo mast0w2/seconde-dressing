@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -16,6 +16,7 @@ import { Profile, Role } from "@/types/database";
 import { Mail, Phone, User, Home, MapPin, ArrowLeft, Edit, Save, X, Camera } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AddressInput } from "@/components/ui/address-input";
+import { capitalizeName } from "@/lib/text";
 import Link from "next/link";
 
 const profileFormSchema = z.object({
@@ -32,8 +33,10 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
-export default function ProfilePage() {
+function ProfileForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const showIncompleteBanner = searchParams.get("incomplete") === "1";
   const { toast } = useToast();
   const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
   const [user, setUser] = useState<any>(null);
@@ -152,8 +155,8 @@ export default function ProfilePage() {
       const profileData: any = {
         id: user.id,
         email: user.email,
-        last_name: data.last_name,
-        first_name: data.first_name,
+        last_name: capitalizeName(data.last_name),
+        first_name: capitalizeName(data.first_name),
         phone: data.phone || null,
         bio: data.bio || null,
         street_address: data.street_address || null,
@@ -330,6 +333,15 @@ export default function ProfilePage() {
   return (
     <div className="container py-8 max-w-3xl">
       <div className="space-y-6">
+        {showIncompleteBanner && (
+          <div className="rounded-md border border-amber-500/60 bg-amber-50 p-4">
+            <p className="text-sm text-amber-900">
+              Il manque des informations dans votre profil personnel. Veuillez les
+              remplir pour accéder à votre tableau de bord.
+            </p>
+          </div>
+        )}
+
         {/* Header with back button */}
         <div className="flex items-center gap-4">
           <Button
@@ -401,7 +413,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <h2 className="text-2xl font-semibold">
-                    {profile.first_name} {profile.last_name}
+                    {capitalizeName(profile.first_name)} {capitalizeName(profile.last_name)}
                   </h2>
                   <p className="text-muted-foreground">{profile.email}</p>
                 </div>
@@ -448,7 +460,7 @@ export default function ProfilePage() {
                         className={errors.first_name ? "border-destructive" : ""}
                       />
                     ) : (
-                      <p className="text-lg">{profile.first_name}</p>
+                      <p className="text-lg">{capitalizeName(profile.first_name)}</p>
                     )}
                     {errors.first_name && (
                       <p className="text-sm text-destructive">{errors.first_name.message}</p>
@@ -464,7 +476,7 @@ export default function ProfilePage() {
                         className={errors.last_name ? "border-destructive" : ""}
                       />
                     ) : (
-                      <p className="text-lg">{profile.last_name}</p>
+                      <p className="text-lg">{capitalizeName(profile.last_name)}</p>
                     )}
                     {errors.last_name && (
                       <p className="text-sm text-destructive">{errors.last_name.message}</p>
@@ -656,5 +668,13 @@ export default function ProfilePage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense>
+      <ProfileForm />
+    </Suspense>
   );
 }

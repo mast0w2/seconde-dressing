@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -29,6 +29,7 @@ function LoginForm() {
   const { toast } = useToast();
   const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
   const redirectTarget = searchParams.get("redirect");
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -42,24 +43,36 @@ function LoginForm() {
   const { errors, isSubmitting } = formState;
 
   const onSubmit = async (data: FormValues) => {
+    setLoginError(null);
     try {
+      const normalizedEmail = data.email.trim().toLowerCase();
+
+      // Supabase Auth returns the same "Invalid login credentials" for both a
+      // non-existent email and a wrong password. To give a precise message, we
+      // first check whether a profile exists for this email: if not, the email
+      // is not linked to any account; otherwise a sign-in failure means the
+      // password is wrong.
+      const { data: existingProfile, error: profileLookupError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("email", normalizedEmail)
+        .maybeSingle();
+
+      if (profileLookupError) {
+        throw profileLookupError;
+      }
+
+      if (!existingProfile) {
+        throw new Error("Aucun compte n'est lié à cette adresse email.");
+      }
+
       const { error, data: authData } = await supabase.auth.signInWithPassword({
-        email: data.email,
+        email: normalizedEmail,
         password: data.password,
       });
 
       if (error) {
-        const errorMessage = error.message?.toLowerCase();
-        const isUserNotFound =
-          errorMessage.includes("user not found") ||
-          errorMessage.includes("invalid login credentials") ||
-          errorMessage.includes("invalid email");
-
-        if (isUserNotFound) {
-          throw new Error("Aucun compte trouvé avec cette adresse email. Veuillez vérifier votre email ou créer un compte.");
-        }
-
-        throw error;
+        throw new Error("Mauvais mot de passe.");
       }
 
       if (!authData.user) {
@@ -121,11 +134,7 @@ function LoginForm() {
       });
     } catch (error: any) {
       console.error("Login error:", error);
-      toast({
-        title: "Erreur de connexion",
-        description: error.message || "Email ou mot de passe incorrect.",
-        variant: "destructive",
-      });
+      setLoginError(error.message || "Email ou mot de passe incorrect.");
     }
   };
 
@@ -171,6 +180,11 @@ function LoginForm() {
                 Mot de passe oublié ?
               </Link>
             </div>
+            {loginError && (
+              <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3">
+                <p className="text-sm text-destructive">{loginError}</p>
+              </div>
+            )}
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? "Connexion..." : "Se connecter"}
             </Button>

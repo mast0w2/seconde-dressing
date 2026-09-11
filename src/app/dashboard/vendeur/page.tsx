@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
+import { isProfileComplete } from "@/lib/profile";
 import type { Request, Profile, Formula, RequestStatus } from "@/types/database";
 import {
   requestStatusConfig,
@@ -74,6 +75,11 @@ export default function SellerDashboardPage() {
 
       if (profileData.role !== "seller") {
         router.push("/dashboard/client");
+        return;
+      }
+
+      if (!isProfileComplete(profileData)) {
+        router.push("/profile?incomplete=1");
         return;
       }
 
