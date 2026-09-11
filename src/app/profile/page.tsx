@@ -12,10 +12,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/components/ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
-import { Profile, Role } from "@/types/database";
+import { Profile } from "@/types/database";
 import { Mail, Phone, User, Home, MapPin, ArrowLeft, Edit, Save, X, Camera } from "lucide-react";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AddressInput } from "@/components/ui/address-input";
+import { Badge } from "@/components/ui/badge";
 import { capitalizeName } from "@/lib/text";
 import Link from "next/link";
 
@@ -25,7 +25,6 @@ const profileFormSchema = z.object({
   phone: z.string().min(10, "Le numéro de téléphone est requis"),
   bio: z.string().optional(),
   street_address: z.string().min(5, "L'adresse est requise"),
-  role: z.enum(["client", "seller"]),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -51,7 +50,6 @@ function ProfileForm() {
       phone: "",
       bio: "",
       street_address: "",
-      role: "client" as Role,
     },
   });
 
@@ -95,7 +93,6 @@ function ProfileForm() {
             phone: profileData.phone || "",
             bio: profileData.bio || "",
             street_address: profileData.street_address || "",
-            role: profileData.role || "client",
           });
         } else {
           // Create a basic profile if it doesn't exist
@@ -159,10 +156,8 @@ function ProfileForm() {
         profileData.specialization = profile.specialization;
         profileData.hourly_rate = profile.hourly_rate;
         profileData.years_experience = profile.years_experience;
+        profileData.role = profile.role;
       }
-
-      // Use the role selected in the form
-      profileData.role = data.role;
 
       const { error, data: upsertResult } = await supabase
         .from("profiles")
@@ -191,8 +186,6 @@ function ProfileForm() {
         throw new Error("Profile not found after update");
       }
 
-      const roleChanged = profile && profile.role !== updatedProfile.role;
-
       setProfile(updatedProfile);
       setIsEditing(false);
 
@@ -200,11 +193,6 @@ function ProfileForm() {
         title: "Profil mis à jour",
         description: `Vos informations ont été enregistrées : ${updatedProfile.first_name} ${updatedProfile.last_name}`,
       });
-
-      // Redirect to the dashboard matching the (possibly new) role
-      if (roleChanged) {
-        router.push(updatedProfile.role === "seller" ? "/dashboard/vendeur" : "/dashboard/client");
-      }
     } catch (error: any) {
       console.error("Profile update error:", error);
       toast({
@@ -224,7 +212,6 @@ function ProfileForm() {
         phone: profile.phone || "",
         bio: profile.bio || "",
         street_address: profile.street_address || "",
-        role: profile.role || "client",
       });
     }
   };
@@ -397,8 +384,11 @@ function ProfileForm() {
                   />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-semibold">
+                  <h2 className="text-2xl font-semibold flex items-center gap-2">
                     {capitalizeName(profile.first_name)} {capitalizeName(profile.last_name)}
+                    <Badge variant="secondary" className="text-xs font-normal">
+                      {profile.role === "seller" ? "Vendeuse" : "Cliente"}
+                    </Badge>
                   </h2>
                   <p className="text-muted-foreground">{profile.email}</p>
                 </div>
@@ -474,45 +464,7 @@ function ProfileForm() {
                   <p className="text-lg">{profile.email}</p>
                 </div>
 
-                {/* Role selection - only visible while editing */}
-                {isEditing && (
-                  <div className="space-y-3">
-                    <Label>Votre rôle</Label>
-                    <RadioGroup
-                      defaultValue={profile.role || "client"}
-                      onValueChange={(value) => setValue("role", value as Role)}
-                      className="grid gap-3 pt-1"
-                    >
-                      <label
-                        htmlFor="role-client"
-                        className="flex items-start gap-3 rounded-lg border border-noir/15 p-4 cursor-pointer hover:bg-noir/5 transition-colors"
-                      >
-                        <RadioGroupItem value="client" id="role-client" className="mt-1" />
-                        <div className="space-y-1">
-                          <span className="block text-sm font-medium">Je veux vendre mes vêtements</span>
-                          <span className="block text-sm text-muted-foreground">
-                            Vous déposez vos pièces pour qu&apos;une vendeuse les reprenne.
-                          </span>
-                        </div>
-                      </label>
-                      <label
-                        htmlFor="role-seller"
-                        className="flex items-start gap-3 rounded-lg border border-noir/15 p-4 cursor-pointer hover:bg-noir/5 transition-colors"
-                      >
-                        <RadioGroupItem value="seller" id="role-seller" className="mt-1" />
-                        <div className="space-y-1">
-                          <span className="block text-sm font-medium">Je souhaite aider à vendre des vêtements</span>
-                          <span className="block text-sm text-muted-foreground">
-                            Vous triez et accompagnez les clientes dans la reprise de leurs pièces.
-                          </span>
-                        </div>
-                      </label>
-                    </RadioGroup>
-                    {errors.role && (
-                      <p className="text-sm text-destructive">{errors.role.message}</p>
-                    )}
-                  </div>
-                )}
+                {/* Role is immutable: shown only as a read-only badge in the header. */}
 
                 <div className="space-y-2">
                   <Label htmlFor="phone">Téléphone *</Label>
