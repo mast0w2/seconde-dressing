@@ -232,10 +232,15 @@ export default function SellerDashboardPage() {
               {clientDisplayName}
             </div>
           )}
-          {clientEmail && (
+          {isAssignedToMe && clientEmail && (
             <div className="text-sm text-gris-moyen mb-2">
               {clientEmail}
               {clientPhone ? ` · ${clientPhone}` : ""}
+            </div>
+          )}
+          {!isAssignedToMe && (
+            <div className="text-sm text-gris-moyen mb-2 italic">
+              Coordonnées visibles après acceptation de la demande
             </div>
           )}
 
