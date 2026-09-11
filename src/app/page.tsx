@@ -4,7 +4,7 @@ import { useRef } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ProgressiveEstimationForm } from "@/components/Form/ProgressiveEstimationForm";
-import { Clock, Euro, Calendar, Truck, ShieldCheck, Leaf } from "lucide-react";
+import { Clock, Euro, Calendar, Truck, Sparkles, Leaf } from "lucide-react";
 
 // ============================================================================
 // Data
@@ -32,9 +32,9 @@ const BENEFITS = [
     text: "Récupération, photographie, mise en ligne et vente : on s'occupe de tout.",
   },
   {
-    icon: ShieldCheck,
-    title: "Sécurité",
-    text: "Transactions sécurisées et suivi transparent de vos ventes.",
+    icon: Sparkles,
+    title: "Expertise",
+    text: "Profitez de l'expertise d'une vendeuse spécialisée qui estime, prépare et vend vos pièces au juste prix, sur les bonnes plateformes, sans que vous ayez à lever le petit doigt.",
   },
   {
     icon: Leaf,
@@ -175,8 +175,7 @@ export default function Home() {
       <section id="pourquoi" className="px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24">
         <div className="max-w-[1200px] mx-auto">
           <div className="text-center flex flex-col items-center gap-3 mb-12 sm:mb-14">
-            <div className="eyebrow">Pourquoi choisir Seconde ?</div>
-            <h2 className="text-3xl sm:text-4xl">Ce que vous n&apos;aurez plus à faire</h2>
+            <h2 className="text-4xl sm:text-5xl">Pourquoi choisir Seconde ?</h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
