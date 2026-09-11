@@ -170,6 +170,27 @@ export interface UpdateDemande {
 }
 
 // ============================================================================
+// demande_refus_vendeurs table
+// Per-seller refusal tracking. A refusal does not change the demande global
+// status, so another vendeur can still accept it. Each refusal is stored here
+// so the refusing vendeur stops seeing the demande as "nouvelle".
+// ============================================================================
+
+export interface DemandeRefusVendeur {
+  id: string;
+  demande_id: string;
+  vendeur_id: string;
+  created_at: string;
+}
+
+export interface InsertDemandeRefusVendeur {
+  id?: string;
+  demande_id: string;
+  vendeur_id: string;
+  created_at?: string;
+}
+
+// ============================================================================
 // disponibilites table
 // ============================================================================
 
@@ -539,6 +560,10 @@ export interface Database {
         Row: Demande;
         Insert: InsertDemande;
         Update: UpdateDemande;
+      };
+      demande_refus_vendeurs: {
+        Row: DemandeRefusVendeur;
+        Insert: InsertDemandeRefusVendeur;
       };
       disponibilites: {
         Row: Disponibilite;
