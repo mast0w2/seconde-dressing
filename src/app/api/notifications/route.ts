@@ -1,10 +1,9 @@
 // src/app/api/notifications/route.ts
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 // Notification API endpoint following REST conventions and best practices
 
 import { NextResponse } from 'next/server';
 import { notificationService } from '@/lib/email';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
 
 // ============================================================================
 // Types
@@ -80,11 +79,7 @@ function validateRequest(body: unknown): { valid: boolean; error?: string; data?
  * Get authenticated user from request
  */
 async function getAuthenticatedUser() {
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies }
-  );
+  const supabase = createSupabaseServerClient();
 
   const { data: { user }, error } = await supabase.auth.getUser();
 

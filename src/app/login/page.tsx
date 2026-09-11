@@ -108,6 +108,9 @@ function LoginForm() {
         ? dashboardForRole(profile.role)
         : "/profile";
 
+      // Refresh the router cache so the middleware and server components
+      // pick up the new auth session before navigating to a protected route.
+      router.refresh();
       router.push(destination);
 
       toast({

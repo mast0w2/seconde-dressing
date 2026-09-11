@@ -1,19 +1,12 @@
 // src/lib/auth/session.ts
 // Server-side authentication and RBAC helpers
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import type { Profile, Role } from '@/types/database';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
 /** Build a server Supabase client bound to the current request cookies. */
 export function getAuthClient() {
-  const cookieStore = cookies();
-  return createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: () => cookieStore,
-  });
+  return createSupabaseServerClient();
 }
 
 /** Return the current authenticated user, or null if none. */

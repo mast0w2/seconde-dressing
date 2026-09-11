@@ -1,9 +1,8 @@
 // src/app/api/reviews/route.ts
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 // Reviews API endpoint with validation and rate limiting
 
 import { NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
 
 // ============================================================================
 // Types
@@ -74,11 +73,7 @@ function validateReview(data: unknown): { valid: boolean; errors?: string[]; dat
  * Check if client already submitted a review
  */
 async function checkExistingReview(clientName: string): Promise<boolean> {
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies }
-  );
+  const supabase = createSupabaseServerClient();
 
   const { data, error } = await supabase
     .from('reviews')
@@ -93,11 +88,7 @@ async function checkExistingReview(clientName: string): Promise<boolean> {
  * Save review to database
  */
 async function saveReview(data: ReviewRequest) {
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies }
-  );
+  const supabase = createSupabaseServerClient();
 
   const { data: reviewData, error } = await supabase
     .from('reviews')
@@ -117,11 +108,7 @@ async function saveReview(data: ReviewRequest) {
  * Get all reviews from database
  */
 async function getAllReviews(): Promise<Review[]> {
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies }
-  );
+  const supabase = createSupabaseServerClient();
 
   const { data, error } = await supabase
     .from('reviews')

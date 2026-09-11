@@ -1,10 +1,9 @@
 // src/app/api/estimation/route.ts
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 // Estimation form API endpoint for handling detailed estimation requests
 
 import { NextResponse } from 'next/server';
 import { notificationService } from '@/lib/email';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
 
 // ============================================================================
 // Types
@@ -108,11 +107,7 @@ function validateEstimationData(data: unknown): { valid: boolean; errors?: strin
 // ============================================================================
 
 async function saveEstimationRequest(data: EstimationRequest) {
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies }
-  );
+  const supabase = createSupabaseServerClient();
 
   // Estimation requests now require an authenticated client (requests.client_id is NOT NULL).
   const { data: { user } } = await supabase.auth.getUser();
