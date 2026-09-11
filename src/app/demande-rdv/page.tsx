@@ -16,9 +16,10 @@ import { ArrowLeft, HelpCircle } from "lucide-react";
 import type { Profile, Formula } from "@/types/database";
 import { isProfileComplete } from "@/lib/profile";
 import { getFormulaDetail } from "@/lib/formulas";
+import { REPRISE_CRITERES } from "@/lib/reprise-criteria";
 
 const formSchema = z.object({
-  message: z.string().min(10, "Le message doit contenir au moins 10 caractères"),
+  message: z.string().optional(),
   proposed_date: z.string().optional(),
   proposed_time: z.string().optional(),
   address: z.string().min(5, "L'adresse de collecte est requise"),
@@ -134,7 +135,7 @@ export default function DemandeRdvPage() {
         {
           client_id: user.id,
           request_type: "appointment",
-          message: data.message,
+          message: data.message || null,
           proposed_date: data.proposed_date || null,
           proposed_time: data.proposed_time || null,
           address: data.address,
@@ -265,29 +266,40 @@ export default function DemandeRdvPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="message">Message *</Label>
+                <Label htmlFor="message">Message (optionnel)</Label>
                 <Textarea
                   id="message"
                   placeholder="Décrivez vos pièces, marques, quantité..."
                   rows={4}
                   {...register("message")}
-                  className={errors.message ? "border-destructive" : ""}
                 />
-                {errors.message && (
-                  <p className="text-sm text-destructive">{errors.message.message}</p>
-                )}
               </div>
 
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  {...register("conditions_accepted")}
-                  className="mt-1"
-                />
-                <span className="text-sm">
-                  Je confirme que mes pièces respectent les critères de reprise de Seconde
-                </span>
-              </label>
+              <div>
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    {...register("conditions_accepted")}
+                    className="mt-1"
+                  />
+                  <span className="text-sm">
+                    Je confirme que mes pièces respectent les{" "}
+                    <span className="group relative inline-flex items-center">
+                      <span className="underline underline-offset-2 cursor-help">critères de reprise</span>
+                      <HelpCircle className="inline h-4 w-4 ml-0.5 text-muted-foreground cursor-help" />
+                      <span className="absolute left-0 bottom-full z-10 mb-2 hidden group-hover:block w-72 rounded-md border border-noir/15 bg-blanc p-4 text-xs text-noir shadow-lg">
+                        {REPRISE_CRITERES.map(({ icon: Icon, texte }) => (
+                          <span key={texte} className="flex gap-2 mb-2 last:mb-0">
+                            <Icon className="h-4 w-4 shrink-0 text-sauge mt-0.5" strokeWidth={1.3} />
+                            <span>{texte}</span>
+                          </span>
+                        ))}
+                      </span>
+                    </span>{" "}
+                    de Seconde
+                  </span>
+                </label>
+              </div>
               {errors.conditions_accepted && (
                 <p className="text-sm text-destructive">{errors.conditions_accepted.message}</p>
               )}
