@@ -328,11 +328,17 @@ export default function SellerDashboardPage() {
         </div>
 
         <Tabs defaultValue="new">
-          <TabsList>
-            <TabsTrigger value="new">
+          <TabsList className="w-full grid grid-cols-2 border-b border-noir/10">
+            <TabsTrigger
+              value="new"
+              className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-noir data-[state=active]:text-noir data-[state=inactive]:text-gris-moyen text-sm tracking-wide"
+            >
               Nouvelles demandes ({newRequests.length})
             </TabsTrigger>
-            <TabsTrigger value="mine">
+            <TabsTrigger
+              value="mine"
+              className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-noir data-[state=active]:text-noir data-[state=inactive]:text-gris-moyen text-sm tracking-wide"
+            >
               Mes demandes ({myRequests.length})
             </TabsTrigger>
           </TabsList>
