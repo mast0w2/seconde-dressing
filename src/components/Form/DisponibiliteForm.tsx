@@ -17,10 +17,10 @@ const formSchema = z.object({
   date: z.date({
     required_error: "La date est requise",
   }),
-  heure_debut: z.string().min(5, "L'heure de début est requise"),
-  heure_fin: z.string().min(5, "L'heure de fin est requise"),
-  est_recurrent: z.boolean().optional(),
-  jour_recurrence: z.string().optional(),
+  start_time: z.string().min(5, "L'heure de début est requise"),
+  end_time: z.string().min(5, "L'heure de fin est requise"),
+  is_recurring: z.boolean().optional(),
+  recurrence_day: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -29,10 +29,10 @@ interface DisponibiliteFormProps {
   onSuccess?: () => void;
   initialData?: {
     date: Date;
-    heure_debut: string;
-    heure_fin: string;
-    est_recurrent: boolean;
-    jour_recurrence: string;
+    start_time: string;
+    end_time: string;
+    is_recurring: boolean;
+    recurrence_day: string;
   };
 }
 
@@ -45,10 +45,10 @@ export function DisponibiliteForm({ onSuccess, initialData }: DisponibiliteFormP
     resolver: zodResolver(formSchema),
     defaultValues: {
       date: initialData?.date || new Date(),
-      heure_debut: initialData?.heure_debut || "",
-      heure_fin: initialData?.heure_fin || "",
-      est_recurrent: initialData?.est_recurrent || false,
-      jour_recurrence: initialData?.jour_recurrence || "",
+      start_time: initialData?.start_time || "",
+      end_time: initialData?.end_time || "",
+      is_recurring: initialData?.is_recurring || false,
+      recurrence_day: initialData?.recurrence_day || "",
     },
   });
 
@@ -72,19 +72,19 @@ export function DisponibiliteForm({ onSuccess, initialData }: DisponibiliteFormP
 
       const formattedDate = format(data.date, "yyyy-MM-dd");
 
-      const disponibiliteData = {
+      const availabilityData = {
         user_id: user.id,
         date: formattedDate,
-        heure_debut: data.heure_debut,
-        heure_fin: data.heure_fin,
-        statut: "disponible" as const,
-        est_recurrent: data.est_recurrent || false,
-        jour_recurrence: data.jour_recurrence || null,
+        start_time: data.start_time,
+        end_time: data.end_time,
+        status: "available" as const,
+        is_recurring: data.is_recurring || false,
+        recurrence_day: data.recurrence_day || null,
       };
 
       const { error } = await supabase
-        .from("disponibilites")
-        .insert([disponibiliteData]);
+        .from("availabilities")
+        .insert([availabilityData]);
 
       if (error) {
         throw error;
@@ -128,47 +128,47 @@ export function DisponibiliteForm({ onSuccess, initialData }: DisponibiliteFormP
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="heure_debut">Heure de début</Label>
+          <Label htmlFor="start_time">Heure de début</Label>
           <Input
-            id="heure_debut"
+            id="start_time"
             type="time"
-            {...register("heure_debut")}
-            className={cn(errors.heure_debut && "border-destructive")}
+            {...register("start_time")}
+            className={cn(errors.start_time && "border-destructive")}
           />
-          {errors.heure_debut && (
-            <p className="text-sm text-destructive">{errors.heure_debut.message}</p>
+          {errors.start_time && (
+            <p className="text-sm text-destructive">{errors.start_time.message}</p>
           )}
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="heure_fin">Heure de fin</Label>
+          <Label htmlFor="end_time">Heure de fin</Label>
           <Input
-            id="heure_fin"
+            id="end_time"
             type="time"
-            {...register("heure_fin")}
-            className={cn(errors.heure_fin && "border-destructive")}
+            {...register("end_time")}
+            className={cn(errors.end_time && "border-destructive")}
           />
-          {errors.heure_fin && (
-            <p className="text-sm text-destructive">{errors.heure_fin.message}</p>
+          {errors.end_time && (
+            <p className="text-sm text-destructive">{errors.end_time.message}</p>
           )}
         </div>
       </div>
 
       <div className="flex items-center space-x-2">
         <Input
-          id="est_recurrent"
+          id="is_recurring"
           type="checkbox"
-          {...register("est_recurrent")}
+          {...register("is_recurring")}
         />
-        <Label htmlFor="est_recurrent">Récurrent</Label>
+        <Label htmlFor="is_recurring">Récurrent</Label>
       </div>
 
-      {watch("est_recurrent") && (
+      {watch("is_recurring") && (
         <div className="space-y-2">
-          <Label htmlFor="jour_recurrence">Jour de récurrence</Label>
+          <Label htmlFor="recurrence_day">Jour de récurrence</Label>
           <Input
-            id="jour_recurrence"
-            {...register("jour_recurrence")}
+            id="recurrence_day"
+            {...register("recurrence_day")}
             placeholder="Ex: Lundi"
           />
         </div>

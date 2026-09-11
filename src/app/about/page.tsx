@@ -8,13 +8,13 @@ export default function AboutPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-purple-50 to-pink-50 py-20">
+      <section className="relative bg-creme py-20">
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-primary">
+            <h1 className="text-4xl md:text-6xl mb-6 text-noir">
               Découvrez Seconde
             </h1>
-            <p className="text-xl text-muted-foreground mb-8">
+            <p className="text-xl text-gris-moyen mb-8">
               La plateforme innovante qui révolutionne la revente de vêtements
             </p>
           </div>
@@ -27,7 +27,7 @@ export default function AboutPage() {
           <div className="max-w-4xl mx-auto">
             <Card className="mb-8">
               <CardHeader>
-                <CardTitle className="text-3xl font-bold text-center">
+                <CardTitle className="text-3xl text-center">
                   Notre Concept
                 </CardTitle>
                 <CardDescription className="text-center">
@@ -40,78 +40,78 @@ export default function AboutPage() {
                     <strong>Seconde</strong> est une plateforme innovante qui met en relation des clients souhaitant vendre leurs vêtements avec des vendeuses professionnelles. Notre mission est de simplifier le processus de revente tout en garantissant une expérience de qualité pour toutes les parties prenantes.
                   </p>
 
-                  <h3 className="text-2xl font-semibold mb-4">Pourquoi choisir Seconde ?</h3>
+                  <h3 className="text-2xl mb-4">Pourquoi choisir Seconde ?</h3>
                   <ul className="space-y-4 mb-8">
                     <li className="flex items-start gap-3">
-                      <span className="text-primary mt-1">✓</span>
+                      <span className="text-sauge-fonce mt-1">✓</span>
                       <span><strong>Expertise professionnelle</strong> : Nos vendeuses sont formées pour maximiser la valeur de vos vêtements</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="text-primary mt-1">✓</span>
+                      <span className="text-sauge-fonce mt-1">✓</span>
                       <span><strong>Gain de temps</strong> : Plus besoin de gérer les annonces, les rendez-vous ou les négociations</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="text-primary mt-1">✓</span>
+                      <span className="text-sauge-fonce mt-1">✓</span>
                       <span><strong>Sécurité</strong> : Transactions sécurisées et suivi transparent de vos ventes</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="text-primary mt-1">✓</span>
+                      <span className="text-sauge-fonce mt-1">✓</span>
                       <span><strong>Flexibilité</strong> : Choisissez le moment qui vous convient pour les rendez-vous</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="text-primary mt-1">✓</span>
+                      <span className="text-sauge-fonce mt-1">✓</span>
                       <span><strong>Réseau étendu</strong> : Accès à une communauté de vendeuses qualifiées</span>
                     </li>
                   </ul>
 
-                  <h3 className="text-2xl font-semibold mb-4">Comment ça fonctionne ?</h3>
+                  <h3 className="text-2xl mb-4">Comment ça fonctionne ?</h3>
                   <div className="space-y-6">
                     <div className="flex gap-4">
-                      <div className="flex-shrink-0 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-bold">
+                      <div className="flex-shrink-0 w-10 h-10 bg-noir text-blanc rounded-full flex items-center justify-center font-bold">
                         1
                       </div>
                       <div>
-                        <h4 className="font-semibold mb-2">Création de compte</h4>
+                        <h4 className="mb-2">Création de compte</h4>
                         <p>Inscrivez-vous gratuitement en tant que client ou vendeuse professionnelle</p>
                       </div>
                     </div>
 
                     <div className="flex gap-4">
-                      <div className="flex-shrink-0 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-bold">
+                      <div className="flex-shrink-0 w-10 h-10 bg-noir text-blanc rounded-full flex items-center justify-center font-bold">
                         2
                       </div>
                       <div>
-                        <h4 className="font-semibold mb-2">Prise de rendez-vous</h4>
+                        <h4 className="mb-2">Prise de rendez-vous</h4>
                         <p>Les clients prennent rendez-vous avec les vendeuses disponibles selon leurs préférences</p>
                       </div>
                     </div>
 
                     <div className="flex gap-4">
-                      <div className="flex-shrink-0 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-bold">
+                      <div className="flex-shrink-0 w-10 h-10 bg-noir text-blanc rounded-full flex items-center justify-center font-bold">
                         3
                       </div>
                       <div>
-                        <h4 className="font-semibold mb-2">Évaluation et sélection</h4>
+                        <h4 className="mb-2">Évaluation et sélection</h4>
                         <p>La vendeuse évalue vos vêtements et sélectionne les pièces à mettre en vente</p>
                       </div>
                     </div>
 
                     <div className="flex gap-4">
-                      <div className="flex-shrink-0 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-bold">
+                      <div className="flex-shrink-0 w-10 h-10 bg-noir text-blanc rounded-full flex items-center justify-center font-bold">
                         4
                       </div>
                       <div>
-                        <h4 className="font-semibold mb-2">Mise en vente</h4>
+                        <h4 className="mb-2">Mise en vente</h4>
                         <p>Vos vêtements sont photographiés, décrits et mis en ligne sur nos plateformes partenaires</p>
                       </div>
                     </div>
 
                     <div className="flex gap-4">
-                      <div className="flex-shrink-0 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-bold">
+                      <div className="flex-shrink-0 w-10 h-10 bg-noir text-blanc rounded-full flex items-center justify-center font-bold">
                         5
                       </div>
                       <div>
-                        <h4 className="font-semibold mb-2">Paiement et suivi</h4>
+                        <h4 className="mb-2">Paiement et suivi</h4>
                         <p>Suivez vos ventes en temps réel et recevez vos paiements directement sur votre compte</p>
                       </div>
                     </div>
@@ -160,13 +160,13 @@ export default function AboutPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-br from-primary/10 to-secondary/10">
+      <section className="py-16 bg-gris-tres-clair">
         <div className="container">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-6">
+            <h2 className="text-3xl mb-6 text-noir">
               Prêt à commencer ?
             </h2>
-            <p className="text-xl text-muted-foreground mb-8">
+            <p className="text-xl text-gris-moyen mb-8">
               Rejoignez notre communauté et commencez à vendre ou acheter des vêtements de qualité.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

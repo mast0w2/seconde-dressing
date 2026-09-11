@@ -1,9 +1,8 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
-  const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { cookies });
+  const supabase = createSupabaseServerClient();
 
   const { email, password } = await request.json();
 

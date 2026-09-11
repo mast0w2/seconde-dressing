@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -9,92 +10,105 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/components/ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
+import { capitalizeName } from "@/lib/text";
+import type { Role } from "@/types/database";
 
 const formSchema = z.object({
   email: z.string().email("Adresse email invalide"),
   password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
-  confirmPassword: z.string().min(6, "Les mots de passe ne correspondent pas"),
   prenom: z.string().min(2, "Le prénom est requis"),
   nom: z.string().min(2, "Le nom est requis"),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Les mots de passe ne correspondent pas",
-  path: ["confirmPassword"],
+  role: z.enum(["client", "seller"], {
+    errorMap: () => ({ message: "Merci d'indiquer votre intention" }),
+  }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-export default function SignupPage() {
+function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+
+  const isVendeurFlow = searchParams.get("vendeur") === "true";
+  const preselectedRole: Role = isVendeurFlow ? "seller" : "client";
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
       password: "",
-      confirmPassword: "",
       prenom: "",
       nom: "",
+      role: preselectedRole,
     },
   });
 
-  const { handleSubmit, register, formState } = form;
+  const { handleSubmit, register, formState, setValue, watch } = form;
   const { errors, isSubmitting } = formState;
+  const selectedRole = watch("role");
 
   const onSubmit = async (data: FormValues) => {
     try {
-      // First, create the auth user
-      const { error: authError } = await supabase.auth.signUp({
+      const {
+        data: { user, session },
+        error: authError,
+      } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+        },
       });
 
       if (authError) {
         throw authError;
       }
 
-      // Get the user to create the profile
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
-      if (userError) {
-        throw userError;
-      }
-
       if (!user) {
         throw new Error("User not found after signup");
       }
 
-      // Create the profile directly with nom and prenom
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .insert([{
+      const { error: profileError } = await supabase.from("profiles").insert([
+        {
           id: user.id,
           email: user.email,
-          nom: data.nom,
-          prenom: data.prenom,
-          telephone: null,
+          first_name: capitalizeName(data.prenom),
+          last_name: capitalizeName(data.nom),
+          phone: null,
           photo_url: null,
-          role: null,
+          street_address: null,
+          role: data.role,
           bio: null,
-          specialisation: null,
-          tarif_horaire: null,
-          annees_experience: null,
-        }]);
+          specialization: null,
+          hourly_rate: null,
+          years_experience: null,
+        },
+      ]);
 
       if (profileError) {
         throw profileError;
       }
 
+      if (!session) {
+        toast({
+          title: "Inscription réussie",
+          description: "N'oubliez pas de confirmer votre adresse e-mail pour activer votre compte.",
+        });
+        router.push("/login?email_pending=1");
+        return;
+      }
+
       toast({
-        title: "Inscription réussie",
-        description: "Veuillez vérifier votre email pour confirmer votre compte.",
+        title: "Bienvenue sur Seconde !",
+        description: "Votre compte a été créé. Complétez votre profil pour finaliser votre inscription.",
       });
 
-      // Redirect to role selection
-      router.push("/role");
+      router.push("/profile");
     } catch (error: any) {
       toast({
         title: "Erreur d'inscription",
@@ -109,7 +123,6 @@ export default function SignupPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
       });
-
       if (error) {
         throw error;
       }
@@ -123,15 +136,16 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-creme p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl">Créer un compte</CardTitle>
+          <CardTitle className="text-2xl">
+            {isVendeurFlow ? "Devenir vendeuse" : "Créer un compte"}
+          </CardTitle>
           <CardDescription>
             Inscrivez-vous pour commencer à utiliser Seconde
           </CardDescription>
         </CardHeader>
-
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -147,7 +161,6 @@ export default function SignupPage() {
                   <p className="text-sm text-destructive">{errors.prenom.message}</p>
                 )}
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="nom">Nom</Label>
                 <Input
@@ -161,7 +174,6 @@ export default function SignupPage() {
                 )}
               </div>
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -175,7 +187,6 @@ export default function SignupPage() {
                 <p className="text-sm text-destructive">{errors.email.message}</p>
               )}
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="password">Mot de passe</Label>
               <Input
@@ -190,37 +201,58 @@ export default function SignupPage() {
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                {...register("confirmPassword")}
-                className={errors.confirmPassword ? "border-destructive" : ""}
-              />
-              {errors.confirmPassword && (
-                <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
-              )}
-            </div>
+            {!isVendeurFlow && (
+              <div className="space-y-3">
+                <Label>Votre intention</Label>
+                <RadioGroup
+                  defaultValue={selectedRole}
+                  onValueChange={(value) => setValue("role", value as Role)}
+                  className="grid gap-3 pt-1"
+                >
+                  <label
+                    htmlFor="role-client"
+                    className="flex items-start gap-3 rounded-lg border border-noir/15 p-4 cursor-pointer hover:bg-noir/5 transition-colors"
+                  >
+                    <RadioGroupItem value="client" id="role-client" className="mt-1" />
+                    <div className="space-y-1">
+                      <span className="block text-sm font-medium">Je veux vendre mes vêtements</span>
+                      <span className="block text-sm text-gris-moyen">
+                        Vous déposez vos pièces pour qu&apos;une vendeuse les reprenne.
+                      </span>
+                    </div>
+                  </label>
+                  <label
+                    htmlFor="role-seller"
+                    className="flex items-start gap-3 rounded-lg border border-noir/15 p-4 cursor-pointer hover:bg-noir/5 transition-colors"
+                  >
+                    <RadioGroupItem value="seller" id="role-seller" className="mt-1" />
+                    <div className="space-y-1">
+                      <span className="block text-sm font-medium">Je souhaite aider à vendre des vêtements</span>
+                      <span className="block text-sm text-gris-moyen">
+                        Vous triez et accompagnez les clientes dans la reprise de leurs pièces.
+                      </span>
+                    </div>
+                  </label>
+                </RadioGroup>
+                {errors.role && (
+                  <p className="text-sm text-destructive">{errors.role.message}</p>
+                )}
+              </div>
+            )}
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? "Inscription..." : "S'inscrire"}
             </Button>
           </form>
-
           <div className="mt-4">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-background text-muted-foreground">
-                  ou
-                </span>
+                <span className="px-2 bg-blanc text-gris-moyen">ou</span>
               </div>
             </div>
-
             <Button
               variant="outline"
               className="w-full mt-4"
@@ -248,15 +280,22 @@ export default function SignupPage() {
               S&apos;inscrire avec Google
             </Button>
           </div>
-
-          <p className="mt-4 text-center text-sm text-muted-foreground">
+          <p className="mt-4 text-center text-sm text-gris-moyen">
             Vous avez déjà un compte ?{" "}
-            <Link href="/login" className="text-primary hover:underline">
+            <Link href="/login" className="text-sauge-fonce hover:underline">
               Se connecter
             </Link>
           </p>
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense>
+      <SignupForm />
+    </Suspense>
   );
 }

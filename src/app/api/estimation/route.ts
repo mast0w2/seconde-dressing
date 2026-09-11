@@ -1,10 +1,9 @@
 // src/app/api/estimation/route.ts
-// Estimation form API endpoint for handling detailed estimation requests
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { capitalizeName } from "@/lib/text";
+import { notificationService } from "@/lib/email";
 
 import { NextResponse } from 'next/server';
-import { notificationService } from '@/lib/email';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
 
 // ============================================================================
 // Types
@@ -23,6 +22,9 @@ interface EstimationRequest {
   marques: string;
   description?: string;
   estimation: number;
+  address?: string;
+  formulaId?: string;
+  conditionsAccepted?: boolean;
 }
 
 // ============================================================================
@@ -93,6 +95,9 @@ function validateEstimationData(data: unknown): { valid: boolean; errors?: strin
       marques: (estimationData.marques as string).trim(),
       description: estimationData.description ? (estimationData.description as string).trim() : undefined,
       estimation: estimationData.estimation as number,
+      address: estimationData.address ? (estimationData.address as string).trim() : undefined,
+      formulaId: estimationData.formulaId ? (estimationData.formulaId as string).trim() : undefined,
+      conditionsAccepted: Boolean(estimationData.conditionsAccepted),
     },
   };
 }
@@ -102,34 +107,61 @@ function validateEstimationData(data: unknown): { valid: boolean; errors?: strin
 // ============================================================================
 
 async function saveEstimationRequest(data: EstimationRequest) {
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies }
-  );
+  const supabase = createSupabaseServerClient();
 
-  const { error } = await supabase
-    .from('estimation_requests')
+  // Estimation requests can be submitted anonymously from the homepage form:
+  // when the submitter is not authenticated, client_id is null and the
+  // contact details are stored in the denormalized client_* columns. If a
+  // logged-in client submits, the request is linked to their profile.
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // The homepage form sends the French formula id (e.g. 'deja-trie');
+  // resolve it to the matching formula UUID via its English slug.
+  const FORMULA_SLUG_MAP: Record<string, string> = {
+    'deja-trie': 'pre-sorted',
+    'tri-sur-place': 'on-site-sorting',
+    'tri-et-conseil': 'sorting-and-advice',
+  };
+
+  let formulaId: string | null = null;
+  const slug = data.formule ? FORMULA_SLUG_MAP[data.formule] : undefined;
+  if (slug) {
+    const { data: formulaRow } = await supabase
+      .from('formulas')
+      .select('id')
+      .eq('slug', slug)
+      .single();
+    if (formulaRow) {
+      formulaId = formulaRow.id as string;
+    }
+  }
+
+  const { data: insertedRow, error } = await supabase
+    .from('requests')
     .insert([
       {
-        nom: data.nom,
-        prenom: data.prenom,
-        email: data.email,
-        telephone: data.telephone,
-        adresse: data.adresse,
-        conditions_acceptees: data.conditionsAcceptees ?? false,
-        formule: data.formule || null,
-        nombre_vetements: data.nombreVetements,
-        valeur_moyenne: data.valeurMoyenne,
-        marques: data.marques,
-        description: data.description || null,
-        estimation: data.estimation,
+        client_id: user ? user.id : null,
+        request_type: 'estimation',
+        message: data.description || null,
         status: 'pending',
-        created_at: new Date().toISOString(),
+        address: data.adresse || data.address || null,
+        formula_id: formulaId,
+        conditions_accepted: data.conditionsAcceptees ?? data.conditionsAccepted ?? false,
+        number_of_items: data.nombreVetements,
+        average_value: data.valeurMoyenne,
+        brands: data.marques,
+        description: data.description || null,
+        estimate: data.estimation,
+        client_first_name: user ? null : capitalizeName(data.prenom),
+        client_last_name: user ? null : capitalizeName(data.nom),
+        client_email: user ? null : data.email,
+        client_phone: user ? null : data.telephone,
       },
-    ]);
+    ])
+    .select('id')
+    .single();
 
-  return { success: !error, error };
+  return { success: !error, error, requestId: (insertedRow as { id?: string } | null)?.id ?? null };
 }
 
 // ============================================================================
@@ -159,25 +191,54 @@ export async function POST(request: Request) {
     const dbResult = await saveEstimationRequest(estimationData);
     if (!dbResult.success) {
       console.error('[Estimation API] Database error:', dbResult.error);
+      const detail =
+        (dbResult.error as { message?: string } | null)?.message ||
+        'Failed to save estimation request';
       return NextResponse.json(
         { 
           success: false, 
-          error: 'Failed to save estimation request' 
+          error: detail
         },
         { status: 500 }
       );
     }
 
-    // Send notification emails with all details (only if BREVO_API_KEY is configured)
+    // Send a confirmation email to the client (and a copy to admins) listing
+    // the actions to take before the appointment, based on the chosen formula.
+    // We never fail the whole request on an email error, but we log the
+    // Brevo response so failures (rejected sender, invalid key, etc.) are
+    // visible in the server logs instead of being swallowed silently.
     if (process.env.BREVO_API_KEY) {
-      const emailResult = await notificationService.sendEstimationNotification(estimationData);
+      const emailResult = await notificationService.sendEstimationNotification({
+        nom: estimationData.nom,
+        prenom: estimationData.prenom,
+        email: estimationData.email,
+        telephone: estimationData.telephone,
+        adresse: estimationData.adresse,
+        formule: estimationData.formule,
+        nombreVetements: estimationData.nombreVetements,
+        valeurMoyenne: estimationData.valeurMoyenne,
+        marques: estimationData.marques,
+        description: estimationData.description,
+        estimation: estimationData.estimation,
+      });
       if (!emailResult.success) {
-        console.warn('[Estimation API] Email notification failed:', emailResult.error);
+        console.error(
+          '[Estimation API] Email sending failed for',
+          estimationData.email,
+          '-',
+          emailResult.error || emailResult.message
+        );
       }
+    } else {
+      console.warn(
+        '[Estimation API] BREVO_API_KEY is not set: email notification skipped.'
+      );
     }
 
     return NextResponse.json({
       success: true,
+      requestId: dbResult.requestId,
       message: 'Votre demande d\'estimation a été envoyée avec succès. Nous vous recontacterons sous 24h.'
     });
   } catch (error) {

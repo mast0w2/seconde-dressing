@@ -32,10 +32,10 @@ export interface EmailSendResult {
  */
 export interface AppointmentNotificationData {
   to: string;
-  vendeuseNom: string;
-  clientNom?: string;
+  sellerName: string;
+  clientName?: string;
   date: string;
-  heure: string;
+  time: string;
 }
 
 /**
@@ -62,16 +62,51 @@ export interface EstimationFormData {
   marques: string;
   description?: string;
   estimation: number;
+  formule?: string;
+  adresse?: string;
 }
+
+const FORMULA_LABELS: Record<string, string> = {
+  'deja-trie': 'Déjà trié',
+  'tri-sur-place': 'Tri sur place',
+  'tri-et-conseil': 'Tri & conseil',
+};
+
+const FORMULA_CLIENT_ACTIONS: Record<string, string[]> = {
+  'deja-trie': [
+    'Vos vêtements sont déjà triés et placés dans des sacs.',
+    'Connectez-vous sur le site et remplissez l’inventaire de vos pièces avant le rendez-vous.',
+    'Lorsque la vendeuse arrive, transmettez-lui les sacs : c’est tout, on s’occupe du reste.',
+  ],
+  'tri-sur-place': [
+    'Mettez de côté ce dont vous ne voulez plus.',
+    'Pas besoin de trier vous-même : on passe 30 min à 1 h chez vous pour repérer les pièces qui se revendront.',
+    'Préparez un espace dégagé pour le tri.',
+  ],
+  'tri-et-conseil': [
+    'Mettez de côté les vêtements que vous voulez vendre.',
+    'Prévoyez 1 h à 1 h 30 : on trie avec vous et on vous conseille.',
+    'Pensez aussi aux pièces dont vous hésitez : on vous dira ce qui vaut le coup d’être vendu.',
+  ],
+};
 
 // ============================================================================
 // Configuration
 // ============================================================================
 
+function parseSenderEmail(raw: string): string {
+  const match = raw.match(/<([^>]+)>/);
+  return match ? match[1].trim() : raw.trim();
+}
+
+const EMAIL_FROM = parseSenderEmail(process.env.EMAIL_FROM || 'support@seconde-dressing.com');
+
+console.warn('[EmailService] sender email resolved to:', EMAIL_FROM, '(raw EMAIL_FROM:', process.env.EMAIL_FROM || '<unset, using fallback>', ')');
+
 const EMAIL_CONFIG = {
   sender: {
     name: 'Seconde',
-    email: process.env.EMAIL_FROM || 'Seconde <no-reply@brevo.com>',
+    email: EMAIL_FROM,
   },
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://seconde.fr',
 } as const;
@@ -88,7 +123,7 @@ export const env = {
     apiKey: process.env.BREVO_API_KEY || '',
   },
   email: {
-    from: process.env.EMAIL_FROM || 'Seconde <no-reply@brevo.com>',
+    from: EMAIL_FROM,
     admin: process.env.CONTACT_ADMIN_EMAILS ? process.env.CONTACT_ADMIN_EMAILS.split(',').map(e => e.trim()).filter(e => e) : [],
   },
   app: {
@@ -145,18 +180,27 @@ class EmailService {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        let errorData: unknown;
+        try {
+          errorData = await response.json();
+        } catch {
+          errorData = await response.text();
+        }
+        const detail = `Brevo API error: ${response.status} - ${JSON.stringify(errorData)}`;
+        console.error('[EmailService] sendEmail failed:', detail);
         return {
           success: false,
-          error: `Brevo API error: ${response.status} - ${JSON.stringify(errorData)}`,
+          error: detail,
         };
       }
 
       return { success: true };
     } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('[EmailService] sendEmail threw:', message);
       return {
         success: false,
-        error: error instanceof Error ? error.message : String(error),
+        error: message,
       };
     }
   }
@@ -372,11 +416,11 @@ class NotificationService {
     const content = `
       <h2>\u2705 Votre rendez-vous est confirmé</h2>
       <p>Bonjour,</p>
-      <p>Votre rendez-vous avec <strong>${data.vendeuseNom}</strong> a été confirmé avec succès.</p>
+      <p>Votre rendez-vous avec <strong>${data.sellerName}</strong> a été confirmé avec succès.</p>
       
       <div class="highlight">
         <p><strong>Date:</strong> ${this.templateService.formatDate(data.date)}</p>
-        <p><strong>Heure:</strong> ${data.heure}</p>
+        <p><strong>Heure:</strong> ${data.time}</p>
       </div>
       
       <p>Merci de vous présenter à l'heure convenue avec vos vêtements à vendre.</p>
@@ -401,16 +445,16 @@ class NotificationService {
     const content = `
       <h2>\ud83d\udcc5 Nouvelle demande reçue</h2>
       <p>Bonjour,</p>
-      <p>Vous avez reçu une nouvelle demande de rendez-vous de la part de <strong>${data.clientNom}</strong>.</p>
+      <p>Vous avez reçu une nouvelle demande de rendez-vous de la part de <strong>${data.clientName}</strong>.</p>
       
       <div class="highlight">
         <p><strong>Date demandée:</strong> ${this.templateService.formatDate(data.date)}</p>
-        <p><strong>Heure demandée:</strong> ${data.heure}</p>
+        <p><strong>Heure demandée:</strong> ${data.time}</p>
       </div>
       
       <p>Connectez-vous à votre espace personnel pour accepter ou refuser cette demande :</p>
       <p>
-        <a href="${EMAIL_CONFIG.siteUrl}/dashboard" class="button">Voir les demandes</a>
+        <a href="${EMAIL_CONFIG.siteUrl}/dashboard/vendeur" class="button">Voir les demandes</a>
       </p>
       
       <p>Ne répondez pas à cet email, utilisez plutôt la plateforme pour gérer vos rendez-vous.</p>
@@ -429,14 +473,14 @@ class NotificationService {
     const subject = '\u274c Annulation de rendez-vous';
     const content = `
       <h2>\u274c Rendez-vous annulé</h2>
-      <p>Bonjour ${data.clientNom || ''},</p>
-      <p>Votre rendez-vous prévu le <strong>${this.templateService.formatDate(data.date)} à ${data.heure}</strong> a été annulé.</p>
+      <p>Bonjour ${data.clientName || ''},</p>
+      <p>Votre rendez-vous prévu le <strong>${this.templateService.formatDate(data.date)} à ${data.time}</strong> a été annulé.</p>
       
       <p>Cela peut être dû à un créneau déjà pris ou à un problème de disponibilité de la vendeuse.</p>
       
       <p>Vous pouvez prendre un nouveau rendez-vous quand vous le souhaitez :</p>
       <p>
-        <a href="${EMAIL_CONFIG.siteUrl}/client/rdv" class="button">Prendre un nouveau rendez-vous</a>
+        <a href="${EMAIL_CONFIG.siteUrl}/demande-rdv" class="button">Prendre un nouveau rendez-vous</a>
       </p>
       
       <p>Nous nous excusons pour la gêne occasionnée.</p>
@@ -456,11 +500,11 @@ class NotificationService {
     const content = `
       <h2>\u2705 Demande acceptée</h2>
       <p>Bonjour,</p>
-      <p>Votre demande de rendez-vous avec <strong>${data.vendeuseNom}</strong> a été acceptée.</p>
+      <p>Votre demande de rendez-vous avec <strong>${data.sellerName}</strong> a été acceptée.</p>
       
       <div class="highlight">
         <p><strong>Date:</strong> ${this.templateService.formatDate(data.date)}</p>
-        <p><strong>Heure:</strong> ${data.heure}</p>
+        <p><strong>Heure:</strong> ${data.time}</p>
       </div>
       
       <p>Nous vous attendons avec plaisir ! N'oubliez pas d'apporter vos vêtements à vendre.</p>
@@ -473,7 +517,7 @@ class NotificationService {
       </ul>
       
       <p>
-        <a href="${EMAIL_CONFIG.siteUrl}/client/rdv" class="button">Voir mes rendez-vous</a>
+        <a href="${EMAIL_CONFIG.siteUrl}/dashboard/client" class="button">Voir mes rendez-vous</a>
       </p>
     `;
 
@@ -491,14 +535,14 @@ class NotificationService {
     const content = `
       <h2>\u274c Demande refusée</h2>
       <p>Bonjour,</p>
-      <p>Malheureusement, votre demande de rendez-vous avec <strong>${data.vendeuseNom}</strong> 
-      pour le <strong>${this.templateService.formatDate(data.date)} à ${data.heure}</strong> a été refusée.</p>
+      <p>Malheureusement, votre demande de rendez-vous avec <strong>${data.sellerName}</strong> 
+      pour le <strong>${this.templateService.formatDate(data.date)} à ${data.time}</strong> a été refusée.</p>
       
       <p>Cela peut être dû à un créneau déjà pris ou à un problème de disponibilité.</p>
       
       <p>Nous vous invitons à essayer avec une autre vendeuse ou un autre créneau :</p>
       <p>
-        <a href="${EMAIL_CONFIG.siteUrl}/client/rdv" class="button">Voir les disponibilités</a>
+        <a href="${EMAIL_CONFIG.siteUrl}/demande-rdv" class="button">Voir les disponibilités</a>
       </p>
       
       <p>Vous pouvez également nous contacter directement via notre 
@@ -582,7 +626,7 @@ class NotificationService {
   public async sendWelcomeEmail(
     email: string,
     name: string,
-    role: 'client' | 'vendeuse'
+    role: 'client' | 'seller'
   ): Promise<EmailSendResult> {
     const subject = '\ud83c\udf89 Bienvenue sur Seconde !';
 
@@ -595,7 +639,7 @@ class NotificationService {
           <li>Suivre vos rendez-vous et vos ventes</li>
         </ul>
         <p style="text-align: center; margin: 20px 0;">
-          <a href="${EMAIL_CONFIG.siteUrl}/client/rdv" class="button">Prendre un rendez-vous</a>
+          <a href="${EMAIL_CONFIG.siteUrl}/demande-rdv" class="button">Prendre un rendez-vous</a>
         </p>
       `
       : `
@@ -606,7 +650,7 @@ class NotificationService {
           <li>Suivre vos clients et vos ventes</li>
         </ul>
         <p style="text-align: center; margin: 20px 0;">
-          <a href="${EMAIL_CONFIG.siteUrl}/vendeuse/demandes" class="button">Voir les demandes</a>
+          <a href="${EMAIL_CONFIG.siteUrl}/dashboard/vendeur" class="button">Voir les demandes</a>
         </p>
       `;
 
@@ -638,6 +682,15 @@ class NotificationService {
     const clientSubject = '\u2705 Demande d\'estimation reçue';
     const adminSubject = `\ud83d\udce7 Nouvelle demande d\'estimation - ${data.prenom} ${data.nom}`;
 
+    const formulaSlug = data.formule || '';
+    const formulaLabel = FORMULA_LABELS[formulaSlug] || 'Non renseignée';
+    const clientActions = FORMULA_CLIENT_ACTIONS[formulaSlug] || [];
+    const actionsHtml = clientActions.length
+      ? `<p><strong>Formule choisie :</strong> ${formulaLabel}</p>
+         <p><strong>À faire de votre côté avant le rendez-vous :</strong></p>
+         <ul>${clientActions.map((action) => `<li>${action}</li>`).join('')}</ul>`
+      : '';
+
     // Email to client (confirmation)
     const clientContent = `
       <h2>\u2705 Demande reçue</h2>
@@ -645,11 +698,7 @@ class NotificationService {
       <p>Nous avons bien reçu votre demande d'estimation.</p>
       <p>Notre équipe vous recontactera sous 24h pour définir votre rendez-vous.</p>
       
-      <div class="highlight">
-        <p><strong>Votre estimation:</strong> ${data.estimation.toFixed(0)}€</p>
-        <p><strong>Nombre de vêtements:</strong> ${data.nombreVetements}</p>
-        <p><strong>Valeur moyenne par vêtement:</strong> ${data.valeurMoyenne}€</p>
-      </div>
+      ${actionsHtml}
       
       <p>Merci de votre confiance !</p>
     `;
@@ -663,8 +712,8 @@ class NotificationService {
       <p><strong>Prénom:</strong> ${data.prenom}</p>
       <p><strong>Email:</strong> ${data.email}</p>
       <p><strong>Téléphone:</strong> ${data.telephone}</p>
-      <p><strong>Adresse:</strong> ${(data as any).adresse || 'Non renseignée'}</p>
-      <p><strong>Formule choisie:</strong> ${(data as any).formule || 'Non renseignée'}</p>
+      <p><strong>Adresse:</strong> ${data.adresse || 'Non renseignée'}</p>
+      <p><strong>Formule choisie:</strong> ${formulaLabel}</p>
       
       <h3>Détails de l'estimation:</h3>
       <p><strong>Nombre de vêtements:</strong> ${data.nombreVetements}</p>

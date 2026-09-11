@@ -1,12 +1,11 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { cookies });
+  const supabase = createSupabaseServerClient();
   const { id } = await params;
 
   const {
@@ -18,7 +17,7 @@ export async function GET(
   }
 
   const { data, error } = await supabase
-    .from("disponibilites")
+    .from("availabilities")
     .select("*")
     .eq("id", id)
     .eq("user_id", user.id)
@@ -35,7 +34,7 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { cookies });
+  const supabase = createSupabaseServerClient();
   const { id } = await params;
 
   const {
@@ -49,7 +48,7 @@ export async function PUT(
   const body = await request.json();
 
   const { error } = await supabase
-    .from("disponibilites")
+    .from("availabilities")
     .update(body)
     .eq("id", id)
     .eq("user_id", user.id);
@@ -65,7 +64,7 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { cookies });
+  const supabase = createSupabaseServerClient();
   const { id } = await params;
 
   const {
@@ -77,7 +76,7 @@ export async function DELETE(
   }
 
   const { error } = await supabase
-    .from("disponibilites")
+    .from("availabilities")
     .delete()
     .eq("id", id)
     .eq("user_id", user.id);

@@ -25,7 +25,7 @@ export default function ImpactPage() {
                 <Globe className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
               </div>
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6 text-noir">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl mb-4 sm:mb-6 text-noir">
               Économie circulaire
             </h1>
             <p className="text-lg sm:text-xl text-gris-moyen mb-6 sm:mb-8 max-w-3xl mx-auto">
@@ -42,7 +42,7 @@ export default function ImpactPage() {
           <div className="max-w-6xl mx-auto">
             <Card className="mb-10 sm:mb-12">
               <CardHeader>
-                <CardTitle className="text-2xl sm:text-3xl font-bold text-center">
+                <CardTitle className="text-2xl sm:text-3xl text-center">
                   L'impact de l'industrie textile
                 </CardTitle>
                 <CardDescription className="text-center text-base sm:text-lg">
@@ -141,7 +141,7 @@ export default function ImpactPage() {
           <div className="max-w-6xl mx-auto">
             <Card>
               <CardHeader>
-                <CardTitle className="text-2xl sm:text-3xl font-bold text-center">
+                <CardTitle className="text-2xl sm:text-3xl text-center">
                   La puissance de l'économie circulaire
                 </CardTitle>
                 <CardDescription className="text-center text-base sm:text-lg">
@@ -156,23 +156,19 @@ export default function ImpactPage() {
                       <strong>utiliser chaque produit jusqu'au bout de son cycle de vie</strong>.
                     </p>
                     <p className="text-base sm:text-lg text-gris-moyen leading-relaxed mb-8">
-                      L'enjeu n'est pas de se contenter de vêtements à faible impact environnemental, 
-                      mais de <strong>maximiser l'utilisation de chaque pièce</strong> déjà produite. 
                       Un vêtement porté jusqu'à usure complète, quel que soit son impact initial, 
                       voit son empreinte environnementale globale considérablement réduite.
                     </p>
                     
                     <div className="bg-creme p-6 sm:p-8 rounded-lg border border-noir/10">
                       <p className="text-base sm:text-lg text-gris-moyen text-center mb-6">
-                        Si les vêtements étaient utilisés jusqu'à la fin de leur durée de vie 
-                        au lieu d'être jetés après seulement un quart de celle-ci, 
-                        <strong>l'impact environnemental de l'industrie textile pourrait être divisé par 4</strong>.
+                        D'après la WRAP (Waste and Resources Action Programme), allonger la durée de vie des vêtements est le plus grand levier identifié pour réduire l'empreinte carbone, eau et déchets du textile : prolonger la vie d'un vêtement de 9 mois supplémentaires suffit à les réduire de 20 à 30 %.
                       </p>
                     </div>
                   </div>
 
                   <div>
-                    <h3 className="text-xl sm:text-2xl font-semibold mb-6 text-center">
+                    <h3 className="text-xl sm:text-2xl mb-6 text-center">
                       Comment agir concrètement ?
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
@@ -224,7 +220,7 @@ export default function ImpactPage() {
                   </div>
 
                   <div className="max-w-4xl mx-auto">
-                    <h3 className="text-xl sm:text-2xl font-semibold mb-6 text-center">
+                    <h3 className="text-xl sm:text-2xl mb-6 text-center">
                       Grâce à vous et Seconde
                     </h3>
                     <p className="text-base sm:text-lg text-gris-moyen leading-relaxed text-center">
@@ -246,7 +242,7 @@ export default function ImpactPage() {
           <div className="max-w-6xl mx-auto">
             <Card>
               <CardHeader>
-                <CardTitle className="text-3xl font-bold text-center">
+                <CardTitle className="text-3xl text-center">
                   Notre engagement
                 </CardTitle>
                 <CardDescription className="text-center text-lg">
@@ -259,7 +255,7 @@ export default function ImpactPage() {
                     <div className="w-16 h-16 border-2 border-noir/20 rounded-full flex items-center justify-center mx-auto mb-4">
                       <Leaf className="h-8 w-8 text-noir" />
                     </div>
-                    <h4 className="font-semibold mb-2">Transparence</h4>
+                    <h4 className="mb-2">Transparence</h4>
                     <p className="text-sm text-gris-moyen">
                       Nous sommes transparents sur notre impact environnemental et nos pratiques.
                     </p>
@@ -268,7 +264,7 @@ export default function ImpactPage() {
                     <div className="w-16 h-16 border-2 border-noir/20 rounded-full flex items-center justify-center mx-auto mb-4">
                       <Recycle className="h-8 w-8 text-noir" />
                     </div>
-                    <h4 className="font-semibold mb-2">Innovation</h4>
+                    <h4 className="mb-2">Innovation</h4>
                     <p className="text-sm text-gris-moyen">
                       Nous cherchons constamment des moyens d'améliorer notre impact positif.
                     </p>
@@ -277,7 +273,7 @@ export default function ImpactPage() {
                     <div className="w-16 h-16 border-2 border-noir/20 rounded-full flex items-center justify-center mx-auto mb-4">
                       <Globe className="h-8 w-8 text-noir" />
                     </div>
-                    <h4 className="font-semibold mb-2">Collaboration</h4>
+                    <h4 className="mb-2">Collaboration</h4>
                     <p className="text-sm text-gris-moyen">
                       Nous travaillons avec des partenaires qui partagent nos valeurs de durabilité.
                     </p>
@@ -300,10 +296,10 @@ export default function ImpactPage() {
       </section>
 
       {/* Call to Action */}
-      <section className="py-16 bg-gradient-to-br from-beige to-creme">
+      <section className="py-16 bg-creme">
         <div className="container">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-6 text-noir">
+            <h2 className="text-3xl mb-6 text-noir">
               Rejoignez le mouvement
             </h2>
             <p className="text-xl text-gris-moyen mb-8">
@@ -327,7 +323,7 @@ export default function ImpactPage() {
       <section className="py-12 border-t border-noir/10">
         <div className="container">
           <div className="max-w-4xl mx-auto">
-            <h3 className="text-xl font-semibold mb-6 text-center">Sources et références</h3>
+            <h3 className="text-xl mb-6 text-center">Sources et références</h3>
             <div className="text-sm text-gris-moyen space-y-4">
               <p>
                 Les données présentées sur cette page proviennent de sources fiables telles que :
@@ -339,6 +335,9 @@ export default function ImpactPage() {
                 <li>Données de l'Agence européenne pour l'environnement (AEE)</li>
                 <li>Études de WRAP (Waste and Resources Action Programme)</li>
               </ul>
+              <p>
+                La WRAP (Waste and Resources Action Programme) est une organisation britannique à but non lucratif créée en 2000, qui travaille avec les gouvernements, les entreprises et les citoyens pour accélérer la transition vers une économie circulaire et la réduction des déchets. Elle est une source de référence sur les questions de gaspillage des ressources, notamment dans le textile.
+              </p>
               <p>
                 Nous nous engageons à maintenir nos informations à jour et basées sur des données 
                 scientifiques vérifiées.

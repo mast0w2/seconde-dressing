@@ -1,265 +1,357 @@
 // src/types/database.ts
 // TypeScript type definitions for Supabase database tables
-// Updated for Version 2 with full authentication and demande system
-
+// English schema (aligned with Notion framing - 11/09/2026)
+// Single `requests` table (merged demandes + estimation_requests) + dedicated `formulas` table
 // ============================================================================
+
 // Base Types
 // ============================================================================
-
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
 
 // ============================================================================
 // Enums and Constants
 // ============================================================================
 
 /** User roles in the application */
-export type Role = 'client' | 'vendeur';
+export type Role = 'client' | 'seller';
 
-/** Demand status */
-export type StatutDemande = 'en_attente' | 'acceptee' | 'refusee' | 'articles_recuperes' | 'articles_en_vente' | 'terminee';
+/** Request status (merged appointment + estimation workflow) */
+export type RequestStatus =
+  | 'pending'
+  | 'accepted'
+  | 'refused'
+  | 'items_collected'
+  | 'items_on_sale'
+  | 'completed';
 
-/** Disponibilite (availability) status */
-export type StatutDisponibilite = 'disponible' | 'reserve';
-
-/** RendezVous (appointment) status */
-export type StatutRendezVous = 'en_attente' | 'confirme' | 'annule' | 'termine';
-
-/** Language preferences */
-export type Langue = 'FR' | 'EN';
-
-/** Theme preferences */
-export type Theme = 'clair' | 'sombre';
+/** Availability status */
+export type AvailabilityStatus = 'available' | 'booked';
 
 /** Contact message status */
 export type ContactMessageStatus = 'pending' | 'read' | 'resolved';
 
-/** Estimation status */
-export type EstimationStatus = 'pending' | 'contacted' | 'converted' | 'rejected';
+/** Request type */
+export type RequestType = 'appointment' | 'estimation';
 
-// ============================================================================
-// Database Tables Types
-// ============================================================================
+/** Language preference */
+export type Language = 'FR' | 'EN';
+
+/** Theme preference */
+export type Theme = 'light' | 'dark';
+
+/** Formula slugs (priced service formulas) */
+export type FormulaSlug = 'pre-sorted' | 'on-site-sorting' | 'sorting-and-advice';
 
 // ============================================================================
 // profiles table
 // ============================================================================
-
 export interface Profile {
   id: string;
-  nom: string;
-  prenom: string;
+  last_name: string;
+  first_name: string;
   email: string;
-  telephone: string | null;
+  phone: string | null;
   photo_url: string | null;
-  // Address fields
-  adresse_rue: string | null;
-  adresse_ville: string | null;
-  adresse_code_postal: string | null;
-  adresse_pays: string | null;
-  // Role
+  street_address: string | null;
   role: Role;
-  // Professional info (for vendeur)
   bio: string | null;
-  specialisation: string | null;
-  tarif_horaire: number | null;
-  annees_experience: number | null;
-  // Timestamps
+  specialization: string | null;
+  hourly_rate: number | null;
+  years_experience: number | null;
   created_at: string;
   updated_at: string;
 }
 
 export interface InsertProfile {
   id?: string;
-  nom: string;
-  prenom: string;
+  last_name: string;
+  first_name: string;
   email: string;
-  telephone?: string | null;
+  phone?: string | null;
   photo_url?: string | null;
-  adresse_rue?: string | null;
-  adresse_ville?: string | null;
-  adresse_code_postal?: string | null;
-  adresse_pays?: string | null;
+  street_address?: string | null;
   role: Role;
   bio?: string | null;
-  specialisation?: string | null;
-  tarif_horaire?: number | null;
-  annees_experience?: number | null;
+  specialization?: string | null;
+  hourly_rate?: number | null;
+  years_experience?: number | null;
   created_at?: string;
   updated_at?: string;
 }
 
 export interface UpdateProfile {
   id?: string;
-  nom?: string;
-  prenom?: string;
+  last_name?: string;
+  first_name?: string;
   email?: string;
-  telephone?: string | null;
+  phone?: string | null;
   photo_url?: string | null;
-  adresse_rue?: string | null;
-  adresse_ville?: string | null;
-  adresse_code_postal?: string | null;
-  adresse_pays?: string | null;
+  street_address?: string | null;
   role?: Role;
   bio?: string | null;
-  specialisation?: string | null;
-  tarif_horaire?: number | null;
-  annees_experience?: number | null;
+  specialization?: string | null;
+  hourly_rate?: number | null;
+  years_experience?: number | null;
   created_at?: string;
   updated_at?: string;
 }
 
 // ============================================================================
-// demandes table
+// formulas table (priced service formulas)
 // ============================================================================
-
-export interface Demande {
+export interface Formula {
   id: string;
-  client_id: string;
-  client_nom: string;
-  client_prenom: string;
-  client_email: string;
-  client_telephone: string | null;
-  type_demande: string;
-  message: string;
-  statut: StatutDemande;
-  vendeur_id: string | null;
+  slug: FormulaSlug;
+  label: string;
+  price: number;
+  description: string | null;
+  created_at: string;
+}
+
+export interface InsertFormula {
+  id?: string;
+  slug: FormulaSlug;
+  label: string;
+  price: number;
+  description?: string | null;
+  created_at?: string;
+}
+
+export interface UpdateFormula {
+  id?: string;
+  slug?: FormulaSlug;
+  label?: string;
+  price?: number;
+  description?: string | null;
+  created_at?: string;
+}
+
+// ============================================================================
+// requests table (merged: appointments + estimation requests)
+// ============================================================================
+export interface Request {
+  id: string;
+  client_id: string | null;
+  request_type: RequestType;
+  message: string | null;
+  status: RequestStatus;
+  seller_id: string | null;
+  proposed_date: string | null;
+  proposed_time: string | null;
+  confirmed_date: string | null;
+  confirmed_time: string | null;
+  address: string | null;
+  formula_id: string | null;
+  conditions_accepted: boolean;
+  number_of_items: number | null;
+  average_value: number | null;
+  brands: string | null;
+  description: string | null;
+  estimate: number | null;
+  client_first_name: string | null;
+  client_last_name: string | null;
+  client_email: string | null;
+  client_phone: string | null;
   created_at: string;
   updated_at: string;
-  date_proposee: string | null;
-  heure_proposee: string | null;
-  date_confirmee: string | null;
-  heure_confirmee: string | null;
 }
 
-export interface InsertDemande {
+export interface InsertRequest {
   id?: string;
-  client_id: string;
-  client_nom: string;
-  client_prenom: string;
-  client_email: string;
-  client_telephone?: string | null;
-  type_demande?: string;
-  message: string;
-  statut?: StatutDemande;
-  vendeur_id?: string | null;
+  client_id?: string | null;
+  request_type?: RequestType;
+  message?: string | null;
+  status?: RequestStatus;
+  seller_id?: string | null;
+  proposed_date?: string | null;
+  proposed_time?: string | null;
+  confirmed_date?: string | null;
+  confirmed_time?: string | null;
+  address?: string | null;
+  formula_id?: string | null;
+  conditions_accepted?: boolean;
+  number_of_items?: number | null;
+  average_value?: number | null;
+  brands?: string | null;
+  description?: string | null;
+  estimate?: number | null;
+  client_first_name?: string | null;
+  client_last_name?: string | null;
+  client_email?: string | null;
+  client_phone?: string | null;
   created_at?: string;
   updated_at?: string;
-  date_proposee?: string | null;
-  heure_proposee?: string | null;
-  date_confirmee?: string | null;
-  heure_confirmee?: string | null;
 }
 
-export interface UpdateDemande {
+export interface UpdateRequest {
   id?: string;
-  client_id?: string;
-  client_nom?: string;
-  client_prenom?: string;
-  client_email?: string;
-  client_telephone?: string | null;
-  type_demande?: string;
-  message?: string;
-  statut?: StatutDemande;
-  vendeur_id?: string | null;
+  client_id?: string | null;
+  request_type?: RequestType;
+  message?: string | null;
+  status?: RequestStatus;
+  seller_id?: string | null;
+  proposed_date?: string | null;
+  proposed_time?: string | null;
+  confirmed_date?: string | null;
+  confirmed_time?: string | null;
+  address?: string | null;
+  formula_id?: string | null;
+  conditions_accepted?: boolean;
+  number_of_items?: number | null;
+  average_value?: number | null;
+  brands?: string | null;
+  description?: string | null;
+  estimate?: number | null;
+  client_first_name?: string | null;
+  client_last_name?: string | null;
+  client_email?: string | null;
+  client_phone?: string | null;
   created_at?: string;
   updated_at?: string;
-  date_proposee?: string | null;
-  heure_proposee?: string | null;
-  date_confirmee?: string | null;
-  heure_confirmee?: string | null;
+}
+
+/** Request with joined client, seller and formula data */
+export interface RequestWithRelations extends Request {
+  client?: Profile;
+  seller?: Profile | null;
+  formula?: Formula | null;
 }
 
 // ============================================================================
-// disponibilites table
+// request_refusals table (per-seller refusal tracking)
+// A refusal does not change the request global status, so another seller can
+// still accept it. Each refusal is stored here so the refusing seller stops
+// seeing the request as "nouvelle".
 // ============================================================================
-
-export interface Disponibilite {
+export interface RequestRefusal {
   id: string;
-  user_id: string;
-  date: string;
-  heure_debut: string;
-  heure_fin: string;
-  statut: StatutDisponibilite;
-  est_recurrent: boolean;
-  jour_recurrence: string | null;
+  request_id: string;
+  seller_id: string;
   created_at: string;
 }
 
-export interface InsertDisponibilite {
+export interface InsertRequestRefusal {
   id?: string;
-  user_id: string;
-  date: string;
-  heure_debut: string;
-  heure_fin: string;
-  statut?: StatutDisponibilite;
-  est_recurrent?: boolean;
-  jour_recurrence?: string | null;
+  request_id: string;
+  seller_id: string;
   created_at?: string;
 }
 
-export interface UpdateDisponibilite {
+// ============================================================================
+// request_items table (clothing items photographed for a request)
+// ============================================================================
+export interface RequestItem {
+  id: string;
+  request_id: string;
+  photo_url: string;
+  description: string | null;
+  created_at: string;
+}
+
+export interface InsertRequestItem {
+  id?: string;
+  request_id: string;
+  photo_url: string;
+  description?: string | null;
+  created_at?: string;
+}
+
+export interface UpdateRequestItem {
+  id?: string;
+  request_id?: string;
+  photo_url?: string;
+  description?: string | null;
+  created_at?: string;
+}
+
+// ============================================================================
+// preferences table
+// ============================================================================
+export interface Preference {
+  id: string;
+  user_id: string;
+  language: Language;
+  timezone: string;
+  theme: Theme;
+  email_notifications: boolean;
+  sms_notifications: boolean;
+  created_at: string;
+}
+
+export interface InsertPreference {
+  id?: string;
+  user_id: string;
+  language?: Language;
+  timezone?: string;
+  theme?: Theme;
+  email_notifications?: boolean;
+  sms_notifications?: boolean;
+  created_at?: string;
+}
+
+export interface UpdatePreference {
+  id?: string;
+  user_id?: string;
+  language?: Language;
+  timezone?: string;
+  theme?: Theme;
+  email_notifications?: boolean;
+  sms_notifications?: boolean;
+  created_at?: string;
+}
+
+// ============================================================================
+// availabilities table
+// ============================================================================
+export interface Availability {
+  id: string;
+  user_id: string;
+  date: string;
+  start_time: string;
+  end_time: string;
+  status: AvailabilityStatus;
+  is_recurring: boolean;
+  recurrence_day: string | null;
+  created_at: string;
+}
+
+export interface InsertAvailability {
+  id?: string;
+  user_id: string;
+  date: string;
+  start_time: string;
+  end_time: string;
+  status?: AvailabilityStatus;
+  is_recurring?: boolean;
+  recurrence_day?: string | null;
+  created_at?: string;
+}
+
+export interface UpdateAvailability {
   id?: string;
   user_id?: string;
   date?: string;
-  heure_debut?: string;
-  heure_fin?: string;
-  statut?: StatutDisponibilite;
-  est_recurrent?: boolean;
-  jour_recurrence?: string | null;
+  start_time?: string;
+  end_time?: string;
+  status?: AvailabilityStatus;
+  is_recurring?: boolean;
+  recurrence_day?: string | null;
   created_at?: string;
-}
-
-// ============================================================================
-// rendez_vous table
-// ============================================================================
-
-export interface RendezVous {
-  id: string;
-  demande_id: string | null;
-  client_id: string;
-  vendeur_id: string;
-  date: string;
-  heure_debut: string;
-  heure_fin: string;
-  statut: StatutRendezVous;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface InsertRendezVous {
-  id?: string;
-  demande_id?: string | null;
-  client_id: string;
-  vendeur_id: string;
-  date: string;
-  heure_debut: string;
-  heure_fin: string;
-  statut?: StatutRendezVous;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export interface UpdateRendezVous {
-  id?: string;
-  demande_id?: string | null;
-  client_id?: string;
-  vendeur_id?: string;
-  date?: string;
-  heure_debut?: string;
-  heure_fin?: string;
-  statut?: StatutRendezVous;
-  created_at?: string;
-  updated_at?: string;
 }
 
 // ============================================================================
 // reviews table
 // ============================================================================
-
 export interface Review {
   id: string;
-  client_id: string | null;
-  vendeur_id: string | null;
+  client_id: string;
+  seller_id: string;
   rating: number;
   comment: string;
   created_at: string;
@@ -267,8 +359,8 @@ export interface Review {
 
 export interface InsertReview {
   id?: string;
-  client_id?: string | null;
-  vendeur_id?: string | null;
+  client_id: string;
+  seller_id: string;
   rating: number;
   comment: string;
   created_at?: string;
@@ -276,8 +368,8 @@ export interface InsertReview {
 
 export interface UpdateReview {
   id?: string;
-  client_id?: string | null;
-  vendeur_id?: string | null;
+  client_id?: string;
+  seller_id?: string;
   rating?: number;
   comment?: string;
   created_at?: string;
@@ -286,7 +378,6 @@ export interface UpdateReview {
 // ============================================================================
 // contact_messages table
 // ============================================================================
-
 export interface ContactMessage {
   id: string;
   name: string;
@@ -321,108 +412,17 @@ export interface UpdateContactMessage {
 }
 
 // ============================================================================
-// estimation_requests table
-// ============================================================================
-
-export interface EstimationRequest {
-  id: string;
-  nom: string;
-  prenom: string;
-  email: string;
-  telephone: string;
-  nombre_vetements: number;
-  valeur_moyenne: number;
-  marques: string;
-  description: string | null;
-  estimation: number;
-  status: EstimationStatus;
-  created_at: string;
-}
-
-export interface InsertEstimationRequest {
-  id?: string;
-  nom: string;
-  prenom: string;
-  email: string;
-  telephone: string;
-  nombre_vetements: number;
-  valeur_moyenne: number;
-  marques: string;
-  description?: string | null;
-  estimation: number;
-  status?: EstimationStatus;
-  created_at?: string;
-}
-
-export interface UpdateEstimationRequest {
-  id?: string;
-  nom?: string;
-  prenom?: string;
-  email?: string;
-  telephone?: string;
-  nombre_vetements?: number;
-  valeur_moyenne?: number;
-  marques?: string;
-  description?: string | null;
-  estimation?: number;
-  status?: EstimationStatus;
-  created_at?: string;
-}
-
-// ============================================================================
-// preferences table
-// ============================================================================
-
-export interface Preference {
-  id: string;
-  user_id: string;
-  langue: Langue;
-  fuseau_horaire: string;
-  theme: Theme;
-  notifications_email: boolean;
-  notifications_sms: boolean;
-  created_at: string;
-}
-
-export interface InsertPreference {
-  id?: string;
-  user_id: string;
-  langue?: Langue;
-  fuseau_horaire?: string;
-  theme?: Theme;
-  notifications_email?: boolean;
-  notifications_sms?: boolean;
-  created_at?: string;
-}
-
-export interface UpdatePreference {
-  id?: string;
-  user_id?: string;
-  langue?: Langue;
-  fuseau_horaire?: string;
-  theme?: Theme;
-  notifications_email?: boolean;
-  notifications_sms?: boolean;
-  created_at?: string;
-}
-
-// ============================================================================
 // Business Logic Types
 // ============================================================================
 
-/** Extended RendezVous with related data */
-export interface ExtendedRendezVous extends RendezVous {
-  client?: Profile;
-  vendeur?: Profile;
-  demande?: Demande;
-}
-
 /** Dashboard statistics */
 export interface DashboardStats {
-  totalDemandes: number;
-  demandesEnAttente: number;
-  demandesAcceptees: number;
-  demandesTerminees: number;
+  total: number;
+  pending: number;
+  accepted: number;
+  refused: number;
+  in_progress: number;
+  completed: number;
 }
 
 /** Select option for form inputs */
@@ -456,32 +456,30 @@ export interface SignupFormData {
   email: string;
   password: string;
   confirmPassword: string;
-  nom: string;
-  prenom: string;
-  telephone: string;
-  adresse_rue: string;
-  adresse_ville: string;
-  adresse_code_postal: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  street_address: string;
   role: Role;
 }
 
 /** Profile form data */
 export interface ProfileFormData {
-  nom: string;
-  prenom: string;
-  telephone: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
   bio?: string;
-  adresse_rue: string;
-  adresse_ville: string;
-  adresse_code_postal: string;
-  adresse_pays: string;
+  street_address: string;
 }
 
 /** Demande RDV form data */
 export interface DemandeRdvFormData {
   message: string;
-  date_proposee?: string;
-  heure_proposee?: string;
+  proposed_date?: string;
+  proposed_time?: string;
+  address: string;
+  formula_id: string;
+  conditions_accepted: boolean;
 }
 
 /** Contact form data */
@@ -499,13 +497,13 @@ export interface ReviewFormData {
   comment: string;
 }
 
-/** Disponibilite form data */
-export interface DisponibiliteFormData {
+/** Availability form data */
+export interface AvailabilityFormData {
   date: string;
-  heure_debut: string;
-  heure_fin: string;
-  est_recurrent: boolean;
-  jour_recurrence?: string;
+  start_time: string;
+  end_time: string;
+  is_recurring: boolean;
+  recurrence_day?: string;
 }
 
 // ============================================================================
@@ -526,7 +524,6 @@ export type DeepPartial<T> = {
 // ============================================================================
 // Database Type (for Supabase client usage)
 // ============================================================================
-
 export interface Database {
   public: {
     Tables: {
@@ -535,20 +532,30 @@ export interface Database {
         Insert: InsertProfile;
         Update: UpdateProfile;
       };
-      demandes: {
-        Row: Demande;
-        Insert: InsertDemande;
-        Update: UpdateDemande;
+      formulas: {
+        Row: Formula;
+        Insert: InsertFormula;
+        Update: UpdateFormula;
       };
-      disponibilites: {
-        Row: Disponibilite;
-        Insert: InsertDisponibilite;
-        Update: UpdateDisponibilite;
+      requests: {
+        Row: Request;
+        Insert: InsertRequest;
+        Update: UpdateRequest;
       };
-      rendez_vous: {
-        Row: RendezVous;
-        Insert: InsertRendezVous;
-        Update: UpdateRendezVous;
+      request_items: {
+        Row: RequestItem;
+        Insert: InsertRequestItem;
+        Update: UpdateRequestItem;
+      };
+      preferences: {
+        Row: Preference;
+        Insert: InsertPreference;
+        Update: UpdatePreference;
+      };
+      availabilities: {
+        Row: Availability;
+        Insert: InsertAvailability;
+        Update: UpdateAvailability;
       };
       reviews: {
         Row: Review;
@@ -559,16 +566,6 @@ export interface Database {
         Row: ContactMessage;
         Insert: InsertContactMessage;
         Update: UpdateContactMessage;
-      };
-      estimation_requests: {
-        Row: EstimationRequest;
-        Insert: InsertEstimationRequest;
-        Update: UpdateEstimationRequest;
-      };
-      preferences: {
-        Row: Preference;
-        Insert: InsertPreference;
-        Update: UpdatePreference;
       };
     };
   };

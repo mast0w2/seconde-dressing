@@ -1,10 +1,10 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ProgressiveEstimationForm } from "@/components/Form/ProgressiveEstimationForm";
-import { Clock, Euro, Calendar, Truck, ShieldCheck, Leaf } from "lucide-react";
+import { Clock, Euro, Calendar, Truck, Sparkles, Leaf } from "lucide-react";
 
 // ============================================================================
 // Data
@@ -32,9 +32,9 @@ const BENEFITS = [
     text: "Récupération, photographie, mise en ligne et vente : on s'occupe de tout.",
   },
   {
-    icon: ShieldCheck,
-    title: "Sécurité",
-    text: "Transactions sécurisées et suivi transparent de vos ventes.",
+    icon: Sparkles,
+    title: "Expertise",
+    text: "Profitez de l'expertise d'une vendeuse spécialisée qui saura vous conseiller, estimer, préparer et vendre vos pièces au meilleur prix.",
   },
   {
     icon: Leaf,
@@ -77,6 +77,7 @@ const STEPS = [
 
 export default function Home() {
   const formRef = useRef<HTMLDivElement>(null);
+  const [formSubmitted, setFormSubmitted] = useState(false);
 
   const scrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -175,8 +176,7 @@ export default function Home() {
       <section id="pourquoi" className="px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24">
         <div className="max-w-[1200px] mx-auto">
           <div className="text-center flex flex-col items-center gap-3 mb-12 sm:mb-14">
-            <div className="eyebrow">Pourquoi choisir Seconde ?</div>
-            <h2 className="text-3xl sm:text-4xl">Ce que vous n&apos;aurez plus à faire</h2>
+            <h2 className="text-4xl sm:text-5xl">Pourquoi choisir Seconde ?</h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
@@ -240,41 +240,21 @@ export default function Home() {
         id="remuneration"
         className="bg-gris-clair px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24"
       >
-        <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-10 lg:gap-16 items-center">
-          <div className="flex flex-col gap-5">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="flex flex-col gap-5 max-w-[480px]">
             <div className="eyebrow">Ce que vous touchez</div>
             <h2 className="text-3xl sm:text-4xl leading-[1.18]">
-              Vous touchez 40 % de chaque vente.
+              Vous touchez 50 % de chaque vente.
             </h2>
-            <p className="text-base text-gris-moyen max-w-[480px]">
+            <p className="text-base text-gris-moyen">
               Votre vendeuse en reçoit 40 % : c&apos;est elle qui trie, photographie, rédige les
-              annonces, répond aux acheteurs et expédie. Les 20 % restants font tourner Seconde —
-              la plateforme, le suivi de vos ventes et les paiements sécurisés.
+              annonces, répond aux acheteurs et expédie. Les 10 % restants font tourner Seconde —
+              la plateforme, le suivi de vos ventes et les paiements.
             </p>
-            <p className="text-base text-gris-moyen max-w-[480px]">
+            <p className="text-base text-gris-moyen">
               Pas de frais cachés. Seul le rendez-vous est facturé, de 10 à 50 € selon la formule
               choisie. Ce qui ne se vend pas vous revient, ou part vers nos filières de réemploi.
             </p>
-          </div>
-
-          <div className="bg-gris-tres-clair border border-noir/15 p-8">
-            <div className="eyebrow mb-6">Exemple</div>
-            <div className="flex items-baseline justify-between pb-4 border-b border-noir/10">
-              <span className="text-gris-moyen">Une veste vendue</span>
-              <span className="font-serif text-2xl text-noir">80 €</span>
-            </div>
-            <div className="flex items-baseline justify-between py-4 border-b border-noir/10">
-              <span className="text-noir">Votre part · 40 %</span>
-              <span className="font-serif text-3xl text-noir">32 €</span>
-            </div>
-            <div className="flex items-baseline justify-between py-4 border-b border-noir/10">
-              <span className="text-gris-moyen">Votre vendeuse · 40 %</span>
-              <span className="font-serif text-2xl text-sauge-fonce">32 €</span>
-            </div>
-            <div className="flex items-baseline justify-between pt-4">
-              <span className="text-gris-moyen">Seconde · 20 %</span>
-              <span className="font-serif text-2xl text-sauge-fonce">16 €</span>
-            </div>
           </div>
         </div>
       </section>
@@ -287,21 +267,19 @@ export default function Home() {
       >
         <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_440px] gap-10 lg:gap-16 items-center">
           <div className="flex flex-col gap-6">
-            <div className="text-center lg:text-left flex flex-col gap-4">
-              <div className="eyebrow">Demandez un rendez-vous</div>
-              <h2 className="text-3xl sm:text-4xl leading-[1.15]">
-                Videz votre dressing, sans effort.
-              </h2>
-              <p className="text-gris-moyen max-w-[440px]">
-                Quelques questions, ça prend moins d&apos;une minute. On vous recontacte dans les
-                24 heures.
-              </p>
-              <div className="flex flex-wrap justify-center lg:justify-start gap-6 text-[11px] tracking-[0.14em] uppercase text-sauge-fonce">
-                <span>Sans engagement</span>
+            {!formSubmitted && (
+              <div className="text-center lg:text-left flex flex-col gap-4">
+                <div className="eyebrow">Demandez un rendez-vous</div>
+                <h2 className="text-3xl sm:text-4xl">Videz votre dressing sans effort</h2>
+                <p className="text-base text-gris-moyen">
+                  Quelques questions, ça prend moins d&apos;une minute. On vous recontacte dans les 24 heures.
+                </p>
+                <div className="flex flex-wrap justify-center lg:justify-start gap-6 text-[11px] tracking-[0.14em] uppercase text-sauge-fonce">
+                  <span>Sans engagement</span>
+                </div>
               </div>
-            </div>
-
-            <ProgressiveEstimationForm />
+            )}
+            <ProgressiveEstimationForm onCompleteChange={setFormSubmitted} />
           </div>
 
           <div className="relative hidden lg:block">

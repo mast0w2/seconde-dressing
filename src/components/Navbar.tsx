@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Menu, X, Users } from "lucide-react";
 import { Logo } from "@/components/Logo";
+import { capitalizeName } from "@/lib/text";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -65,7 +66,7 @@ export function Navbar() {
   };
 
   const isClient = profile?.role === "client";
-  const isVendeur = profile?.role === "vendeur";
+  const isSeller = profile?.role === "seller";
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-blanc/95 backdrop-blur border-b border-noir/10">
@@ -90,12 +91,12 @@ export function Navbar() {
 
         {/* Devenir vendeuse + icône de connexion - extrême droite */}
         <div className="flex items-center gap-5 sm:gap-7">
-          {!isVendeur && (
+          {!isSeller && (
             <Button
               asChild
               className="hidden sm:inline-flex bg-noir text-blanc border border-noir rounded-none h-9 px-5 text-[10px] font-medium tracking-[0.18em] uppercase hover:bg-transparent hover:text-noir transition-colors"
             >
-              <Link href="/signup">Devenir vendeuse</Link>
+              <Link href="/signup?vendeur=true">Devenir vendeuse</Link>
             </Button>
           )}
           {user ? (
@@ -109,7 +110,7 @@ export function Navbar() {
                     <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
                       <AvatarImage src={profile?.photo_url || undefined} />
                       <AvatarFallback className="bg-noir text-blanc text-xs font-bold">
-                        {profile?.prenom ? profile.prenom.charAt(0).toUpperCase() : 'U'}
+                        {profile?.first_name ? profile.first_name.charAt(0).toUpperCase() : 'U'}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
@@ -117,7 +118,7 @@ export function Navbar() {
                 <DropdownMenuContent className="w-52 sm:w-56 bg-blanc border border-noir/10" align="end">
                   <DropdownMenuLabel className="font-normal text-noir">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium">{profile?.prenom} {profile?.nom}</p>
+                      <p className="text-sm font-medium">{profile?.first_name ? capitalizeName(profile.first_name) : ""} {profile?.last_name ? capitalizeName(profile.last_name) : ""}</p>
                       <p className="text-xs text-gris-moyen">{profile?.email}</p>
                     </div>
                   </DropdownMenuLabel>
@@ -144,7 +145,7 @@ export function Navbar() {
                       </Link>
                     </DropdownMenuItem>
                   )}
-                  {isVendeur && (
+                  {isSeller && (
                     <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
                       <Link href="/vendeur">
                         Espace Vendeur
@@ -210,13 +211,13 @@ export function Navbar() {
                 NOTRE IMPACT
               </Link>
               <Link
-                href="/blog"
+                href="/reviews"
                 className={`text-sm font-medium transition-colors hover:text-noir ${
-                  pathname === "/blog" ? "text-noir" : "text-gris-moyen"
+                  pathname === "/reviews" ? "text-noir" : "text-gris-moyen"
                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                BLOG
+                AVIS
               </Link>
               <Link
                 href="/contact"
@@ -227,9 +228,9 @@ export function Navbar() {
               >
                 CONTACT
               </Link>
-              {!isVendeur && (
+              {!isSeller && (
                 <Link
-                  href="/signup"
+                  href="/signup?vendeur=true"
                   className="sm:hidden mt-2 inline-flex items-center justify-center bg-noir text-blanc border border-noir h-11 px-5 text-[11px] font-medium tracking-[0.18em] uppercase"
                   onClick={() => setIsMenuOpen(false)}
                 >

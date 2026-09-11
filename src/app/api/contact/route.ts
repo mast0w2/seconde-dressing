@@ -1,13 +1,10 @@
 // src/app/api/contact/route.ts
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 // Contact form API endpoint with validation and error handling
 
 import { NextResponse } from 'next/server';
 import { notificationService } from '@/lib/email';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
 
-// Mock cookies for server-side when not in request context
-const mockCookies = () => ({ get: () => null, set: () => null, delete: () => null });
 
 // Mock notification service when BREVO_API_KEY is not configured
 const mockNotificationService = {
@@ -94,11 +91,7 @@ function validateContactData(data: unknown): { valid: boolean; errors?: string[]
  * Save contact message to database
  */
 async function saveContactMessage(data: ContactRequest) {
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: process.env.NEXT_PUBLIC_SUPABASE_URL ? cookies() : mockCookies() }
-  );
+  const supabase = createSupabaseServerClient();
 
   const { error } = await supabase
     .from('contact_messages')

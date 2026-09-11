@@ -1,9 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/components/ui/use-toast";
+import { createBrowserClient } from "@supabase/ssr";
+import { capitalizeName } from "@/lib/text";
 import { Users, Sparkles, Gem, Ban } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -234,7 +237,9 @@ function estHorsZone(adresse: string): boolean {
 // API
 // ============================================================================
 
-async function submitForm(data: FormData): Promise<{ success: boolean; message?: string }> {
+async function submitForm(
+  data: FormData
+): Promise<{ success: boolean; message?: string; requestId?: string }> {
   try {
     const response = await fetch("/api/estimation", {
       method: "POST",
@@ -411,13 +416,56 @@ const EMPTY_FORM: FormData = {
   description: "",
 };
 
-export function ProgressiveEstimationForm() {
+interface ProgressiveEstimationFormProps {
+  onCompleteChange?: (isComplete: boolean) => void;
+}
+
+export function ProgressiveEstimationForm({ onCompleteChange }: ProgressiveEstimationFormProps = {}) {
   const { toast } = useToast();
+  const router = useRouter();
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<FormData>(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [password, setPassword] = useState("");
+  const [isCreatingAccount, setIsCreatingAccount] = useState(false);
+  // id of the request once it has been submitted anonymously, used to link it
+  // to the account created afterwards.
+  const [submittedRequestId, setSubmittedRequestId] = useState<string | null>(null);
+  const [accountCreated, setAccountCreated] = useState(false);
+  // True when the signed-in user is a seller: they cannot submit a request
+  // (the form is for clients). They must create a separate client account.
+  const [isSeller, setIsSeller] = useState(false);
+
+  useEffect(() => {
+    onCompleteChange?.(isComplete);
+  }, [isComplete, onCompleteChange]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (cancelled || !user) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+      if (!cancelled && profile?.role === "seller") {
+        setIsSeller(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [supabase]);
 
   const currentQuestion = QUESTIONS[currentStep];
   const isLastStep = currentStep === QUESTIONS.length - 1;
@@ -442,6 +490,7 @@ export function ProgressiveEstimationForm() {
   };
 
   const handleNext = () => {
+    if (isSeller) return;
     if (!validateStep()) return;
     if (!isLastStep) {
       setCurrentStep(currentStep + 1);
@@ -458,29 +507,111 @@ export function ProgressiveEstimationForm() {
     if (!validateStep()) return;
     setIsSubmitting(true);
     try {
+      // The request is submitted anonymously FIRST. Account creation is
+      // proposed afterwards and never conditions the request submission.
       const result = await submitForm(formData);
       if (!result.success) {
         toast({
           title: "Erreur",
-          description: result.message || "Impossible d'envoyer votre demande.",
+          description: result.message || "Votre demande n'a pas pu être envoyée.",
           variant: "destructive",
         });
         return;
       }
+      if (result.requestId) {
+        setSubmittedRequestId(result.requestId);
+      }
       setIsComplete(true);
-      toast({
-        title: "Demande envoyée",
-        description: "On vous recontacte sous 24 h pour caler le rendez-vous.",
-      });
-    } catch (error) {
-      console.error("[Estimation Form] Error:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCreateAccount = async () => {
+    if (password.length < 6) {
       toast({
         title: "Erreur",
-        description: "Impossible d'envoyer votre demande. Veuillez réessayer.",
+        description: "Le mot de passe doit contenir au moins 6 caractères.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsCreatingAccount(true);
+    try {
+      // 1. Create the auth account with the email collected in the form.
+      const {
+        data: { user, session },
+        error: signUpError,
+      } = await supabase.auth.signUp({
+        email: formData.email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+        },
+      });
+
+      if (signUpError) {
+        throw signUpError;
+      }
+
+      if (!user) {
+        throw new Error("Impossible de créer le compte.");
+      }
+
+      // 2. Create the profile with the information already entered in the form.
+      const { error: profileError } = await supabase.from("profiles").upsert([
+        {
+          id: user.id,
+          email: formData.email,
+          first_name: capitalizeName(formData.prenom),
+          last_name: capitalizeName(formData.nom),
+          phone: formData.telephone,
+          street_address: formData.adresse,
+          role: "client",
+        },
+      ]);
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      // 3. Link the already-submitted anonymous request to the new account.
+      if (submittedRequestId) {
+        const { error: linkError } = await supabase
+          .from("requests")
+          .update({ client_id: user.id })
+          .eq("id", submittedRequestId);
+        if (linkError) {
+          console.warn("[Estimation Form] Could not link request to account:", linkError.message);
+        }
+      }
+
+      setAccountCreated(true);
+
+      // 4. Redirect to the dashboard (or login if email confirmation is required).
+      if (session) {
+        toast({
+          title: "Bienvenue sur Seconde !",
+          description: "Votre compte est créé et votre demande est rattachée à votre espace.",
+        });
+        router.refresh();
+        router.push("/dashboard/client");
+      } else {
+        toast({
+          title: "Compte créé",
+          description: "N'oubliez pas de confirmer votre adresse e-mail pour activer votre compte.",
+        });
+        router.push("/login?email_pending=1");
+      }
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Impossible de créer le compte.",
         variant: "destructive",
       });
     } finally {
-      setIsSubmitting(false);
+      setIsCreatingAccount(false);
     }
   };
 
@@ -489,6 +620,9 @@ export function ProgressiveEstimationForm() {
     setCurrentStep(0);
     setIsComplete(false);
     setErrors({});
+    setSubmittedRequestId(null);
+    setAccountCreated(false);
+    setPassword("");
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -663,7 +797,7 @@ export function ProgressiveEstimationForm() {
           {formData.nombreVetements} vêtement{formData.nombreVetements > 1 ? "s" : ""} ×{" "}
           {formData.valeurMoyenne} € ={" "}
           {totalEstime.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} € de ventes estimées,
-          dont vous touchez 40 %. Estimation indicative, ajustée après le tri.
+          dont vous touchez 50 %. Estimation indicative, ajustée après le tri.
         </p>
       </div>
     );
@@ -671,16 +805,84 @@ export function ProgressiveEstimationForm() {
 
   if (isComplete) {
     return (
-      <div className="w-full max-w-2xl space-y-5">
-        <h3 className="font-serif text-3xl text-noir">Demande envoyée.</h3>
-        <p className="text-gris-moyen">
-          On vous recontacte sous 24 h pour caler le rendez-vous. À très vite !
-        </p>
+      <div className="w-full max-w-2xl space-y-8">
+        {/* Confirmation : la demande a bien été envoyée (compte optionnel) */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl" aria-hidden="true">
+              ✅
+            </span>
+            <h3 className="font-serif text-3xl text-noir">Demande envoyée</h3>
+          </div>
+          <p className="text-gris-moyen">
+            Merci {capitalizeName(formData.prenom)} ! Votre demande d’estimation a bien été enregistrée.
+            Nous vous recontacterons sous 24 h pour valider la formule et organiser la collecte.
+          </p>
+          <div className="text-sm text-gris-moyen bg-gris-tres-clair p-4 border border-noir/10">
+            <p className="mb-1">
+              <span className="font-medium text-noir">{capitalizeName(formData.prenom)} {capitalizeName(formData.nom)}</span>
+            </p>
+            <p>{formData.email}</p>
+            <p>{formData.telephone}</p>
+            <p>{formData.adresse}</p>
+          </div>
+        </div>
+
+        {/* Création de compte optionnelle pour suivre sa demande */}
+        {accountCreated ? (
+          <div className="border-t border-noir/10 pt-6 space-y-3">
+            <p className="font-serif text-xl text-noir">Compte créé 🎉</p>
+            <p className="text-gris-moyen">
+              Votre demande est désormais rattachée à votre compte. Vous pouvez suivre son
+              statut depuis votre espace personnel.
+            </p>
+          </div>
+        ) : (
+          <div className="border-t border-noir/10 pt-6 space-y-5">
+            <div className="space-y-2">
+              <h3 className="font-serif text-xl text-noir">
+                Souhaitez-vous suivre votre demande&nbsp;?
+              </h3>
+              <p className="text-gris-moyen">
+                Créez un compte avec le même email pour suivre votre demande. C’est facultatif.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label
+                  htmlFor="account-password"
+                  className="text-sm font-medium text-noir"
+                >
+                  Mot de passe
+                </label>
+                <Input
+                  id="account-password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  disabled={isCreatingAccount}
+                />
+                <p className="text-xs text-gris-moyen">Minimum 6 caractères.</p>
+              </div>
+
+              <button
+                onClick={handleCreateAccount}
+                disabled={isCreatingAccount}
+                className="bg-noir text-blanc border border-noir px-8 py-4 text-[11px] tracking-[0.2em] uppercase hover:bg-transparent hover:text-noir transition-colors disabled:opacity-50"
+              >
+                {isCreatingAccount ? "Création en cours…" : "Créer mon compte et suivre ma demande"}
+              </button>
+            </div>
+          </div>
+        )}
+
         <button
           onClick={handleReset}
-          className="text-[11px] tracking-[0.18em] uppercase text-sauge-fonce underline underline-offset-4 hover:text-noir transition-colors"
+          className="text-[11px] tracking-[0.18em] uppercase text-sauge-fonce hover:text-noir transition-colors"
         >
-          Faire une nouvelle demande
+          ← Faire une nouvelle demande
         </button>
       </div>
     );
@@ -691,6 +893,12 @@ export function ProgressiveEstimationForm() {
       {renderProgress()}
 
       <div className="space-y-4">
+        {isSeller && (
+          <p className="text-sm text-red-600">
+            Vous êtes connectée en tant que vendeuse. Pour vendre vos propres
+            vêtements, créez un autre compte client.
+          </p>
+        )}
         <h3 className="font-serif text-2xl sm:text-3xl text-noir">
           {currentQuestion.question}
         </h3>
@@ -723,7 +931,7 @@ export function ProgressiveEstimationForm() {
           {isLastStep ? (
             <button
               onClick={handleNext}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isSeller}
               className="bg-noir text-blanc border border-noir px-8 py-4 text-[11px] tracking-[0.2em] uppercase hover:bg-transparent hover:text-noir transition-colors disabled:opacity-50"
             >
               {isSubmitting ? "Envoi en cours…" : "Valider ma demande"}
@@ -731,8 +939,8 @@ export function ProgressiveEstimationForm() {
           ) : (
             <button
               onClick={handleNext}
-              disabled={isSubmitting}
-              className="border border-noir px-7 py-4 text-[11px] tracking-[0.2em] uppercase text-noir hover:bg-noir hover:text-blanc transition-colors"
+              disabled={isSubmitting || isSeller}
+              className="border border-noir px-7 py-4 text-[11px] tracking-[0.2em] uppercase text-noir hover:bg-noir hover:text-blanc transition-colors disabled:opacity-50"
             >
               Suivant →
             </button>

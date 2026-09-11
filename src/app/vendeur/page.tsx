@@ -34,22 +34,22 @@ export default function VendeurPage() {
         .single();
 
       if (!profile) {
-        router.push("/signup");
+        router.push("/signup?vendeur=true");
         return;
       }
 
-      if (profile.role !== "vendeur") {
+      if (profile.role !== "seller") {
         router.push("/");
         return;
       }
 
       setProfile(profile);
 
-      // Get demandes count for this vendeur
+      // Get requests count for this seller
       const { count, error: countError } = await supabase
-        .from("demandes")
+        .from("requests")
         .select("*", { count: "exact", head: true })
-        .eq("vendeur_id", currentUser.id);
+        .eq("seller_id", currentUser.id);
 
       if (!countError) {
         setDemandesCount(count || 0);
@@ -87,11 +87,11 @@ export default function VendeurPage() {
             <div className="w-16 h-16 mx-auto mb-6 border-2 border-noir rounded-full flex items-center justify-center">
               <Leaf className="h-8 w-8 text-noir" />
             </div>
-            <h1 className="text-4xl md:text-6xl font-700 text-noir mb-6 leading-tight">
+            <h1 className="text-4xl md:text-6xl text-noir mb-6 leading-tight">
               Espace Vendeur
             </h1>
             <p className="text-lg sm:text-xl text-gris-moyen mb-8 max-w-2xl mx-auto">
-              Bienvenue {profile?.prenom} ! Gagnez de l'argent en aidant les clients à vendre leurs vêtements.
+              Bienvenue {profile?.first_name} ! Gagnez de l'argent en aidant les clients à vendre leurs vêtements.
             </p>
 
             {/* Quick Stats */}
@@ -99,11 +99,11 @@ export default function VendeurPage() {
               <Card className="border-2 border-noir/20">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Demandes reçues</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <Users className="h-4 w-4 text-gris-moyen" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{demandesCount}</div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gris-moyen">
                     demandes en attente
                   </p>
                 </CardContent>
@@ -112,11 +112,11 @@ export default function VendeurPage() {
               <Card className="border-2 border-noir/20">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Revenu potentiel</CardTitle>
-                  <Euro className="h-4 w-4 text-muted-foreground" />
+                  <Euro className="h-4 w-4 text-gris-moyen" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">~€50-150/jour</div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gris-moyen">
                     selon votre activité
                   </p>
                 </CardContent>
@@ -125,11 +125,11 @@ export default function VendeurPage() {
               <Card className="border-2 border-noir/20">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Prochains RDV</CardTitle>
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <Calendar className="h-4 w-4 text-gris-moyen" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">0</div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gris-moyen">
                     rendez-vous confirmés
                   </p>
                 </CardContent>
@@ -141,7 +141,7 @@ export default function VendeurPage() {
                 asChild
                 className="bg-noir hover:bg-gris-fonce text-blanc px-8 py-3 rounded-none text-sm sm:text-lg font-500 transition-all duration-300 tracking-widest"
               >
-                <Link href="/dashboard">
+                <Link href="/dashboard/vendeur">
                   VOIR LES DEMANDES
                 </Link>
               </Button>
@@ -174,7 +174,7 @@ export default function VendeurPage() {
                   {/* Step 1 */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                     <div className="text-center md:text-right order-2 md:order-1">
-                      <h3 className="text-2xl font-semibold mb-4">1. Recevez des demandes</h3>
+                      <h3 className="text-2xl mb-4">1. Recevez des demandes</h3>
                       <p className="text-gris-moyen">
                         Les clients remplissent un formulaire pour demander un rendez-vous. 
                         Toutes les demandes sont visibles dans votre tableau de bord.
@@ -190,7 +190,7 @@ export default function VendeurPage() {
                   {/* Step 2 */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                     <div className="text-center md:text-left">
-                      <h3 className="text-2xl font-semibold mb-4">2. Acceptez ou refusez</h3>
+                      <h3 className="text-2xl mb-4">2. Acceptez ou refusez</h3>
                       <p className="text-gris-moyen">
                         Pour chaque demande, vous pouvez accepter (pour prendre en charge le client) 
                         ou refuser (si vous n'êtes pas disponible).
@@ -206,7 +206,7 @@ export default function VendeurPage() {
                   {/* Step 3 */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                     <div className="text-center md:text-right order-2 md:order-1">
-                      <h3 className="text-2xl font-semibold mb-4">3. Gérez le processus</h3>
+                      <h3 className="text-2xl mb-4">3. Gérez le processus</h3>
                       <p className="text-gris-moyen">
                         Une fois la demande acceptée, vous pouvez mettre à jour le statut : 
                         articles récupérés, articles en vente, ou terminée.
@@ -222,7 +222,7 @@ export default function VendeurPage() {
                   {/* Step 4 */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                     <div className="text-center md:text-left">
-                      <h3 className="text-2xl font-semibold mb-4">4. Gagnez de l'argent</h3>
+                      <h3 className="text-2xl mb-4">4. Gagnez de l'argent</h3>
                       <p className="text-gris-moyen">
                         Vous êtes rémunéré au juste prix du travail fourni. 
                         La plateforme vous met en relation avec des clients motivés.
@@ -245,7 +245,7 @@ export default function VendeurPage() {
       <section className="py-16 bg-creme/50">
         <div className="container">
           <div className="max-w-6xl mx-auto text-center">
-            <h2 className="text-3xl font-semibold text-noir mb-4">Pourquoi devenir vendeur ?</h2>
+            <h2 className="text-3xl text-noir mb-4">Pourquoi devenir vendeur ?</h2>
             <p className="text-lg text-gris-moyen mb-12 max-w-2xl mx-auto">
               Rejoignez notre réseau de vendeurs professionnels et bénéficiez de nombreux avantages
             </p>
@@ -300,7 +300,7 @@ export default function VendeurPage() {
       {/* CTA */}
       <section className="py-16 bg-blanc">
         <div className="container text-center">
-          <h2 className="text-2xl md:text-3xl font-semibold text-noir mb-6">
+          <h2 className="text-2xl md:text-3xl text-noir mb-6">
             Prêt à gagner de l'argent ?
           </h2>
           <p className="text-lg text-gris-moyen mb-8 max-w-2xl mx-auto">
@@ -310,7 +310,7 @@ export default function VendeurPage() {
             asChild
             className="bg-noir hover:bg-gris-fonce text-blanc px-8 py-3 rounded-none text-sm sm:text-lg font-500 transition-all duration-300 tracking-widest"
           >
-            <Link href="/dashboard">
+            <Link href="/dashboard/vendeur">
               VOIR MES DEMANDES <ChevronRight className="h-4 w-4 ml-2 inline" />
             </Link>
           </Button>

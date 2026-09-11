@@ -108,7 +108,7 @@ export function Calendar({
         <Button variant="outline" onClick={prevMonth} size="sm">
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <h2 className="text-lg font-semibold">
+        <h2 className="text-lg">
           {months[month]} {year}
         </h2>
         <Button variant="outline" onClick={nextMonth} size="sm">

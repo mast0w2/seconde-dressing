@@ -1,9 +1,8 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function GET() {
-  const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { cookies });
+  const supabase = createSupabaseServerClient();
 
   const {
     data: { user },
@@ -14,7 +13,7 @@ export async function GET() {
   }
 
   const { data, error } = await supabase
-    .from("disponibilites")
+    .from("availabilities")
     .select("*")
     .eq("user_id", user.id)
     .order("date", { ascending: true });
@@ -27,7 +26,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { cookies });
+  const supabase = createSupabaseServerClient();
 
   const {
     data: { user },
@@ -39,10 +38,17 @@ export async function POST(request: Request) {
 
   const body = await request.json();
 
-  const { error } = await supabase.from("disponibilites").insert([{
-    ...body,
-    user_id: user.id,
-  }]);
+  const { error } = await supabase.from("availabilities").insert([
+    {
+      user_id: user.id,
+      date: body.date,
+      start_time: body.start_time,
+      end_time: body.end_time,
+      status: body.status || "available",
+      is_recurring: body.is_recurring ?? false,
+      recurrence_day: body.recurrence_day || null,
+    },
+  ]);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
