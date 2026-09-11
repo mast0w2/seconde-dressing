@@ -12,9 +12,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/components/ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
-import { Profile } from "@/types/database";
+import { Profile, Role } from "@/types/database";
 import { Mail, Phone, User, Home, MapPin, ArrowLeft, Edit, Save, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import Link from "next/link";
 
 const profileFormSchema = z.object({
@@ -26,6 +27,7 @@ const profileFormSchema = z.object({
   city: z.string().optional(),
   postal_code: z.string().optional(),
   country: z.string().optional(),
+  role: z.enum(["client", "seller"]),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -50,6 +52,7 @@ export default function ProfilePage() {
       city: "",
       postal_code: "",
       country: "",
+      role: "client" as Role,
     },
   });
 
@@ -95,6 +98,7 @@ export default function ProfilePage() {
             city: profileData.city || "",
             postal_code: profileData.postal_code || "",
             country: profileData.country || "",
+            role: profileData.role || "client",
           });
         } else {
           // Create a basic profile if it doesn't exist
@@ -105,7 +109,7 @@ export default function ProfilePage() {
               email: currentUser.email,
               last_name: null,
               first_name: null,
-              role: null,
+              role: "client",
             }]);
           
           if (createError) {
@@ -157,12 +161,14 @@ export default function ProfilePage() {
 
       // Preserve existing fields that shouldn't be modified here
       if (profile) {
-        profileData.role = profile.role;
         profileData.photo_url = profile.photo_url;
         profileData.specialization = profile.specialization;
         profileData.hourly_rate = profile.hourly_rate;
         profileData.years_experience = profile.years_experience;
       }
+
+      // Use the role selected in the form
+      profileData.role = data.role;
 
       const { error, data: upsertResult } = await supabase
         .from("profiles")
@@ -191,6 +197,8 @@ export default function ProfilePage() {
         throw new Error("Profile not found after update");
       }
 
+      const roleChanged = profile && profile.role !== updatedProfile.role;
+
       setProfile(updatedProfile);
       setIsEditing(false);
 
@@ -198,6 +206,11 @@ export default function ProfilePage() {
         title: "Profil mis à jour",
         description: `Vos informations ont été enregistrées : ${updatedProfile.first_name} ${updatedProfile.last_name}`,
       });
+
+      // Redirect to the dashboard matching the (possibly new) role
+      if (roleChanged) {
+        router.push(updatedProfile.role === "seller" ? "/dashboard/vendeur" : "/dashboard/client");
+      }
     } catch (error: any) {
       console.error("Profile update error:", error);
       toast({
@@ -220,6 +233,7 @@ export default function ProfilePage() {
         city: profile.city || "",
         postal_code: profile.postal_code || "",
         country: profile.country || "",
+        role: profile.role || "client",
       });
     }
   };
@@ -362,6 +376,52 @@ export default function ProfilePage() {
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <p className="text-lg">{profile.email}</p>
+                </div>
+
+                {/* Role selection */}
+                <div className="space-y-3">
+                  <Label>Votre rôle</Label>
+                  {isEditing ? (
+                    <RadioGroup
+                      defaultValue={profile.role || "client"}
+                      onValueChange={(value) => setValue("role", value as Role)}
+                      className="grid gap-3 pt-1"
+                    >
+                      <label
+                        htmlFor="role-client"
+                        className="flex items-start gap-3 rounded-lg border border-noir/15 p-4 cursor-pointer hover:bg-noir/5 transition-colors"
+                      >
+                        <RadioGroupItem value="client" id="role-client" className="mt-1" />
+                        <div className="space-y-1">
+                          <span className="block text-sm font-medium">Je veux vendre mes vêtements</span>
+                          <span className="block text-sm text-muted-foreground">
+                            Vous déposez vos pièces pour qu&apos;une vendeuse les reprenne.
+                          </span>
+                        </div>
+                      </label>
+                      <label
+                        htmlFor="role-seller"
+                        className="flex items-start gap-3 rounded-lg border border-noir/15 p-4 cursor-pointer hover:bg-noir/5 transition-colors"
+                      >
+                        <RadioGroupItem value="seller" id="role-seller" className="mt-1" />
+                        <div className="space-y-1">
+                          <span className="block text-sm font-medium">Je souhaite aider à vendre des vêtements</span>
+                          <span className="block text-sm text-muted-foreground">
+                            Vous triez et accompagnez les clientes dans la reprise de leurs pièces.
+                          </span>
+                        </div>
+                      </label>
+                    </RadioGroup>
+                  ) : (
+                    <p className="text-lg">
+                      {profile.role === "seller"
+                        ? "Je souhaite aider à vendre des vêtements"
+                        : "Je veux vendre mes vêtements"}
+                    </p>
+                  )}
+                  {errors.role && (
+                    <p className="text-sm text-destructive">{errors.role.message}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
