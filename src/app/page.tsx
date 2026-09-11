@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ProgressiveEstimationForm } from "@/components/Form/ProgressiveEstimationForm";
@@ -77,6 +77,7 @@ const STEPS = [
 
 export default function Home() {
   const formRef = useRef<HTMLDivElement>(null);
+  const [formSubmitted, setFormSubmitted] = useState(false);
 
   const scrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -266,7 +267,19 @@ export default function Home() {
       >
         <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_440px] gap-10 lg:gap-16 items-center">
           <div className="flex flex-col gap-6">
-            <ProgressiveEstimationForm />
+            {!formSubmitted && (
+              <div className="text-center lg:text-left flex flex-col gap-4">
+                <div className="eyebrow">Demandez un rendez-vous</div>
+                <h2 className="text-3xl sm:text-4xl">Videz votre dressing sans effort</h2>
+                <p className="text-base text-gris-moyen">
+                  Quelques questions, ça prend moins d&apos;une minute. On vous recontacte dans les 24 heures.
+                </p>
+                <div className="flex flex-wrap justify-center lg:justify-start gap-6 text-[11px] tracking-[0.14em] uppercase text-sauge-fonce">
+                  <span>Sans engagement</span>
+                </div>
+              </div>
+            )}
+            <ProgressiveEstimationForm onCompleteChange={setFormSubmitted} />
           </div>
 
           <div className="relative hidden lg:block">

@@ -416,7 +416,11 @@ const EMPTY_FORM: FormData = {
   description: "",
 };
 
-export function ProgressiveEstimationForm() {
+interface ProgressiveEstimationFormProps {
+  onCompleteChange?: (isComplete: boolean) => void;
+}
+
+export function ProgressiveEstimationForm({ onCompleteChange }: ProgressiveEstimationFormProps = {}) {
   const { toast } = useToast();
   const router = useRouter();
   const supabase = createBrowserClient(
@@ -437,6 +441,10 @@ export function ProgressiveEstimationForm() {
   // True when the signed-in user is a seller: they cannot submit a request
   // (the form is for clients). They must create a separate client account.
   const [isSeller, setIsSeller] = useState(false);
+
+  useEffect(() => {
+    onCompleteChange?.(isComplete);
+  }, [isComplete, onCompleteChange]);
 
   useEffect(() => {
     let cancelled = false;
