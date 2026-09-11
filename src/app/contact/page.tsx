@@ -190,7 +190,7 @@ export default function ContactPage() {
       <section className="relative bg-creme py-20">
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-noir">
+            <h1 className="text-4xl md:text-6xl mb-6 text-noir">
               Contactez-nous
             </h1>
             <p className="text-xl text-gris-moyen mb-8">
@@ -304,7 +304,7 @@ export default function ContactPage() {
                       <Mail className="h-6 w-6 text-sauge-fonce" />
                     </div>
                     <div>
-                      <h3 className="font-semibold mb-1">Email</h3>
+                      <h3 className="mb-1">Email</h3>
                       <p className="text-gris-moyen">
                         support@seconde-dressing.com
                       </p>
@@ -337,7 +337,7 @@ export default function ContactPage() {
       <section className="py-16 bg-gris-tres-clair">
         <div className="container">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12 text-noir">
+            <h2 className="text-3xl text-center mb-12 text-noir">
               Questions Fréquentes
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

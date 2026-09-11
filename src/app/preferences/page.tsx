@@ -153,7 +153,7 @@ export default function PreferencesPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Préférences</h1>
+            <h1 className="text-3xl">Préférences</h1>
             <p className="text-gris-moyen">
               Configurez vos préférences d&apos;utilisation
             </p>

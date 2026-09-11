@@ -136,7 +136,7 @@ export default function ClientDashboardPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Tableau de bord</h1>
+            <h1 className="text-3xl">Tableau de bord</h1>
             <p className="text-gris-moyen">Suivez l'état de vos demandes de rendez-vous</p>
           </div>
         </div>

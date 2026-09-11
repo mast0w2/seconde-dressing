@@ -165,7 +165,7 @@ export default function ReviewsPage() {
       <section className="relative bg-creme py-20">
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-noir">
+            <h1 className="text-4xl md:text-6xl mb-6 text-noir">
               Avis Clients
             </h1>
             <p className="text-xl text-gris-moyen mb-8">
@@ -199,7 +199,7 @@ export default function ReviewsPage() {
                     })}
                   </div>
                 </div>
-                <h2 className="text-4xl font-bold mb-2">{getAverageRating()}/5.0</h2>
+                <h2 className="text-4xl mb-2">{getAverageRating()}/5.0</h2>
                 <p className="text-gris-moyen">
                   Basé sur {reviews.length} avis
                 </p>
@@ -208,7 +208,7 @@ export default function ReviewsPage() {
 
             {/* Reviews List */}
             <div className="space-y-6 mb-12">
-              <h2 className="text-2xl font-bold mb-6">Derniers Avis</h2>
+              <h2 className="text-2xl mb-6">Derniers Avis</h2>
               {reviews.length > 0 ? (
                 reviews.map((review) => (
                   <Card key={review.id}>

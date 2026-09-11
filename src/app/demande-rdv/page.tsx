@@ -176,7 +176,7 @@ export default function DemandeRdvPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Demande de rendez-vous</h1>
+            <h1 className="text-3xl">Demande de rendez-vous</h1>
             <p className="text-gris-moyen">Décrivez votre besoin de reprise de vêtements</p>
           </div>
         </div>

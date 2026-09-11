@@ -17,7 +17,7 @@ export default function ConceptPage() {
                 <Recycle className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
               </div>
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6 text-noir">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl mb-4 sm:mb-6 text-noir">
               Notre Concept
             </h1>
             <p className="text-lg sm:text-xl text-gris-moyen mb-6 sm:mb-8 max-w-3xl mx-auto">
@@ -49,7 +49,7 @@ export default function ConceptPage() {
                       <div className="w-10 h-10 sm:w-12 sm:h-12 bg-noir/10 rounded-full flex items-center justify-center">
                         <Users className="h-5 w-5 sm:h-6 sm:w-6 text-noir" />
                       </div>
-                      <h3 className="text-xl sm:text-2xl font-bold text-noir">Service complet de vente</h3>
+                      <h3 className="text-xl sm:text-2xl text-noir">Service complet de vente</h3>
                     </div>
                     <p className="text-sm sm:text-base text-gris-moyen mb-4 sm:mb-6">
                       Vous confiez vos vêtements valant plus de 20€ à une Dressing Angel. Elle s'occupe de tout : 
@@ -99,7 +99,7 @@ export default function ConceptPage() {
                 <div className="space-y-10 sm:space-y-12">
                   {/* Value Distribution */}
                   <div className="text-center">
-                    <h3 className="text-xl sm:text-2xl font-semibold mb-6 sm:mb-8">Répartition des revenus</h3>
+                    <h3 className="text-xl sm:text-2xl mb-6 sm:mb-8">Répartition des revenus</h3>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8">
                       <div className="flex flex-col items-center">
                         <div className="relative w-24 h-24 sm:w-32 sm:h-32 mb-3 sm:mb-4">
@@ -191,7 +191,7 @@ export default function ConceptPage() {
 
                   {/* Why This Model */}
                   <div>
-                    <h3 className="text-xl sm:text-2xl font-semibold mb-6 text-center">Pourquoi ce modèle ?</h3>
+                    <h3 className="text-xl sm:text-2xl mb-6 text-center">Pourquoi ce modèle ?</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6 sm:gap-8">
                       <Card className="border-noir/20">
                         <CardHeader>
@@ -259,7 +259,7 @@ export default function ConceptPage() {
 
                   {/* Concrete Example */}
                   <div>
-                    <h3 className="text-2xl font-semibold mb-6 text-center">Exemple concret</h3>
+                    <h3 className="text-2xl mb-6 text-center">Exemple concret</h3>
                     <div className="space-y-6">
                       <Card className="border-noir/20">
                         <CardHeader>
@@ -337,7 +337,7 @@ export default function ConceptPage() {
                       <div className="w-16 h-16 border-2 border-noir/20 rounded-full flex items-center justify-center mx-auto mb-4">
                         <ShoppingBag className="h-8 w-8 text-noir" />
                       </div>
-                      <h4 className="font-semibold mb-2">Vendez vos vêtements</h4>
+                      <h4 className="mb-2">Vendez vos vêtements</h4>
                       <p className="text-sm text-gris-moyen">
                         Au lieu de les jeter, donnez-leur une seconde vie et générez des revenus.
                       </p>
@@ -346,7 +346,7 @@ export default function ConceptPage() {
                       <div className="w-16 h-16 border-2 border-noir/20 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Recycle className="h-8 w-8 text-noir" />
                       </div>
-                      <h4 className="font-semibold mb-2">Réduisez votre empreinte</h4>
+                      <h4 className="mb-2">Réduisez votre empreinte</h4>
                       <p className="text-sm text-gris-moyen">
                         Chaque vêtement vendu, c'est moins de déchets et moins de production neuve.
                       </p>
@@ -355,7 +355,7 @@ export default function ConceptPage() {
                       <div className="w-16 h-16 border-2 border-noir/20 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Users className="h-8 w-8 text-noir" />
                       </div>
-                      <h4 className="font-semibold mb-2">Créez de la valeur</h4>
+                      <h4 className="mb-2">Créez de la valeur</h4>
                       <p className="text-sm text-gris-moyen">
                         Vous soutenez une économie locale et circulaire qui profite à tous.
                       </p>
@@ -377,7 +377,7 @@ export default function ConceptPage() {
       <section className="py-16 bg-creme">
         <div className="container">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-6 text-noir">
+            <h2 className="text-3xl mb-6 text-noir">
               Prêt à donner une seconde vie à vos vêtements ?
             </h2>
             <p className="text-xl text-gris-moyen mb-8">

@@ -223,7 +223,7 @@ export default function SellerDashboardPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Tableau de bord</h1>
+            <h1 className="text-3xl">Tableau de bord</h1>
             <p className="text-gris-moyen">Gérez les demandes des clients</p>
           </div>
         </div>

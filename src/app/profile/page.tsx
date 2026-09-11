@@ -324,7 +324,7 @@ function ProfileForm() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Mon profil</h1>
+            <h1 className="text-3xl">Mon profil</h1>
             <p className="text-gris-moyen">
               Gérez vos informations personnelles
             </p>
@@ -384,7 +384,7 @@ function ProfileForm() {
                   />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-semibold flex items-center gap-2">
+                  <h2 className="text-2xl flex items-center gap-2">
                     {capitalizeName(profile.first_name)} {capitalizeName(profile.last_name)}
                     <Badge variant="secondary" className="text-xs font-normal">
                       {profile.role === "seller" ? "Vendeuse" : "Cliente"}
