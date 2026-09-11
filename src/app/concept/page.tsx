@@ -38,7 +38,7 @@ export default function ConceptPage() {
                   Un service unique pour vendre vos vêtements
                 </CardTitle>
                 <CardDescription className="text-center text-base sm:text-lg">
-                  Confiez vos vêtements de valeur à nos Dressing Angels pour une vente optimisée.
+                  Confiez vos vêtements de valeur à nos vendeuses pour une vente optimisée.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -52,7 +52,7 @@ export default function ConceptPage() {
                       <h3 className="text-xl sm:text-2xl text-noir">Service complet de vente</h3>
                     </div>
                     <p className="text-sm sm:text-base text-gris-moyen mb-4 sm:mb-6">
-                      Vous confiez vos vêtements valant plus de 20€ à une Dressing Angel. Elle s'occupe de tout : 
+                      Vous confiez vos vêtements valant plus de 20€ à une vendeuse. Elle s'occupe de tout : 
                       photographie, mise en ligne et vente. Vous recevez votre paiement dans les 60 jours au plus tard.
                     </p>
                     <div className="space-y-3 sm:space-y-4">
@@ -62,7 +62,7 @@ export default function ConceptPage() {
                       </div>
                       <div className="flex items-center gap-2 sm:gap-3">
                         <span className="text-sauge-fonce">✓</span>
-                        <span className="text-xs sm:text-sm text-gris-moyen">La Dressing Angel gère tout le processus de vente</span>
+                        <span className="text-xs sm:text-sm text-gris-moyen">La vendeuse gère tout le processus de vente</span>
                       </div>
                       <div className="flex items-center gap-2 sm:gap-3">
                         <span className="text-sauge-fonce">✓</span>
@@ -152,7 +152,7 @@ export default function ConceptPage() {
                             <span className="text-xl sm:text-2xl font-bold">40%</span>
                           </div>
                         </div>
-                        <p className="font-semibold text-sm sm:text-base text-noir">Dressing Angel</p>
+                        <p className="font-semibold text-sm sm:text-base text-noir">Vendeuse</p>
                         <p className="text-xs sm:text-sm text-gris-moyen max-w-xs">
                           La vendeuse professionnelle reçoit 40% pour son expertise et son travail.
                         </p>
@@ -203,7 +203,7 @@ export default function ConceptPage() {
                         <CardContent>
                           <p className="text-gris-moyen">
                             Chaque acteur reçoit une part juste pour son contribution. Les clients sont rémunérés 
-                            pour leurs vêtements, les Dressing Angels pour leur expertise, et la plateforme pour 
+                            pour leurs vêtements, les vendeuses pour leur expertise, et la plateforme pour 
                             son infrastructure et son support.
                           </p>
                         </CardContent>
@@ -218,7 +218,7 @@ export default function ConceptPage() {
                         </CardHeader>
                         <CardContent>
                           <p className="text-gris-moyen">
-                            En utilisant nos services, vous soutenez directement des professionnels locaux (les Dressing Angels) 
+                            En utilisant nos services, vous soutenez directement des professionnels locaux (les vendeuses) 
                             ainsi que toute une équipe qui travaille pour rendre cette plateforme possible : développeurs, 
                             modérateurs, service client, etc.
                           </p>
@@ -257,39 +257,54 @@ export default function ConceptPage() {
                     </div>
                   </div>
 
-                  {/* Concrete Example */}
+                  {/* Formulas */}
                   <div>
-                    <h3 className="text-2xl mb-6 text-center">Exemple concret</h3>
-                    <div className="space-y-6">
+                    <h3 className="text-2xl mb-6 text-center">Nos formules</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                       <Card className="border-noir/20">
                         <CardHeader>
-                          <CardTitle className="text-lg">Veste en cuir vendue 200€</CardTitle>
+                          <div className="flex items-baseline justify-between">
+                            <CardTitle className="text-lg">Dressing déjà trié</CardTitle>
+                            <span className="text-lg font-semibold text-noir">10 €</span>
+                          </div>
                         </CardHeader>
                         <CardContent>
-                          <div className="space-y-3">
-                            <div className="flex justify-between py-2 border-b border-noir/10">
-                              <span className="text-gris-moyen">Client (propriétaire de la veste)</span>
-                              <span className="font-semibold">80€</span>
-                            </div>
-                            <div className="flex justify-between py-2 border-b border-noir/10">
-                              <span className="text-gris-moyen">Dressing Angel (vendeuse professionnelle)</span>
-                              <span className="font-semibold">80€</span>
-                            </div>
-                            <div className="flex justify-between py-2 border-b border-noir/10">
-                              <span className="text-gris-moyen">Plateforme (frais de service)</span>
-                              <span className="font-semibold">40€</span>
-                            </div>
-                            <div className="flex justify-between py-2 font-bold">
-                              <span>Total</span>
-                              <span>200€</span>
-                            </div>
+                          <p className="text-sm text-gris-moyen">
+                            Vos vêtements sont déjà mis de côté, et vous remplirez vous-même l'inventaire de vos pièces avant notre passage. On vient simplement les récupérer.
+                          </p>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="border-noir/20">
+                        <CardHeader>
+                          <div className="flex items-baseline justify-between">
+                            <CardTitle className="text-lg">Tri sur place</CardTitle>
+                            <span className="text-lg font-semibold text-noir">30 €</span>
                           </div>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-sm text-gris-moyen">
+                            Vous avez mis de côté ce dont vous ne voulez plus, mais vous ne savez pas ce qui a de la valeur. On passe 30 min à 1 h chez vous pour trier et repérer les pièces qui se revendront.
+                          </p>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="border-noir/20">
+                        <CardHeader>
+                          <div className="flex items-baseline justify-between">
+                            <CardTitle className="text-lg">Tri & conseil</CardTitle>
+                            <span className="text-lg font-semibold text-noir">50 €</span>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-sm text-gris-moyen">
+                            Rendez-vous d'1 h à 1 h 30 : on trie avec vous et on vous conseille — ce qui vaut le coup d'être vendu, ce qui vous va le mieux, ce que vous avez intérêt à garder.
+                          </p>
                         </CardContent>
                       </Card>
                     </div>
                     <p className="text-center text-gris-moyen mt-6">
-                      Cet exemple montre comment chaque vente crée de la valeur pour tous les acteurs 
-                      de notre écosystème.
+                      Le prix du rendez-vous dépend de la formule choisie. Il est le seul frais facturé : pas de coût caché.
                     </p>
                   </div>
                 </div>
