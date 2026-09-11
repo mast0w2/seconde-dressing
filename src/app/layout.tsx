@@ -1,20 +1,24 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Jost, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ToastProvider } from "@/components/ToastProvider";
 
-const inter = Inter({ subsets: ["latin"] });
-const playfair = Playfair_Display({ subsets: ["latin"] });
+const jost = Jost({ subsets: ["latin"], weight: ["300", "400", "500", "600"] });
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  style: ["normal", "italic"],
+});
 
 export const metadata: Metadata = {
   icons: {
     icon: "/favicon.svg",
   },
-  title: "Seconde - Plateforme de revente de vêtements",
+  title: "Seconde - On vous aide à vendre vos vêtements",
   description:
-    "Seconde connecte les clients avec des vendeurs professionnels pour vendre vos vêtements.",
+    "Seconde vient chercher votre dressing, trie, photographie et vend vos vêtements pour vous. Donnez-leur une seconde vie.",
 };
 
 export const dynamic = 'force-dynamic';
@@ -25,8 +29,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className={playfair.className}>
-      <body className={inter.className}>
+    <html lang="fr" className={cormorant.className}>
+      <body className={jost.className}>
         <div className="flex min-h-screen flex-col">
           <Navbar />
           <main className="flex-1">{children}</main>

@@ -2,67 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Jost:wght@300;400;500;600&display=swap');
 
 @layer base {
   :root {
-    /* Cezanne-inspired Black & White Color Palette */
-    --noir: #000000;
-    --gris-fonce: #1a1a1a;
-    --gris-moyen: #333333;
-    --gris-clair: #f5f5f5;
-    --gris-tres-clair: #fafafa;
-    --blanc: #ffffff;
-    --beige: #f8f6f3;
-    --creme: #f0ede8;
-    
+    /* Seconde — palette chaleureuse & responsable */
+    --noir: #2e3a2c;
+    --gris-fonce: #23301e;
+    --gris-moyen: #5c6653;
+    --gris-clair: #ede9df;
+    --gris-tres-clair: #faf8f3;
+    --blanc: #f4f1ea;
+    --beige: #faf8f3;
+    --creme: #f4f1ea;
+    --sauge: #8b9a7a;
+    --sauge-clair: #c7d0b7;
+    --sauge-fonce: #6f7d62;
+
     /* Font Families */
-    --font-titres: 'Playfair Display', Georgia, serif;
-    --font-texte: 'Inter', 'Helvetica Neue', sans-serif;
-    
+    --font-titres: 'Cormorant Garamond', Georgia, serif;
+    --font-texte: 'Jost', 'Avenir Next', sans-serif;
+
     /* Semantic colors for Tailwind */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
-    --primary: 0 0% 0%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 0%;
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 40%;
-    --accent: 0 0% 96%;
-    --accent-foreground: 0 0% 0%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 0 0% 0%;
-    --radius: 0px;
+    --background: 42 30% 94%;
+    --foreground: 112 14% 20%;
+    --card: 42 30% 97%;
+    --card-foreground: 112 14% 20%;
+    --popover: 42 30% 97%;
+    --popover-foreground: 112 14% 20%;
+    --primary: 112 14% 20%;
+    --primary-foreground: 42 30% 94%;
+    --secondary: 43 27% 90%;
+    --secondary-foreground: 112 14% 20%;
+    --muted: 43 27% 90%;
+    --muted-foreground: 91 10% 36%;
+    --accent: 88 14% 54%;
+    --accent-foreground: 42 30% 96%;
+    --destructive: 0 60% 45%;
+    --destructive-foreground: 42 30% 96%;
+    --border: 44 24% 85%;
+    --input: 44 24% 85%;
+    --ring: 112 14% 20%;
+    --radius: 6px;
   }
 
   .dark {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
-    --card: 0 0% 0%;
-    --card-foreground: 0 0% 100%;
-    --popover: 0 0% 0%;
-    --popover-foreground: 0 0% 100%;
-    --primary: 0 0% 100%;
-    --primary-foreground: 0 0% 0%;
-    --secondary: 0 0% 4%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 0 0% 4%;
-    --muted-foreground: 0 0% 60%;
-    --accent: 0 0% 4%;
-    --accent-foreground: 0 0% 100%;
+    --background: 112 18% 14%;
+    --foreground: 42 30% 94%;
+    --card: 112 18% 14%;
+    --card-foreground: 42 30% 94%;
+    --popover: 112 18% 14%;
+    --popover-foreground: 42 30% 94%;
+    --primary: 42 30% 94%;
+    --primary-foreground: 112 14% 20%;
+    --secondary: 112 14% 20%;
+    --secondary-foreground: 42 30% 94%;
+    --muted: 112 14% 20%;
+    --muted-foreground: 88 10% 70%;
+    --accent: 112 14% 20%;
+    --accent-foreground: 42 30% 94%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 14%;
-    --input: 0 0% 14%;
-    --ring: 0 0% 83.9%;
+    --destructive-foreground: 42 30% 94%;
+    --border: 112 14% 24%;
+    --input: 112 14% 24%;
+    --ring: 88 14% 66%;
   }
 }
 
@@ -74,8 +77,8 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-texte);
-    font-size: 18px;
-    line-height: 1.8;
+    font-size: 17px;
+    line-height: 1.75;
     color: var(--noir);
     background-color: var(--blanc);
     font-feature-settings: "rlig" 1, "calt" 1;
@@ -83,35 +86,33 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-titres);
-    font-weight: 600;
-    line-height: 1.2;
+    font-weight: 400;
+    line-height: 1.18;
     color: var(--noir);
-    letter-spacing: -0.02em;
+    letter-spacing: 0.005em;
   }
 
   h1 {
     font-size: 48px;
-    font-weight: 700;
-    letter-spacing: -0.03em;
+    font-weight: 400;
+    letter-spacing: 0.005em;
   }
 
   h2 {
     font-size: 36px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
+    font-weight: 400;
   }
 
   h3 {
-    font-size: 28px;
-    font-weight: 600;
-    color: var(--gris-moyen);
-    letter-spacing: -0.01em;
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--noir);
   }
 
   p {
     font-family: var(--font-texte);
-    font-size: 18px;
-    line-height: 1.8;
+    font-size: 17px;
+    line-height: 1.75;
     color: var(--gris-moyen);
   }
 
@@ -127,6 +128,13 @@
     font-size: 14px;
     color: var(--gris-moyen);
     letter-spacing: 0.02em;
+  }
+
+  .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--sauge);
   }
 
   input, textarea, select {
@@ -152,22 +160,22 @@
     html {
       scroll-snap-type: none;
     }
-    
+
     .scroll-section {
       scroll-snap-align: none;
       min-height: auto;
     }
   }
 
-  /* Button Styles - Cezanne Minimalist */
+  /* Button Styles */
   .btn-primary {
     background-color: var(--noir);
     color: var(--blanc);
     padding: 16px 32px;
-    border: none;
+    border: 1px solid var(--noir);
     cursor: pointer;
     font-family: var(--font-texte);
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 500;
     letter-spacing: 0.05em;
     transition: all 0.3s ease;
@@ -175,9 +183,8 @@
   }
 
   .btn-primary:hover {
-    background-color: var(--gris-fonce);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background-color: transparent;
+    color: var(--noir);
   }
 
   .btn-secondary {
@@ -187,7 +194,7 @@
     padding: 16px 32px;
     cursor: pointer;
     font-family: var(--font-texte);
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 500;
     letter-spacing: 0.05em;
     transition: all 0.3s ease;
@@ -197,21 +204,19 @@
   .btn-secondary:hover {
     background-color: var(--noir);
     color: var(--blanc);
-    transform: translateY(-2px);
   }
 
-  /* Card Styles - Cezanne Minimalist */
+  /* Card Styles */
   .card-cezanne {
-    background: var(--blanc);
-    border: none;
-    border-radius: 0px;
+    background: var(--beige);
+    border: 1px solid var(--gris-clair);
+    border-radius: 4px;
     padding: 40px;
-    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05);
     transition: box-shadow 0.3s ease;
   }
 
   .card-cezanne:hover {
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 30px rgba(46, 58, 44, 0.08);
   }
 
   /* Form Styles */
@@ -228,7 +233,7 @@
   }
 
   .form-input-cezanne:focus {
-    border-bottom-color: var(--noir);
+    border-bottom-color: var(--sauge);
     box-shadow: none;
   }
 
@@ -245,66 +250,66 @@
     .section-spacing {
       padding: 40px 0;
     }
-    
+
     h1 {
       font-size: 32px;
     }
-    
+
     h2 {
       font-size: 24px;
     }
-    
+
     h3 {
       font-size: 20px;
     }
-    
+
     h4 {
       font-size: 18px;
     }
-    
+
     body {
-      font-size: 14px;
-      line-height: 1.6;
+      font-size: 15px;
+      line-height: 1.65;
     }
-    
+
     p {
-      font-size: 14px;
-      line-height: 1.6;
+      font-size: 15px;
+      line-height: 1.65;
     }
-    
+
     .text-xl {
       font-size: 18px !important;
     }
-    
+
     .text-2xl {
       font-size: 20px !important;
     }
   }
-  
+
   @media (max-width: 640px) {
     h1 {
       font-size: 28px;
     }
-    
+
     h2 {
       font-size: 22px;
     }
-    
+
     h3 {
       font-size: 18px;
     }
-    
+
     .text-xl {
       font-size: 16px !important;
     }
-    
+
     .text-2xl {
       font-size: 18px !important;
     }
   }
 }
 
-/* Custom scrollbar for Cezanne aesthetic */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -314,7 +319,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--gris-moyen);
+  background: var(--sauge);
   border-radius: 4px;
 }
 

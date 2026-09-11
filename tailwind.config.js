@@ -16,20 +16,26 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        serif: ['Playfair Display', 'Georgia', 'serif'],
-        sans: ['Inter', 'Helvetica Neue', 'sans-serif'],
+        serif: ['Cormorant Garamond', 'Georgia', 'Times New Roman', 'serif'],
+        sans: ['Jost', 'Avenir Next', 'Helvetica Neue', 'sans-serif'],
       },
       colors: {
-        // Cezanne-inspired Black & White Palette
-        'noir': '#000000',
-        'gris-fonce': '#1a1a1a',
-        'gris-moyen': '#333333',
-        'gris-clair': '#f5f5f5',
-        'gris-tres-clair': '#fafafa',
-        'blanc': '#ffffff',
-        'beige': '#f8f6f3',
-        'creme': '#f0ede8',
-        
+        // Seconde — palette chaleureuse & responsable (vert forêt / sauge / crème)
+        'noir': '#2e3a2c',
+        'gris-fonce': '#23301e',
+        'gris-moyen': '#5c6653',
+        'gris-clair': '#ede9df',
+        'gris-tres-clair': '#faf8f3',
+        'blanc': '#f4f1ea',
+        'beige': '#faf8f3',
+        'creme': '#f4f1ea',
+
+        // Accents botaniques
+        'sauge': '#8b9a7a',
+        'sauge-clair': '#c7d0b7',
+        'sauge-fonce': '#6f7d62',
+        'foret': '#2e3a2c',
+
         // Semantic colors
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

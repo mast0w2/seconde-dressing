@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "./ui/button";
-import { Leaf } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 export function Footer() {
   return (
@@ -8,12 +8,7 @@ export function Footer() {
       <div className="container flex flex-col items-center gap-8">
         {/* Logo and description - centered on all screens */}
         <div className="flex flex-col items-center gap-4 sm:gap-6 text-center">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 border border-noir rounded-full flex items-center justify-center">
-              <Leaf className="h-4 w-4 sm:h-5 sm:w-5 text-noir" />
-            </div>
-            <span className="text-lg sm:text-xl font-bold text-noir tracking-wide">SECONDE</span>
-          </div>
+          <Logo layout="stack" markClassName="h-12 sm:h-14" wordClassName="text-xl sm:text-2xl" />
           <p className="text-sm sm:text-base text-gris-moyen max-w-md">
             Plateforme de revente de vêtements entre particuliers et vendeuses professionnelles.
           </p>
