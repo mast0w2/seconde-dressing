@@ -94,11 +94,14 @@ const FORMULA_CLIENT_ACTIONS: Record<string, string[]> = {
 // Configuration
 // ============================================================================
 
-const EMAIL_FROM = process.env.EMAIL_FROM || 'support@seconde-dressing.com';
-
-if (!process.env.EMAIL_FROM) {
-  console.warn('[EmailService] EMAIL_FROM is not set; falling back to', EMAIL_FROM);
+function parseSenderEmail(raw: string): string {
+  const match = raw.match(/<([^>]+)>/);
+  return match ? match[1].trim() : raw.trim();
 }
+
+const EMAIL_FROM = parseSenderEmail(process.env.EMAIL_FROM || 'support@seconde-dressing.com');
+
+console.warn('[EmailService] sender email resolved to:', EMAIL_FROM, '(raw EMAIL_FROM:', process.env.EMAIL_FROM || '<unset, using fallback>', ')');
 
 const EMAIL_CONFIG = {
   sender: {
