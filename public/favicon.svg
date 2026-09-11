@@ -1,4 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" fill="white"/>
-  <text x="50" y="60" font-size="80" font-family="Playfair Display, serif" font-weight="900" fill="black" text-anchor="middle" dominant-baseline="middle">S</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 140">
+  <rect width="220" height="140" fill="#f4f1ea"/>
+  <g fill="none" stroke="#2e3a2c" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M110 46 L110 30 C110 21 101 17 96 22 C92 26 94 33 100 35"/>
+    <path d="M110 47 L58 90 Q53 94 55 98 Q57 101 62 101 L158 101 Q163 101 165 98 Q167 94 162 90 Z"/>
+    <path d="M110 47 C110 56 114 62 119 66"/>
+  </g>
+  <g transform="translate(105,64) rotate(7)">
+    <rect x="0" y="0" width="34" height="42" rx="4" fill="#f4f1ea" stroke="#2e3a2c" stroke-width="5"/>
+    <path d="M17 33 C12 28.5 8.5 26 8.5 22.2 C8.5 19.8 10.3 18 12.6 18 C14.4 18 16.1 19.1 17 20.5 C17.9 19.1 19.6 18 21.4 18 C23.7 18 25.5 19.8 25.5 22.2 C25.5 26 22 28.5 17 33 Z" fill="#8b9a7a"/>
+  </g>
 </svg>
