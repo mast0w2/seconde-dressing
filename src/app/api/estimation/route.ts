@@ -205,8 +205,11 @@ export async function POST(request: Request) {
 
     // Send a confirmation email to the client (and a copy to admins) listing
     // the actions to take before the appointment, based on the chosen formula.
+    // We never fail the whole request on an email error, but we log the
+    // Brevo response so failures (rejected sender, invalid key, etc.) are
+    // visible in the server logs instead of being swallowed silently.
     if (process.env.BREVO_API_KEY) {
-      await notificationService.sendEstimationNotification({
+      const emailResult = await notificationService.sendEstimationNotification({
         nom: estimationData.nom,
         prenom: estimationData.prenom,
         email: estimationData.email,
@@ -219,6 +222,18 @@ export async function POST(request: Request) {
         description: estimationData.description,
         estimation: estimationData.estimation,
       });
+      if (!emailResult.success) {
+        console.error(
+          '[Estimation API] Email sending failed for',
+          estimationData.email,
+          '-',
+          emailResult.error || emailResult.message
+        );
+      }
+    } else {
+      console.warn(
+        '[Estimation API] BREVO_API_KEY is not set: email notification skipped.'
+      );
     }
 
     return NextResponse.json({

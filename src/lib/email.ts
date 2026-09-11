@@ -171,18 +171,27 @@ class EmailService {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        let errorData: unknown;
+        try {
+          errorData = await response.json();
+        } catch {
+          errorData = await response.text();
+        }
+        const detail = `Brevo API error: ${response.status} - ${JSON.stringify(errorData)}`;
+        console.error('[EmailService] sendEmail failed:', detail);
         return {
           success: false,
-          error: `Brevo API error: ${response.status} - ${JSON.stringify(errorData)}`,
+          error: detail,
         };
       }
 
       return { success: true };
     } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('[EmailService] sendEmail threw:', message);
       return {
         success: false,
-        error: error instanceof Error ? error.message : String(error),
+        error: message,
       };
     }
   }
