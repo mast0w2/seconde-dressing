@@ -764,7 +764,7 @@ export function ProgressiveEstimationForm() {
           {formData.nombreVetements} vêtement{formData.nombreVetements > 1 ? "s" : ""} ×{" "}
           {formData.valeurMoyenne} € ={" "}
           {totalEstime.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} € de ventes estimées,
-          dont vous touchez 40 %. Estimation indicative, ajustée après le tri.
+          dont vous touchez 50 %. Estimation indicative, ajustée après le tri.
         </p>
       </div>
     );

@@ -115,17 +115,17 @@ export default function ConceptPage() {
                               fill="none"
                               stroke="#000"
                               strokeWidth="2"
-                              strokeDasharray="40, 100"
+                              strokeDasharray="50, 100"
                               strokeLinecap="round"
                             />
                           </svg>
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-xl sm:text-2xl font-bold">40%</span>
+                            <span className="text-xl sm:text-2xl font-bold">50%</span>
                           </div>
                         </div>
                         <p className="font-semibold text-sm sm:text-base text-noir">Client</p>
                         <p className="text-xs sm:text-sm text-gris-moyen max-w-xs">
-                          Vous récupérez 40% du montant de la vente sans faire d'effort.
+                          Vous récupérez 50% du montant de la vente sans faire d'effort.
                         </p>
                       </div>
 
@@ -144,7 +144,7 @@ export default function ConceptPage() {
                               stroke="#000"
                               strokeWidth="2"
                               strokeDasharray="40, 100"
-                              strokeDashoffset="-40"
+                              strokeDashoffset="-50"
                               strokeLinecap="round"
                             />
                           </svg>
@@ -172,18 +172,18 @@ export default function ConceptPage() {
                               fill="none"
                               stroke="#000"
                               strokeWidth="2"
-                              strokeDasharray="20, 100"
-                              strokeDashoffset="-80"
+                              strokeDasharray="10, 100"
+                              strokeDashoffset="-90"
                               strokeLinecap="round"
                             />
                           </svg>
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-xl sm:text-2xl font-bold">20%</span>
+                            <span className="text-xl sm:text-2xl font-bold">10%</span>
                           </div>
                         </div>
                         <p className="font-semibold text-sm sm:text-base text-noir">Plateforme</p>
                         <p className="text-xs sm:text-sm text-gris-moyen max-w-xs">
-                          20% pour la plateforme afin de rémunérer les développeurs et gérer les litiges.
+                          10% pour la plateforme afin de rémunérer les développeurs et gérer les litiges.
                         </p>
                       </div>
                     </div>

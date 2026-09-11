@@ -243,11 +243,11 @@ export default function Home() {
           <div className="flex flex-col gap-5 max-w-[480px]">
             <div className="eyebrow">Ce que vous touchez</div>
             <h2 className="text-3xl sm:text-4xl leading-[1.18]">
-              Vous touchez 40 % de chaque vente.
+              Vous touchez 50 % de chaque vente.
             </h2>
             <p className="text-base text-gris-moyen">
               Votre vendeuse en reçoit 40 % : c&apos;est elle qui trie, photographie, rédige les
-              annonces, répond aux acheteurs et expédie. Les 20 % restants font tourner Seconde —
+              annonces, répond aux acheteurs et expédie. Les 10 % restants font tourner Seconde —
               la plateforme, le suivi de vos ventes et les paiements.
             </p>
             <p className="text-base text-gris-moyen">
