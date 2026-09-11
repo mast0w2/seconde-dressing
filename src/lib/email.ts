@@ -74,9 +74,9 @@ const FORMULA_LABELS: Record<string, string> = {
 
 const FORMULA_CLIENT_ACTIONS: Record<string, string[]> = {
   'deja-trie': [
-    'Mettez de côté les vêtements que vous souhaitez vendre.',
-    'Remplissez vous-même l’inventaire de vos pièces avant notre passage.',
-    'Préparez le sac ou les cartons : on vient simplement les récupérer.',
+    'Vos vêtements sont déjà triés et placés dans des sacs.',
+    'Connectez-vous sur le site et remplissez l’inventaire de vos pièces avant le rendez-vous.',
+    'Lorsque la vendeuse arrive, transmettez-lui les sacs : c’est tout, on s’occupe du reste.',
   ],
   'tri-sur-place': [
     'Mettez de côté ce dont vous ne voulez plus.',
