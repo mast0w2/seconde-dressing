@@ -12,7 +12,7 @@ export * from './database';
 export interface UserSession {
   id: string;
   email: string;
-  role: 'client' | 'vendeuse';
+  role: 'client' | 'seller';
   profile?: any;
   token: string;
   expiresAt: Date;
@@ -121,8 +121,8 @@ export interface AppointmentSlot {
   startTime: string;
   endTime: string;
   isAvailable: boolean;
-  vendeuseId: string;
-  vendeuseName: string;
+  sellerId: string;
+  sellerName: string;
 }
 
 /** Calendar view configuration */
@@ -145,7 +145,7 @@ export interface DashboardWidget {
 
 /** User preferences for UI */
 export interface UserPreferences {
-  theme: 'clair' | 'sombre';
+  theme: 'light' | 'dark';
   language: 'FR' | 'EN';
   notifications: {
     email: boolean;

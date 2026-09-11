@@ -32,10 +32,10 @@ export interface EmailSendResult {
  */
 export interface AppointmentNotificationData {
   to: string;
-  vendeuseNom: string;
-  clientNom?: string;
+  sellerName: string;
+  clientName?: string;
   date: string;
-  heure: string;
+  time: string;
 }
 
 /**
@@ -372,11 +372,11 @@ class NotificationService {
     const content = `
       <h2>\u2705 Votre rendez-vous est confirmé</h2>
       <p>Bonjour,</p>
-      <p>Votre rendez-vous avec <strong>${data.vendeuseNom}</strong> a été confirmé avec succès.</p>
+      <p>Votre rendez-vous avec <strong>${data.sellerName}</strong> a été confirmé avec succès.</p>
       
       <div class="highlight">
         <p><strong>Date:</strong> ${this.templateService.formatDate(data.date)}</p>
-        <p><strong>Heure:</strong> ${data.heure}</p>
+        <p><strong>Heure:</strong> ${data.time}</p>
       </div>
       
       <p>Merci de vous présenter à l'heure convenue avec vos vêtements à vendre.</p>
@@ -401,16 +401,16 @@ class NotificationService {
     const content = `
       <h2>\ud83d\udcc5 Nouvelle demande reçue</h2>
       <p>Bonjour,</p>
-      <p>Vous avez reçu une nouvelle demande de rendez-vous de la part de <strong>${data.clientNom}</strong>.</p>
+      <p>Vous avez reçu une nouvelle demande de rendez-vous de la part de <strong>${data.clientName}</strong>.</p>
       
       <div class="highlight">
         <p><strong>Date demandée:</strong> ${this.templateService.formatDate(data.date)}</p>
-        <p><strong>Heure demandée:</strong> ${data.heure}</p>
+        <p><strong>Heure demandée:</strong> ${data.time}</p>
       </div>
       
       <p>Connectez-vous à votre espace personnel pour accepter ou refuser cette demande :</p>
       <p>
-        <a href="${EMAIL_CONFIG.siteUrl}/dashboard" class="button">Voir les demandes</a>
+        <a href="${EMAIL_CONFIG.siteUrl}/dashboard/vendeur" class="button">Voir les demandes</a>
       </p>
       
       <p>Ne répondez pas à cet email, utilisez plutôt la plateforme pour gérer vos rendez-vous.</p>
@@ -429,14 +429,14 @@ class NotificationService {
     const subject = '\u274c Annulation de rendez-vous';
     const content = `
       <h2>\u274c Rendez-vous annulé</h2>
-      <p>Bonjour ${data.clientNom || ''},</p>
-      <p>Votre rendez-vous prévu le <strong>${this.templateService.formatDate(data.date)} à ${data.heure}</strong> a été annulé.</p>
+      <p>Bonjour ${data.clientName || ''},</p>
+      <p>Votre rendez-vous prévu le <strong>${this.templateService.formatDate(data.date)} à ${data.time}</strong> a été annulé.</p>
       
       <p>Cela peut être dû à un créneau déjà pris ou à un problème de disponibilité de la vendeuse.</p>
       
       <p>Vous pouvez prendre un nouveau rendez-vous quand vous le souhaitez :</p>
       <p>
-        <a href="${EMAIL_CONFIG.siteUrl}/client/rdv" class="button">Prendre un nouveau rendez-vous</a>
+        <a href="${EMAIL_CONFIG.siteUrl}/demande-rdv" class="button">Prendre un nouveau rendez-vous</a>
       </p>
       
       <p>Nous nous excusons pour la gêne occasionnée.</p>
@@ -456,11 +456,11 @@ class NotificationService {
     const content = `
       <h2>\u2705 Demande acceptée</h2>
       <p>Bonjour,</p>
-      <p>Votre demande de rendez-vous avec <strong>${data.vendeuseNom}</strong> a été acceptée.</p>
+      <p>Votre demande de rendez-vous avec <strong>${data.sellerName}</strong> a été acceptée.</p>
       
       <div class="highlight">
         <p><strong>Date:</strong> ${this.templateService.formatDate(data.date)}</p>
-        <p><strong>Heure:</strong> ${data.heure}</p>
+        <p><strong>Heure:</strong> ${data.time}</p>
       </div>
       
       <p>Nous vous attendons avec plaisir ! N'oubliez pas d'apporter vos vêtements à vendre.</p>
@@ -473,7 +473,7 @@ class NotificationService {
       </ul>
       
       <p>
-        <a href="${EMAIL_CONFIG.siteUrl}/client/rdv" class="button">Voir mes rendez-vous</a>
+        <a href="${EMAIL_CONFIG.siteUrl}/dashboard/client" class="button">Voir mes rendez-vous</a>
       </p>
     `;
 
@@ -491,14 +491,14 @@ class NotificationService {
     const content = `
       <h2>\u274c Demande refusée</h2>
       <p>Bonjour,</p>
-      <p>Malheureusement, votre demande de rendez-vous avec <strong>${data.vendeuseNom}</strong> 
-      pour le <strong>${this.templateService.formatDate(data.date)} à ${data.heure}</strong> a été refusée.</p>
+      <p>Malheureusement, votre demande de rendez-vous avec <strong>${data.sellerName}</strong> 
+      pour le <strong>${this.templateService.formatDate(data.date)} à ${data.time}</strong> a été refusée.</p>
       
       <p>Cela peut être dû à un créneau déjà pris ou à un problème de disponibilité.</p>
       
       <p>Nous vous invitons à essayer avec une autre vendeuse ou un autre créneau :</p>
       <p>
-        <a href="${EMAIL_CONFIG.siteUrl}/client/rdv" class="button">Voir les disponibilités</a>
+        <a href="${EMAIL_CONFIG.siteUrl}/demande-rdv" class="button">Voir les disponibilités</a>
       </p>
       
       <p>Vous pouvez également nous contacter directement via notre 
@@ -582,7 +582,7 @@ class NotificationService {
   public async sendWelcomeEmail(
     email: string,
     name: string,
-    role: 'client' | 'vendeuse'
+    role: 'client' | 'seller'
   ): Promise<EmailSendResult> {
     const subject = '\ud83c\udf89 Bienvenue sur Seconde !';
 
@@ -595,7 +595,7 @@ class NotificationService {
           <li>Suivre vos rendez-vous et vos ventes</li>
         </ul>
         <p style="text-align: center; margin: 20px 0;">
-          <a href="${EMAIL_CONFIG.siteUrl}/client/rdv" class="button">Prendre un rendez-vous</a>
+          <a href="${EMAIL_CONFIG.siteUrl}/demande-rdv" class="button">Prendre un rendez-vous</a>
         </p>
       `
       : `
@@ -606,7 +606,7 @@ class NotificationService {
           <li>Suivre vos clients et vos ventes</li>
         </ul>
         <p style="text-align: center; margin: 20px 0;">
-          <a href="${EMAIL_CONFIG.siteUrl}/vendeuse/demandes" class="button">Voir les demandes</a>
+          <a href="${EMAIL_CONFIG.siteUrl}/dashboard/vendeur" class="button">Voir les demandes</a>
         </p>
       `;
 

@@ -18,14 +18,14 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
 const profileFormSchema = z.object({
-  nom: z.string().min(2, "Le nom est requis"),
-  prenom: z.string().min(2, "Le prénom est requis"),
-  telephone: z.string().optional(),
+  last_name: z.string().min(2, "Le nom est requis"),
+  first_name: z.string().min(2, "Le prénom est requis"),
+  phone: z.string().optional(),
   bio: z.string().optional(),
-  adresse_rue: z.string().optional(),
-  adresse_ville: z.string().optional(),
-  adresse_code_postal: z.string().optional(),
-  adresse_pays: z.string().optional(),
+  street_address: z.string().optional(),
+  city: z.string().optional(),
+  postal_code: z.string().optional(),
+  country: z.string().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -42,14 +42,14 @@ export default function ProfilePage() {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      nom: "",
-      prenom: "",
-      telephone: "",
+      last_name: "",
+      first_name: "",
+      phone: "",
       bio: "",
-      adresse_rue: "",
-      adresse_ville: "",
-      adresse_code_postal: "",
-      adresse_pays: "",
+      street_address: "",
+      city: "",
+      postal_code: "",
+      country: "",
     },
   });
 
@@ -87,14 +87,14 @@ export default function ProfilePage() {
           setProfile(profileData);
           // Populate form with profile data
           reset({
-            nom: profileData.nom || "",
-            prenom: profileData.prenom || "",
-            telephone: profileData.telephone || "",
+            last_name: profileData.last_name || "",
+            first_name: profileData.first_name || "",
+            phone: profileData.phone || "",
             bio: profileData.bio || "",
-            adresse_rue: profileData.adresse_rue || "",
-            adresse_ville: profileData.adresse_ville || "",
-            adresse_code_postal: profileData.adresse_code_postal || "",
-            adresse_pays: profileData.adresse_pays || "",
+            street_address: profileData.street_address || "",
+            city: profileData.city || "",
+            postal_code: profileData.postal_code || "",
+            country: profileData.country || "",
           });
         } else {
           // Create a basic profile if it doesn't exist
@@ -103,8 +103,8 @@ export default function ProfilePage() {
             .insert([{
               id: currentUser.id,
               email: currentUser.email,
-              nom: null,
-              prenom: null,
+              last_name: null,
+              first_name: null,
               role: null,
             }]);
           
@@ -145,23 +145,23 @@ export default function ProfilePage() {
       const profileData: any = {
         id: user.id,
         email: user.email,
-        nom: data.nom,
-        prenom: data.prenom,
-        telephone: data.telephone || null,
+        last_name: data.last_name,
+        first_name: data.first_name,
+        phone: data.phone || null,
         bio: data.bio || null,
-        adresse_rue: data.adresse_rue || null,
-        adresse_ville: data.adresse_ville || null,
-        adresse_code_postal: data.adresse_code_postal || null,
-        adresse_pays: data.adresse_pays || null,
+        street_address: data.street_address || null,
+        city: data.city || null,
+        postal_code: data.postal_code || null,
+        country: data.country || null,
       };
 
       // Preserve existing fields that shouldn't be modified here
       if (profile) {
         profileData.role = profile.role;
         profileData.photo_url = profile.photo_url;
-        profileData.specialisation = profile.specialisation;
-        profileData.tarif_horaire = profile.tarif_horaire;
-        profileData.annees_experience = profile.annees_experience;
+        profileData.specialization = profile.specialization;
+        profileData.hourly_rate = profile.hourly_rate;
+        profileData.years_experience = profile.years_experience;
       }
 
       const { error, data: upsertResult } = await supabase
@@ -196,7 +196,7 @@ export default function ProfilePage() {
 
       toast({
         title: "Profil mis à jour",
-        description: `Vos informations ont été enregistrées : ${updatedProfile.prenom} ${updatedProfile.nom}`,
+        description: `Vos informations ont été enregistrées : ${updatedProfile.first_name} ${updatedProfile.last_name}`,
       });
     } catch (error: any) {
       console.error("Profile update error:", error);
@@ -212,14 +212,14 @@ export default function ProfilePage() {
     setIsEditing(false);
     if (profile) {
       reset({
-        nom: profile.nom || "",
-        prenom: profile.prenom || "",
-        telephone: profile.telephone || "",
+        last_name: profile.last_name || "",
+        first_name: profile.first_name || "",
+        phone: profile.phone || "",
         bio: profile.bio || "",
-        adresse_rue: profile.adresse_rue || "",
-        adresse_ville: profile.adresse_ville || "",
-        adresse_code_postal: profile.adresse_code_postal || "",
-        adresse_pays: profile.adresse_pays || "",
+        street_address: profile.street_address || "",
+        city: profile.city || "",
+        postal_code: profile.postal_code || "",
+        country: profile.country || "",
       });
     }
   };
@@ -237,7 +237,7 @@ export default function ProfilePage() {
   }
 
   // Get initials for avatar
-  const initials = (profile.prenom?.[0] || "") + (profile.nom?.[0] || "");
+  const initials = (profile.first_name?.[0] || "") + (profile.last_name?.[0] || "");
 
   return (
     <div className="container py-8 max-w-3xl">
@@ -283,12 +283,12 @@ export default function ProfilePage() {
                 </Avatar>
                 <div>
                   <h2 className="text-2xl font-semibold">
-                    {profile.prenom} {profile.nom}
+                    {profile.first_name} {profile.last_name}
                   </h2>
                   <p className="text-muted-foreground">{profile.email}</p>
                   {profile.role && (
                     <Badge className="mt-2">
-                      {profile.role === "client" ? "Client" : "Vendeur"}
+                      {profile.role === "client" ? "Client" : "Vendeuse"}
                     </Badge>
                   )}
                 </div>
@@ -327,34 +327,34 @@ export default function ProfilePage() {
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="prenom">Prénom *</Label>
+                    <Label htmlFor="first_name">Prénom *</Label>
                     {isEditing ? (
                       <Input
-                        id="prenom"
-                        {...register("prenom")}
-                        className={errors.prenom ? "border-destructive" : ""}
+                        id="first_name"
+                        {...register("first_name")}
+                        className={errors.first_name ? "border-destructive" : ""}
                       />
                     ) : (
-                      <p className="text-lg">{profile.prenom}</p>
+                      <p className="text-lg">{profile.first_name}</p>
                     )}
-                    {errors.prenom && (
-                      <p className="text-sm text-destructive">{errors.prenom.message}</p>
+                    {errors.first_name && (
+                      <p className="text-sm text-destructive">{errors.first_name.message}</p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="nom">Nom *</Label>
+                    <Label htmlFor="last_name">Nom *</Label>
                     {isEditing ? (
                       <Input
-                        id="nom"
-                        {...register("nom")}
-                        className={errors.nom ? "border-destructive" : ""}
+                        id="last_name"
+                        {...register("last_name")}
+                        className={errors.last_name ? "border-destructive" : ""}
                       />
                     ) : (
-                      <p className="text-lg">{profile.nom}</p>
+                      <p className="text-lg">{profile.last_name}</p>
                     )}
-                    {errors.nom && (
-                      <p className="text-sm text-destructive">{errors.nom.message}</p>
+                    {errors.last_name && (
+                      <p className="text-sm text-destructive">{errors.last_name.message}</p>
                     )}
                   </div>
                 </div>
@@ -365,16 +365,16 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="telephone">Téléphone</Label>
+                  <Label htmlFor="phone">Téléphone</Label>
                   {isEditing ? (
                     <Input
-                      id="telephone"
+                      id="phone"
                       type="tel"
-                      {...register("telephone")}
+                      {...register("phone")}
                       placeholder="Ex: 06 12 34 56 78"
                     />
                   ) : (
-                    <p className="text-lg">{profile.telephone || "Non renseigné"}</p>
+                    <p className="text-lg">{profile.phone || "Non renseigné"}</p>
                   )}
                 </div>
 
@@ -407,69 +407,69 @@ export default function ProfilePage() {
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="adresse_rue">Rue et numéro</Label>
+                <Label htmlFor="street_address">Rue et numéro</Label>
                 {isEditing ? (
                   <Input
-                    id="adresse_rue"
-                    {...register("adresse_rue")}
+                    id="street_address"
+                    {...register("street_address")}
                     placeholder="Ex: 123 Rue de la République"
                   />
                 ) : (
-                  <p className="text-lg">{profile.adresse_rue || "Non renseigné"}</p>
+                  <p className="text-lg">{profile.street_address || "Non renseigné"}</p>
                 )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="adresse_code_postal">Code postal</Label>
+                  <Label htmlFor="postal_code">Code postal</Label>
                   {isEditing ? (
                     <Input
-                      id="adresse_code_postal"
-                      {...register("adresse_code_postal")}
+                      id="postal_code"
+                      {...register("postal_code")}
                       placeholder="Ex: 75001"
                     />
                   ) : (
-                    <p className="text-lg">{profile.adresse_code_postal || "Non renseigné"}</p>
+                    <p className="text-lg">{profile.postal_code || "Non renseigné"}</p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="adresse_ville">Ville</Label>
+                  <Label htmlFor="city">Ville</Label>
                   {isEditing ? (
                     <Input
-                      id="adresse_ville"
-                      {...register("adresse_ville")}
+                      id="city"
+                      {...register("city")}
                       placeholder="Ex: Paris"
                     />
                   ) : (
-                    <p className="text-lg">{profile.adresse_ville || "Non renseigné"}</p>
+                    <p className="text-lg">{profile.city || "Non renseigné"}</p>
                   )}
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="adresse_pays">Pays</Label>
+                <Label htmlFor="country">Pays</Label>
                 {isEditing ? (
                   <Input
-                    id="adresse_pays"
-                    {...register("adresse_pays")}
+                    id="country"
+                    {...register("country")}
                     placeholder="Ex: France"
                   />
                 ) : (
-                  <p className="text-lg">{profile.adresse_pays || "Non renseigné"}</p>
+                  <p className="text-lg">{profile.country || "Non renseigné"}</p>
                 )}
               </div>
             </form>
           </CardContent>
         </Card>
 
-        {/* Vendeur specific info */}
-        {profile.role === "vendeur" && (
+        {/* Seller specific info */}
+        {profile.role === "seller" && (
           <Card>
             <CardHeader>
               <CardTitle>Informations professionnelles</CardTitle>
               <CardDescription>
-                Vos informations en tant que vendeur
+                Vos informations en tant que vendeuse
               </CardDescription>
             </CardHeader>
 
@@ -478,18 +478,18 @@ export default function ProfilePage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Spécialisation</Label>
-                    <p className="text-lg">{profile.specialisation || "Non renseigné"}</p>
+                    <p className="text-lg">{profile.specialization || "Non renseigné"}</p>
                   </div>
 
                   <div className="space-y-2">
                     <Label>Années d'expérience</Label>
-                    <p className="text-lg">{profile.annees_experience || "Non renseigné"}</p>
+                    <p className="text-lg">{profile.years_experience || "Non renseigné"}</p>
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label>Tarif horaire</Label>
-                  <p className="text-lg">{profile.tarif_horaire ? `€${profile.tarif_horaire}/h` : "Non renseigné"}</p>
+                  <p className="text-lg">{profile.hourly_rate ? `€${profile.hourly_rate}/h` : "Non renseigné"}</p>
                 </div>
               </div>
             </CardContent>

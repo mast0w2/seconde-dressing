@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
 import { Preference } from "@/types/database";
+import type { Theme } from "@/types/database";
 import { ArrowLeft, Check, X } from "lucide-react";
 
 export default function PreferencesPage() {
@@ -20,9 +21,9 @@ export default function PreferencesPage() {
   const [isSaving, setIsSaving] = useState(false);
 
   // Form state
-  const [langue, setLangue] = useState<"FR" | "EN">("FR");
-  const [theme, setTheme] = useState<"clair" | "sombre">("clair");
-  const [fuseauHoraire, setFuseauHoraire] = useState<string>("Europe/Paris");
+  const [language, setLanguage] = useState<"FR" | "EN">("FR");
+  const [theme, setTheme] = useState<Theme>("light");
+  const [timezone, setTimezone] = useState<string>("Europe/Paris");
   const [notificationsEmail, setNotificationsEmail] = useState<boolean>(true);
   const [notificationsSms, setNotificationsSms] = useState<boolean>(false);
 
@@ -55,11 +56,11 @@ export default function PreferencesPage() {
 
         if (preferencesData) {
           setPreferences(preferencesData);
-          setLangue(preferencesData.langue || "FR");
-          setTheme(preferencesData.theme || "clair");
-          setFuseauHoraire(preferencesData.fuseau_horaire || "Europe/Paris");
-          setNotificationsEmail(preferencesData.notifications_email || true);
-          setNotificationsSms(preferencesData.notifications_sms || false);
+          setLanguage(preferencesData.language || "FR");
+          setTheme(preferencesData.theme || "light");
+          setTimezone(preferencesData.timezone || "Europe/Paris");
+          setNotificationsEmail(preferencesData.email_notifications || true);
+          setNotificationsSms(preferencesData.sms_notifications || false);
         }
       } catch (error: any) {
         toast({
@@ -92,12 +93,11 @@ export default function PreferencesPage() {
 
       const preferencesData = {
         user_id: user.id,
-        langue,
-        fuseau_horaire: fuseauHoraire,
+        language,
+        timezone,
         theme,
-        notifications_email: notificationsEmail,
-        notifications_sms: notificationsSms,
-        preferences_ventes: null,
+        email_notifications: notificationsEmail,
+        sms_notifications: notificationsSms,
       };
 
       const { error } = await supabase
@@ -177,9 +177,9 @@ export default function PreferencesPage() {
                   Langue
                 </Label>
                 <select
-                  id="langue"
-                  value={langue}
-                  onChange={(e) => setLangue(e.target.value as "FR" | "EN")}
+                  id="language"
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value as "FR" | "EN")}
                   className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 >
                   <option value="FR">Français</option>
@@ -189,13 +189,13 @@ export default function PreferencesPage() {
 
               {/* Fuseau horaire */}
               <div className="space-y-2">
-                <Label htmlFor="fuseau_horaire" className="text-sm font-medium">
+                <Label htmlFor="timezone" className="text-sm font-medium">
                   Fuseau horaire
                 </Label>
                 <select
-                  id="fuseau_horaire"
-                  value={fuseauHoraire}
-                  onChange={(e) => setFuseauHoraire(e.target.value)}
+                  id="timezone"
+                  value={timezone}
+                  onChange={(e) => setTimezone(e.target.value)}
                   className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 >
                   <option value="Europe/Paris">Europe/Paris</option>
@@ -213,11 +213,11 @@ export default function PreferencesPage() {
                 <select
                   id="theme"
                   value={theme}
-                  onChange={(e) => setTheme(e.target.value as "clair" | "sombre")}
+                  onChange={(e) => setTheme(e.target.value as Theme)}
                   className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 >
-                  <option value="clair">Clair</option>
-                  <option value="sombre">Sombre</option>
+                  <option value="light">Clair</option>
+                  <option value="dark">Sombre</option>
                 </select>
               </div>
 

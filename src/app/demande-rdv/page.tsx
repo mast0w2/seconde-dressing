@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,12 +12,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
-import { Calendar, Clock, Mail, Phone, User, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import type { Profile, Formula } from "@/types/database";
 
 const formSchema = z.object({
   message: z.string().min(10, "Le message doit contenir au moins 10 caractères"),
-  date_proposee: z.string().optional(),
-  heure_proposee: z.string().optional(),
+  proposed_date: z.string().optional(),
+  proposed_time: z.string().optional(),
+  address: z.string().min(5, "L'adresse de collecte est requise"),
+  formula_id: z.string().min(1, "Veuillez choisir une formule"),
+  conditions_accepted: z
+    .boolean()
+    .refine((v) => v === true, "Vous devez accepter les critères de reprise"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -25,103 +31,113 @@ type FormValues = z.infer<typeof formSchema>;
 export default function DemandeRdvPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
-  const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [formulas, setFormulas] = useState<Formula[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       message: "",
-      date_proposee: "",
-      heure_proposee: "",
+      proposed_date: "",
+      proposed_time: "",
+      address: "",
+      formula_id: "",
+      conditions_accepted: false,
     },
   });
 
-  const { handleSubmit, register, formState } = form;
-  const { errors, isSubmitting } = formState;
+  const {
+    handleSubmit,
+    register,
+    formState: { errors, isSubmitting },
+  } = form;
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
-      
-      if (!currentUser) {
-        // Store redirect path for after login
-        sessionStorage.setItem("redirectAfterLogin", "/demande-rdv");
+  const loadData = useCallback(async () => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
         router.push("/login");
         return;
       }
 
-      setUser(currentUser);
-
-      const { data: profile } = await supabase
+      const { data: profileData } = await supabase
         .from("profiles")
         .select("*")
-        .eq("id", currentUser.id)
+        .eq("id", user.id)
         .single();
 
-      if (!profile) {
+      if (!profileData) {
         router.push("/signup");
         return;
       }
+      setProfile(profileData as Profile);
 
-      // Only clients can make RDV requests
-      if (profile.role !== "client") {
-        toast({
-          title: "Accès refusé",
-          description: "Seuls les clients peuvent faire une demande de rendez-vous.",
-          variant: "destructive",
-        });
-        router.push("/");
+      if (profileData.role !== "client") {
+        router.push("/dashboard/vendeur");
         return;
       }
 
-      setProfile(profile);
-      setIsLoading(false);
-    };
+      const { data: formulasData, error: formulasError } = await supabase
+        .from("formulas")
+        .select("*")
+        .order("price", { ascending: true });
 
-    checkUser();
+      if (formulasError) throw formulasError;
+      setFormulas((formulasData || []) as Formula[]);
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Impossible de charger le formulaire.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }, [supabase, router, toast]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const onSubmit = async (data: FormValues) => {
     try {
-      if (!user || !profile) {
-        throw new Error("User not found");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        router.push("/login");
+        return;
       }
 
-      // Create the demande
-      const demandeData = {
-        client_id: user.id,
-        client_nom: profile.nom,
-        client_prenom: profile.prenom,
-        client_email: profile.email,
-        client_telephone: profile.telephone,
-        type_demande: "rdv",
-        message: data.message,
-        statut: "en_attente",
-        vendeur_id: null,
-        date_proposee: data.date_proposee || null,
-        heure_proposee: data.heure_proposee || null,
-      };
+      const { error } = await supabase.from("requests").insert([
+        {
+          client_id: user.id,
+          request_type: "appointment",
+          message: data.message,
+          proposed_date: data.proposed_date || null,
+          proposed_time: data.proposed_time || null,
+          address: data.address,
+          formula_id: data.formula_id,
+          conditions_accepted: data.conditions_accepted,
+          status: "pending",
+        },
+      ]);
 
-      const { error } = await supabase
-        .from("demandes")
-        .insert([demandeData]);
-
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       toast({
         title: "Demande envoyée",
-        description: "Votre demande de rendez-vous a été envoyée avec succès. Un vendeur va vous contacter rapidement.",
+        description: "Votre demande a bien été enregistrée.",
       });
-
-      // Redirect to dashboard to see the demande
-      router.push("/dashboard");
+      router.push("/dashboard/client");
     } catch (error: any) {
-      console.error("Demande RDV error:", error);
       toast({
         title: "Erreur",
         description: error.message || "Une erreur est survenue.",
@@ -138,179 +154,115 @@ export default function DemandeRdvPage() {
     );
   }
 
+  if (!profile) return null;
+
   return (
     <div className="container py-8 max-w-2xl">
       <div className="space-y-6">
-        {/* Header with back button */}
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            onClick={() => router.back()}
-            className="h-10 w-10 p-0"
-          >
+          <Button variant="ghost" onClick={() => router.back()} className="h-10 w-10 p-0">
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
             <h1 className="text-3xl font-bold">Demande de rendez-vous</h1>
-            <p className="text-muted-foreground">
-              Remplissez ce formulaire pour être contacté par un vendeur
-            </p>
+            <p className="text-muted-foreground">Décrivez votre besoin de reprise de vêtements</p>
           </div>
         </div>
 
-        {/* Form Card */}
         <Card>
           <CardHeader>
-            <CardTitle>Vos informations</CardTitle>
-            <CardDescription>
-              Ces informations seront envoyées aux vendeurs disponibles
-            </CardDescription>
+            <CardTitle>Votre demande</CardTitle>
+            <CardDescription>Renseignez les informations de collecte</CardDescription>
           </CardHeader>
-
           <CardContent>
-            {/* Display user info */}
-            <div className="space-y-4 mb-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-muted-foreground">
-                    Nom
-                  </Label>
-                  <p className="text-lg">{profile?.nom}</p>
-                </div>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="address">Adresse de collecte *</Label>
+                <Input
+                  id="address"
+                  placeholder="12 rue du Commerce, 75001 Paris"
+                  {...register("address")}
+                  className={errors.address ? "border-destructive" : ""}
+                />
+                {errors.address && (
+                  <p className="text-sm text-destructive">{errors.address.message}</p>
+                )}
+              </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="formula_id">Formule de service *</Label>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {formulas.map((formula) => (
+                    <label
+                      key={formula.id}
+                      className={`flex flex-col gap-1 p-4 border rounded-lg cursor-pointer transition-colors ${
+                        form.watch("formula_id") === formula.id
+                          ? "border-primary bg-primary/5"
+                          : "hover:bg-muted/50"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        value={formula.id}
+                        {...register("formula_id")}
+                        className="sr-only"
+                      />
+                      <span className="font-medium">{formula.label}</span>
+                      <span className="text-sm text-muted-foreground">{formula.price} €</span>
+                    </label>
+                  ))}
+                </div>
+                {errors.formula_id && (
+                  <p className="text-sm text-destructive">{errors.formula_id.message}</p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-muted-foreground">
-                    Prénom
-                  </Label>
-                  <p className="text-lg">{profile?.prenom}</p>
+                  <Label htmlFor="proposed_date">Date proposée (optionnel)</Label>
+                  <Input id="proposed_date" type="date" {...register("proposed_date")} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="proposed_time">Heure proposée (optionnel)</Label>
+                  <Input id="proposed_time" type="time" {...register("proposed_time")} />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-muted-foreground">
-                  Email
-                </Label>
-                <p className="text-lg">{profile?.email}</p>
+                <Label htmlFor="message">Message *</Label>
+                <Textarea
+                  id="message"
+                  placeholder="Décrivez vos pièces, marques, quantité..."
+                  rows={4}
+                  {...register("message")}
+                  className={errors.message ? "border-destructive" : ""}
+                />
+                {errors.message && (
+                  <p className="text-sm text-destructive">{errors.message.message}</p>
+                )}
               </div>
 
-              {profile?.telephone && (
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-muted-foreground">
-                    Téléphone
-                  </Label>
-                  <p className="text-lg">{profile.telephone}</p>
-                </div>
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  {...register("conditions_accepted")}
+                  className="mt-1"
+                />
+                <span className="text-sm">
+                  Je confirme que mes pièces respectent les critères de reprise de Seconde
+                </span>
+              </label>
+              {errors.conditions_accepted && (
+                <p className="text-sm text-destructive">{errors.conditions_accepted.message}</p>
               )}
 
-              {profile?.adresse_rue && (
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-muted-foreground">
-                    Adresse
-                  </Label>
-                  <p className="text-lg">
-                    {profile.adresse_rue}, {profile.adresse_code_postal} {profile.adresse_ville}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Votre demande</h3>
-
-                <div className="space-y-2">
-                  <Label htmlFor="message">Message *</Label>
-                  <Textarea
-                    id="message"
-                    placeholder="Décrivez vos vêtements, vos attentes, et toute information utile pour le vendeur..."
-                    {...register("message")}
-                    className={errors.message ? "border-destructive" : ""}
-                    rows={6}
-                  />
-                  {errors.message && (
-                    <p className="text-sm text-destructive">{errors.message.message}</p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="date_proposee">Date souhaitée (optionnel)</Label>
-                    <Input
-                      id="date_proposee"
-                      type="date"
-                      {...register("date_proposee")}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="heure_proposee">Heure souhaitée (optionnel)</Label>
-                    <Input
-                      id="heure_proposee"
-                      type="time"
-                      {...register("heure_proposee")}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="text-sm text-muted-foreground">
-                * Ces champs sont obligatoires
-              </div>
-
-              <Button type="submit" className="w-full md:w-auto" disabled={isSubmitting}>
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? "Envoi..." : "Envoyer la demande"}
               </Button>
             </form>
-          </CardContent>
-        </Card>
-
-        {/* Info Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Que se passe-t-il ensuite ?</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-start gap-4">
-              <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                <Mail className="h-4 w-4 text-primary" />
-              </div>
-              <p className="text-sm">
-                Votre demande est envoyée à tous les vendeurs disponibles.
-              </p>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                <Phone className="h-4 w-4 text-primary" />
-              </div>
-              <p className="text-sm">
-                Un vendeur vous contactera par email ou téléphone pour discuter de votre demande.
-              </p>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                <Calendar className="h-4 w-4 text-primary" />
-              </div>
-              <p className="text-sm">
-                Vous pourrez convenir ensemble d&apos;un rendez-vous qui vous convient.
-              </p>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                <User className="h-4 w-4 text-primary" />
-              </div>
-              <p className="text-sm">
-                Vous pouvez suivre l&apos;état de votre demande dans votre tableau de bord.
-              </p>
-            </div>
           </CardContent>
         </Card>
       </div>
     </div>
   );
 }
-
-// Import for icons
-import { Euro } from "lucide-react";

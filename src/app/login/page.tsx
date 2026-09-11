@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -19,10 +20,15 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export default function LoginPage() {
+const dashboardForRole = (role: string) =>
+  role === "seller" ? "/dashboard/vendeur" : "/dashboard/client";
+
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+  const redirectTarget = searchParams.get("redirect");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -43,17 +49,16 @@ export default function LoginPage() {
       });
 
       if (error) {
-        // Check if it's an "user not found" or "invalid credentials" error
         const errorMessage = error.message?.toLowerCase();
-        const isUserNotFound = errorMessage.includes("user not found") || 
-                             errorMessage.includes("invalid login credentials") ||
-                             errorMessage.includes("invalid email");
-        
+        const isUserNotFound =
+          errorMessage.includes("user not found") ||
+          errorMessage.includes("invalid login credentials") ||
+          errorMessage.includes("invalid email");
+
         if (isUserNotFound) {
           throw new Error("Aucun compte trouvé avec cette adresse email. Veuillez vérifier votre email ou créer un compte.");
         }
-        
-        // For other errors, use the original message
+
         throw error;
       }
 
@@ -61,7 +66,6 @@ export default function LoginPage() {
         throw new Error("User not found");
       }
 
-      // Check user profile
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("*")
@@ -72,17 +76,14 @@ export default function LoginPage() {
         throw profileError;
       }
 
-      if (profile) {
-        // Profile exists, redirect based on role
-        if (profile.role === "vendeur") {
-          router.push("/vendeur");
-        } else {
-          router.push("/");
-        }
-      } else {
-        // This shouldn't happen with the new flow, but handle it gracefully
-        router.push("/");
-      }
+      const destination =
+        redirectTarget && profile
+          ? redirectTarget
+          : profile
+          ? dashboardForRole(profile.role)
+          : "/";
+
+      router.push(destination);
 
       toast({
         title: "Connexion réussie",
@@ -107,7 +108,6 @@ export default function LoginPage() {
             Connectez-vous à votre compte pour continuer
           </CardDescription>
         </CardHeader>
-
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
@@ -123,7 +123,6 @@ export default function LoginPage() {
                 <p className="text-sm text-destructive">{errors.email.message}</p>
               )}
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="password">Mot de passe</Label>
               <Input
@@ -137,18 +136,15 @@ export default function LoginPage() {
                 <p className="text-sm text-destructive">{errors.password.message}</p>
               )}
             </div>
-
             <div className="text-right">
               <Link href="/forgot-password" className="text-sm text-primary hover:underline">
                 Mot de passe oublié ?
               </Link>
             </div>
-
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? "Connexion..." : "Se connecter"}
             </Button>
           </form>
-
           <div className="mt-4 text-center text-sm text-muted-foreground">
             Vous n&apos;avez pas de compte ?{" "}
             <Link href="/signup" className="text-primary hover:underline">
@@ -158,5 +154,13 @@ export default function LoginPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }

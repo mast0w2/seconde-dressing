@@ -20,6 +20,9 @@ interface EstimationRequest {
   marques: string;
   description?: string;
   estimation: number;
+  address?: string;
+  formulaId?: string;
+  conditionsAccepted?: boolean;
 }
 
 // ============================================================================
@@ -83,6 +86,9 @@ function validateEstimationData(data: unknown): { valid: boolean; errors?: strin
       marques: (estimationData.marques as string).trim(),
       description: estimationData.description ? (estimationData.description as string).trim() : undefined,
       estimation: estimationData.estimation as number,
+      address: estimationData.address ? (estimationData.address as string).trim() : undefined,
+      formulaId: estimationData.formulaId ? (estimationData.formulaId as string).trim() : undefined,
+      conditionsAccepted: Boolean(estimationData.conditionsAccepted),
     },
   };
 }
@@ -98,21 +104,28 @@ async function saveEstimationRequest(data: EstimationRequest) {
     { cookies }
   );
 
+  // Estimation requests now require an authenticated client (requests.client_id is NOT NULL).
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, error: { message: 'Authentication required' } as any };
+  }
+
   const { error } = await supabase
-    .from('estimation_requests')
+    .from('requests')
     .insert([
       {
-        nom: data.nom,
-        prenom: data.prenom,
-        email: data.email,
-        telephone: data.telephone,
-        nombre_vetements: data.nombreVetements,
-        valeur_moyenne: data.valeurMoyenne,
-        marques: data.marques,
-        description: data.description || null,
-        estimation: data.estimation,
+        client_id: user.id,
+        request_type: 'estimation',
+        message: data.description || null,
         status: 'pending',
-        created_at: new Date().toISOString(),
+        address: data.address || null,
+        formula_id: data.formulaId || null,
+        conditions_accepted: data.conditionsAccepted,
+        number_of_items: data.nombreVetements,
+        average_value: data.valeurMoyenne,
+        brands: data.marques,
+        description: data.description || null,
+        estimate: data.estimation,
       },
     ]);
 

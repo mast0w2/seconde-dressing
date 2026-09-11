@@ -27,14 +27,14 @@ export async function GET(request: Request) {
 
       if (profile) {
         // Profile exists, check if it's complete
-        if (!profile.nom || !profile.prenom || !profile.role) {
+        if (!profile.last_name || !profile.first_name || !profile.role) {
           // Profile incomplete, redirect to signup to complete
           return NextResponse.redirect(new URL("/signup", requestUrl.origin).toString());
         }
-        
+
         // Profile is complete, redirect based on role
-        if (profile.role === "vendeur") {
-          return NextResponse.redirect(new URL("/vendeur", requestUrl.origin).toString());
+        if (profile.role === "seller") {
+          return NextResponse.redirect(new URL("/dashboard/vendeur", requestUrl.origin).toString());
         } else {
           // Default to home for clients
           return NextResponse.redirect(new URL("/", requestUrl.origin).toString());

@@ -12,14 +12,14 @@ import { cookies } from 'next/headers';
 
 interface NotificationRequest {
   type: NotificationType;
-  vendeuseEmail?: string;
+  sellerEmail?: string;
   clientEmail?: string;
-  clientNom?: string;
-  vendeuseNom?: string;
+  clientName?: string;
+  sellerName?: string;
   email?: string;
   nom?: string;
   date: string;
-  heure: string;
+  time: string;
 }
 
 type NotificationType = 
@@ -52,7 +52,7 @@ function validateRequest(body: unknown): { valid: boolean; error?: string; data?
     return { valid: false, error: 'Date is required' };
   }
 
-  if (!data.heure || typeof data.heure !== 'string') {
+  if (!data.time || typeof data.time !== 'string') {
     return { valid: false, error: 'Heure is required' };
   }
 
@@ -108,30 +108,30 @@ async function handleNotification(
 ): Promise<{ success: boolean; error?: string }> {
   const handlers: Record<NotificationType, () => Promise<{ success: boolean }>> = {
     nouvelle_demande: async () => {
-      if (!data.vendeuseEmail || !data.clientNom) {
+      if (!data.sellerEmail || !data.clientName) {
         return { success: false };
       }
       if (!process.env.BREVO_API_KEY) return { success: true };
       const result = await notificationService.sendNewAppointmentRequest({
-        to: data.vendeuseEmail,
-        vendeuseNom: data.vendeuseNom || '',
-        clientNom: data.clientNom,
+        to: data.sellerEmail,
+        sellerName: data.sellerName || '',
+        clientName: data.clientName,
         date: data.date,
-        heure: data.heure,
+        time: data.time,
       });
       return { success: result.success };
     },
 
     rendez_vous_confirmation: async () => {
-      if (!data.clientEmail || !data.vendeuseNom) {
+      if (!data.clientEmail || !data.sellerName) {
         return { success: false };
       }
       if (!process.env.BREVO_API_KEY) return { success: true };
       const result = await notificationService.sendAppointmentConfirmation({
         to: data.clientEmail,
-        vendeuseNom: data.vendeuseNom,
+        sellerName: data.sellerName,
         date: data.date,
-        heure: data.heure,
+        time: data.time,
       });
       return { success: result.success };
     },
@@ -143,38 +143,38 @@ async function handleNotification(
       if (!process.env.BREVO_API_KEY) return { success: true };
       const result = await notificationService.sendAppointmentCancellation({
         to: data.email,
-        vendeuseNom: data.vendeuseNom || '',
-        clientNom: data.nom,
+        sellerName: data.sellerName || '',
+        clientName: data.nom,
         date: data.date,
-        heure: data.heure,
+        time: data.time,
       });
       return { success: result.success };
     },
 
     demande_acceptee: async () => {
-      if (!data.clientEmail || !data.vendeuseNom) {
+      if (!data.clientEmail || !data.sellerName) {
         return { success: false };
       }
       if (!process.env.BREVO_API_KEY) return { success: true };
       const result = await notificationService.sendAppointmentAccepted({
         to: data.clientEmail,
-        vendeuseNom: data.vendeuseNom,
+        sellerName: data.sellerName,
         date: data.date,
-        heure: data.heure,
+        time: data.time,
       });
       return { success: result.success };
     },
 
     demande_refusee: async () => {
-      if (!data.clientEmail || !data.vendeuseNom) {
+      if (!data.clientEmail || !data.sellerName) {
         return { success: false };
       }
       if (!process.env.BREVO_API_KEY) return { success: true };
       const result = await notificationService.sendAppointmentRejected({
         to: data.clientEmail,
-        vendeuseNom: data.vendeuseNom,
+        sellerName: data.sellerName,
         date: data.date,
-        heure: data.heure,
+        time: data.time,
       });
       return { success: result.success };
     },

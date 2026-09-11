@@ -14,7 +14,7 @@ export async function GET() {
   }
 
   const { data, error } = await supabase
-    .from("disponibilites")
+    .from("availabilities")
     .select("*")
     .eq("user_id", user.id)
     .order("date", { ascending: true });
@@ -39,10 +39,17 @@ export async function POST(request: Request) {
 
   const body = await request.json();
 
-  const { error } = await supabase.from("disponibilites").insert([{
-    ...body,
-    user_id: user.id,
-  }]);
+  const { error } = await supabase.from("availabilities").insert([
+    {
+      user_id: user.id,
+      date: body.date,
+      start_time: body.start_time,
+      end_time: body.end_time,
+      status: body.status || "available",
+      is_recurring: body.is_recurring ?? false,
+      recurrence_day: body.recurrence_day || null,
+    },
+  ]);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

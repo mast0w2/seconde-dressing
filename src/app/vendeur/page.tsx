@@ -38,18 +38,18 @@ export default function VendeurPage() {
         return;
       }
 
-      if (profile.role !== "vendeur") {
+      if (profile.role !== "seller") {
         router.push("/");
         return;
       }
 
       setProfile(profile);
 
-      // Get demandes count for this vendeur
+      // Get requests count for this seller
       const { count, error: countError } = await supabase
-        .from("demandes")
+        .from("requests")
         .select("*", { count: "exact", head: true })
-        .eq("vendeur_id", currentUser.id);
+        .eq("seller_id", currentUser.id);
 
       if (!countError) {
         setDemandesCount(count || 0);
@@ -91,7 +91,7 @@ export default function VendeurPage() {
               Espace Vendeur
             </h1>
             <p className="text-lg sm:text-xl text-gris-moyen mb-8 max-w-2xl mx-auto">
-              Bienvenue {profile?.prenom} ! Gagnez de l'argent en aidant les clients à vendre leurs vêtements.
+              Bienvenue {profile?.first_name} ! Gagnez de l'argent en aidant les clients à vendre leurs vêtements.
             </p>
 
             {/* Quick Stats */}
@@ -141,7 +141,7 @@ export default function VendeurPage() {
                 asChild
                 className="bg-noir hover:bg-gris-fonce text-blanc px-8 py-3 rounded-none text-sm sm:text-lg font-500 transition-all duration-300 tracking-widest"
               >
-                <Link href="/dashboard">
+                <Link href="/dashboard/vendeur">
                   VOIR LES DEMANDES
                 </Link>
               </Button>
@@ -310,7 +310,7 @@ export default function VendeurPage() {
             asChild
             className="bg-noir hover:bg-gris-fonce text-blanc px-8 py-3 rounded-none text-sm sm:text-lg font-500 transition-all duration-300 tracking-widest"
           >
-            <Link href="/dashboard">
+            <Link href="/dashboard/vendeur">
               VOIR MES DEMANDES <ChevronRight className="h-4 w-4 ml-2 inline" />
             </Link>
           </Button>

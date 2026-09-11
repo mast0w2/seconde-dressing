@@ -8,27 +8,26 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
-import { Select } from "../ui/select";
 import { cn } from "@/lib/utils";
 import { useToast } from "../ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
 import { Profile, Role } from "@/types/database";
 
 const clientSchema = z.object({
-  nom: z.string().min(2, "Le nom est requis"),
-  prenom: z.string().min(2, "Le prénom est requis"),
-  telephone: z.string().optional(),
+  last_name: z.string().min(2, "Le nom est requis"),
+  first_name: z.string().min(2, "Le prénom est requis"),
+  phone: z.string().optional(),
   bio: z.string().optional(),
 });
 
-const vendeurSchema = z.object({
-  nom: z.string().min(2, "Le nom est requis"),
-  prenom: z.string().min(2, "Le prénom est requis"),
-  telephone: z.string().optional(),
+const sellerSchema = z.object({
+  last_name: z.string().min(2, "Le nom est requis"),
+  first_name: z.string().min(2, "Le prénom est requis"),
+  phone: z.string().optional(),
   bio: z.string().optional(),
-  specialisation: z.string().min(2, "La spécialisation est requise"),
-  tarif_horaire: z.coerce.number().min(0, "Le tarif doit être positif"),
-  annees_experience: z.coerce.number().min(0, "L'expérience doit être positive"),
+  specialization: z.string().min(2, "La spécialisation est requise"),
+  hourly_rate: z.coerce.number().min(0, "Le tarif doit être positif"),
+  years_experience: z.coerce.number().min(0, "L'expérience doit être positive"),
 });
 
 interface ProfileFormProps {
@@ -41,21 +40,21 @@ export function ProfileForm({ profile, role, onSuccess }: ProfileFormProps) {
   const { toast } = useToast();
   const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
-  const schema = role === "vendeur" ? vendeurSchema : clientSchema;
+  const schema = role === "seller" ? sellerSchema : clientSchema;
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
-      nom: profile?.nom || "",
-      prenom: profile?.prenom || "",
-      telephone: profile?.telephone || "",
+      last_name: profile?.last_name || "",
+      first_name: profile?.first_name || "",
+      phone: profile?.phone || "",
       bio: profile?.bio || "",
-      ...(role === "vendeur" && {
-        specialisation: profile?.specialisation || "",
-        tarif_horaire: profile?.tarif_horaire || 0,
-        annees_experience: profile?.annees_experience || 0,
+      ...(role === "seller" && {
+        specialization: profile?.specialization || "",
+        hourly_rate: profile?.hourly_rate || 0,
+        years_experience: profile?.years_experience || 0,
       }),
-    },
+    } as any,
   });
 
   const { handleSubmit, register, formState } = form;
@@ -76,21 +75,22 @@ export function ProfileForm({ profile, role, onSuccess }: ProfileFormProps) {
         return;
       }
 
+      const base = data as z.infer<typeof clientSchema>;
       const profileData: any = {
         id: user.id,
-        nom: data.nom,
-        prenom: data.prenom,
+        last_name: base.last_name,
+        first_name: base.first_name,
         email: user.email,
-        telephone: data.telephone || null,
-        bio: data.bio || null,
+        phone: base.phone || null,
+        bio: base.bio || null,
         role,
       };
 
-      if (role === "vendeur" && "specialisation" in data) {
-        const vendeurData = data as z.infer<typeof vendeurSchema>;
-        profileData.specialisation = vendeurData.specialisation;
-        profileData.tarif_horaire = vendeurData.tarif_horaire;
-        profileData.annees_experience = vendeurData.annees_experience;
+      if (role === "seller" && "specialization" in data) {
+        const sellerData = data as z.infer<typeof sellerSchema>;
+        profileData.specialization = sellerData.specialization;
+        profileData.hourly_rate = sellerData.hourly_rate;
+        profileData.years_experience = sellerData.years_experience;
       }
 
       const { error } = await supabase
@@ -120,40 +120,40 @@ export function ProfileForm({ profile, role, onSuccess }: ProfileFormProps) {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="prenom">Prénom</Label>
+          <Label htmlFor="first_name">Prénom</Label>
           <Input
-            id="prenom"
-            {...register("prenom")}
-            className={cn(errors.prenom && "border-destructive")}
+            id="first_name"
+            {...register("first_name")}
+            className={cn(errors.first_name && "border-destructive")}
           />
-          {errors.prenom && (
-            <p className="text-sm text-destructive">{errors.prenom.message}</p>
+          {errors.first_name && (
+            <p className="text-sm text-destructive">{errors.first_name.message}</p>
           )}
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="nom">Nom</Label>
+          <Label htmlFor="last_name">Nom</Label>
           <Input
-            id="nom"
-            {...register("nom")}
-            className={cn(errors.nom && "border-destructive")}
+            id="last_name"
+            {...register("last_name")}
+            className={cn(errors.last_name && "border-destructive")}
           />
-          {errors.nom && (
-            <p className="text-sm text-destructive">{errors.nom.message}</p>
+          {errors.last_name && (
+            <p className="text-sm text-destructive">{errors.last_name.message}</p>
           )}
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="telephone">Téléphone</Label>
+        <Label htmlFor="phone">Téléphone</Label>
         <Input
-          id="telephone"
+          id="phone"
           type="tel"
-          {...register("telephone")}
-          className={cn(errors.telephone && "border-destructive")}
+          {...register("phone")}
+          className={cn(errors.phone && "border-destructive")}
         />
-        {errors.telephone && (
-          <p className="text-sm text-destructive">{errors.telephone.message}</p>
+        {errors.phone && (
+          <p className="text-sm text-destructive">{errors.phone.message}</p>
         )}
       </div>
 
@@ -170,49 +170,49 @@ export function ProfileForm({ profile, role, onSuccess }: ProfileFormProps) {
         )}
       </div>
 
-      {role === "vendeur" && (
+      {role === "seller" && (
         <>
           <div className="space-y-2">
-            <Label htmlFor="specialisation">Spécialisation</Label>
+            <Label htmlFor="specialization">Spécialisation</Label>
             <Input
-              id="specialisation"
-              {...register("specialisation" as any)}
-              className={cn((errors as any).specialisation && "border-destructive")}
+              id="specialization"
+              {...register("specialization" as any)}
+              className={cn((errors as any).specialization && "border-destructive")}
             />
-            {(errors as any).specialisation && (
+            {(errors as any).specialization && (
               <p className="text-sm text-destructive">
-                {(errors as any).specialisation.message}
+                {(errors as any).specialization.message}
               </p>
             )}
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="tarif_horaire">Tarif horaire (€)</Label>
+              <Label htmlFor="hourly_rate">Tarif horaire (€)</Label>
               <Input
-                id="tarif_horaire"
+                id="hourly_rate"
                 type="number"
-                {...register("tarif_horaire" as any)}
-                className={cn((errors as any).tarif_horaire && "border-destructive")}
+                {...register("hourly_rate" as any)}
+                className={cn((errors as any).hourly_rate && "border-destructive")}
               />
-              {(errors as any).tarif_horaire && (
+              {(errors as any).hourly_rate && (
                 <p className="text-sm text-destructive">
-                  {(errors as any).tarif_horaire.message}
+                  {(errors as any).hourly_rate.message}
                 </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="annees_experience">Années d&apos;expérience</Label>
+              <Label htmlFor="years_experience">Années d&apos;expérience</Label>
               <Input
-                id="annees_experience"
+                id="years_experience"
                 type="number"
-                {...register("annees_experience" as any)}
-                className={cn((errors as any).annees_experience && "border-destructive")}
+                {...register("years_experience" as any)}
+                className={cn((errors as any).years_experience && "border-destructive")}
               />
-              {(errors as any).annees_experience && (
+              {(errors as any).years_experience && (
                 <p className="text-sm text-destructive">
-                  {(errors as any).annees_experience.message}
+                  {(errors as any).years_experience.message}
                 </p>
               )}
             </div>

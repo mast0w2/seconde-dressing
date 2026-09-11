@@ -64,7 +64,7 @@ export function Navbar() {
   };
 
   const isClient = profile?.role === "client";
-  const isVendeur = profile?.role === "vendeur";
+  const isSeller = profile?.role === "seller";
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-blanc/95 backdrop-blur border-b border-noir/10">
@@ -102,7 +102,7 @@ export function Navbar() {
                     <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
                       <AvatarImage src={profile?.photo_url || undefined} />
                       <AvatarFallback className="bg-noir text-blanc text-xs font-bold">
-                        {profile?.prenom ? profile.prenom.charAt(0).toUpperCase() : 'U'}
+                        {profile?.first_name ? profile.first_name.charAt(0).toUpperCase() : 'U'}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
@@ -110,7 +110,7 @@ export function Navbar() {
                 <DropdownMenuContent className="w-52 sm:w-56 bg-blanc border border-noir/10" align="end">
                   <DropdownMenuLabel className="font-normal text-noir">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium">{profile?.prenom} {profile?.nom}</p>
+                      <p className="text-sm font-medium">{profile?.first_name} {profile?.last_name}</p>
                       <p className="text-xs text-gris-moyen">{profile?.email}</p>
                     </div>
                   </DropdownMenuLabel>
@@ -137,7 +137,7 @@ export function Navbar() {
                       </Link>
                     </DropdownMenuItem>
                   )}
-                  {isVendeur && (
+                  {isSeller && (
                     <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
                       <Link href="/vendeur">
                         Espace Vendeur

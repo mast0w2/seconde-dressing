@@ -1,3 +1,6 @@
+// src/app/api/rendez-vous/route.ts
+// Appointments are now stored in the `requests` table (request_type = 'appointment').
+// This route is kept for backward compatibility but delegates to `requests`.
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
@@ -14,10 +17,11 @@ export async function GET() {
   }
 
   const { data, error } = await supabase
-    .from("rendez_vous")
+    .from("requests")
     .select("*")
-    .or(`client_id.eq.${user.id},vendeuse_id.eq.${user.id}`)
-    .order("cree_le", { ascending: false });
+    .eq("request_type", "appointment")
+    .or(`client_id.eq.${user.id},seller_id.eq.${user.id}`)
+    .order("created_at", { ascending: false });
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -39,37 +43,23 @@ export async function POST(request: Request) {
 
   const body = await request.json();
 
-  // Check if disponibilite exists and is available
-  const { data: dispo, error: dispoError } = await supabase
-    .from("disponibilites")
-    .select("*")
-    .eq("id", body.disponibilite_id)
-    .eq("statut", "disponible")
-    .single();
-
-  if (dispoError || !dispo) {
-    return NextResponse.json(
-      { error: "Disponibilite not available" },
-      { status: 400 }
-    );
-  }
-
-  const { error } = await supabase.from("rendez_vous").insert([{
-    client_id: user.id,
-    vendeuse_id: dispo.user_id,
-    disponibilite_id: body.disponibilite_id,
-    statut: "en_attente",
-  }]);
+  const { error } = await supabase.from("requests").insert([
+    {
+      client_id: user.id,
+      request_type: "appointment",
+      message: body.message || null,
+      proposed_date: body.proposed_date || null,
+      proposed_time: body.proposed_time || null,
+      address: body.address || null,
+      formula_id: body.formula_id || null,
+      conditions_accepted: body.conditions_accepted ?? false,
+      status: "pending",
+    },
+  ]);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-
-  // Update disponibilite statut to reserve
-  await supabase
-    .from("disponibilites")
-    .update({ statut: "reserve" })
-    .eq("id", body.disponibilite_id);
 
   return NextResponse.json({ success: true });
 }
