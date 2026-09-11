@@ -81,6 +81,61 @@ export default function ConceptPage() {
         </div>
       </section>
 
+      {/* Formulas Section */}
+      <section className="py-12 sm:py-16">
+        <div className="container">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-10">Nos formules</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <Card className="border-noir/20">
+                <CardHeader>
+                  <div className="flex items-baseline justify-between">
+                    <CardTitle className="text-lg">Dressing déjà trié</CardTitle>
+                    <span className="text-lg font-semibold text-noir">10 €</span>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gris-moyen">
+                    Vos vêtements sont déjà mis de côté, et vous remplirez vous-même l'inventaire de vos pièces avant notre passage. On vient simplement les récupérer.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-noir/20">
+                <CardHeader>
+                  <div className="flex items-baseline justify-between">
+                    <CardTitle className="text-lg">Tri sur place</CardTitle>
+                    <span className="text-lg font-semibold text-noir">30 €</span>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gris-moyen">
+                    Vous avez mis de côté ce dont vous ne voulez plus, mais vous ne savez pas ce qui a de la valeur. On passe 30 min à 1 h chez vous pour trier et repérer les pièces qui se revendront.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-noir/20">
+                <CardHeader>
+                  <div className="flex items-baseline justify-between">
+                    <CardTitle className="text-lg">Tri & conseil</CardTitle>
+                    <span className="text-lg font-semibold text-noir">50 €</span>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gris-moyen">
+                    Rendez-vous d'1 h à 1 h 30 : on trie avec vous et on vous conseille — ce qui vaut le coup d'être vendu, ce qui vous va le mieux, ce que vous avez intérêt à garder.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+            <p className="text-center text-gris-moyen mt-6">
+              Le prix du rendez-vous dépend de la formule choisie. Il est le seul frais facturé : pas de coût caché.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Business Model Section */}
       <section className="py-12 sm:py-16 bg-gris-tres-clair">
         <div className="container">
@@ -255,57 +310,6 @@ export default function ConceptPage() {
                         </CardContent>
                       </Card>
                     </div>
-                  </div>
-
-                  {/* Formulas */}
-                  <div>
-                    <h3 className="text-2xl mb-6 text-center">Nos formules</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                      <Card className="border-noir/20">
-                        <CardHeader>
-                          <div className="flex items-baseline justify-between">
-                            <CardTitle className="text-lg">Dressing déjà trié</CardTitle>
-                            <span className="text-lg font-semibold text-noir">10 €</span>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-sm text-gris-moyen">
-                            Vos vêtements sont déjà mis de côté, et vous remplirez vous-même l'inventaire de vos pièces avant notre passage. On vient simplement les récupérer.
-                          </p>
-                        </CardContent>
-                      </Card>
-
-                      <Card className="border-noir/20">
-                        <CardHeader>
-                          <div className="flex items-baseline justify-between">
-                            <CardTitle className="text-lg">Tri sur place</CardTitle>
-                            <span className="text-lg font-semibold text-noir">30 €</span>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-sm text-gris-moyen">
-                            Vous avez mis de côté ce dont vous ne voulez plus, mais vous ne savez pas ce qui a de la valeur. On passe 30 min à 1 h chez vous pour trier et repérer les pièces qui se revendront.
-                          </p>
-                        </CardContent>
-                      </Card>
-
-                      <Card className="border-noir/20">
-                        <CardHeader>
-                          <div className="flex items-baseline justify-between">
-                            <CardTitle className="text-lg">Tri & conseil</CardTitle>
-                            <span className="text-lg font-semibold text-noir">50 €</span>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-sm text-gris-moyen">
-                            Rendez-vous d'1 h à 1 h 30 : on trie avec vous et on vous conseille — ce qui vaut le coup d'être vendu, ce qui vous va le mieux, ce que vous avez intérêt à garder.
-                          </p>
-                        </CardContent>
-                      </Card>
-                    </div>
-                    <p className="text-center text-gris-moyen mt-6">
-                      Le prix du rendez-vous dépend de la formule choisie. Il est le seul frais facturé : pas de coût caché.
-                    </p>
                   </div>
                 </div>
               </CardContent>
