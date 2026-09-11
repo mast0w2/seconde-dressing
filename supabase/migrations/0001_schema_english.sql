@@ -24,34 +24,45 @@ DROP TABLE IF EXISTS profiles CASCADE;
 DROP TYPE IF EXISTS statut_demande CASCADE;
 DROP TYPE IF EXISTS statut_disponibilite CASCADE;
 DROP TYPE IF EXISTS statut_rendez_vous CASCADE;
-DROP TYPE IF EXISTS contact_message_status CASCADE;
 DROP TYPE IF EXISTS estimation_status CASCADE;
 
 -- Drop legacy trigger function if present
 DROP FUNCTION IF EXISTS update_updated_at() CASCADE;
 
 -- ============================================================
--- ENUMS
+-- ENUMS (idempotent: create only if missing)
 -- ============================================================
-CREATE TYPE request_status AS ENUM (
-    'pending',
-    'accepted',
-    'refused',
-    'items_collected',
-    'items_on_sale',
-    'completed'
-);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'request_status') THEN
+        CREATE TYPE request_status AS ENUM (
+            'pending',
+            'accepted',
+            'refused',
+            'items_collected',
+            'items_on_sale',
+            'completed'
+        );
+    END IF;
+END $$;
 
-CREATE TYPE availability_status AS ENUM (
-    'available',
-    'booked'
-);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'availability_status') THEN
+        CREATE TYPE availability_status AS ENUM (
+            'available',
+            'booked'
+        );
+    END IF;
+END $$;
 
-CREATE TYPE contact_message_status AS ENUM (
-    'pending',
-    'read',
-    'resolved'
-);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'contact_message_status') THEN
+        CREATE TYPE contact_message_status AS ENUM (
+            'pending',
+            'read',
+            'resolved'
+        );
+    END IF;
+END $$;
 
 -- ============================================================
 -- profiles (users)
@@ -196,10 +207,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON profiles;
 CREATE TRIGGER update_profiles_updated_at
     BEFORE UPDATE ON profiles
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS update_requests_updated_at ON requests;
 CREATE TRIGGER update_requests_updated_at
     BEFORE UPDATE ON requests
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
