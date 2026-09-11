@@ -772,7 +772,7 @@ export function ProgressiveEstimationForm() {
         {/* Confirmation : la demande a bien été envoyée (compte optionnel) */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sauge text-2xl">
+            <span className="text-2xl" aria-hidden="true">
               ✅
             </span>
             <h3 className="font-serif text-3xl text-noir">Demande envoyée</h3>
