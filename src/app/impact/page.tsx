@@ -156,17 +156,13 @@ export default function ImpactPage() {
                       <strong>utiliser chaque produit jusqu'au bout de son cycle de vie</strong>.
                     </p>
                     <p className="text-base sm:text-lg text-gris-moyen leading-relaxed mb-8">
-                      L'enjeu n'est pas de se contenter de vêtements à faible impact environnemental, 
-                      mais de <strong>maximiser l'utilisation de chaque pièce</strong> déjà produite. 
                       Un vêtement porté jusqu'à usure complète, quel que soit son impact initial, 
                       voit son empreinte environnementale globale considérablement réduite.
                     </p>
                     
                     <div className="bg-creme p-6 sm:p-8 rounded-lg border border-noir/10">
                       <p className="text-base sm:text-lg text-gris-moyen text-center mb-6">
-                        Si les vêtements étaient utilisés jusqu'à la fin de leur durée de vie 
-                        au lieu d'être jetés après seulement un quart de celle-ci, 
-                        <strong>l'impact environnemental de l'industrie textile pourrait être divisé par 4</strong>.
+                        D'après la WRAP (Waste and Resources Action Programme), allonger la durée de vie des vêtements est le plus grand levier identifié pour réduire l'empreinte carbone, eau et déchets du textile : prolonger la vie d'un vêtement de 9 mois supplémentaires suffit à les réduire de 20 à 30 %.
                       </p>
                     </div>
                   </div>
@@ -339,6 +335,9 @@ export default function ImpactPage() {
                 <li>Données de l'Agence européenne pour l'environnement (AEE)</li>
                 <li>Études de WRAP (Waste and Resources Action Programme)</li>
               </ul>
+              <p>
+                La WRAP (Waste and Resources Action Programme) est une organisation britannique à but non lucratif créée en 2000, qui travaille avec les gouvernements, les entreprises et les citoyens pour accélérer la transition vers une économie circulaire et la réduction des déchets. Elle est une source de référence sur les questions de gaspillage des ressources, notamment dans le textile.
+              </p>
               <p>
                 Nous nous engageons à maintenir nos informations à jour et basées sur des données 
                 scientifiques vérifiées.
