@@ -150,12 +150,8 @@ function ProfileForm() {
         street_address: data.street_address || null,
       };
 
-      // Preserve existing fields that shouldn't be modified here
       if (profile) {
         profileData.photo_url = profile.photo_url;
-        profileData.specialization = profile.specialization;
-        profileData.hourly_rate = profile.hourly_rate;
-        profileData.years_experience = profile.years_experience;
         profileData.role = profile.role;
       }
 
@@ -527,38 +523,6 @@ function ProfileForm() {
           </CardContent>
         </Card>
 
-        {/* Seller specific info */}
-        {profile.role === "seller" && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Informations professionnelles</CardTitle>
-              <CardDescription>
-                Vos informations en tant que vendeuse
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Spécialisation</Label>
-                    <p className="text-lg">{profile.specialization || "Non renseigné"}</p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Années d'expérience</Label>
-                    <p className="text-lg">{profile.years_experience || "Non renseigné"}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Tarif horaire</Label>
-                  <p className="text-lg">{profile.hourly_rate ? `€${profile.hourly_rate}/h` : "Non renseigné"}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
     </div>
   );
