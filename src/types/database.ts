@@ -224,6 +224,26 @@ export interface RequestWithRelations extends Request {
 }
 
 // ============================================================================
+// request_refusals table (per-seller refusal tracking)
+// A refusal does not change the request global status, so another seller can
+// still accept it. Each refusal is stored here so the refusing seller stops
+// seeing the request as "nouvelle".
+// ============================================================================
+export interface RequestRefusal {
+  id: string;
+  request_id: string;
+  seller_id: string;
+  created_at: string;
+}
+
+export interface InsertRequestRefusal {
+  id?: string;
+  request_id: string;
+  seller_id: string;
+  created_at?: string;
+}
+
+// ============================================================================
 // request_items table (clothing items photographed for a request)
 // ============================================================================
 export interface RequestItem {

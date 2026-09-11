@@ -63,6 +63,15 @@ export const NEXT_STATUS_LABEL: Record<RequestStatus, string> = {
   completed: "",
 };
 
+// Statuses a seller can set on a request they accepted, in lifecycle order.
+// The seller can pick any of them at any time, allowing them to revert.
+export const SELLER_STATUS_OPTIONS: RequestStatus[] = [
+  "accepted",
+  "items_collected",
+  "items_on_sale",
+  "completed",
+];
+
 export type RequestFilterTab =
   | "all"
   | "pending"

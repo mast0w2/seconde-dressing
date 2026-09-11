@@ -3,18 +3,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
 import { isProfileComplete } from "@/lib/profile";
-import type { Request, Profile, Formula } from "@/types/database";
-import {
-  requestStatusConfig,
-  NEXT_STATUS,
-  NEXT_STATUS_LABEL,
-} from "@/lib/request-status";
+import type { Request, Profile, Formula, RequestStatus } from "@/types/database";
+import { requestStatusConfig, SELLER_STATUS_OPTIONS } from "@/lib/request-status";
 import { ArrowLeft } from "lucide-react";
 import { RequestItemsUploader } from "@/components/RequestItemsUploader";
 import { RequestAccordion } from "@/components/RequestAccordion";
@@ -31,23 +27,49 @@ export default function SellerDashboardPage() {
   const [user, setUser] = useState<{ id: string } | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [requests, setRequests] = useState<RequestWithRelations[]>([]);
+  // request ids the current seller refused (still open for other sellers)
+  const [refusedIds, setRefusedIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchRequests = useCallback(async (userId: string) => {
-    const { data, error } = await supabase
-      .from("requests")
-      .select(`
-        *,
-        client:client_id (id, first_name, last_name, email, phone),
-        formula:formula_id (id, slug, label, price)
-      `)
-      .or(`and(client_id.not.is.null,seller_id.is.null),seller_id.eq.${userId}`)
-      .order("created_at", { ascending: false });
+    // Accepted requests (assigned to this seller, any status) + open requests
+    // (pending). Refusals are tracked per seller so a refused request stays
+    // open for others but is hidden from this seller's "nouvelles".
+    const [acceptedRes, openRes, refusRes] = await Promise.all([
+      supabase
+        .from("requests")
+        .select(`*, client:client_id (id, first_name, last_name, email, phone), formula:formula_id (id, slug, label, price)`)
+        .eq("seller_id", userId)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("requests")
+        .select(`*, client:client_id (id, first_name, last_name, email, phone), formula:formula_id (id, slug, label, price)`)
+        .eq("status", "pending")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("request_refusals")
+        .select("request_id")
+        .eq("seller_id", userId),
+    ]);
 
-    if (error) {
-      throw error;
-    }
-    setRequests((data || []) as unknown as RequestWithRelations[]);
+    if (acceptedRes.error) throw acceptedRes.error;
+    if (openRes.error) throw openRes.error;
+    if (refusRes.error) throw refusRes.error;
+
+    setRefusedIds(new Set<string>((refusRes.data || []).map((r) => r.request_id)));
+
+    // Merge, dedupe by id, keep newest first
+    const merged: RequestWithRelations[] = [
+      ...(acceptedRes.data || []),
+      ...(openRes.data || []),
+    ] as unknown as RequestWithRelations[];
+    const seen = new Set<string>();
+    const unique = merged.filter((r) => {
+      if (seen.has(r.id)) return false;
+      seen.add(r.id);
+      return true;
+    });
+    setRequests(unique);
   }, [supabase]);
 
   const fetchData = useCallback(async () => {
@@ -99,6 +121,8 @@ export default function SellerDashboardPage() {
     fetchData();
   }, [fetchData]);
 
+  // Seller accepts a request: it becomes theirs and leaves the open pool for
+  // everyone else. The first seller to accept wins.
   const handleAccept = async (requestId: string) => {
     if (!user) return;
     try {
@@ -111,7 +135,9 @@ export default function SellerDashboardPage() {
           confirmed_time: new Date().toTimeString().slice(0, 8),
           updated_at: new Date().toISOString(),
         })
-        .eq("id", requestId);
+        .eq("id", requestId)
+        .eq("seller_id", null)
+        .eq("status", "pending");
 
       if (error) throw error;
 
@@ -126,22 +152,25 @@ export default function SellerDashboardPage() {
     }
   };
 
+  // Seller refuses a request: the global status is NOT changed, so another
+  // seller can still accept it. We only record the refusal for this seller.
   const handleRefuse = async (requestId: string) => {
     if (!user) return;
     try {
       const { error } = await supabase
-        .from("requests")
-        .update({
-          status: "refused",
-          seller_id: null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", requestId);
+        .from("request_refusals")
+        .upsert(
+          { request_id: requestId, seller_id: user.id },
+          { onConflict: "request_id,seller_id" }
+        );
 
       if (error) throw error;
 
       await fetchRequests(user.id);
-      toast({ title: "Demande refusée", description: "Vous avez refusé cette demande." });
+      toast({
+        title: "Demande refusée",
+        description: "Cette demande reste disponible pour les autres vendeuses.",
+      });
     } catch (error: any) {
       toast({
         title: "Erreur",
@@ -151,26 +180,27 @@ export default function SellerDashboardPage() {
     }
   };
 
-  const handleAdvanceStatus = async (requestId: string) => {
+  // Update the status of a request the seller accepted. Works for any of the
+  // post-acceptance statuses, so the seller can move forward or revert.
+  const handleUpdateStatus = async (requestId: string, newStatus: RequestStatus) => {
     if (!user) return;
-    const current = requests.find((r) => r.id === requestId);
-    if (!current) return;
-    const next = NEXT_STATUS[current.status];
-    if (!next) return;
-
     try {
       const { error } = await supabase
         .from("requests")
         .update({
-          status: next,
+          status: newStatus,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", requestId);
+        .eq("id", requestId)
+        .eq("seller_id", user.id);
 
       if (error) throw error;
 
       await fetchRequests(user.id);
-      toast({ title: "Statut mis à jour", description: `La demande est passée en "${requestStatusConfig[next].label}".` });
+      toast({
+        title: "Statut mis à jour",
+        description: `La demande est passée en "${requestStatusConfig[newStatus].label}".`,
+      });
     } catch (error: any) {
       toast({
         title: "Erreur",
@@ -210,14 +240,14 @@ export default function SellerDashboardPage() {
     );
   };
 
-  const renderRequestDetails = (request: RequestWithRelations) => {
+  const renderRequestDetails = (
+    request: RequestWithRelations,
+    tab: "new" | "accepted" | "refused"
+  ) => {
     const statusInfo = requestStatusConfig[request.status];
     const client = request.client;
     const formula = request.formula;
     const isAssignedToMe = request.seller_id === user?.id;
-    const canAccept = !request.seller_id;
-    const canRefuse = !request.seller_id;
-    const canAdvance = isAssignedToMe && NEXT_STATUS[request.status];
     const clientDisplayName = client
       ? `${client.first_name} ${client.last_name}`.trim()
       : `${request.client_first_name ?? ""} ${request.client_last_name ?? ""}`.trim();
@@ -238,7 +268,7 @@ export default function SellerDashboardPage() {
               {clientPhone ? ` · ${clientPhone}` : ""}
             </div>
           )}
-          {!isAssignedToMe && (
+          {!isAssignedToMe && tab !== "refused" && (
             <div className="text-sm text-gris-moyen mb-2 italic">
               Coordonnées visibles après acceptation de la demande
             </div>
@@ -266,35 +296,52 @@ export default function SellerDashboardPage() {
           <RequestItemsUploader requestId={request.id} />
         </div>
 
-        <div className="flex flex-col gap-2 shrink-0">
-          {canAccept && (
-            <Button
-              size="sm"
-              onClick={() => handleAccept(request.id)}
-              className="h-8 px-3"
-            >
-              Accepter
-            </Button>
+        <div className="flex flex-col gap-2 shrink-0 min-w-[180px]">
+          {tab === "new" && (
+            <>
+              <Button
+                size="sm"
+                onClick={() => handleAccept(request.id)}
+                className="h-8 px-3"
+              >
+                Accepter
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleRefuse(request.id)}
+                className="h-8 px-3"
+              >
+                Refuser
+              </Button>
+            </>
           )}
-          {canRefuse && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => handleRefuse(request.id)}
-              className="h-8 px-3"
-            >
-              Refuser
-            </Button>
+
+          {tab === "accepted" && (
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-medium text-gris-moyen mb-1">
+                Statut de la commande
+              </label>
+              <Select
+                value={request.status}
+                onChange={(e) =>
+                  handleUpdateStatus(request.id, e.target.value as RequestStatus)
+                }
+                className="h-9"
+              >
+                {SELLER_STATUS_OPTIONS.map((status) => (
+                  <option key={status} value={status}>
+                    {requestStatusConfig[status].label}
+                  </option>
+                ))}
+              </Select>
+            </div>
           )}
-          {canAdvance && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => handleAdvanceStatus(request.id)}
-              className="h-8 px-3 text-xs"
-            >
-              {NEXT_STATUS_LABEL[request.status]}
-            </Button>
+
+          {tab === "refused" && (
+            <div className="text-xs text-gris-moyen italic">
+              Disponible pour les autres vendeuses
+            </div>
           )}
         </div>
       </div>
@@ -311,8 +358,20 @@ export default function SellerDashboardPage() {
 
   if (!user || !profile) return null;
 
-  const newRequests = requests.filter((r) => !r.seller_id);
-  const myRequests = requests.filter((r) => r.seller_id === user.id);
+  // Split requests into the three tabs.
+  const newRequests: RequestWithRelations[] = [];
+  const acceptedRequests: RequestWithRelations[] = [];
+  const refusedRequests: RequestWithRelations[] = [];
+
+  for (const request of requests) {
+    if (request.seller_id === user.id) {
+      acceptedRequests.push(request);
+    } else if (refusedIds.has(request.id)) {
+      refusedRequests.push(request);
+    } else {
+      newRequests.push(request);
+    }
+  }
 
   return (
     <div className="container py-8 max-w-6xl">
@@ -328,7 +387,7 @@ export default function SellerDashboardPage() {
         </div>
 
         <Tabs defaultValue="new">
-          <TabsList className="w-full grid grid-cols-2 border-b border-noir/10">
+          <TabsList className="w-full grid grid-cols-3 border-b border-noir/10">
             <TabsTrigger
               value="new"
               className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-noir data-[state=active]:text-noir data-[state=inactive]:text-gris-moyen text-sm tracking-wide"
@@ -336,10 +395,16 @@ export default function SellerDashboardPage() {
               Nouvelles demandes ({newRequests.length})
             </TabsTrigger>
             <TabsTrigger
-              value="mine"
+              value="accepted"
               className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-noir data-[state=active]:text-noir data-[state=inactive]:text-gris-moyen text-sm tracking-wide"
             >
-              Mes demandes ({myRequests.length})
+              Demandes acceptées ({acceptedRequests.length})
+            </TabsTrigger>
+            <TabsTrigger
+              value="refused"
+              className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-noir data-[state=active]:text-noir data-[state=inactive]:text-gris-moyen text-sm tracking-wide"
+            >
+              Demandes refusées ({refusedRequests.length})
             </TabsTrigger>
           </TabsList>
 
@@ -354,24 +419,41 @@ export default function SellerDashboardPage() {
                   key={request.id}
                   header={renderRequestSummary(request)}
                 >
-                  {renderRequestDetails(request)}
+                  {renderRequestDetails(request, "new")}
                 </RequestAccordion>
               ))
             )}
           </TabsContent>
 
-          <TabsContent value="mine" className="space-y-4">
-            {myRequests.length === 0 ? (
+          <TabsContent value="accepted" className="space-y-4">
+            {acceptedRequests.length === 0 ? (
               <div className="text-center py-12 text-gris-moyen">
                 <p>Aucune demande acceptée pour le moment.</p>
               </div>
             ) : (
-              myRequests.map((request) => (
+              acceptedRequests.map((request) => (
                 <RequestAccordion
                   key={request.id}
                   header={renderRequestSummary(request)}
                 >
-                  {renderRequestDetails(request)}
+                  {renderRequestDetails(request, "accepted")}
+                </RequestAccordion>
+              ))
+            )}
+          </TabsContent>
+
+          <TabsContent value="refused" className="space-y-4">
+            {refusedRequests.length === 0 ? (
+              <div className="text-center py-12 text-gris-moyen">
+                <p>Aucune demande refusée.</p>
+              </div>
+            ) : (
+              refusedRequests.map((request) => (
+                <RequestAccordion
+                  key={request.id}
+                  header={renderRequestSummary(request)}
+                >
+                  {renderRequestDetails(request, "refused")}
                 </RequestAccordion>
               ))
             )}
