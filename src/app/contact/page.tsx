@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
-import { Mail, Phone, MapPin } from 'lucide-react';
+import { Mail } from 'lucide-react';
 
 // ============================================================================
 // Types
@@ -295,7 +295,7 @@ export default function ContactPage() {
                 <CardHeader>
                   <CardTitle className="text-2xl">Informations de contact</CardTitle>
                   <CardDescription>
-                    Plusieurs façons de nous contacter
+                    Contactez-nous par email ou sur Instagram
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -306,57 +306,8 @@ export default function ContactPage() {
                     <div>
                       <h3 className="font-semibold mb-1">Email</h3>
                       <p className="text-gris-moyen">
-                        contact@seconde-dressing.fr
+                        support@seconde-dressing.com
                       </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-sauge/15 rounded-full flex items-center justify-center">
-                      <Phone className="h-6 w-6 text-sauge-fonce" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold mb-1">Téléphone</h3>
-                      <p className="text-gris-moyen">
-                        +33 1 23 45 67 89
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-sauge/15 rounded-full flex items-center justify-center">
-                      <MapPin className="h-6 w-6 text-sauge-fonce" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold mb-1">Adresse</h3>
-                      <p className="text-gris-moyen">
-                        123 Rue de la Mode
-                        <br />
-                        75000 Paris, France
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Business Hours */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-2xl">Heures d'ouverture</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between">
-                      <span className="font-medium">Lundi - Vendredi</span>
-                      <span className="text-gris-moyen">9h00 - 18h00</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium">Samedi</span>
-                      <span className="text-gris-moyen">10h00 - 16h00</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium">Dimanche</span>
-                      <span className="text-gris-moyen">Fermé</span>
                     </div>
                   </div>
                 </CardContent>
@@ -370,18 +321,8 @@ export default function ContactPage() {
                 <CardContent>
                   <div className="flex gap-4">
                     <Button variant="outline" asChild>
-                      <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
-                        Facebook
-                      </a>
-                    </Button>
-                    <Button variant="outline" asChild>
                       <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
                         Instagram
-                      </a>
-                    </Button>
-                    <Button variant="outline" asChild>
-                      <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">
-                        LinkedIn
                       </a>
                     </Button>
                   </div>
