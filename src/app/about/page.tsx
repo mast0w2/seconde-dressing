@@ -27,7 +27,7 @@ export default function AboutPage() {
           <div className="max-w-4xl mx-auto">
             <Card className="mb-8">
               <CardHeader>
-                <CardTitle className="text-3xl font-bold text-center">
+                <CardTitle className="text-3xl text-center">
                   Notre Concept
                 </CardTitle>
                 <CardDescription className="text-center">

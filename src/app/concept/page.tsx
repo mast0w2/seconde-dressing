@@ -32,9 +32,9 @@ export default function ConceptPage() {
       <section className="py-12 sm:py-16">
         <div className="container">
           <div className="max-w-6xl mx-auto">
-            <Card className="mb-10 sm:mb-12">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-2xl sm:text-3xl font-bold text-center">
+                <CardTitle className="text-2xl sm:text-3xl text-center">
                   Un service unique pour vendre vos vêtements
                 </CardTitle>
                 <CardDescription className="text-center text-base sm:text-lg">
@@ -85,7 +85,7 @@ export default function ConceptPage() {
       <section className="py-12 sm:py-16">
         <div className="container">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-10">Nos formules</h2>
+            <h2 className="text-2xl sm:text-3xl text-center mb-8 sm:mb-10">Nos formules</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <Card className="border-noir/20">
                 <CardHeader>
@@ -142,7 +142,7 @@ export default function ConceptPage() {
           <div className="max-w-6xl mx-auto">
             <Card>
               <CardHeader>
-                <CardTitle className="text-2xl sm:text-3xl font-bold text-center">
+                <CardTitle className="text-2xl sm:text-3xl text-center">
                   Un business model transparent et équitable
                 </CardTitle>
                 <CardDescription className="text-center text-base sm:text-lg">
@@ -324,7 +324,7 @@ export default function ConceptPage() {
           <div className="max-w-6xl mx-auto">
             <Card>
               <CardHeader>
-                <CardTitle className="text-3xl font-bold text-center">
+                <CardTitle className="text-3xl text-center">
                   Favoriser la circularité
                 </CardTitle>
                 <CardDescription className="text-center text-lg">

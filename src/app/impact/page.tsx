@@ -42,7 +42,7 @@ export default function ImpactPage() {
           <div className="max-w-6xl mx-auto">
             <Card className="mb-10 sm:mb-12">
               <CardHeader>
-                <CardTitle className="text-2xl sm:text-3xl font-bold text-center">
+                <CardTitle className="text-2xl sm:text-3xl text-center">
                   L'impact de l'industrie textile
                 </CardTitle>
                 <CardDescription className="text-center text-base sm:text-lg">
@@ -141,7 +141,7 @@ export default function ImpactPage() {
           <div className="max-w-6xl mx-auto">
             <Card>
               <CardHeader>
-                <CardTitle className="text-2xl sm:text-3xl font-bold text-center">
+                <CardTitle className="text-2xl sm:text-3xl text-center">
                   La puissance de l'économie circulaire
                 </CardTitle>
                 <CardDescription className="text-center text-base sm:text-lg">
@@ -242,7 +242,7 @@ export default function ImpactPage() {
           <div className="max-w-6xl mx-auto">
             <Card>
               <CardHeader>
-                <CardTitle className="text-3xl font-bold text-center">
+                <CardTitle className="text-3xl text-center">
                   Notre engagement
                 </CardTitle>
                 <CardDescription className="text-center text-lg">
