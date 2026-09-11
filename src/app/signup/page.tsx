@@ -61,22 +61,16 @@ function SignupForm() {
 
   const onSubmit = async (data: FormValues) => {
     try {
-      const { error: authError } = await supabase.auth.signUp({
+      const {
+        data: { user, session },
+        error: authError,
+      } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
       });
 
       if (authError) {
         throw authError;
-      }
-
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError) {
-        throw userError;
       }
 
       if (!user) {
@@ -107,9 +101,20 @@ function SignupForm() {
         throw profileError;
       }
 
+      // When email confirmation is enabled, no session is created yet:
+      // prompt the user to confirm their email before signing in.
+      if (!session) {
+        toast({
+          title: "Inscription réussie",
+          description: "Veuillez vérifier votre email pour confirmer votre compte.",
+        });
+        router.push("/login");
+        return;
+      }
+
       toast({
         title: "Inscription réussie",
-        description: "Veuillez vérifier votre email pour confirmer votre compte.",
+        description: "Votre compte a été créé avec succès.",
       });
 
       router.push(role === "seller" ? "/vendeur" : "/");
