@@ -92,11 +92,8 @@ export default function DemandeRdvPage() {
         return;
       }
 
-      const fullAddress = [profileData.street_address, profileData.postal_code, profileData.city]
-        .filter(Boolean)
-        .join(", ");
-      if (fullAddress) {
-        form.setValue("address", fullAddress);
+      if (profileData.street_address) {
+        form.setValue("address", profileData.street_address);
       }
 
       const { data: formulasData, error: formulasError } = await supabase

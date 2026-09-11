@@ -76,10 +76,7 @@ CREATE TABLE IF NOT EXISTS profiles (
     email            TEXT NOT NULL UNIQUE,
     phone            TEXT,
     photo_url         TEXT,
-    street_address   TEXT,
-    city             TEXT,
-    postal_code      TEXT,
-    country          TEXT DEFAULT 'France',
+    street_address   TEXT,              -- full postal address (Base Adresse Nationale label)
     role             TEXT NOT NULL CHECK (role IN ('client', 'seller')),
     bio              TEXT,
     specialization   TEXT,

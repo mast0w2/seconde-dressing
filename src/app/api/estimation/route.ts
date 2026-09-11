@@ -1,10 +1,8 @@
 // src/app/api/estimation/route.ts
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { capitalizeName } from "@/lib/text";
-// Estimation form API endpoint for handling detailed estimation requests
 
 import { NextResponse } from 'next/server';
-import { notificationService } from '@/lib/email';
 
 // ============================================================================
 // Types
@@ -202,14 +200,6 @@ export async function POST(request: Request) {
         },
         { status: 500 }
       );
-    }
-
-    // Send notification emails with all details (only if BREVO_API_KEY is configured)
-    if (process.env.BREVO_API_KEY) {
-      const emailResult = await notificationService.sendEstimationNotification(estimationData);
-      if (!emailResult.success) {
-        console.warn('[Estimation API] Email notification failed:', emailResult.error);
-      }
     }
 
     return NextResponse.json({

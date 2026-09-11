@@ -59,9 +59,6 @@ export interface Profile {
   phone: string | null;
   photo_url: string | null;
   street_address: string | null;
-  city: string | null;
-  postal_code: string | null;
-  country: string | null;
   role: Role;
   bio: string | null;
   specialization: string | null;
@@ -79,9 +76,6 @@ export interface InsertProfile {
   phone?: string | null;
   photo_url?: string | null;
   street_address?: string | null;
-  city?: string | null;
-  postal_code?: string | null;
-  country?: string | null;
   role: Role;
   bio?: string | null;
   specialization?: string | null;
@@ -99,9 +93,6 @@ export interface UpdateProfile {
   phone?: string | null;
   photo_url?: string | null;
   street_address?: string | null;
-  city?: string | null;
-  postal_code?: string | null;
-  country?: string | null;
   role?: Role;
   bio?: string | null;
   specialization?: string | null;
@@ -422,8 +413,6 @@ export interface SignupFormData {
   last_name: string;
   phone: string;
   street_address: string;
-  city: string;
-  postal_code: string;
   role: Role;
 }
 
@@ -434,9 +423,6 @@ export interface ProfileFormData {
   phone: string;
   bio?: string;
   street_address: string;
-  city: string;
-  postal_code: string;
-  country: string;
 }
 
 /** Demande RDV form data */

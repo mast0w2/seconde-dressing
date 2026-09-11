@@ -25,9 +25,6 @@ const profileFormSchema = z.object({
   phone: z.string().min(10, "Le numéro de téléphone est requis"),
   bio: z.string().optional(),
   street_address: z.string().min(5, "L'adresse est requise"),
-  city: z.string().min(2, "La ville est requise"),
-  postal_code: z.string().min(5, "Le code postal est requis"),
-  country: z.string().optional(),
   role: z.enum(["client", "seller"]),
 });
 
@@ -54,9 +51,6 @@ function ProfileForm() {
       phone: "",
       bio: "",
       street_address: "",
-      city: "",
-      postal_code: "",
-      country: "",
       role: "client" as Role,
     },
   });
@@ -101,9 +95,6 @@ function ProfileForm() {
             phone: profileData.phone || "",
             bio: profileData.bio || "",
             street_address: profileData.street_address || "",
-            city: profileData.city || "",
-            postal_code: profileData.postal_code || "",
-            country: profileData.country || "",
             role: profileData.role || "client",
           });
         } else {
@@ -160,9 +151,6 @@ function ProfileForm() {
         phone: data.phone || null,
         bio: data.bio || null,
         street_address: data.street_address || null,
-        city: data.city || null,
-        postal_code: data.postal_code || null,
-        country: data.country || null,
       };
 
       // Preserve existing fields that shouldn't be modified here
@@ -236,9 +224,6 @@ function ProfileForm() {
         phone: profile.phone || "",
         bio: profile.bio || "",
         street_address: profile.street_address || "",
-        city: profile.city || "",
-        postal_code: profile.postal_code || "",
-        country: profile.country || "",
         role: profile.role || "client",
       });
     }
@@ -572,62 +557,19 @@ function ProfileForm() {
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="street_address">Rue et numéro *</Label>
+                <Label htmlFor="street_address">Adresse *</Label>
                 {isEditing ? (
                   <AddressInput
                     id="street_address"
                     value={streetAddressValue}
                     onChange={(v) => setValue("street_address", v, { shouldValidate: false })}
-                    onPick={(picked) => {
-                      setValue("street_address", picked.label, { shouldValidate: true });
-                      setValue("postal_code", picked.postcode, { shouldValidate: true });
-                      setValue("city", picked.city, { shouldValidate: true });
-                    }}
+                    onPick={(picked) =>
+                      setValue("street_address", picked.label, { shouldValidate: true })
+                    }
                     placeholder="Commencez à taper votre adresse…"
                   />
                 ) : (
                   <p className="text-lg">{profile.street_address || "Non renseigné"}</p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="postal_code">Code postal *</Label>
-                  {isEditing ? (
-                    <Input
-                      id="postal_code"
-                      {...register("postal_code")}
-                      placeholder="Ex: 75001"
-                    />
-                  ) : (
-                    <p className="text-lg">{profile.postal_code || "Non renseigné"}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="city">Ville *</Label>
-                  {isEditing ? (
-                    <Input
-                      id="city"
-                      {...register("city")}
-                      placeholder="Ex: Paris"
-                    />
-                  ) : (
-                    <p className="text-lg">{profile.city || "Non renseigné"}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="country">Pays</Label>
-                {isEditing ? (
-                  <Input
-                    id="country"
-                    {...register("country")}
-                    placeholder="Ex: France"
-                  />
-                ) : (
-                  <p className="text-lg">{profile.country || "Non renseigné"}</p>
                 )}
               </div>
             </form>

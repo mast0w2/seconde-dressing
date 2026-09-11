@@ -17,8 +17,6 @@ export const MANDATORY_PROFILE_FIELDS: Array<{
   { key: "email", label: "Email" },
   { key: "phone", label: "Téléphone" },
   { key: "street_address", label: "Adresse" },
-  { key: "city", label: "Ville" },
-  { key: "postal_code", label: "Code postal" },
 ];
 
 export function getProfileMissingFields(
