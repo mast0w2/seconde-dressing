@@ -2,7 +2,7 @@
 // Protect private routes: redirect unauthenticated visitors to /login.
 // Refreshes the Supabase auth session on every request so protected pages
 // and the middleware itself see a valid access token.
-import { createServerClient } from '@supabase/ssr';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 const PROTECTED_ROUTES = [
@@ -26,14 +26,16 @@ export async function middleware(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() {
-          return request.cookies.getAll();
+        get(key: string) {
+          return request.cookies.get(key)?.value;
         },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            request.cookies.set(name, value);
-            response.cookies.set(name, value, options);
-          });
+        set(key: string, value: string, options: CookieOptions) {
+          request.cookies.set(key, value);
+          response.cookies.set(key, value, options);
+        },
+        remove(key: string, options: CookieOptions) {
+          request.cookies.delete(key);
+          response.cookies.set(key, '', { ...options, maxAge: 0 });
         },
       },
     }

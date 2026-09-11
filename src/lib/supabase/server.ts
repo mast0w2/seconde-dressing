@@ -1,9 +1,9 @@
 // src/lib/supabase/server.ts
 // Supabase server client for server-side usage (API routes, SSR).
-// Uses the modern @supabase/ssr getAll/setAll cookie API so the access token
-// is refreshed and persisted across requests.
+// @supabase/ssr 0.3.0 uses the get/set/remove cookie methods (single cookie
+// at a time). The access token is refreshed and persisted across requests.
 
-import { createServerClient } from '@supabase/ssr';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -14,16 +14,22 @@ export function createSupabaseServerClient() {
 
   return createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
-      getAll() {
-        return cookieStore.getAll();
+      get(key: string) {
+        return cookieStore.get(key)?.value;
       },
-      setAll(cookiesToSet) {
+      set(key: string, value: string, options: CookieOptions) {
         try {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          );
+          cookieStore.set(key, value, options);
         } catch {
-          // The `setAll` method was called from a Server Component.
+          // `set` was called from a Server Component.
+          // This can be ignored if you have middleware refreshing sessions.
+        }
+      },
+      remove(key: string, options: CookieOptions) {
+        try {
+          cookieStore.set(key, '', { ...options, maxAge: 0 });
+        } catch {
+          // `remove` was called from a Server Component.
           // This can be ignored if you have middleware refreshing sessions.
         }
       },
