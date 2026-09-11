@@ -289,13 +289,6 @@ export default function Home() {
           <div className="flex flex-col gap-6">
             <div className="text-center lg:text-left flex flex-col gap-4">
               <div className="eyebrow">Demandez un rendez-vous</div>
-              <h2 className="text-3xl sm:text-4xl leading-[1.15]">
-                Videz votre dressing, sans effort.
-              </h2>
-              <p className="text-gris-moyen max-w-[440px]">
-                Quelques questions, ça prend moins d&apos;une minute. On vous recontacte dans les
-                24 heures.
-              </p>
               <div className="flex flex-wrap justify-center lg:justify-start gap-6 text-[11px] tracking-[0.14em] uppercase text-sauge-fonce">
                 <span>Sans engagement</span>
               </div>

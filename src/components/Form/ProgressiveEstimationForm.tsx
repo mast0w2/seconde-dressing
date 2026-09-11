@@ -811,9 +811,7 @@ export function ProgressiveEstimationForm() {
                 Souhaitez-vous suivre votre demande&nbsp;?
               </h3>
               <p className="text-gris-moyen">
-                Créez un compte avec le même email pour suivre le statut de votre demande à
-                tout moment. C’est facultatif — votre demande est déjà enregistrée. Il vous
-                suffit de choisir un mot de passe.
+                Créez un compte avec le même email pour suivre votre demande. C’est facultatif.
               </p>
             </div>
 
