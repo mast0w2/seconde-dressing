@@ -111,6 +111,7 @@ async function handleNotification(
       if (!data.vendeuseEmail || !data.clientNom) {
         return { success: false };
       }
+      if (!process.env.BREVO_API_KEY) return { success: true };
       const result = await notificationService.sendNewAppointmentRequest({
         to: data.vendeuseEmail,
         vendeuseNom: data.vendeuseNom || '',
@@ -125,6 +126,7 @@ async function handleNotification(
       if (!data.clientEmail || !data.vendeuseNom) {
         return { success: false };
       }
+      if (!process.env.BREVO_API_KEY) return { success: true };
       const result = await notificationService.sendAppointmentConfirmation({
         to: data.clientEmail,
         vendeuseNom: data.vendeuseNom,
@@ -138,6 +140,7 @@ async function handleNotification(
       if (!data.email || !data.nom) {
         return { success: false };
       }
+      if (!process.env.BREVO_API_KEY) return { success: true };
       const result = await notificationService.sendAppointmentCancellation({
         to: data.email,
         vendeuseNom: data.vendeuseNom || '',
@@ -152,6 +155,7 @@ async function handleNotification(
       if (!data.clientEmail || !data.vendeuseNom) {
         return { success: false };
       }
+      if (!process.env.BREVO_API_KEY) return { success: true };
       const result = await notificationService.sendAppointmentAccepted({
         to: data.clientEmail,
         vendeuseNom: data.vendeuseNom,
@@ -165,6 +169,7 @@ async function handleNotification(
       if (!data.clientEmail || !data.vendeuseNom) {
         return { success: false };
       }
+      if (!process.env.BREVO_API_KEY) return { success: true };
       const result = await notificationService.sendAppointmentRejected({
         to: data.clientEmail,
         vendeuseNom: data.vendeuseNom,

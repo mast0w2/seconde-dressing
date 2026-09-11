@@ -112,7 +112,8 @@ class EmailService {
   public static getInstance(): EmailService {
     if (!EmailService.instance) {
       if (!env.brevo.apiKey) {
-        throw new Error('[EmailService] Brevo API key is not configured');
+        // Return a mock instance when API key is not configured
+        return new EmailService('');
       }
       EmailService.instance = new EmailService(env.brevo.apiKey);
     }

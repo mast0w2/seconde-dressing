@@ -65,7 +65,7 @@ export function Navbar() {
   };
 
   const isClient = profile?.role === "client";
-  const isVendeuse = profile?.role === "vendeuse";
+  const isVendeur = profile?.role === "vendeur";
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-blanc/95 backdrop-blur border-b border-noir/10">
@@ -132,25 +132,24 @@ export function Navbar() {
                       Préférences
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
+                    <Link href="/dashboard">
+                      Tableau de bord
+                    </Link>
+                  </DropdownMenuItem>
                   {isClient && (
-                    <>
-                      <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
-                        <Link href="/client/disponibilites">Mes disponibilités</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
-                        <Link href="/client/rdv">Mes rendez-vous</Link>
-                      </DropdownMenuItem>
-                    </>
+                    <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
+                      <Link href="/demande-rdv">
+                        Demande de RDV
+                      </Link>
+                    </DropdownMenuItem>
                   )}
-                  {isVendeuse && (
-                    <>
-                      <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
-                        <Link href="/vendeuse/agenda">Mon agenda</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
-                        <Link href="/vendeuse/demandes">Mes demandes</Link>
-                      </DropdownMenuItem>
-                    </>
+                  {isVendeur && (
+                    <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
+                      <Link href="/vendeur">
+                        Espace Vendeur
+                      </Link>
+                    </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator className="bg-noir/10" />
                   <DropdownMenuItem
@@ -208,16 +207,16 @@ export function Navbar() {
                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                ÉCONOMIE CIRCULAIRE
+                NOTRE IMPACT
               </Link>
               <Link
-                href="/reviews"
+                href="/blog"
                 className={`text-sm font-medium transition-colors hover:text-noir ${
-                  pathname === "/reviews" ? "text-noir" : "text-gris-moyen"
+                  pathname === "/blog" ? "text-noir" : "text-gris-moyen"
                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                AVIS CLIENTS
+                BLOG
               </Link>
               <Link
                 href="/contact"
