@@ -191,10 +191,13 @@ export async function POST(request: Request) {
     const dbResult = await saveEstimationRequest(estimationData);
     if (!dbResult.success) {
       console.error('[Estimation API] Database error:', dbResult.error);
+      const detail =
+        (dbResult.error as { message?: string } | null)?.message ||
+        'Failed to save estimation request';
       return NextResponse.json(
         { 
           success: false, 
-          error: 'Failed to save estimation request' 
+          error: detail
         },
         { status: 500 }
       );
