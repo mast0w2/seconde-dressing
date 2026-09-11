@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/components/ui/use-toast";
+import { createBrowserClient } from "@supabase/ssr";
 import { Users, Sparkles, Gem, Ban } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -413,11 +415,18 @@ const EMPTY_FORM: FormData = {
 
 export function ProgressiveEstimationForm() {
   const { toast } = useToast();
+  const router = useRouter();
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<FormData>(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [password, setPassword] = useState("");
+  const [isCreatingAccount, setIsCreatingAccount] = useState(false);
 
   const currentQuestion = QUESTIONS[currentStep];
   const isLastStep = currentStep === QUESTIONS.length - 1;
@@ -456,31 +465,89 @@ export function ProgressiveEstimationForm() {
 
   const handleSubmit = async () => {
     if (!validateStep()) return;
-    setIsSubmitting(true);
+    // Move to the account creation step: the request itself is submitted
+    // right after the account is created (see handleCreateAccount).
+    setIsComplete(true);
+  };
+
+  const handleCreateAccount = async () => {
+    if (password.length < 6) {
+      toast({
+        title: "Erreur",
+        description: "Le mot de passe doit contenir au moins 6 caractères.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsCreatingAccount(true);
     try {
+      // 1. Create the auth account with the email collected in the form.
+      const {
+        data: { user, session },
+        error: signUpError,
+      } = await supabase.auth.signUp({
+        email: formData.email,
+        password,
+      });
+
+      if (signUpError) {
+        throw signUpError;
+      }
+
+      if (!user) {
+        throw new Error("Impossible de créer le compte.");
+      }
+
+      // 2. Create the profile with all the information already entered.
+      const { error: profileError } = await supabase.from("profiles").upsert([
+        {
+          id: user.id,
+          email: formData.email,
+          first_name: formData.prenom,
+          last_name: formData.nom,
+          phone: formData.telephone,
+          street_address: formData.adresse,
+          role: "client",
+        },
+      ]);
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      // 3. Submit the estimation request (now authenticated).
       const result = await submitForm(formData);
       if (!result.success) {
         toast({
-          title: "Erreur",
-          description: result.message || "Impossible d'envoyer votre demande.",
-          variant: "destructive",
+          title: "Compte créé",
+          description: "Votre compte est créé mais la demande n'a pas pu être enregistrée. Vous pouvez la soumettre depuis votre espace.",
         });
-        return;
       }
-      setIsComplete(true);
-      toast({
-        title: "Demande envoyée",
-        description: "On vous recontacte sous 24 h pour caler le rendez-vous.",
-      });
-    } catch (error) {
-      console.error("[Estimation Form] Error:", error);
+
+      // 4. Redirect to the dashboard (or login if email confirmation is required).
+      if (session) {
+        toast({
+          title: "Bienvenue sur Seconde !",
+          description: "Votre compte est créé et votre demande envoyée.",
+        });
+        router.refresh();
+        router.push("/dashboard/client");
+      } else {
+        toast({
+          title: "Compte créé",
+          description: "Vérifiez votre email pour confirmer votre compte, puis connectez-vous.",
+        });
+        router.push("/login");
+      }
+    } catch (error: any) {
       toast({
         title: "Erreur",
-        description: "Impossible d'envoyer votre demande. Veuillez réessayer.",
+        description: error.message || "Impossible de créer le compte.",
         variant: "destructive",
       });
     } finally {
-      setIsSubmitting(false);
+      setIsCreatingAccount(false);
     }
   };
 
@@ -672,16 +739,50 @@ export function ProgressiveEstimationForm() {
   if (isComplete) {
     return (
       <div className="w-full max-w-2xl space-y-5">
-        <h3 className="font-serif text-3xl text-noir">Demande envoyée.</h3>
+        <h3 className="font-serif text-3xl text-noir">Presque terminé.</h3>
         <p className="text-gris-moyen">
-          On vous recontacte sous 24 h pour caler le rendez-vous. À très vite !
+          Choisissez un mot de passe pour créer votre compte et suivre votre
+          demande. Toutes vos informations sont déjà enregistrées.
         </p>
-        <button
-          onClick={handleReset}
-          className="text-[11px] tracking-[0.18em] uppercase text-sauge-fonce underline underline-offset-4 hover:text-noir transition-colors"
-        >
-          Faire une nouvelle demande
-        </button>
+
+        <div className="space-y-4 pt-2">
+          <div className="space-y-2">
+            <label
+              htmlFor="account-password"
+              className="text-sm font-medium text-noir"
+            >
+              Mot de passe
+            </label>
+            <Input
+              id="account-password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              disabled={isCreatingAccount}
+            />
+            <p className="text-xs text-gris-moyen">
+              Minimum 6 caractères.
+            </p>
+          </div>
+
+          <div className="text-sm text-gris-moyen bg-gris-tres-clair p-4 border border-noir/10">
+            <p className="mb-1">
+              <span className="font-medium text-noir">{formData.prenom} {formData.nom}</span>
+            </p>
+            <p>{formData.email}</p>
+            <p>{formData.telephone}</p>
+            <p>{formData.adresse}</p>
+          </div>
+
+          <button
+            onClick={handleCreateAccount}
+            disabled={isCreatingAccount}
+            className="bg-noir text-blanc border border-noir px-8 py-4 text-[11px] tracking-[0.2em] uppercase hover:bg-transparent hover:text-noir transition-colors disabled:opacity-50"
+          >
+            {isCreatingAccount ? "Création en cours…" : "Se créer un compte"}
+          </button>
+        </div>
       </div>
     );
   }

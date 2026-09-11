@@ -115,6 +115,27 @@ async function saveEstimationRequest(data: EstimationRequest) {
     return { success: false, error: { message: 'Authentication required' } as any };
   }
 
+  // The homepage form sends the French formula id (e.g. 'deja-trie');
+  // resolve it to the matching formula UUID via its English slug.
+  const FORMULA_SLUG_MAP: Record<string, string> = {
+    'deja-trie': 'pre-sorted',
+    'tri-sur-place': 'on-site-sorting',
+    'tri-et-conseil': 'sorting-and-advice',
+  };
+
+  let formulaId: string | null = null;
+  const slug = data.formule ? FORMULA_SLUG_MAP[data.formule] : undefined;
+  if (slug) {
+    const { data: formulaRow } = await supabase
+      .from('formulas')
+      .select('id')
+      .eq('slug', slug)
+      .single();
+    if (formulaRow) {
+      formulaId = formulaRow.id as string;
+    }
+  }
+
   const { error } = await supabase
     .from('requests')
     .insert([
@@ -123,9 +144,9 @@ async function saveEstimationRequest(data: EstimationRequest) {
         request_type: 'estimation',
         message: data.description || null,
         status: 'pending',
-        address: data.address || null,
-        formula_id: data.formulaId || null,
-        conditions_accepted: data.conditionsAccepted,
+        address: data.adresse || data.address || null,
+        formula_id: formulaId,
+        conditions_accepted: data.conditionsAcceptees ?? data.conditionsAccepted ?? false,
         number_of_items: data.nombreVetements,
         average_value: data.valeurMoyenne,
         brands: data.marques,

@@ -14,6 +14,7 @@ import {
   RequestFilterTab,
   IN_PROGRESS_STATUSES,
 } from "@/lib/request-status";
+import { isProfileComplete } from "@/lib/profile";
 import { ArrowLeft } from "lucide-react";
 
 interface RequestWithRelations extends Request {
@@ -54,6 +55,11 @@ export default function ClientDashboardPage() {
 
       if (profileData.role !== "client") {
         router.push("/dashboard/vendeur");
+        return;
+      }
+
+      if (!isProfileComplete(profileData)) {
+        router.push("/profile");
         return;
       }
 

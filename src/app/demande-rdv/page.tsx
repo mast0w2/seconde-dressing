@@ -12,8 +12,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, HelpCircle } from "lucide-react";
 import type { Profile, Formula } from "@/types/database";
+import { isProfileComplete } from "@/lib/profile";
+import { getFormulaDetail } from "@/lib/formulas";
 
 const formSchema = z.object({
   message: z.string().min(10, "Le message doit contenir au moins 10 caractères"),
@@ -82,6 +84,18 @@ export default function DemandeRdvPage() {
       if (profileData.role !== "client") {
         router.push("/dashboard/vendeur");
         return;
+      }
+
+      if (!isProfileComplete(profileData)) {
+        router.push("/profile");
+        return;
+      }
+
+      const fullAddress = [profileData.street_address, profileData.postal_code, profileData.city]
+        .filter(Boolean)
+        .join(", ");
+      if (fullAddress) {
+        form.setValue("address", fullAddress);
       }
 
       const { data: formulasData, error: formulasError } = await supabase
@@ -190,11 +204,29 @@ export default function DemandeRdvPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="formula_id">Formule de service *</Label>
+                <div className="flex items-center gap-1.5">
+                  <Label htmlFor="formula_id">Formule de service *</Label>
+                  <span className="group relative inline-flex">
+                    <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                    <span className="absolute left-1/2 bottom-full z-10 mb-2 hidden -translate-x-1/2 group-hover:block w-64 rounded-md border border-noir/15 bg-blanc p-3 text-xs text-noir shadow-lg">
+                      <strong className="block mb-1">Déjà trié (10 €) :</strong>
+                      Vos vêtements sont déjà mis de côté, vous remplissez l'inventaire. On vient les récupérer.
+                      <br /><br />
+                      <strong className="block mb-1">Tri sur place (30 €) :</strong>
+                      On passe 30 min à 1 h chez vous pour trier et repérer les pièces qui se revendront.
+                      <br /><br />
+                      <strong className="block mb-1">Tri & conseil (50 €) :</strong>
+                      Rendez-vous d'1 h à 1 h 30 : on trie avec vous et on vous conseille.
+                    </span>
+                  </span>
+                </div>
                 <div className="grid gap-3 sm:grid-cols-3">
-                  {formulas.map((formula) => (
+                  {formulas.map((formula) => {
+                    const detail = getFormulaDetail(formula.slug);
+                    return (
                     <label
                       key={formula.id}
+                      title={detail}
                       className={`flex flex-col gap-1 p-4 border rounded-lg cursor-pointer transition-colors ${
                         form.watch("formula_id") === formula.id
                           ? "border-primary bg-primary/5"
@@ -209,8 +241,12 @@ export default function DemandeRdvPage() {
                       />
                       <span className="font-medium">{formula.label}</span>
                       <span className="text-sm text-muted-foreground">{formula.price} €</span>
+                      {detail && (
+                        <span className="text-xs text-muted-foreground mt-1 line-clamp-2">{detail}</span>
+                      )}
                     </label>
-                  ))}
+                    );
+                  })}
                 </div>
                 {errors.formula_id && (
                   <p className="text-sm text-destructive">{errors.formula_id.message}</p>

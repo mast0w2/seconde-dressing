@@ -20,11 +20,11 @@ import Link from "next/link";
 const profileFormSchema = z.object({
   last_name: z.string().min(2, "Le nom est requis"),
   first_name: z.string().min(2, "Le prénom est requis"),
-  phone: z.string().optional(),
+  phone: z.string().min(10, "Le numéro de téléphone est requis"),
   bio: z.string().optional(),
-  street_address: z.string().optional(),
-  city: z.string().optional(),
-  postal_code: z.string().optional(),
+  street_address: z.string().min(5, "L'adresse est requise"),
+  city: z.string().min(2, "La ville est requise"),
+  postal_code: z.string().min(5, "Le code postal est requis"),
   country: z.string().optional(),
   role: z.enum(["client", "seller"]),
 });
@@ -516,7 +516,7 @@ export default function ProfilePage() {
                 )}
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Téléphone</Label>
+                  <Label htmlFor="phone">Téléphone *</Label>
                   {isEditing ? (
                     <Input
                       id="phone"
@@ -558,7 +558,7 @@ export default function ProfilePage() {
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="street_address">Rue et numéro</Label>
+                <Label htmlFor="street_address">Rue et numéro *</Label>
                 {isEditing ? (
                   <Input
                     id="street_address"
@@ -572,7 +572,7 @@ export default function ProfilePage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="postal_code">Code postal</Label>
+                  <Label htmlFor="postal_code">Code postal *</Label>
                   {isEditing ? (
                     <Input
                       id="postal_code"
@@ -585,7 +585,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="city">Ville</Label>
+                  <Label htmlFor="city">Ville *</Label>
                   {isEditing ? (
                     <Input
                       id="city"

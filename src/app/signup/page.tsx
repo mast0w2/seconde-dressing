@@ -21,10 +21,10 @@ const formSchema = z
     confirmPassword: z.string().min(6, "Les mots de passe ne correspondent pas"),
     prenom: z.string().min(2, "Le prénom est requis"),
     nom: z.string().min(2, "Le nom est requis"),
-    telephone: z.string().optional(),
-    rue: z.string().optional(),
-    ville: z.string().optional(),
-    codePostal: z.string().optional(),
+    telephone: z.string().min(10, "Le numéro de téléphone est requis"),
+    rue: z.string().min(5, "L'adresse est requise"),
+    ville: z.string().min(2, "La ville est requise"),
+    codePostal: z.string().min(5, "Le code postal est requis"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Les mots de passe ne correspondent pas",
@@ -223,7 +223,7 @@ function SignupForm() {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="telephone">Téléphone (optionnel)</Label>
+              <Label htmlFor="telephone">Téléphone *</Label>
               <Input
                 id="telephone"
                 placeholder="06 12 34 56 78"
@@ -231,7 +231,7 @@ function SignupForm() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="rue">Adresse (optionnel)</Label>
+              <Label htmlFor="rue">Adresse *</Label>
               <Input
                 id="rue"
                 placeholder="12 rue du Commerce"
@@ -240,7 +240,7 @@ function SignupForm() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="ville">Ville (optionnel)</Label>
+                <Label htmlFor="ville">Ville *</Label>
                 <Input
                   id="ville"
                   placeholder="Paris"
@@ -248,7 +248,7 @@ function SignupForm() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="codePostal">Code postal (optionnel)</Label>
+                <Label htmlFor="codePostal">Code postal *</Label>
                 <Input
                   id="codePostal"
                   placeholder="75001"
