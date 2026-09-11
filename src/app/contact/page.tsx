@@ -321,8 +321,8 @@ export default function ContactPage() {
                 <CardContent>
                   <div className="flex gap-4">
                     <Button variant="outline" asChild>
-                      <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
-                        Instagram
+                      <a href="https://instagram.com/seconde.dressing" target="_blank" rel="noopener noreferrer">
+                        @seconde.dressing
                       </a>
                     </Button>
                   </div>
