@@ -224,6 +224,33 @@ export interface RequestWithRelations extends Request {
 }
 
 // ============================================================================
+// request_items table (clothing items photographed for a request)
+// ============================================================================
+export interface RequestItem {
+  id: string;
+  request_id: string;
+  photo_url: string;
+  description: string | null;
+  created_at: string;
+}
+
+export interface InsertRequestItem {
+  id?: string;
+  request_id: string;
+  photo_url: string;
+  description?: string | null;
+  created_at?: string;
+}
+
+export interface UpdateRequestItem {
+  id?: string;
+  request_id?: string;
+  photo_url?: string;
+  description?: string | null;
+  created_at?: string;
+}
+
+// ============================================================================
 // preferences table
 // ============================================================================
 export interface Preference {
@@ -494,6 +521,11 @@ export interface Database {
         Row: Request;
         Insert: InsertRequest;
         Update: UpdateRequest;
+      };
+      request_items: {
+        Row: RequestItem;
+        Insert: InsertRequestItem;
+        Update: UpdateRequestItem;
       };
       preferences: {
         Row: Preference;

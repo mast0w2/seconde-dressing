@@ -17,6 +17,7 @@ import {
   NEXT_STATUS_LABEL,
 } from "@/lib/request-status";
 import { ArrowLeft } from "lucide-react";
+import { RequestItemsUploader } from "@/components/RequestItemsUploader";
 
 interface RequestWithRelations extends Request {
   client: Profile;
@@ -312,6 +313,8 @@ export default function SellerDashboardPage() {
                                 <p className="text-sm">{request.message}</p>
                               </div>
                             )}
+
+                            <RequestItemsUploader requestId={request.id} />
                           </div>
 
                           <div className="flex flex-col gap-2 ml-4">

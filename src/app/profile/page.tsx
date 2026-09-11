@@ -390,7 +390,6 @@ function ProfileForm() {
                       {profile.role === "seller" ? "Vendeuse" : "Cliente"}
                     </Badge>
                   </h2>
-                  <p className="text-muted-foreground">{profile.email}</p>
                 </div>
               </div>
 

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
 import type { Request, Profile, Formula, RequestStatus } from "@/types/database";
+import { RequestItemsUploader } from "@/components/RequestItemsUploader";
 import {
   requestStatusConfig,
   RequestFilterTab,
@@ -220,6 +221,8 @@ export default function ClientDashboardPage() {
                                 <p className="text-sm">{request.message}</p>
                               </div>
                             )}
+
+                            <RequestItemsUploader requestId={request.id} />
                           </div>
                         </div>
                       </CardContent>
