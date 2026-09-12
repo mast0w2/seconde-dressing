@@ -336,9 +336,6 @@ export default function ImpactPage() {
                 <li>Études de WRAP (Waste and Resources Action Programme)</li>
               </ul>
               <p>
-                La WRAP (Waste and Resources Action Programme) est une organisation britannique à but non lucratif créée en 2000, qui travaille avec les gouvernements, les entreprises et les citoyens pour accélérer la transition vers une économie circulaire et la réduction des déchets. Elle est une source de référence sur les questions de gaspillage des ressources, notamment dans le textile.
-              </p>
-              <p>
                 Nous nous engageons à maintenir nos informations à jour et basées sur des données 
                 scientifiques vérifiées.
               </p>

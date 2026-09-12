@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { buildPageMetadata } from "@/lib/seo";
+import { buildPageMetadata, buildBreadcrumbLd } from "@/lib/seo";
+import { JsonLd } from "@/components/JsonLd";
 import ReviewsPage from "./ReviewsPage";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -10,5 +11,15 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 export default function Page() {
-  return <ReviewsPage />;
+  return (
+    <>
+      <ReviewsPage />
+      <JsonLd
+        data={buildBreadcrumbLd([
+          { name: "Accueil", path: "/" },
+          { name: "Avis Clients", path: "/reviews" },
+        ])}
+      />
+    </>
+  );
 }

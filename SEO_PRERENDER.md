@@ -78,6 +78,25 @@ NEXT_PUBLIC_SITE_URL=https://seconde-dressing.com
 `NEXT_PUBLIC_SITE_URL` est utilisé pour générer les URL canoniques, Open Graph, le
 sitemap et le robots.txt. En production, indiquez l'URL publique du site.
 
+## Optimisations SEO avancées
+
+Au-delà du pré-rendu, les signaux SEO suivants ont été ajoutés :
+
+- **Données structurées multi-types sur l'accueil** : `Service` + `Organization` + `WebSite`
+  (trois blocs `application/ld+json` dans le HTML pré-rendu) pour décrire le service,
+  l'organisation et le site aux moteurs.
+- **`BreadcrumbList` par sous-page** (`/concept`, `/about`, `/impact`, `/contact`,
+  `/demande-rdv`, `/reviews`) : fil d'Ariane schema.org pré-rendu, affichable dans les
+  résultats de recherche.
+- **Avis clients (`AggregateRating` + `Review`)** sur `/reviews` : injectés côté client
+  après chargement des avis (données dynamiques depuis Supabase). Google exécute le JS
+  et indexe les étoiles et les avis individuels — signal fort pour les SERP.
+- **`noindex, nofollow` sur les pages privées** (`/dashboard`, `/dashboard/client`,
+  `/dashboard/vendeur`, `/profile`, `/preferences`) : ces pages ne doivent pas être
+  indexées. Doublement protégé via `robots` meta + `robots.txt` (`disallow`).
+- **`robots.txt` élargi** : bloque désormais `/api/`, `/admin/`, `/dashboard/`,
+  `/profile`, `/preferences`.
+
 ## Note sur l'hébergement
 
 `next build` produit des pages pré-rendues (HTML statique) **et** des routes API

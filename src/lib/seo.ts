@@ -21,6 +21,13 @@ type PageMetadataInput = {
   absolute?: boolean;
 };
 
+export function noIndexMetadata(title: string): Metadata {
+  return {
+    title,
+    robots: { index: false, follow: false },
+  };
+}
+
 export function buildPageMetadata({
   title,
   description,
@@ -77,10 +84,77 @@ export function buildJsonLd() {
       "@type": "Offer",
       description: "Récupération, photographie et vente de vêtements de seconde main",
     },
-    provider: {
-      "@type": "Organization",
-      name: "Seconde",
-      url: SITE_URL,
-    },
+    provider: buildOrganizationLd(),
+  };
+}
+
+export function buildOrganizationLd() {
+  return {
+    "@type": "Organization",
+    name: "Seconde",
+    url: SITE_URL,
+    logo: `${SITE_URL}/favicon.svg`,
+    description: siteConfig.description,
+    areaServed: "FR",
+  };
+}
+
+export function buildWebsiteLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Seconde",
+    url: SITE_URL,
+    inLanguage: "fr-FR",
+    publisher: buildOrganizationLd(),
+  };
+}
+
+export function buildBreadcrumbLd(items: { name: string; path: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: `${SITE_URL}${item.path === "/" ? "" : item.path}`,
+    })),
+  };
+}
+
+export type ReviewData = {
+  author: string;
+  rating: number;
+  body: string;
+};
+
+export function buildReviewsLd(reviews: ReviewData[]) {
+  const reviewCount = reviews.length;
+ const ratingSum = reviews.reduce((sum, r) => sum + r.rating, 0);
+  const ratingValue = reviewCount > 0 ? ratingSum / reviewCount : 0;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: "Seconde",
+    url: `${SITE_URL}/reviews`,
+    provider: buildOrganizationLd(),
+    aggregateRating:
+      reviewCount > 0
+        ? {
+            "@type": "AggregateRating",
+            ratingValue: Math.round(ratingValue * 10) / 10,
+            reviewCount,
+            bestRating: 5,
+            worstRating: 1,
+          }
+        : undefined,
+    review: reviews.map((review) => ({
+      "@type": "Review",
+      author: { "@type": "Person", name: review.author },
+      reviewRating: { "@type": "Rating", ratingValue: review.rating, bestRating: 5, worstRating: 1 },
+      reviewBody: review.body,
+    })),
   };
 }

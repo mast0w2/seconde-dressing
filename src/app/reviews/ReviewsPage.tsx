@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -144,6 +144,55 @@ export default function ReviewsPage() {
     const total = reviews.reduce((sum, review) => sum + review.rating, 0);
     return (total / reviews.length).toFixed(1);
   };
+
+  const reviewsJsonLd = useMemo(() => {
+    const siteUrl =
+      process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+      "https://seconde-dressing.com";
+    const reviewCount = reviews.length;
+    const ratingSum = reviews.reduce((sum, r) => sum + r.rating, 0);
+    const ratingValue = reviewCount > 0 ? ratingSum / reviewCount : 0;
+    return {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      name: "Seconde",
+      url: `${siteUrl}/reviews`,
+      provider: { "@type": "Organization", name: "Seconde", url: siteUrl },
+      aggregateRating:
+        reviewCount > 0
+          ? {
+              "@type": "AggregateRating",
+              ratingValue: Math.round(ratingValue * 10) / 10,
+              reviewCount,
+              bestRating: 5,
+              worstRating: 1,
+            }
+          : undefined,
+      review: reviews.map((review) => ({
+        "@type": "Review",
+        author: { "@type": "Person", name: review.client_name },
+        reviewRating: {
+          "@type": "Rating",
+          ratingValue: review.rating,
+          bestRating: 5,
+          worstRating: 1,
+        },
+        reviewBody: review.comment,
+      })),
+    };
+  }, [reviews]);
+
+  useEffect(() => {
+    const id = "reviews-jsonld";
+    let script = document.getElementById(id) as HTMLScriptElement | null;
+    if (!script) {
+      script = document.createElement("script");
+      script.id = id;
+      script.type = "application/ld+json";
+      document.head.appendChild(script);
+    }
+    script.textContent = JSON.stringify(reviewsJsonLd);
+  }, [reviewsJsonLd]);
 
   if (loading) {
     return (
