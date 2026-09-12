@@ -1,0 +1,465 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select } from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
+import { createBrowserClient } from "@supabase/ssr";
+import { isProfileComplete } from "@/lib/profile";
+import type { Request, Profile, Formula, RequestStatus } from "@/types/database";
+import { requestStatusConfig, SELLER_STATUS_OPTIONS } from "@/lib/request-status";
+import { ArrowLeft } from "lucide-react";
+import { RequestItemsUploader } from "@/components/RequestItemsUploader";
+import { RequestAccordion } from "@/components/RequestAccordion";
+
+interface RequestWithRelations extends Request {
+  client: Profile | null;
+  formula: Formula | null;
+}
+
+export default function SellerDashboardPage() {
+  const router = useRouter();
+  const { toast } = useToast();
+  const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+  const [user, setUser] = useState<{ id: string } | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [requests, setRequests] = useState<RequestWithRelations[]>([]);
+  // request ids the current seller refused (still open for other sellers)
+  const [refusedIds, setRefusedIds] = useState<Set<string>>(new Set());
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchRequests = useCallback(async (userId: string) => {
+    // Accepted requests (assigned to this seller, any status) + open requests
+    // (pending). Refusals are tracked per seller so a refused request stays
+    // open for others but is hidden from this seller's "nouvelles".
+    const [acceptedRes, openRes, refusRes] = await Promise.all([
+      supabase
+        .from("requests")
+        .select(`*, client:client_id (id, first_name, last_name, email, phone), formula:formula_id (id, slug, label, price)`)
+        .eq("seller_id", userId)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("requests")
+        .select(`*, client:client_id (id, first_name, last_name, email, phone), formula:formula_id (id, slug, label, price)`)
+        .eq("status", "pending")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("request_refusals")
+        .select("request_id")
+        .eq("seller_id", userId),
+    ]);
+
+    if (acceptedRes.error) throw acceptedRes.error;
+    if (openRes.error) throw openRes.error;
+    if (refusRes.error) throw refusRes.error;
+
+    setRefusedIds(new Set<string>((refusRes.data || []).map((r) => r.request_id)));
+
+    // Merge, dedupe by id, keep newest first
+    const merged: RequestWithRelations[] = [
+      ...(acceptedRes.data || []),
+      ...(openRes.data || []),
+    ] as unknown as RequestWithRelations[];
+    const seen = new Set<string>();
+    const unique = merged.filter((r) => {
+      if (seen.has(r.id)) return false;
+      seen.add(r.id);
+      return true;
+    });
+    setRequests(unique);
+  }, [supabase]);
+
+  const fetchData = useCallback(async () => {
+    try {
+      const {
+        data: { user: currentUser },
+      } = await supabase.auth.getUser();
+      if (!currentUser) {
+        router.push("/login");
+        return;
+      }
+      setUser(currentUser);
+
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", currentUser.id)
+        .single();
+
+      if (!profileData) {
+        router.push("/signup");
+        return;
+      }
+      setProfile(profileData as Profile);
+
+      if (profileData.role !== "seller") {
+        router.push("/dashboard/client");
+        return;
+      }
+
+      if (!isProfileComplete(profileData)) {
+        router.push("/profile?incomplete=1");
+        return;
+      }
+
+      await fetchRequests(currentUser.id);
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Impossible de charger les demandes.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [supabase, router, toast, fetchRequests]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Seller accepts a request: it becomes theirs and leaves the open pool for
+  // everyone else. The first seller to accept wins.
+  const handleAccept = async (requestId: string) => {
+    if (!user) return;
+    try {
+      const { error } = await supabase
+        .from("requests")
+        .update({
+          status: "accepted",
+          seller_id: user.id,
+          confirmed_date: new Date().toISOString().slice(0, 10),
+          confirmed_time: new Date().toTimeString().slice(0, 8),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", requestId)
+        .is("seller_id", null)
+        .eq("status", "pending");
+
+      if (error) throw error;
+
+      await fetchRequests(user.id);
+      toast({ title: "Demande acceptée", description: "Le client a été notifié." });
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Seller refuses a request: the global status is NOT changed, so another
+  // seller can still accept it. We only record the refusal for this seller.
+  const handleRefuse = async (requestId: string) => {
+    if (!user) return;
+    try {
+      const { error } = await supabase
+        .from("request_refusals")
+        .upsert(
+          { request_id: requestId, seller_id: user.id },
+          { onConflict: "request_id,seller_id" }
+        );
+
+      if (error) throw error;
+
+      await fetchRequests(user.id);
+      toast({
+        title: "Demande refusée",
+        description: "Cette demande reste disponible pour les autres vendeuses.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Update the status of a request the seller accepted. Works for any of the
+  // post-acceptance statuses, so the seller can move forward or revert.
+  const handleUpdateStatus = async (requestId: string, newStatus: RequestStatus) => {
+    if (!user) return;
+    try {
+      const { error } = await supabase
+        .from("requests")
+        .update({
+          status: newStatus,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", requestId)
+        .eq("seller_id", user.id);
+
+      if (error) throw error;
+
+      await fetchRequests(user.id);
+      toast({
+        title: "Statut mis à jour",
+        description: `La demande est passée en "${requestStatusConfig[newStatus].label}".`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const renderRequestSummary = (request: RequestWithRelations) => {
+    const statusInfo = requestStatusConfig[request.status];
+    const client = request.client;
+    const formula = request.formula;
+    const clientDisplayName = client
+      ? `${client.first_name} ${client.last_name}`.trim()
+      : `${request.client_first_name ?? ""} ${request.client_last_name ?? ""}`.trim();
+
+    return (
+      <div className="flex flex-wrap items-center gap-3">
+        <div className={`p-2 rounded-full ${statusInfo.color}`}>
+          {statusInfo.icon}
+        </div>
+        <div className="font-semibold">Demande #{request.id.slice(0, 8)}</div>
+        <div className="text-sm text-gris-moyen">
+          {new Date(request.created_at).toLocaleDateString("fr-FR")}
+        </div>
+        {clientDisplayName && (
+          <div className="text-sm text-gris-moyen">· {clientDisplayName}</div>
+        )}
+        {formula && (
+          <div className="text-sm text-gris-moyen">
+            · {formula.label} ({formula.price} €)
+          </div>
+        )}
+        <Badge className={statusInfo.color}>{statusInfo.label}</Badge>
+      </div>
+    );
+  };
+
+  const renderRequestDetails = (
+    request: RequestWithRelations,
+    tab: "new" | "accepted" | "refused"
+  ) => {
+    const statusInfo = requestStatusConfig[request.status];
+    const client = request.client;
+    const formula = request.formula;
+    const isAssignedToMe = request.seller_id === user?.id;
+    const clientDisplayName = client
+      ? `${client.first_name} ${client.last_name}`.trim()
+      : `${request.client_first_name ?? ""} ${request.client_last_name ?? ""}`.trim();
+    const clientEmail = client?.email ?? request.client_email ?? null;
+    const clientPhone = client?.phone ?? request.client_phone ?? null;
+
+    return (
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1">
+          {clientDisplayName && (
+            <div className="text-sm text-gris-moyen mb-2">
+              {clientDisplayName}
+            </div>
+          )}
+          {isAssignedToMe && clientEmail && (
+            <div className="text-sm text-gris-moyen mb-2">
+              {clientEmail}
+              {clientPhone ? ` · ${clientPhone}` : ""}
+            </div>
+          )}
+          {!isAssignedToMe && tab !== "refused" && (
+            <div className="text-sm text-gris-moyen mb-2 italic">
+              Coordonnées visibles après acceptation de la demande
+            </div>
+          )}
+
+          {formula && (
+            <div className="text-sm text-gris-moyen mb-3">
+              Formule : {formula.label} ({formula.price} €)
+            </div>
+          )}
+          {request.address && (
+            <div className="text-sm text-gris-moyen mb-3">
+              Adresse : {request.address}
+            </div>
+          )}
+
+          <Badge className={statusInfo.color}>{statusInfo.label}</Badge>
+
+          {request.message && (
+            <div className="mt-3 p-3 bg-muted/50 rounded">
+              <p className="text-sm">{request.message}</p>
+            </div>
+          )}
+
+          <RequestItemsUploader requestId={request.id} />
+        </div>
+
+        <div className="flex flex-col gap-2 shrink-0 min-w-[180px]">
+          {tab === "new" && (
+            <>
+              <Button
+                size="sm"
+                onClick={() => handleAccept(request.id)}
+                className="h-8 px-3"
+              >
+                Accepter
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleRefuse(request.id)}
+                className="h-8 px-3"
+              >
+                Refuser
+              </Button>
+            </>
+          )}
+
+          {tab === "accepted" && (
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-medium text-gris-moyen mb-1">
+                Statut de la commande
+              </label>
+              <Select
+                value={request.status}
+                onChange={(e) =>
+                  handleUpdateStatus(request.id, e.target.value as RequestStatus)
+                }
+                className="h-9"
+              >
+                {SELLER_STATUS_OPTIONS.map((status) => (
+                  <option key={status} value={status}>
+                    {requestStatusConfig[status].label}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          )}
+
+          {tab === "refused" && (
+            <div className="text-xs text-gris-moyen italic">
+              Disponible pour les autres vendeuses
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-creme">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-noir"></div>
+      </div>
+    );
+  }
+
+  if (!user || !profile) return null;
+
+  // Split requests into the three tabs.
+  const newRequests: RequestWithRelations[] = [];
+  const acceptedRequests: RequestWithRelations[] = [];
+  const refusedRequests: RequestWithRelations[] = [];
+
+  for (const request of requests) {
+    if (request.seller_id === user.id) {
+      acceptedRequests.push(request);
+    } else if (refusedIds.has(request.id)) {
+      refusedRequests.push(request);
+    } else {
+      newRequests.push(request);
+    }
+  }
+
+  return (
+    <div className="container py-8 max-w-6xl">
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" onClick={() => router.back()} className="h-10 w-10 p-0">
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-3xl">Tableau de bord</h1>
+            <p className="text-gris-moyen">Gérez les demandes des clients</p>
+          </div>
+        </div>
+
+        <Tabs defaultValue="new">
+          <TabsList className="w-full grid grid-cols-3 border-b border-noir/10">
+            <TabsTrigger
+              value="new"
+              className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-noir data-[state=active]:text-noir data-[state=inactive]:text-gris-moyen text-sm tracking-wide"
+            >
+              Nouvelles demandes ({newRequests.length})
+            </TabsTrigger>
+            <TabsTrigger
+              value="accepted"
+              className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-noir data-[state=active]:text-noir data-[state=inactive]:text-gris-moyen text-sm tracking-wide"
+            >
+              Demandes acceptées ({acceptedRequests.length})
+            </TabsTrigger>
+            <TabsTrigger
+              value="refused"
+              className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-noir data-[state=active]:text-noir data-[state=inactive]:text-gris-moyen text-sm tracking-wide"
+            >
+              Demandes refusées ({refusedRequests.length})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="new" className="space-y-4">
+            {newRequests.length === 0 ? (
+              <div className="text-center py-12 text-gris-moyen">
+                <p>Aucune nouvelle demande.</p>
+              </div>
+            ) : (
+              newRequests.map((request) => (
+                <RequestAccordion
+                  key={request.id}
+                  header={renderRequestSummary(request)}
+                >
+                  {renderRequestDetails(request, "new")}
+                </RequestAccordion>
+              ))
+            )}
+          </TabsContent>
+
+          <TabsContent value="accepted" className="space-y-4">
+            {acceptedRequests.length === 0 ? (
+              <div className="text-center py-12 text-gris-moyen">
+                <p>Aucune demande acceptée pour le moment.</p>
+              </div>
+            ) : (
+              acceptedRequests.map((request) => (
+                <RequestAccordion
+                  key={request.id}
+                  header={renderRequestSummary(request)}
+                >
+                  {renderRequestDetails(request, "accepted")}
+                </RequestAccordion>
+              ))
+            )}
+          </TabsContent>
+
+          <TabsContent value="refused" className="space-y-4">
+            {refusedRequests.length === 0 ? (
+              <div className="text-center py-12 text-gris-moyen">
+                <p>Aucune demande refusée.</p>
+              </div>
+            ) : (
+              refusedRequests.map((request) => (
+                <RequestAccordion
+                  key={request.id}
+                  header={renderRequestSummary(request)}
+                >
+                  {renderRequestDetails(request, "refused")}
+                </RequestAccordion>
+              ))
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}

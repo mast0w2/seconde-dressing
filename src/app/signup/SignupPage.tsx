@@ -1,0 +1,301 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useToast } from "@/components/ui/use-toast";
+import { createBrowserClient } from "@supabase/ssr";
+import { capitalizeName } from "@/lib/text";
+import type { Role } from "@/types/database";
+
+const formSchema = z.object({
+  email: z.string().email("Adresse email invalide"),
+  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+  prenom: z.string().min(2, "Le prénom est requis"),
+  nom: z.string().min(2, "Le nom est requis"),
+  role: z.enum(["client", "seller"], {
+    errorMap: () => ({ message: "Merci d'indiquer votre intention" }),
+  }),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
+function SignupForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { toast } = useToast();
+  const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+
+  const isVendeurFlow = searchParams.get("vendeur") === "true";
+  const preselectedRole: Role = isVendeurFlow ? "seller" : "client";
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      prenom: "",
+      nom: "",
+      role: preselectedRole,
+    },
+  });
+
+  const { handleSubmit, register, formState, setValue, watch } = form;
+  const { errors, isSubmitting } = formState;
+  const selectedRole = watch("role");
+
+  const onSubmit = async (data: FormValues) => {
+    try {
+      const {
+        data: { user, session },
+        error: authError,
+      } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+        },
+      });
+
+      if (authError) {
+        throw authError;
+      }
+
+      if (!user) {
+        throw new Error("User not found after signup");
+      }
+
+      const { error: profileError } = await supabase.from("profiles").insert([
+        {
+          id: user.id,
+          email: user.email,
+          first_name: capitalizeName(data.prenom),
+          last_name: capitalizeName(data.nom),
+          phone: null,
+          photo_url: null,
+          street_address: null,
+          role: data.role,
+          bio: null,
+          specialization: null,
+          hourly_rate: null,
+          years_experience: null,
+        },
+      ]);
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      if (!session) {
+        toast({
+          title: "Inscription réussie",
+          description: "N'oubliez pas de confirmer votre adresse e-mail pour activer votre compte.",
+        });
+        router.push("/login?email_pending=1");
+        return;
+      }
+
+      toast({
+        title: "Bienvenue sur Seconde !",
+        description: "Votre compte a été créé. Complétez votre profil pour finaliser votre inscription.",
+      });
+
+      router.push("/profile");
+    } catch (error: any) {
+      toast({
+        title: "Erreur d'inscription",
+        description: error.message || "Une erreur est survenue.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+      });
+      if (error) {
+        throw error;
+      }
+    } catch (error: any) {
+      toast({
+        title: "Erreur de connexion",
+        description: error.message || "Une erreur est survenue.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-creme p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-2xl">
+            {isVendeurFlow ? "Devenir vendeuse" : "Créer un compte"}
+          </CardTitle>
+          <CardDescription>
+            Inscrivez-vous pour commencer à utiliser Seconde
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="prenom">Prénom</Label>
+                <Input
+                  id="prenom"
+                  placeholder="Jean"
+                  {...register("prenom")}
+                  className={errors.prenom ? "border-destructive" : ""}
+                />
+                {errors.prenom && (
+                  <p className="text-sm text-destructive">{errors.prenom.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="nom">Nom</Label>
+                <Input
+                  id="nom"
+                  placeholder="Dupont"
+                  {...register("nom")}
+                  className={errors.nom ? "border-destructive" : ""}
+                />
+                {errors.nom && (
+                  <p className="text-sm text-destructive">{errors.nom.message}</p>
+                )}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="votre@email.com"
+                {...register("email")}
+                className={errors.email ? "border-destructive" : ""}
+              />
+              {errors.email && (
+                <p className="text-sm text-destructive">{errors.email.message}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Mot de passe</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                {...register("password")}
+                className={errors.password ? "border-destructive" : ""}
+              />
+              {errors.password && (
+                <p className="text-sm text-destructive">{errors.password.message}</p>
+              )}
+            </div>
+
+            {!isVendeurFlow && (
+              <div className="space-y-3">
+                <Label>Votre intention</Label>
+                <RadioGroup
+                  defaultValue={selectedRole}
+                  onValueChange={(value) => setValue("role", value as Role)}
+                  className="grid gap-3 pt-1"
+                >
+                  <label
+                    htmlFor="role-client"
+                    className="flex items-start gap-3 rounded-lg border border-noir/15 p-4 cursor-pointer hover:bg-noir/5 transition-colors"
+                  >
+                    <RadioGroupItem value="client" id="role-client" className="mt-1" />
+                    <div className="space-y-1">
+                      <span className="block text-sm font-medium">Je veux vendre mes vêtements</span>
+                      <span className="block text-sm text-gris-moyen">
+                        Vous déposez vos pièces pour qu&apos;une vendeuse les reprenne.
+                      </span>
+                    </div>
+                  </label>
+                  <label
+                    htmlFor="role-seller"
+                    className="flex items-start gap-3 rounded-lg border border-noir/15 p-4 cursor-pointer hover:bg-noir/5 transition-colors"
+                  >
+                    <RadioGroupItem value="seller" id="role-seller" className="mt-1" />
+                    <div className="space-y-1">
+                      <span className="block text-sm font-medium">Je souhaite aider à vendre des vêtements</span>
+                      <span className="block text-sm text-gris-moyen">
+                        Vous triez et accompagnez les clientes dans la reprise de leurs pièces.
+                      </span>
+                    </div>
+                  </label>
+                </RadioGroup>
+                {errors.role && (
+                  <p className="text-sm text-destructive">{errors.role.message}</p>
+                )}
+              </div>
+            )}
+
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Inscription..." : "S'inscrire"}
+            </Button>
+          </form>
+          <div className="mt-4">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-blanc text-gris-moyen">ou</span>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              className="w-full mt-4"
+              onClick={handleGoogleLogin}
+              type="button"
+            >
+              <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+                <path
+                  fill="#4285F4"
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                />
+              </svg>
+              S&apos;inscrire avec Google
+            </Button>
+          </div>
+          <p className="mt-4 text-center text-sm text-gris-moyen">
+            Vous avez déjà un compte ?{" "}
+            <Link href="/login" className="text-sauge-fonce hover:underline">
+              Se connecter
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense>
+      <SignupForm />
+    </Suspense>
+  );
+}
