@@ -2,9 +2,11 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ProgressiveEstimationForm } from "@/components/Form/ProgressiveEstimationForm";
 import { Clock, Euro, Calendar, Truck, Sparkles, Leaf } from "lucide-react";
+import { cities, getCityLabel } from "@/lib/cities";
 
 // ============================================================================
 // Data
@@ -255,6 +257,39 @@ export default function HomePage() {
               Pas de frais cachés. Seul le rendez-vous est facturé, de 10 à 50 € selon la formule
               choisie. Ce qui ne se vend pas vous revient, ou part vers nos filières de réemploi.
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ================= NOS ZONES D'INTERVENTION ================= */}
+      <section
+        id="zones"
+        className="px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24"
+      >
+        <div className="max-w-[1200px] mx-auto">
+          <div className="flex flex-col gap-5 max-w-[640px] mb-10 sm:mb-14">
+            <div className="eyebrow">Nos zones d'intervention</div>
+            <h2 className="text-3xl sm:text-4xl leading-[1.18]">
+              On se déplace à Paris et en petite couronne
+            </h2>
+            <p className="text-base text-gris-moyen">
+              On vient chez vous dans Paris intra-muros et dans les communes de
+              petite couronne (92, 93, 94). Sélectionnez votre ville pour en savoir plus.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+            {cities.map((city) => (
+              <Link
+                key={city.slug}
+                href={`/${city.slug}`}
+                className="bg-gris-tres-clair border border-gris-clair px-5 py-4 text-center hover:border-noir hover:bg-creme transition-colors"
+              >
+                <span className="text-sm sm:text-base text-noir">
+                  {getCityLabel(city.slug)}
+                </span>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
