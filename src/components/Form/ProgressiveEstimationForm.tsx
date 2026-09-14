@@ -185,7 +185,7 @@ const QUESTIONS: Question[] = [
   },
 ];
 
-const PART_CLIENTE = 0.4;
+const PART_CLIENTE = 0.5;
 
 // ============================================================================
 // Validation

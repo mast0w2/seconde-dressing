@@ -1,373 +1,203 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import { createBrowserClient } from "@supabase/ssr";
-import { useToast } from "@/components/ui/use-toast";
-import { Star } from "lucide-react";
+import { Star, MessageCircle } from "lucide-react";
+
+// ============================================================================
+// Types
+// ============================================================================
+
+interface ProfilLeger {
+  first_name?: string | null;
+  last_name?: string | null;
+}
 
 interface Review {
   id: string;
-  client_name: string;
   rating: number;
   comment: string;
   created_at: string;
+  client?: ProfilLeger | ProfilLeger[] | null;
 }
 
+// ============================================================================
+// Utilitaires
+// ============================================================================
+
+/** Prénom + initiale du nom : on ne publie jamais l'identité complète d'une cliente. */
+function nomAffiche(client: Review["client"]): string {
+  const p = Array.isArray(client) ? client[0] : client;
+  const prenom = p?.first_name?.trim();
+  if (!prenom) return "Cliente Seconde";
+  const initiale = p?.last_name?.trim()?.charAt(0);
+  return initiale ? `${prenom} ${initiale.toUpperCase()}.` : prenom;
+}
+
+function formaterDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+}
+
+function Etoiles({ note, taille = 14 }: { note: number; taille?: number }) {
+  return (
+    <span className="inline-flex items-center gap-1" aria-label={`${note} sur 5`}>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <Star
+          key={i}
+          style={{ width: taille, height: taille }}
+          strokeWidth={1.3}
+          className={i <= Math.round(note) ? "fill-sauge text-sauge" : "text-sauge-clair"}
+        />
+      ))}
+    </span>
+  );
+}
+
+// ============================================================================
+// Page
+// ============================================================================
+
 export default function ReviewsPage() {
-  const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
-  const { toast } = useToast();
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
-
-  // Form states
-  const [name, setName] = useState("");
-  const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-
-      if (user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .single();
-        setProfile(profile);
-        setName(profile?.full_name || "");
-      }
-    };
-
-    const fetchReviews = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("reviews")
-          .select("*")
-          .order("created_at", { ascending: false });
-
-        if (error) throw error;
-        setReviews(data || []);
-      } catch (error) {
-        console.error("Error fetching reviews:", error);
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger les avis. Veuillez réessayer.",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkUser();
-    fetchReviews();
-  }, [supabase, toast]);
-
-  const handleStarClick = (value: number) => {
-    setRating(value);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!name.trim() || rating === 0 || !comment.trim()) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez remplir tous les champs et sélectionner une note.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch('/api/reviews', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          client_name: name,
-          rating,
-          comment,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to submit review");
-      }
-
-      // Refresh reviews
-      const { data: reviewsData } = await supabase
+    const charger = async () => {
+      // La table reviews référence profiles deux fois (cliente et vendeuse) :
+      // il faut donc désigner explicitement la clé étrangère.
+      const avecProfil = await supabase
         .from("reviews")
-        .select("*")
+        .select("id, rating, comment, created_at, client:profiles!client_id (first_name, last_name)")
         .order("created_at", { ascending: false });
 
-      setReviews(reviewsData || []);
+      if (!avecProfil.error) {
+        setReviews((avecProfil.data as unknown as Review[]) || []);
+        setLoading(false);
+        return;
+      }
 
-      // Reset form
-      setName("");
-      setRating(0);
-      setComment("");
+      // Repli : si la jointure échoue, on affiche au moins les avis.
+      console.warn("[Avis] Jointure profil indisponible :", avecProfil.error.message);
+      const simple = await supabase
+        .from("reviews")
+        .select("id, rating, comment, created_at")
+        .order("created_at", { ascending: false });
 
-      toast({
-        title: "Succès",
-        description: data.message || "Votre avis a été soumis avec succès. Merci !",
-      });
-    } catch (error: any) {
-      console.error("Error submitting review:", error);
-      toast({
-        title: "Erreur",
-        description: error.message || "Impossible de soumettre votre avis. Veuillez réessayer.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const getAverageRating = () => {
-    if (reviews.length === 0) return "0";
-    const total = reviews.reduce((sum, review) => sum + review.rating, 0);
-    return (total / reviews.length).toFixed(1);
-  };
-
-  const reviewsJsonLd = useMemo(() => {
-    const siteUrl =
-      process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-      "https://seconde-dressing.com";
-    const reviewCount = reviews.length;
-    const ratingSum = reviews.reduce((sum, r) => sum + r.rating, 0);
-    const ratingValue = reviewCount > 0 ? ratingSum / reviewCount : 0;
-    return {
-      "@context": "https://schema.org",
-      "@type": "Service",
-      name: "Seconde",
-      url: `${siteUrl}/reviews`,
-      provider: { "@type": "Organization", name: "Seconde", url: siteUrl },
-      aggregateRating:
-        reviewCount > 0
-          ? {
-              "@type": "AggregateRating",
-              ratingValue: Math.round(ratingValue * 10) / 10,
-              reviewCount,
-              bestRating: 5,
-              worstRating: 1,
-            }
-          : undefined,
-      review: reviews.map((review) => ({
-        "@type": "Review",
-        author: { "@type": "Person", name: review.client_name },
-        reviewRating: {
-          "@type": "Rating",
-          ratingValue: review.rating,
-          bestRating: 5,
-          worstRating: 1,
-        },
-        reviewBody: review.comment,
-      })),
+      if (simple.error) {
+        console.error("[Avis] Chargement impossible :", simple.error.message);
+      }
+      setReviews((simple.data as unknown as Review[]) || []);
+      setLoading(false);
     };
-  }, [reviews]);
 
-  useEffect(() => {
-    const id = "reviews-jsonld";
-    let script = document.getElementById(id) as HTMLScriptElement | null;
-    if (!script) {
-      script = document.createElement("script");
-      script.id = id;
-      script.type = "application/ld+json";
-      document.head.appendChild(script);
-    }
-    script.textContent = JSON.stringify(reviewsJsonLd);
-  }, [reviewsJsonLd]);
+    charger();
+  }, [supabase]);
 
-  if (loading) {
-    return (
-      <div className="flex flex-col min-h-screen">
-        <section className="py-20">
-          <div className="container">
-            <div className="max-w-4xl mx-auto text-center">
-              <p>Chargement des avis...</p>
-            </div>
-          </div>
-        </section>
-      </div>
-    );
-  }
+  const moyenne =
+    reviews.length > 0
+      ? reviews.reduce((total, avis) => total + (avis.rating || 0), 0) / reviews.length
+      : 0;
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Hero Section */}
-      <section className="relative bg-creme py-20">
-        <div className="container">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl mb-6 text-noir">
-              Avis Clients
-            </h1>
-            <p className="text-xl text-gris-moyen mb-8">
-              Découvrez ce que nos clients pensent de Seconde
-            </p>
-          </div>
-        </div>
-      </section>
+    <div className="bg-creme text-noir">
+      {/* ================= INTRODUCTION ================= */}
+      <section className="px-6 sm:px-10 lg:px-[76px] pt-12 sm:pt-16 pb-12 sm:pb-14">
+        <div className="max-w-[820px] mx-auto flex flex-col gap-6">
+          <div className="eyebrow">Avis clientes</div>
+          <h1 className="text-4xl sm:text-5xl leading-[1.14]">
+            Ce qu&apos;elles en disent,
+            <br />
+            <span className="italic text-sauge-fonce">une fois leurs pièces vendues.</span>
+          </h1>
+          <p className="text-base sm:text-lg text-gris-moyen">
+            Chaque avis publié ici vient d&apos;une cliente à qui nous avons réellement vendu des
+            vêtements. Nous les sollicitons par email à la fin de la vente, et nous publions ce
+            qu&apos;elles écrivent — sans trier.
+          </p>
 
-      {/* Reviews Summary */}
-      <section className="py-16">
-        <div className="container">
-          <div className="max-w-4xl mx-auto">
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle className="text-2xl text-center">
-                  Note Globale
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-center">
-                <div className="flex justify-center mb-4">
-                  <div className="flex items-center gap-1">
-                    {[1, 2, 3, 4, 5].map((star) => {
-                      const filled = Math.round(parseFloat(getAverageRating())) >= star;
-                      return (
-                        <Star
-                          key={star}
-                          className={`h-8 w-8 ${filled ? "text-sauge-fonce fill-sauge-fonce" : "text-gris-clair"}`}
-                        />
-                      );
-                    })}
-                  </div>
-                </div>
-                <h2 className="text-4xl mb-2">{getAverageRating()}/5.0</h2>
-                <p className="text-gris-moyen">
-                  Basé sur {reviews.length} avis
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Reviews List */}
-            <div className="space-y-6 mb-12">
-              <h2 className="text-2xl mb-6">Derniers Avis</h2>
-              {reviews.length > 0 ? (
-                reviews.map((review) => (
-                  <Card key={review.id}>
-                    <CardHeader>
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <CardTitle>{review.client_name}</CardTitle>
-                          <CardDescription>
-                            {new Date(review.created_at).toLocaleDateString("fr-FR", {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            })}
-                          </CardDescription>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          {[1, 2, 3, 4, 5].map((star) => {
-                            const filled = review.rating >= star;
-                            return (
-                              <Star
-                                key={star}
-                                className={`h-5 w-5 ${filled ? "text-sauge-fonce fill-sauge-fonce" : "text-gris-clair"}`}
-                              />
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm">{review.comment}</p>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                <Card>
-                  <CardContent className="text-center py-8">
-                    <p className="text-gris-moyen">
-                      Aucun avis pour le moment. Soyez le premier à en laisser un !
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
+          {reviews.length > 0 && (
+            <div className="flex items-center gap-4 border-t border-noir/10 pt-6">
+              <span className="font-serif text-4xl leading-none text-noir">
+                {moyenne.toFixed(1).replace(".", ",")}
+              </span>
+              <div className="flex flex-col gap-1">
+                <Etoiles note={moyenne} taille={16} />
+                <span className="text-sm text-gris-moyen">
+                  {reviews.length} avis {reviews.length > 1 ? "publiés" : "publié"}
+                </span>
+              </div>
             </div>
-
-            {/* Review Form */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">Laissez votre avis</CardTitle>
-                <CardDescription>
-                  Partagez votre expérience avec Seconde
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Nom complet</Label>
-                    <Input
-                      id="name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Votre nom complet"
-                      disabled={isSubmitting}
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Note</Label>
-                    <div className="flex items-center gap-2">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          type="button"
-                          onClick={() => handleStarClick(star)}
-                          className="p-0"
-                          disabled={isSubmitting}
-                        >
-                          <Star
-                            className={`h-8 w-8 ${star <= rating ? "text-sauge-fonce fill-sauge-fonce" : "text-gris-clair"}`}
-                          />
-                        </button>
-                      ))}
-                    </div>
-                    <p className="text-sm text-gris-moyen">
-                      Cliquez sur les étoiles pour noter (1 = médiocre, 5 = excellent)
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="comment">Votre avis</Label>
-                    <Textarea
-                      id="comment"
-                      value={comment}
-                      onChange={(e) => setComment(e.target.value)}
-                      placeholder="Décrivez votre expérience avec Seconde..."
-                      rows={5}
-                      disabled={isSubmitting}
-                      required
-                    />
-                  </div>
-
-                  <Button type="submit" disabled={isSubmitting} className="w-full">
-                    {isSubmitting ? "Envoi en cours..." : "Soumettre mon avis"}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
+          )}
         </div>
       </section>
+
+      {/* ================= LES AVIS ================= */}
+      <section className="bg-gris-clair px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24">
+        <div className="max-w-[1200px] mx-auto">
+          {loading ? (
+            <p className="text-gris-moyen">Chargement des avis…</p>
+          ) : reviews.length === 0 ? (
+            <div className="max-w-[620px] mx-auto text-center flex flex-col items-center gap-5 bg-gris-tres-clair border border-noir/10 p-10 sm:p-12">
+              <MessageCircle className="h-8 w-8 text-sauge" strokeWidth={1.3} />
+              <h2 className="text-2xl sm:text-3xl">Les premiers avis arrivent bientôt.</h2>
+              <p className="text-gris-moyen">
+                Nous venons d&apos;ouvrir. Dès que les premières ventes seront conclues, les clientes
+                concernées recevront une invitation à donner leur avis, et il apparaîtra ici tel
+                qu&apos;elles l&apos;auront écrit.
+              </p>
+              <Link
+                href="/demande-rdv"
+                className="mt-2 bg-noir text-blanc border border-noir px-8 py-4 text-[11px] tracking-[0.2em] uppercase hover:bg-transparent hover:text-noir transition-colors"
+              >
+                Demander un rendez-vous
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
+              {reviews.map((avis) => (
+                <figure
+                  key={avis.id}
+                  className="bg-gris-tres-clair border border-noir/10 p-8 flex flex-col gap-4"
+                >
+                  <Etoiles note={avis.rating} />
+                  <blockquote className="font-serif text-xl leading-snug text-noir">
+                    « {avis.comment} »
+                  </blockquote>
+                  <figcaption className="mt-auto pt-4 border-t border-noir/10 text-sm text-gris-moyen">
+                    {nomAffiche(avis.client)} · {formaterDate(avis.created_at)}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ================= APPEL À L'ACTION ================= */}
+      {reviews.length > 0 && (
+        <section className="px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24">
+          <div className="max-w-[720px] mx-auto text-center flex flex-col items-center gap-6">
+            <div className="eyebrow">À votre tour</div>
+            <h2 className="text-3xl sm:text-4xl leading-[1.18]">
+              Videz votre dressing, sans effort.
+            </h2>
+            <p className="text-base text-gris-moyen max-w-[520px]">
+              Quelques questions, moins d&apos;une minute, et on vous recontacte sous 24 heures.
+            </p>
+            <Link
+              href="/demande-rdv"
+              className="mt-2 bg-noir text-blanc border border-noir px-8 py-4 text-[11px] tracking-[0.2em] uppercase hover:bg-transparent hover:text-noir transition-colors"
+            >
+              Demander un rendez-vous
+            </Link>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

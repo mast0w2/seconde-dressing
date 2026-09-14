@@ -286,8 +286,8 @@ export default function HomePage() {
             <div className="absolute inset-x-[-28px] top-[30px] bottom-[-26px] bg-sauge-clair/45 rounded-xl" />
             <div className="relative w-full h-[400px] rounded-xl overflow-hidden">
               <Image
-                src="/dressing-sort-4.jpg"
-                alt="Une cliente confie un sac de vêtements"
+                src="/rdv-pliage.jpg"
+                alt="Une femme plie un pull sur une table, dressing trié en arrière-plan"
                 fill
                 sizes="440px"
                 className="object-cover"

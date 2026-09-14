@@ -4,7 +4,6 @@ import { siteConfig } from "@/lib/seo";
 const ROUTES = [
   "/",
   "/concept",
-  "/about",
   "/impact",
   "/contact",
   "/vendeur",

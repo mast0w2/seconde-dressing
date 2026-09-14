@@ -1,417 +1,313 @@
-"use client";
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import Link from "next/link";
-import { Leaf, Home, ShoppingBag, Users, Euro, Recycle } from "lucide-react";
+import {
+  Gem,
+  HeartHandshake,
+  Wallet,
+  RotateCcw,
+  Scale,
+  MapPin,
+  Recycle,
+  Eye,
+  ShoppingBag,
+  Users,
+} from "lucide-react";
+
+// ============================================================================
+// Données
+// ============================================================================
+
+const ENGAGEMENTS = [
+  { icon: Gem, texte: "Vos pièces valent au moins 15 € en seconde main." },
+  {
+    icon: HeartHandshake,
+    texte:
+      "Votre vendeuse gère tout : le tri, les photos, les annonces, les échanges et l'expédition.",
+  },
+  { icon: Wallet, texte: "Vous êtes payée sous 60 jours au plus tard après la vente." },
+  {
+    icon: RotateCcw,
+    texte: "Ce qui ne se vend pas vous revient, ou part vers nos filières de réemploi.",
+  },
+];
+
+const FORMULES = [
+  {
+    titre: "Dressing déjà trié",
+    prix: "10 €",
+    texte:
+      "Vos vêtements sont déjà mis de côté, et vous remplirez vous-même l'inventaire de vos pièces avant notre passage. On vient simplement les récupérer.",
+  },
+  {
+    titre: "Tri sur place",
+    prix: "30 €",
+    texte:
+      "Vous avez mis de côté ce dont vous ne voulez plus, mais vous ne savez pas ce qui a de la valeur. On passe 30 min à 1 h chez vous pour trier et repérer les pièces qui se revendront.",
+  },
+  {
+    titre: "Tri & conseil",
+    prix: "50 €",
+    texte:
+      "Rendez-vous d'1 h à 1 h 30 : on trie avec vous et on vous conseille — ce qui vaut le coup d'être vendu, ce qui vous va le mieux, ce que vous avez intérêt à garder.",
+  },
+];
+
+const REPARTITION = [
+  {
+    part: "50 %",
+    titre: "Pour vous",
+    texte: "Votre part sur chaque pièce vendue, versée sur votre compte après la vente.",
+  },
+  {
+    part: "40 %",
+    titre: "Pour votre vendeuse",
+    texte:
+      "Elle se déplace, trie, photographie, rédige les annonces, répond aux acheteurs et expédie.",
+  },
+  {
+    part: "10 %",
+    titre: "Pour Seconde",
+    texte: "La plateforme, le suivi de vos ventes, les paiements sécurisés et le service client.",
+  },
+];
+
+const RAISONS = [
+  {
+    icon: Scale,
+    titre: "Une rémunération juste",
+    texte:
+      "Chacun est payé pour ce qu'il apporte : vous pour vos vêtements, votre vendeuse pour son travail et son œil, Seconde pour l'outil qui fait tourner l'ensemble.",
+  },
+  {
+    icon: MapPin,
+    titre: "Un métier, près de chez vous",
+    texte:
+      "Nos vendeuses sont des professionnelles indépendantes qui travaillent dans leur quartier. Faire appel à Seconde, c'est faire vivre une activité locale.",
+  },
+  {
+    icon: Recycle,
+    titre: "Une garde-robe qui circule",
+    texte:
+      "Chaque pièce qui trouve preneuse, c'est un vêtement neuf qui n'est pas produit. C'est là que se joue l'essentiel de l'impact.",
+  },
+  {
+    icon: Eye,
+    titre: "Des comptes clairs",
+    texte:
+      "Vous savez où va chaque euro avant même de nous confier quoi que ce soit. Pas de frais découverts en cours de route.",
+  },
+];
+
+const CIRCULARITE = [
+  {
+    icon: ShoppingBag,
+    titre: "Vous vendez plutôt que de jeter",
+    texte: "Des pièces qui dormaient retrouvent quelqu'un pour les porter.",
+  },
+  {
+    icon: Recycle,
+    titre: "Vous allégez votre empreinte",
+    texte: "Un vêtement porté une seconde fois, c'est un vêtement neuf en moins.",
+  },
+  {
+    icon: Users,
+    titre: "Vous soutenez une activité locale",
+    texte: "Votre dressing fait travailler quelqu'un près de chez vous.",
+  },
+];
+
+// ============================================================================
+// Page
+// ============================================================================
 
 export default function ConceptPage() {
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Hero Section */}
-      <section className="relative bg-creme py-16 sm:py-20">
-        <div className="container">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="flex justify-center mb-4 sm:mb-6">
-              <div className="w-12 h-12 sm:w-16 sm:h-16 border-2 border-noir rounded-full flex items-center justify-center">
-                <Recycle className="h-6 w-6 sm:h-8 sm:w-8 text-noir" />
-              </div>
-            </div>
-            <h1 className="text-3xl sm:text-4xl md:text-6xl mb-4 sm:mb-6 text-noir">
-              Notre Concept
+    <div className="bg-creme text-noir">
+      {/* ================= INTRODUCTION ================= */}
+      <section className="px-6 sm:px-10 lg:px-[76px] pt-12 sm:pt-16 pb-16 sm:pb-20">
+        <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_520px] gap-10 lg:gap-16 items-center">
+          <div className="flex flex-col gap-6">
+            <div className="eyebrow">Notre concept</div>
+            <h1 className="text-4xl sm:text-5xl leading-[1.14]">
+              Une mode plus durable,
+              <br />
+              <span className="italic text-sauge-fonce">et plus accessible.</span>
             </h1>
-            <p className="text-lg sm:text-xl text-gris-moyen mb-6 sm:mb-8 max-w-3xl mx-auto">
-              Chez Seconde, nous croyons en une mode plus durable et accessible. 
-              Découvrez comment on vous aide à vider votre dressing.
+            <p className="text-base sm:text-lg text-gris-moyen max-w-[480px]">
+              Vider son dressing prend du temps, demande de la méthode et un peu de flair. C&apos;est
+              exactement ce qu&apos;on fait à votre place : une vendeuse vient chez vous, repère ce
+              qui a de la valeur, et s&apos;occupe de la vente du début à la fin.
             </p>
           </div>
-        </div>
-      </section>
 
-      {/* Service Levels Section */}
-      <section className="py-12 sm:py-16">
-        <div className="container">
-          <div className="max-w-6xl mx-auto">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl sm:text-3xl text-center">
-                  Un service unique pour vendre vos vêtements
-                </CardTitle>
-                <CardDescription className="text-center text-base sm:text-lg">
-                  Confiez vos vêtements de valeur à nos vendeuses pour une vente optimisée.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-1 gap-6 sm:gap-8 mt-6 sm:mt-8">
-                  {/* Single Service */}
-                  <div className="border border-noir/20 p-6 sm:p-8 rounded-lg">
-                    <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-noir/10 rounded-full flex items-center justify-center">
-                        <Users className="h-5 w-5 sm:h-6 sm:w-6 text-noir" />
-                      </div>
-                      <h3 className="text-xl sm:text-2xl text-noir">Service complet de vente</h3>
-                    </div>
-                    <p className="text-sm sm:text-base text-gris-moyen mb-4 sm:mb-6">
-                      Vous confiez vos vêtements valant plus de 20€ à une vendeuse. Elle s'occupe de tout : 
-                      photographie, mise en ligne et vente. Vous recevez votre paiement dans les 60 jours au plus tard.
-                    </p>
-                    <div className="space-y-3 sm:space-y-4">
-                      <div className="flex items-center gap-2 sm:gap-3">
-                        <span className="text-sauge-fonce">✓</span>
-                        <span className="text-xs sm:text-sm text-gris-moyen">Vos vêtements doivent valoir plus de 20€</span>
-                      </div>
-                      <div className="flex items-center gap-2 sm:gap-3">
-                        <span className="text-sauge-fonce">✓</span>
-                        <span className="text-xs sm:text-sm text-gris-moyen">La vendeuse gère tout le processus de vente</span>
-                      </div>
-                      <div className="flex items-center gap-2 sm:gap-3">
-                        <span className="text-sauge-fonce">✓</span>
-                        <span className="text-xs sm:text-sm text-gris-moyen">Paiement sous 60 jours maximum</span>
-                      </div>
-                      <div className="flex items-center gap-2 sm:gap-3">
-                        <span className="text-sauge-fonce">✓</span>
-                        <span className="text-xs sm:text-sm text-gris-moyen">Gagner de l'argent : vous récupérez une partie du prix de vente de vos articles</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Formulas Section */}
-      <section className="py-12 sm:py-16">
-        <div className="container">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl text-center mb-8 sm:mb-10">Nos formules</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <Card className="border-noir/20">
-                <CardHeader>
-                  <div className="flex items-baseline justify-between">
-                    <CardTitle className="text-lg">Dressing déjà trié</CardTitle>
-                    <span className="text-lg font-semibold text-noir">10 €</span>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gris-moyen">
-                    Vos vêtements sont déjà mis de côté, et vous remplirez vous-même l'inventaire de vos pièces avant notre passage. On vient simplement les récupérer.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-noir/20">
-                <CardHeader>
-                  <div className="flex items-baseline justify-between">
-                    <CardTitle className="text-lg">Tri sur place</CardTitle>
-                    <span className="text-lg font-semibold text-noir">30 €</span>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gris-moyen">
-                    Vous avez mis de côté ce dont vous ne voulez plus, mais vous ne savez pas ce qui a de la valeur. On passe 30 min à 1 h chez vous pour trier et repérer les pièces qui se revendront.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-noir/20">
-                <CardHeader>
-                  <div className="flex items-baseline justify-between">
-                    <CardTitle className="text-lg">Tri & conseil</CardTitle>
-                    <span className="text-lg font-semibold text-noir">50 €</span>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gris-moyen">
-                    Rendez-vous d'1 h à 1 h 30 : on trie avec vous et on vous conseille — ce qui vaut le coup d'être vendu, ce qui vous va le mieux, ce que vous avez intérêt à garder.
-                  </p>
-                </CardContent>
-              </Card>
+          <div className="relative">
+            <div className="absolute inset-x-[-28px] top-[28px] bottom-[-26px] bg-sauge-clair/45 rounded-xl" />
+            <div className="relative w-full h-[290px] sm:h-[390px] rounded-xl overflow-hidden">
+              <Image
+                src="/concept-carton.jpg"
+                alt="Une femme range des pulls pliés dans un carton Seconde"
+                fill
+                sizes="(max-width: 1024px) 100vw, 520px"
+                className="object-cover"
+                priority
+              />
             </div>
-            <p className="text-center text-gris-moyen mt-6">
-              Le prix du rendez-vous dépend de la formule choisie. Il est le seul frais facturé : pas de coût caché.
-            </p>
           </div>
         </div>
       </section>
 
-      {/* Business Model Section */}
-      <section className="py-12 sm:py-16 bg-gris-tres-clair">
-        <div className="container">
-          <div className="max-w-6xl mx-auto">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl sm:text-3xl text-center">
-                  Un business model transparent et équitable
-                </CardTitle>
-                <CardDescription className="text-center text-base sm:text-lg">
-                  Nous croyons que la transparence est la clé de la confiance. 
-                  Voici comment la valeur est répartie.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-10 sm:space-y-12">
-                  {/* Value Distribution */}
-                  <div className="text-center">
-                    <h3 className="text-xl sm:text-2xl mb-6 sm:mb-8">Répartition des revenus</h3>
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8">
-                      <div className="flex flex-col items-center">
-                        <div className="relative w-24 h-24 sm:w-32 sm:h-32 mb-3 sm:mb-4">
-                          <svg className="w-24 h-24 sm:w-32 sm:h-32 transform -rotate-90" viewBox="0 0 36 36">
-                            <path
-                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                              fill="none"
-                              stroke="#000"
-                              strokeWidth="2"
-                            />
-                            <path
-                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831"
-                              fill="none"
-                              stroke="#000"
-                              strokeWidth="2"
-                              strokeDasharray="50, 100"
-                              strokeLinecap="round"
-                            />
-                          </svg>
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-xl sm:text-2xl font-bold">50%</span>
-                          </div>
-                        </div>
-                        <p className="font-semibold text-sm sm:text-base text-noir">Client</p>
-                        <p className="text-xs sm:text-sm text-gris-moyen max-w-xs">
-                          Vous récupérez 50% du montant de la vente sans faire d'effort.
-                        </p>
-                      </div>
-
-                      <div className="flex flex-col items-center">
-                        <div className="relative w-24 h-24 sm:w-32 sm:h-32 mb-3 sm:mb-4">
-                          <svg className="w-24 h-24 sm:w-32 sm:h-32 transform -rotate-90" viewBox="0 0 36 36">
-                            <path
-                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                              fill="none"
-                              stroke="#000"
-                              strokeWidth="2"
-                            />
-                            <path
-                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831"
-                              fill="none"
-                              stroke="#000"
-                              strokeWidth="2"
-                              strokeDasharray="40, 100"
-                              strokeDashoffset="-50"
-                              strokeLinecap="round"
-                            />
-                          </svg>
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-xl sm:text-2xl font-bold">40%</span>
-                          </div>
-                        </div>
-                        <p className="font-semibold text-sm sm:text-base text-noir">Vendeuse</p>
-                        <p className="text-xs sm:text-sm text-gris-moyen max-w-xs">
-                          La vendeuse professionnelle reçoit 40% pour son expertise et son travail.
-                        </p>
-                      </div>
-
-                      <div className="flex flex-col items-center">
-                        <div className="relative w-24 h-24 sm:w-32 sm:h-32 mb-3 sm:mb-4">
-                          <svg className="w-24 h-24 sm:w-32 sm:h-32 transform -rotate-90" viewBox="0 0 36 36">
-                            <path
-                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                              fill="none"
-                              stroke="#000"
-                              strokeWidth="2"
-                            />
-                            <path
-                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831"
-                              fill="none"
-                              stroke="#000"
-                              strokeWidth="2"
-                              strokeDasharray="10, 100"
-                              strokeDashoffset="-90"
-                              strokeLinecap="round"
-                            />
-                          </svg>
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-xl sm:text-2xl font-bold">10%</span>
-                          </div>
-                        </div>
-                        <p className="font-semibold text-sm sm:text-base text-noir">Plateforme</p>
-                        <p className="text-xs sm:text-sm text-gris-moyen max-w-xs">
-                          10% pour la plateforme afin de rémunérer les développeurs et gérer les litiges.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Why This Model */}
-                  <div>
-                    <h3 className="text-xl sm:text-2xl mb-6 text-center">Pourquoi ce modèle ?</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6 sm:gap-8">
-                      <Card className="border-noir/20">
-                        <CardHeader>
-                          <CardTitle className="text-xl flex items-center gap-2">
-                            <Euro className="h-5 w-5" />
-                            Rémunération équitable
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-gris-moyen">
-                            Chaque acteur reçoit une part juste pour son contribution. Les clients sont rémunérés 
-                            pour leurs vêtements, les vendeuses pour leur expertise, et la plateforme pour 
-                            son infrastructure et son support.
-                          </p>
-                        </CardContent>
-                      </Card>
-
-                      <Card className="border-noir/20">
-                        <CardHeader>
-                          <CardTitle className="text-xl flex items-center gap-2">
-                            <Users className="h-5 w-5" />
-                            Soutien à l'économie locale
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-gris-moyen">
-                            En utilisant nos services, vous soutenez directement des professionnels locaux (les vendeuses) 
-                            ainsi que toute une équipe qui travaille pour rendre cette plateforme possible : développeurs, 
-                            modérateurs, service client, etc.
-                          </p>
-                        </CardContent>
-                      </Card>
-
-                      <Card className="border-noir/20">
-                        <CardHeader>
-                          <CardTitle className="text-xl flex items-center gap-2">
-                            <Recycle className="h-5 w-5" />
-                            Durabilité
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-gris-moyen">
-                            Ce modèle permet de donner une seconde vie à vos vêtements, réduisant ainsi l'impact 
-                            environnemental de l'industrie textile. C'est un cercle vertueux où tout le monde y gagne.
-                          </p>
-                        </CardContent>
-                      </Card>
-
-                      <Card className="border-noir/20">
-                        <CardHeader>
-                          <CardTitle className="text-xl flex items-center gap-2">
-                            <Leaf className="h-5 w-5" />
-                            Transparence
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-gris-moyen">
-                            Nous sommes transparents sur notre modèle économique car nous croyons que c'est la clé 
-                            pour établir une relation de confiance avec nos clients. Vous savez exactement où va chaque euro.
-                          </p>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Circularity Section */}
-      <section className="py-16">
-        <div className="container">
-          <div className="max-w-6xl mx-auto">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-3xl text-center">
-                  Favoriser la circularité
-                </CardTitle>
-                <CardDescription className="text-center text-lg">
-                  En utilisant Seconde, vous donnez une seconde vie à vos vêtements et participez 
-                  à une économie circulaire.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-8">
-                  <div className="text-center">
-                    <div className="flex justify-center mb-6">
-                      <div className="relative">
-                        <div className="w-48 h-48 border-2 border-noir/20 rounded-full flex items-center justify-center">
-                          <div className="text-center">
-                            <div className="text-4xl font-bold mb-2">2,5</div>
-                            <div className="text-sm text-gris-moyen">tonnes de CO2</div>
-                            <div className="text-xs text-gris-moyen mt-1">économisées par tonne de vêtements recyclés</div>
-                          </div>
-                        </div>
-                        <div className="absolute -top-4 -right-4 w-16 h-16 bg-noir/10 rounded-full flex items-center justify-center">
-                          <Leaf className="h-8 w-8 text-noir" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div className="text-center">
-                      <div className="w-16 h-16 border-2 border-noir/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <ShoppingBag className="h-8 w-8 text-noir" />
-                      </div>
-                      <h4 className="mb-2">Vendez vos vêtements</h4>
-                      <p className="text-sm text-gris-moyen">
-                        Au lieu de les jeter, donnez-leur une seconde vie et générez des revenus.
-                      </p>
-                    </div>
-                    <div className="text-center">
-                      <div className="w-16 h-16 border-2 border-noir/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Recycle className="h-8 w-8 text-noir" />
-                      </div>
-                      <h4 className="mb-2">Réduisez votre empreinte</h4>
-                      <p className="text-sm text-gris-moyen">
-                        Chaque vêtement vendu, c'est moins de déchets et moins de production neuve.
-                      </p>
-                    </div>
-                    <div className="text-center">
-                      <div className="w-16 h-16 border-2 border-noir/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Users className="h-8 w-8 text-noir" />
-                      </div>
-                      <h4 className="mb-2">Créez de la valeur</h4>
-                      <p className="text-sm text-gris-moyen">
-                        Vous soutenez une économie locale et circulaire qui profite à tous.
-                      </p>
-                    </div>
-                  </div>
-
-                  <p className="text-center text-gris-moyen mt-8">
-                    Ensemble, nous pouvons changer la façon dont la mode fonctionne. 
-                    Chaque petit geste compte pour créer un impact significatif.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-16 bg-creme">
-        <div className="container">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl mb-6 text-noir">
-              Prêt à donner une seconde vie à vos vêtements ?
+      {/* ================= LE SERVICE ================= */}
+      <section className="bg-gris-clair px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="flex flex-col gap-4 mb-10 sm:mb-12 max-w-[620px]">
+            <div className="eyebrow">Ce qu&apos;on fait pour vous</div>
+            <h2 className="text-3xl sm:text-4xl leading-[1.18]">
+              Un service complet, du tri jusqu&apos;au virement.
             </h2>
-            <p className="text-xl text-gris-moyen mb-8">
-              Rejoignez notre communauté et commencez à vendre ou acheter des vêtements de qualité 
-              tout en participant à une mode plus durable.
+            <p className="text-base text-gris-moyen">
+              Vous confiez vos pièces à une vendeuse. Elle s&apos;occupe de tout et vous tient au
+              courant. Vous n&apos;avez ni annonce à rédiger, ni acheteur à gérer, ni colis à poster.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild size="lg" className="bg-noir text-blanc hover:bg-gris-fonce">
-                <Link href="/signup">S'inscrire gratuitement</Link>
-              </Button>
-              <Button asChild variant="outline" size="lg" className="border-noir text-noir hover:bg-noir hover:text-blanc">
-                <Link href="/contact">Nous contacter</Link>
-              </Button>
-            </div>
           </div>
+
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-7">
+            {ENGAGEMENTS.map(({ icon: Icon, texte }) => (
+              <li key={texte} className="flex items-start gap-4 text-gris-moyen">
+                <span className="flex h-[1.75em] shrink-0 items-center">
+                  <Icon className="h-[18px] w-[18px] text-sauge" strokeWidth={1.3} />
+                </span>
+                <span>{texte}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* ================= NOS FORMULES ================= */}
+      <section className="px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="flex flex-col gap-4 mb-10 sm:mb-12 max-w-[620px]">
+            <div className="eyebrow">Nos formules</div>
+            <h2 className="text-3xl sm:text-4xl leading-[1.18]">
+              Vous choisissez le niveau d&apos;accompagnement.
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-7">
+            {FORMULES.map(({ titre, prix, texte }) => (
+              <div
+                key={titre}
+                className="bg-gris-tres-clair border border-gris-clair p-8 flex flex-col gap-3"
+              >
+                <span className="font-serif text-4xl leading-none text-sauge">{prix}</span>
+                <h3 className="text-xl">{titre}</h3>
+                <p className="text-sm text-gris-moyen">{texte}</p>
+              </div>
+            ))}
+          </div>
+
+          <p className="mt-8 text-base text-gris-moyen max-w-[620px]">
+            Le prix du rendez-vous dépend de la formule choisie. C&apos;est le seul frais facturé :
+            pas de coût caché.
+          </p>
+        </div>
+      </section>
+
+      {/* ================= RÉPARTITION ================= */}
+      <section className="bg-gris-clair px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="flex flex-col gap-4 mb-10 sm:mb-12 max-w-[620px]">
+            <div className="eyebrow">La répartition</div>
+            <h2 className="text-3xl sm:text-4xl leading-[1.18]">Où va l&apos;argent de vos ventes.</h2>
+            <p className="text-base text-gris-moyen">
+              Sur chaque pièce vendue, le prix se partage toujours de la même façon. Vous savez
+              exactement où va chaque euro avant même de nous confier quoi que ce soit.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-7">
+            {REPARTITION.map(({ part, titre, texte }) => (
+              <div
+                key={titre}
+                className="bg-gris-tres-clair border border-noir/10 p-8 flex flex-col gap-3"
+              >
+                <span className="font-serif text-5xl leading-none text-sauge">{part}</span>
+                <h3 className="text-xl">{titre}</h3>
+                <p className="text-sm text-gris-moyen">{texte}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ================= POURQUOI CE MODÈLE ================= */}
+      <section className="px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="text-center flex flex-col items-center gap-3 mb-12">
+            <div className="eyebrow">Pourquoi ce modèle</div>
+            <h2 className="text-3xl sm:text-4xl">Ce qu&apos;il permet</h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-7">
+            {RAISONS.map(({ icon: Icon, titre, texte }) => (
+              <div
+                key={titre}
+                className="bg-gris-tres-clair border border-noir/10 p-8 flex flex-col gap-3.5"
+              >
+                <Icon className="h-7 w-7 text-sauge" strokeWidth={1.4} />
+                <h3 className="text-xl">{titre}</h3>
+                <p className="text-gris-moyen text-sm">{texte}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ================= CIRCULARITÉ ================= */}
+      <section className="bg-noir text-creme px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="flex flex-col gap-4 mb-12 max-w-[620px]">
+            <div className="text-[10px] tracking-[0.26em] uppercase text-sauge-clair">
+              Économie circulaire
+            </div>
+            <h2 className="text-3xl sm:text-4xl text-creme leading-[1.18]">
+              Le vêtement le plus écologique est celui qui existe déjà.
+            </h2>
+            <p className="text-[#b9c2b0]">
+              L&apos;essentiel de l&apos;empreinte d&apos;un vêtement se joue à sa fabrication.
+              Prolonger sa vie est donc le geste le plus efficace — bien avant le recyclage.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-10">
+            {CIRCULARITE.map(({ icon: Icon, titre, texte }) => (
+              <div key={titre} className="flex flex-col gap-3 border-t border-[#46523f] pt-6">
+                <Icon className="h-7 w-7 text-sauge-clair" strokeWidth={1.4} />
+                <h3 className="text-xl text-creme">{titre}</h3>
+                <p className="text-sm text-[#b9c2b0]">{texte}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ================= APPEL À L'ACTION ================= */}
+      <section className="px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24">
+        <div className="max-w-[720px] mx-auto text-center flex flex-col items-center gap-6">
+          <div className="eyebrow">On commence quand vous voulez</div>
+          <h2 className="text-3xl sm:text-4xl leading-[1.18]">
+            Prête à donner une seconde vie à votre dressing ?
+          </h2>
+          <p className="text-base text-gris-moyen max-w-[520px]">
+            Quelques questions, moins d&apos;une minute, et on vous recontacte sous 24 heures pour
+            caler le rendez-vous.
+          </p>
+          <Link
+            href="/demande-rdv"
+            className="mt-2 bg-noir text-blanc border border-noir px-8 py-4 text-[11px] tracking-[0.2em] uppercase hover:bg-transparent hover:text-noir transition-colors"
+          >
+            Demander un rendez-vous
+          </Link>
         </div>
       </section>
     </div>

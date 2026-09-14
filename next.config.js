@@ -8,6 +8,15 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/about',
+        destination: '/concept',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

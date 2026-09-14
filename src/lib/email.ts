@@ -662,7 +662,7 @@ class NotificationService {
       ${roleSpecificContent}
       
       <p>Si vous avez des questions, n'hésitez pas à consulter notre 
-      <a href="${EMAIL_CONFIG.siteUrl}/about">page de concept</a> ou à nous contacter via 
+      <a href="${EMAIL_CONFIG.siteUrl}/concept">page de concept</a> ou à nous contacter via 
       <a href="${EMAIL_CONFIG.siteUrl}/contact">notre formulaire</a>.</p>
       
       <p>Bonne aventure avec Seconde !</p>
