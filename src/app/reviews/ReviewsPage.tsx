@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Star, MessageCircle, ShieldCheck } from "lucide-react";
+import { Star, MessageCircle } from "lucide-react";
 import { AVIS, noteMoyenne, formaterMois, formaterJour } from "@/data/avis";
 
 function Etoiles({ note, taille = 14 }: { note: number; taille?: number }) {
@@ -102,46 +102,6 @@ export default function ReviewsPage() {
               ))}
             </div>
           )}
-        </div>
-      </section>
-
-      {/* ================= COMMENT NOUS RECUEILLONS LES AVIS ================= */}
-      <section className="px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24">
-        <div className="max-w-[820px] mx-auto flex flex-col gap-6">
-          <div className="flex items-center gap-3">
-            <ShieldCheck className="h-7 w-7 shrink-0 text-sauge" strokeWidth={1.3} />
-            <h2 className="text-2xl sm:text-3xl">Comment nous recueillons ces avis</h2>
-          </div>
-          <div className="flex flex-col gap-4 text-base text-gris-moyen">
-            <p>
-              Nous écrivons à chaque cliente une fois ses pièces vendues et son virement effectué,
-              en lui proposant de donner son avis. Seules les personnes ayant réellement bénéficié
-              du service peuvent en laisser un : nous ne publions aucun avis venu d&apos;ailleurs.
-            </p>
-            <p>
-              Nous vérifions que l&apos;avis correspond bien à une prestation figurant dans nos
-              dossiers, puis nous le publions tel qu&apos;il a été écrit, sans le reformuler et sans
-              rien retirer. Les avis sont affichés du plus récent au plus ancien, avec le mois de la
-              prestation et la date de mise en ligne.
-            </p>
-            <p>
-              Un avis n&apos;est écarté que s&apos;il est injurieux, diffamatoire ou manifestement
-              étranger au service — et son autrice en est alors informée. Nous ne supprimons jamais
-              un avis au motif qu&apos;il est négatif, et aucune contrepartie n&apos;est offerte en
-              échange d&apos;un avis.
-            </p>
-            <p>
-              Seuls le prénom et la ville sont publiés. Chaque cliente peut à tout moment demander
-              la modification ou le retrait de son avis via{" "}
-              <Link
-                href="/contact"
-                className="text-sauge-fonce underline underline-offset-4 hover:text-noir transition-colors"
-              >
-                notre formulaire de contact
-              </Link>
-              .
-            </p>
-          </div>
         </div>
       </section>
 
