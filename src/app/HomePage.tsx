@@ -130,7 +130,7 @@ export default function HomePage() {
             <div className="absolute -inset-x-6 -top-6 -bottom-10 bg-sauge-clair/45 rounded-[240px_240px_40px_40px]" />
             <div className="relative w-full h-[360px] sm:h-[440px] lg:h-[520px] rounded-[235px_235px_16px_16px] overflow-hidden">
               <Image
-                src="/tri-pull-creme-hero.jpg"
+                src="/hero.jpg"
                 alt="Deux femmes trient des vêtements pliés sur un lit, l'une tenant un pull crème, dans un appartement parisien"
                 fill
                 sizes="(max-width: 1024px) 100vw, 470px"
