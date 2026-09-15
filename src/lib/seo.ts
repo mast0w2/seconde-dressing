@@ -11,7 +11,7 @@ export const siteConfig = {
   title: "Seconde - On vous aide à vendre vos vêtements",
   description:
     "Seconde vient chercher votre dressing, trie, photographie et vend vos vêtements pour vous. Donnez-leur une seconde vie.",
-  ogImage: "/dressing-sort-1.jpg",
+  ogImage: "/og-image.png",
 };
 
 type PageMetadataInput = {

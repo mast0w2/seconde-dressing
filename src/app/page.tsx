@@ -3,9 +3,9 @@ import { buildPageMetadata } from "@/lib/seo";
 import HomePage from "./HomePage";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Seconde - On vous aide à vendre vos vêtements",
+  title: "Seconde - Videz votre dressing, on s'occupe de tout",
   description:
-    "Seconde vient chercher votre dressing, trie, photographie et vend vos vêtements pour vous. Donnez-leur une seconde vie.",
+    "Conciergerie de seconde main à Paris. On vient chez vous, on trie, on photographie et on vend vos vêtements. Vous touchez 50 % de chaque vente.",
   path: "/",
   absolute: true,
 });
