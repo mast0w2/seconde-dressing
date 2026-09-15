@@ -229,7 +229,7 @@ export default function HomePage() {
               />
             </div>
             <p className="font-serif italic text-lg sm:text-xl text-[#c3cbb9] leading-relaxed">
-              « Vos vêtements méritent une seconde histoire. »
+              Vos vêtements méritent une seconde vie.
             </p>
           </div>
         </div>
