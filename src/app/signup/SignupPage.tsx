@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/components/ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
 import { capitalizeName } from "@/lib/text";
@@ -21,21 +20,20 @@ const formSchema = z.object({
   password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
   prenom: z.string().min(2, "Le prénom est requis"),
   nom: z.string().min(2, "Le nom est requis"),
-  role: z.enum(["client", "seller"], {
-    errorMap: () => ({ message: "Merci d'indiquer votre intention" }),
-  }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 function SignupForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { toast } = useToast();
   const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
-  const isVendeurFlow = searchParams.get("vendeur") === "true";
-  const preselectedRole: Role = isVendeurFlow ? "seller" : "client";
+  // Cette page ne crée que des comptes vendeuse. Les clientes n'ont pas à
+  // s'inscrire : leur espace est créé quand elles envoient leur demande de
+  // rendez-vous, et elles s'y connectent par lien email. Un compte cliente
+  // créé ici serait un compte vide, sans demande à suivre.
+  const ROLE: Role = "seller";
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -44,13 +42,11 @@ function SignupForm() {
       password: "",
       prenom: "",
       nom: "",
-      role: preselectedRole,
     },
   });
 
-  const { handleSubmit, register, formState, setValue, watch } = form;
+  const { handleSubmit, register, formState } = form;
   const { errors, isSubmitting } = formState;
-  const selectedRole = watch("role");
 
   const onSubmit = async (data: FormValues) => {
     try {
@@ -82,7 +78,7 @@ function SignupForm() {
           phone: null,
           photo_url: null,
           street_address: null,
-          role: data.role,
+          role: ROLE,
           bio: null,
           specialization: null,
           hourly_rate: null,
@@ -139,11 +135,17 @@ function SignupForm() {
     <div className="flex min-h-screen items-center justify-center bg-creme p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl">
-            {isVendeurFlow ? "Devenir vendeuse" : "Créer un compte"}
-          </CardTitle>
+          <CardTitle className="text-2xl">Devenir vendeuse</CardTitle>
           <CardDescription>
-            Inscrivez-vous pour commencer à utiliser Seconde
+            Créez votre compte vendeuse pour accompagner les clientes et vendre leurs
+            pièces. Vous cherchez à faire vendre vos propres vêtements ?{" "}
+            <Link
+              href="/#estimation-form"
+              className="text-sauge-fonce underline underline-offset-4 hover:text-noir transition-colors"
+            >
+              Demandez un rendez-vous
+            </Link>{" "}
+            — votre espace se crée tout seul.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -200,45 +202,6 @@ function SignupForm() {
                 <p className="text-sm text-destructive">{errors.password.message}</p>
               )}
             </div>
-
-            {!isVendeurFlow && (
-              <div className="space-y-3">
-                <Label>Votre intention</Label>
-                <RadioGroup
-                  defaultValue={selectedRole}
-                  onValueChange={(value) => setValue("role", value as Role)}
-                  className="grid gap-3 pt-1"
-                >
-                  <label
-                    htmlFor="role-client"
-                    className="flex items-start gap-3 rounded-lg border border-noir/15 p-4 cursor-pointer hover:bg-noir/5 transition-colors"
-                  >
-                    <RadioGroupItem value="client" id="role-client" className="mt-1" />
-                    <div className="space-y-1">
-                      <span className="block text-sm font-medium">Je veux vendre mes vêtements</span>
-                      <span className="block text-sm text-gris-moyen">
-                        Vous déposez vos pièces pour qu&apos;une vendeuse les reprenne.
-                      </span>
-                    </div>
-                  </label>
-                  <label
-                    htmlFor="role-seller"
-                    className="flex items-start gap-3 rounded-lg border border-noir/15 p-4 cursor-pointer hover:bg-noir/5 transition-colors"
-                  >
-                    <RadioGroupItem value="seller" id="role-seller" className="mt-1" />
-                    <div className="space-y-1">
-                      <span className="block text-sm font-medium">Je souhaite aider à vendre des vêtements</span>
-                      <span className="block text-sm text-gris-moyen">
-                        Vous triez et accompagnez les clientes dans la reprise de leurs pièces.
-                      </span>
-                    </div>
-                  </label>
-                </RadioGroup>
-                {errors.role && (
-                  <p className="text-sm text-destructive">{errors.role.message}</p>
-                )}
-              </div>
-            )}
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? "Inscription..." : "S'inscrire"}
