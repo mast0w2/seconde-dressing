@@ -120,10 +120,17 @@ export function Navbar() {
                     aria-label={initiale ? `Compte de ${profile?.first_name ?? ""}` : "Mon compte"}
                   >
                     <Avatar className="h-full w-full">
-                      <AvatarImage src={profile?.photo_url || undefined} />
-                      <AvatarFallback className="bg-sauge text-creme text-[13px] sm:text-[15px] font-normal tracking-wide">
-                        {initiale}
-                      </AvatarFallback>
+                      {profile?.photo_url ? (
+                        <AvatarImage
+                          src={profile.photo_url}
+                          alt=""
+                          className="object-cover"
+                        />
+                      ) : (
+                        <AvatarFallback className="bg-sauge text-creme text-[13px] sm:text-[15px] font-normal tracking-wide">
+                          {initiale}
+                        </AvatarFallback>
+                      )}
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
