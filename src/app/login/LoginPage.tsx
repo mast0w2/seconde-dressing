@@ -262,14 +262,6 @@ function LoginForm() {
               vides, sans aucune demande à suivre. */}
           <div className="mt-6 border-t border-noir/10 pt-6 flex flex-col gap-3 text-sm text-gris-moyen">
             <p>
-              Vous n&apos;avez pas encore d&apos;espace ? Il est créé automatiquement quand
-              vous{" "}
-              <Link href="/#estimation-form" className="text-sauge-fonce underline underline-offset-4 hover:text-noir transition-colors">
-                demandez un rendez-vous
-              </Link>
-              .
-            </p>
-            <p>
               Vous souhaitez devenir vendeuse ?{" "}
               <Link href="/signup?vendeur=true" className="text-sauge-fonce underline underline-offset-4 hover:text-noir transition-colors">
                 Créer un compte vendeuse
