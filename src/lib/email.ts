@@ -101,6 +101,13 @@ function parseSenderEmail(raw: string): string {
 
 const EMAIL_FROM = parseSenderEmail(process.env.EMAIL_FROM || 'support@seconde-dressing.com');
 
+// Adresse de réponse. Une cliente qui répond à un email doit tomber sur une
+// vraie boîte, pas dans le vide : si l'expéditeur est une adresse « no-reply »,
+// c'est cette adresse-ci qui reçoit la réponse.
+const EMAIL_REPLY_TO = parseSenderEmail(
+  process.env.EMAIL_REPLY_TO || process.env.EMAIL_FROM || 'support@seconde-dressing.com'
+);
+
 console.warn('[EmailService] sender email resolved to:', EMAIL_FROM, '(raw EMAIL_FROM:', process.env.EMAIL_FROM || '<unset, using fallback>', ')');
 
 const EMAIL_CONFIG = {
@@ -108,7 +115,8 @@ const EMAIL_CONFIG = {
     name: 'Seconde',
     email: EMAIL_FROM,
   },
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://seconde.fr',
+  replyTo: { name: 'Seconde', email: EMAIL_REPLY_TO },
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://seconde-dressing.com',
 } as const;
 
 // ============================================================================
@@ -173,6 +181,7 @@ class EmailService {
         },
         body: JSON.stringify({
           sender: EMAIL_CONFIG.sender,
+          replyTo: EMAIL_CONFIG.replyTo,
           to: [{ email: to }],
           subject,
           htmlContent: html,
