@@ -10,6 +10,26 @@ import { Clock, Euro, Calendar, Truck, Sparkles, Leaf } from "lucide-react";
 // Data
 // ============================================================================
 
+const REPARTITION = [
+  {
+    part: "50 %",
+    titre: "Pour vous",
+    texte:
+      "La moitié du prix de vente de chaque pièce vous revient, versée directement sur votre compte.",
+  },
+  {
+    part: "40 %",
+    titre: "Pour votre vendeuse",
+    texte:
+      "C'est elle qui trie, photographie, rédige les annonces, répond aux acheteurs et expédie.",
+  },
+  {
+    part: "10 %",
+    titre: "Pour Seconde",
+    texte: "Le site, le suivi de vos ventes et les paiements.",
+  },
+];
+
 const BENEFITS = [
   {
     icon: Clock,
@@ -240,22 +260,39 @@ export default function HomePage() {
         id="remuneration"
         className="bg-gris-clair px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24"
       >
-        <div className="max-w-[1200px] mx-auto">
-          <div className="flex flex-col gap-5 max-w-[480px]">
+        <div className="max-w-[1200px] mx-auto flex flex-col gap-10 sm:gap-12">
+          <div className="flex flex-col gap-4 max-w-[620px]">
             <div className="eyebrow">Ce que vous touchez</div>
             <h2 className="text-3xl sm:text-4xl leading-[1.18]">
               Vous touchez 50 % de chaque vente.
             </h2>
-            <p className="text-base text-gris-moyen">
-              Votre vendeuse en reçoit 40 % : c&apos;est elle qui trie, photographie, rédige les
-              annonces, répond aux acheteurs et expédie. Les 10 % restants font tourner Seconde —
-              la plateforme, le suivi de vos ventes et les paiements.
-            </p>
-            <p className="text-base text-gris-moyen">
-              Pas de frais cachés. Seul le rendez-vous est facturé, de 10 à 50 € selon la formule
-              choisie. Ce qui ne se vend pas vous revient, ou part vers nos filières de réemploi.
-            </p>
           </div>
+
+          {/* Répartition rendue visible : les largeurs suivent les pourcentages. */}
+          <div className="flex w-full gap-1.5" aria-hidden="true">
+            <div style={{ flexGrow: 50 }} className="h-2.5 rounded-full bg-noir" />
+            <div style={{ flexGrow: 40 }} className="h-2.5 rounded-full bg-sauge" />
+            <div style={{ flexGrow: 10 }} className="h-2.5 rounded-full bg-sauge-clair" />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-10 lg:gap-14">
+            {REPARTITION.map(({ part, titre, texte }) => (
+              <div key={titre} className="flex flex-col gap-3">
+                <span className="font-serif text-4xl sm:text-5xl leading-none text-noir">
+                  {part}
+                </span>
+                <span className="text-[11px] tracking-[0.2em] uppercase text-sauge-fonce">
+                  {titre}
+                </span>
+                <p className="text-base text-gris-moyen">{texte}</p>
+              </div>
+            ))}
+          </div>
+
+          <p className="border-t border-noir/10 pt-8 text-base text-gris-moyen max-w-[820px]">
+            Pas de frais cachés. Seul le rendez-vous est facturé, de 10 à 50 € selon la formule
+            choisie. Ce qui ne se vend pas vous revient, ou part vers nos filières de réemploi.
+          </p>
         </div>
       </section>
 
@@ -265,35 +302,21 @@ export default function HomePage() {
         id="estimation-form"
         className="border-t border-noir/10 px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24"
       >
-        <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_440px] gap-10 lg:gap-16 items-center">
-          <div className="flex flex-col gap-6">
-            {!formSubmitted && (
-              <div className="text-center lg:text-left flex flex-col gap-4">
-                <div className="eyebrow">Demandez un rendez-vous</div>
-                <h2 className="text-3xl sm:text-4xl">Videz votre dressing sans effort</h2>
-                <p className="text-base text-gris-moyen">
-                  Quelques questions, ça prend moins d&apos;une minute. On vous recontacte dans les 24 heures.
-                </p>
-                <div className="flex flex-wrap justify-center lg:justify-start gap-6 text-[11px] tracking-[0.14em] uppercase text-sauge-fonce">
-                  <span>Sans engagement</span>
-                </div>
+        <div className="max-w-[760px] mx-auto flex flex-col items-center gap-10">
+          {!formSubmitted && (
+            <div className="text-center flex flex-col items-center gap-4">
+              <div className="eyebrow">Demandez un rendez-vous</div>
+              <h2 className="text-3xl sm:text-4xl">Videz votre dressing sans effort</h2>
+              <p className="text-base text-gris-moyen max-w-[560px]">
+                Quelques questions, ça prend moins d&apos;une minute. On vous recontacte dans les
+                24 heures.
+              </p>
+              <div className="text-[11px] tracking-[0.14em] uppercase text-sauge-fonce">
+                Sans engagement
               </div>
-            )}
-            <ProgressiveEstimationForm onCompleteChange={setFormSubmitted} />
-          </div>
-
-          <div className="relative hidden lg:block">
-            <div className="absolute inset-x-[-28px] top-[30px] bottom-[-26px] bg-sauge-clair/45 rounded-xl" />
-            <div className="relative w-full h-[400px] rounded-xl overflow-hidden">
-              <Image
-                src="/rdv-pliage.jpg"
-                alt="Une femme plie un pull sur une table, dressing trié en arrière-plan"
-                fill
-                sizes="440px"
-                className="object-cover"
-              />
             </div>
-          </div>
+          )}
+          <ProgressiveEstimationForm onCompleteChange={setFormSubmitted} />
         </div>
       </section>
     </div>
