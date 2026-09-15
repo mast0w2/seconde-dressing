@@ -165,7 +165,7 @@ export default function HomePage() {
       {/* ================= NOTRE CONCEPT ================= */}
       <section id="concept" className="bg-gris-clair py-16 sm:py-20 lg:py-24">
         <div className="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-[76px] grid grid-cols-1 lg:grid-cols-[460px_1fr] gap-10 lg:gap-16 items-center">
-          <div className="relative w-full h-[300px] sm:h-[380px] lg:h-[420px] rounded-xl overflow-hidden">
+          <div className="order-2 lg:order-1 relative w-full h-[300px] sm:h-[380px] lg:h-[420px] rounded-xl overflow-hidden">
             <Image
               src="/mise-sous-pli.jpg"
               alt="Une femme glisse un pull plié dans une pochette d'expédition, sur une table en bois"
@@ -174,7 +174,7 @@ export default function HomePage() {
               className="object-cover"
             />
           </div>
-          <div className="flex flex-col gap-5">
+          <div className="order-1 lg:order-2 flex flex-col gap-5">
             <div className="eyebrow">Notre concept</div>
             <h2 className="text-3xl sm:text-4xl leading-[1.18]">
               Confiez-nous vos vêtements, on s&apos;occupe du reste.
