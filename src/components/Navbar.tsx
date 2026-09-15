@@ -65,6 +65,15 @@ export function Navbar() {
     router.push("/");
   };
 
+  // Initiale affichée dans la pastille du compte : prénom de préférence,
+  // sinon première lettre de l'email, pour ne jamais afficher un rond vide.
+  const initiale = (
+    profile?.first_name?.trim()?.charAt(0) ||
+    profile?.email?.trim()?.charAt(0) ||
+    user?.email?.charAt(0) ||
+    ""
+  ).toUpperCase();
+
   const isClient = profile?.role === "client";
   const isSeller = profile?.role === "seller";
 
@@ -105,12 +114,15 @@ export function Navbar() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="relative h-8 w-8 sm:h-10 sm:w-10 rounded-full border border-noir/20"
+                    // p-0 : sans cela le padding du bouton repousse l'avatar
+                    // hors du cercle et l'initiale devient invisible.
+                    className="relative h-8 w-8 sm:h-10 sm:w-10 shrink-0 p-0 rounded-full border border-noir/20 overflow-hidden hover:bg-transparent"
+                    aria-label={initiale ? `Compte de ${profile?.first_name ?? ""}` : "Mon compte"}
                   >
-                    <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
+                    <Avatar className="h-full w-full">
                       <AvatarImage src={profile?.photo_url || undefined} />
-                      <AvatarFallback className="bg-noir text-blanc text-xs font-bold">
-                        {profile?.first_name ? profile.first_name.charAt(0).toUpperCase() : 'U'}
+                      <AvatarFallback className="bg-sauge text-creme text-[13px] sm:text-[15px] font-normal tracking-wide">
+                        {initiale}
                       </AvatarFallback>
                     </Avatar>
                   </Button>

@@ -31,6 +31,11 @@ function LoginForm() {
   const redirectTarget = searchParams.get("redirect");
   const showEmailPending = searchParams.get("email_pending") === "1";
   const [loginError, setLoginError] = useState<string | null>(null);
+  // Connexion sans mot de passe : la cliente reçoit un lien par email.
+  // C'est le mode par défaut pour les comptes créés depuis le formulaire
+  // de demande, qui n'ont jamais défini de mot de passe.
+  const [envoiLien, setEnvoiLien] = useState(false);
+  const [lienEnvoye, setLienEnvoye] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -42,6 +47,32 @@ function LoginForm() {
 
   const { handleSubmit, register, formState } = form;
   const { errors, isSubmitting } = formState;
+
+  const envoyerLien = async () => {
+    setLoginError(null);
+    const email = (form.getValues("email") || "").trim().toLowerCase();
+    if (!email || !email.includes("@")) {
+      setLoginError("Indiquez d'abord votre adresse email ci-dessus.");
+      return;
+    }
+    setEnvoiLien(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: false,
+          emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+        },
+      });
+      if (error) {
+        setLoginError(error.message);
+        return;
+      }
+      setLienEnvoye(true);
+    } finally {
+      setEnvoiLien(false);
+    }
+  };
 
   const onSubmit = async (data: FormValues) => {
     setLoginError(null);
@@ -198,6 +229,33 @@ function LoginForm() {
               {isSubmitting ? "Connexion..." : "Se connecter"}
             </Button>
           </form>
+
+          {/* Connexion par lien : indispensable pour les comptes créés depuis
+              le formulaire de demande, qui n'ont pas de mot de passe. */}
+          <div className="mt-6 border-t border-noir/10 pt-6">
+            {lienEnvoye ? (
+              <p className="text-sm text-gris-moyen">
+                Un lien de connexion vient de partir vers votre adresse. Cliquez dessus pour
+                accéder à votre espace — pensez à regarder dans vos indésirables.
+              </p>
+            ) : (
+              <>
+                <p className="text-sm text-gris-moyen">
+                  Vous avez créé votre espace depuis le formulaire de demande et vous
+                  n&apos;avez pas de mot de passe ?
+                </p>
+                <button
+                  type="button"
+                  onClick={envoyerLien}
+                  disabled={envoiLien}
+                  className="mt-3 w-full border border-noir px-6 py-3 text-[11px] tracking-[0.2em] uppercase text-noir hover:bg-noir hover:text-blanc transition-colors disabled:opacity-50"
+                >
+                  {envoiLien ? "Envoi en cours…" : "Recevoir un lien de connexion"}
+                </button>
+              </>
+            )}
+          </div>
+
           <div className="mt-4 text-center text-sm text-gris-moyen">
             Vous n&apos;avez pas de compte ?{" "}
             <Link href="/signup" className="text-sauge-fonce hover:underline">

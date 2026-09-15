@@ -7,10 +7,7 @@ const ROUTES = [
   "/impact",
   "/contact",
   "/vendeur",
-  "/demande-rdv",
   "/reviews",
-  "/login",
-  "/signup",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

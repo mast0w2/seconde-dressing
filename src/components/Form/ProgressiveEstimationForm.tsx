@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/components/ui/use-toast";
@@ -422,7 +421,6 @@ interface ProgressiveEstimationFormProps {
 
 export function ProgressiveEstimationForm({ onCompleteChange }: ProgressiveEstimationFormProps = {}) {
   const { toast } = useToast();
-  const router = useRouter();
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -432,12 +430,12 @@ export function ProgressiveEstimationForm({ onCompleteChange }: ProgressiveEstim
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [password, setPassword] = useState("");
-  const [isCreatingAccount, setIsCreatingAccount] = useState(false);
-  // id of the request once it has been submitted anonymously, used to link it
-  // to the account created afterwards.
-  const [submittedRequestId, setSubmittedRequestId] = useState<string | null>(null);
-  const [accountCreated, setAccountCreated] = useState(false);
+  // Option B : pas de mot de passe. À la validation, on envoie un lien de
+  // connexion à l'adresse déjà saisie. La case est cochée par défaut.
+  const [creerEspace, setCreerEspace] = useState(true);
+  const [lienEnvoye, setLienEnvoye] = useState(false);
+  // Vrai quand la visiteuse est déjà connectée : inutile de lui proposer un espace.
+  const [dejaConnectee, setDejaConnectee] = useState(false);
   // True when the signed-in user is a seller: they cannot submit a request
   // (the form is for clients). They must create a separate client account.
   const [isSeller, setIsSeller] = useState(false);
@@ -453,6 +451,7 @@ export function ProgressiveEstimationForm({ onCompleteChange }: ProgressiveEstim
         data: { user },
       } = await supabase.auth.getUser();
       if (cancelled || !user) return;
+      setDejaConnectee(true);
       const { data: profile } = await supabase
         .from("profiles")
         .select("role")
@@ -507,8 +506,8 @@ export function ProgressiveEstimationForm({ onCompleteChange }: ProgressiveEstim
     if (!validateStep()) return;
     setIsSubmitting(true);
     try {
-      // The request is submitted anonymously FIRST. Account creation is
-      // proposed afterwards and never conditions the request submission.
+      // La demande part TOUJOURS en premier. La création de l'espace de suivi
+      // ne doit jamais pouvoir empêcher l'envoi de la demande.
       const result = await submitForm(formData);
       if (!result.success) {
         toast({
@@ -518,100 +517,38 @@ export function ProgressiveEstimationForm({ onCompleteChange }: ProgressiveEstim
         });
         return;
       }
-      if (result.requestId) {
-        setSubmittedRequestId(result.requestId);
-      }
-      setIsComplete(true);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
-  const handleCreateAccount = async () => {
-    if (password.length < 6) {
-      toast({
-        title: "Erreur",
-        description: "Le mot de passe doit contenir au moins 6 caractères.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsCreatingAccount(true);
-    try {
-      // 1. Create the auth account with the email collected in the form.
-      const {
-        data: { user, session },
-        error: signUpError,
-      } = await supabase.auth.signUp({
-        email: formData.email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/api/auth/callback`,
-        },
-      });
-
-      if (signUpError) {
-        throw signUpError;
-      }
-
-      if (!user) {
-        throw new Error("Impossible de créer le compte.");
-      }
-
-      // 2. Create the profile with the information already entered in the form.
-      const { error: profileError } = await supabase.from("profiles").upsert([
-        {
-          id: user.id,
+      // Espace de suivi : un lien de connexion part vers l'adresse saisie.
+      // Aucun mot de passe. Les informations du formulaire voyagent dans les
+      // métadonnées du compte ; le profil est créé côté serveur au moment où
+      // la cliente clique sur le lien (src/app/api/auth/callback/route.ts).
+      if (creerEspace && !dejaConnectee) {
+        const { error: otpError } = await supabase.auth.signInWithOtp({
           email: formData.email,
-          first_name: capitalizeName(formData.prenom),
-          last_name: capitalizeName(formData.nom),
-          phone: formData.telephone,
-          street_address: formData.adresse,
-          role: "client",
-        },
-      ]);
-
-      if (profileError) {
-        throw profileError;
-      }
-
-      // 3. Link the already-submitted anonymous request to the new account.
-      if (submittedRequestId) {
-        const { error: linkError } = await supabase
-          .from("requests")
-          .update({ client_id: user.id })
-          .eq("id", submittedRequestId);
-        if (linkError) {
-          console.warn("[Estimation Form] Could not link request to account:", linkError.message);
+          options: {
+            shouldCreateUser: true,
+            emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+            data: {
+              first_name: capitalizeName(formData.prenom),
+              last_name: capitalizeName(formData.nom),
+              phone: formData.telephone,
+              street_address: formData.adresse,
+              role: "client",
+            },
+          },
+        });
+        if (otpError) {
+          // La demande est enregistrée : on ne transforme pas cet échec en
+          // erreur bloquante, on le dit simplement à la cliente.
+          console.warn("[Estimation Form] Lien de connexion non envoyé :", otpError.message);
+        } else {
+          setLienEnvoye(true);
         }
       }
 
-      setAccountCreated(true);
-
-      // 4. Redirect to the dashboard (or login if email confirmation is required).
-      if (session) {
-        toast({
-          title: "Bienvenue sur Seconde !",
-          description: "Votre compte est créé et votre demande est rattachée à votre espace.",
-        });
-        router.refresh();
-        router.push("/dashboard/client");
-      } else {
-        toast({
-          title: "Compte créé",
-          description: "N'oubliez pas de confirmer votre adresse e-mail pour activer votre compte.",
-        });
-        router.push("/login?email_pending=1");
-      }
-    } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: error.message || "Impossible de créer le compte.",
-        variant: "destructive",
-      });
+      setIsComplete(true);
     } finally {
-      setIsCreatingAccount(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -620,9 +557,8 @@ export function ProgressiveEstimationForm({ onCompleteChange }: ProgressiveEstim
     setCurrentStep(0);
     setIsComplete(false);
     setErrors({});
-    setSubmittedRequestId(null);
-    setAccountCreated(false);
-    setPassword("");
+    setLienEnvoye(false);
+    setCreerEspace(true);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -828,55 +764,28 @@ export function ProgressiveEstimationForm({ onCompleteChange }: ProgressiveEstim
           </div>
         </div>
 
-        {/* Création de compte optionnelle pour suivre sa demande */}
-        {accountCreated ? (
+        {/* Espace de suivi : aucun mot de passe, un lien envoyé par email. */}
+        {dejaConnectee ? (
           <div className="border-t border-noir/10 pt-6 space-y-3">
-            <p className="font-serif text-xl text-noir">Compte créé 🎉</p>
+            <p className="font-serif text-xl text-noir">Demande rattachée à votre espace</p>
             <p className="text-gris-moyen">
-              Votre demande est désormais rattachée à votre compte. Vous pouvez suivre son
-              statut depuis votre espace personnel.
+              Vous pouvez suivre son avancement depuis votre tableau de bord.
             </p>
           </div>
-        ) : (
-          <div className="border-t border-noir/10 pt-6 space-y-5">
-            <div className="space-y-2">
-              <h3 className="font-serif text-xl text-noir">
-                Souhaitez-vous suivre votre demande&nbsp;?
-              </h3>
-              <p className="text-gris-moyen">
-                Créez un compte avec le même email pour suivre votre demande. C’est facultatif.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label
-                  htmlFor="account-password"
-                  className="text-sm font-medium text-noir"
-                >
-                  Mot de passe
-                </label>
-                <Input
-                  id="account-password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  disabled={isCreatingAccount}
-                />
-                <p className="text-xs text-gris-moyen">Minimum 6 caractères.</p>
-              </div>
-
-              <button
-                onClick={handleCreateAccount}
-                disabled={isCreatingAccount}
-                className="bg-noir text-blanc border border-noir px-8 py-4 text-[11px] tracking-[0.2em] uppercase hover:bg-transparent hover:text-noir transition-colors disabled:opacity-50"
-              >
-                {isCreatingAccount ? "Création en cours…" : "Créer mon compte et suivre ma demande"}
-              </button>
-            </div>
+        ) : lienEnvoye ? (
+          <div className="border-t border-noir/10 pt-6 space-y-3">
+            <p className="font-serif text-xl text-noir">Votre espace de suivi vous attend</p>
+            <p className="text-gris-moyen">
+              Un email vient de partir vers{" "}
+              <span className="text-noir">{formData.email}</span>. Cliquez sur le lien
+              qu&apos;il contient pour accéder à votre espace et suivre l&apos;avancement de
+              votre demande. Aucun mot de passe à retenir.
+            </p>
+            <p className="text-sm text-gris-moyen">
+              Rien reçu au bout de quelques minutes ? Pensez à regarder dans vos indésirables.
+            </p>
           </div>
-        )}
+        ) : null}
 
         <button
           onClick={handleReset}
@@ -914,6 +823,29 @@ export function ProgressiveEstimationForm({ onCompleteChange }: ProgressiveEstim
         )}
 
         {renderEstimation()}
+
+        {/* Dernière étape : proposition d'espace de suivi, sans champ à remplir.
+            L'adresse email a déjà été saisie plus haut dans le formulaire. */}
+        {isLastStep && !dejaConnectee && (
+          <label className="flex items-start gap-3 cursor-pointer border border-noir/10 bg-gris-tres-clair p-5">
+            <input
+              type="checkbox"
+              checked={creerEspace}
+              onChange={(e) => setCreerEspace(e.target.checked)}
+              className="mt-1 h-4 w-4 shrink-0 accent-[#6f7d62]"
+            />
+            <span className="flex flex-col gap-1">
+              <span className="text-sm text-noir">
+                Créer mon espace pour suivre ma demande
+              </span>
+              <span className="text-sm text-gris-moyen">
+                Vous recevrez un lien de connexion à l&apos;adresse{" "}
+                {formData.email || "que vous avez indiquée"} : un clic suffit, il n&apos;y a
+                pas de mot de passe à créer.
+              </span>
+            </span>
+          </label>
+        )}
 
         <div className="flex items-center justify-between gap-4 pt-4">
           {currentStep > 0 ? (

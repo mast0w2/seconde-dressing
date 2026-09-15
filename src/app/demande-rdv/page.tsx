@@ -1,25 +1,13 @@
 import type { Metadata } from "next";
-import { buildPageMetadata, buildBreadcrumbLd } from "@/lib/seo";
-import { JsonLd } from "@/components/JsonLd";
+import { noIndexMetadata } from "@/lib/seo";
 import DemandeRdvPage from "./DemandeRdvPage";
 
-export const metadata: Metadata = buildPageMetadata({
-  title: "Demande de rendez-vous",
-  description:
-    "Demandez un rendez-vous gratuit : on vient chercher votre dressing, on trie, on photographie et on vend vos vêtements pour vous. Réponse sous 24h.",
-  path: "/demande-rdv",
-});
+// Page réservée aux clientes déjà connectées : elle demande un rendez-vous
+// supplémentaire sans ressaisir ses coordonnées. Le parcours public passe par
+// le formulaire de la page d'accueil (/#estimation-form), qui fonctionne sans
+// compte. Retirée du sitemap et désindexée en conséquence.
+export const metadata: Metadata = noIndexMetadata("Demande de rendez-vous");
 
 export default function Page() {
-  return (
-    <>
-      <DemandeRdvPage />
-      <JsonLd
-        data={buildBreadcrumbLd([
-          { name: "Accueil", path: "/" },
-          { name: "Demande de rendez-vous", path: "/demande-rdv" },
-        ])}
-      />
-    </>
-  );
+  return <DemandeRdvPage />;
 }
