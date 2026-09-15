@@ -39,3 +39,6 @@ next-env.d.ts
 .vscode/
 *.swp
 *.swo
+
+# Sorties générées par Claude (affiches, visuels) — hors du dépôt
+Claude outputs/

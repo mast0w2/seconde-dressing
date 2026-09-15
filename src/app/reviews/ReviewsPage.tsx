@@ -1,43 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
-import { createBrowserClient } from "@supabase/ssr";
-import { Star, MessageCircle } from "lucide-react";
-
-// ============================================================================
-// Types
-// ============================================================================
-
-interface ProfilLeger {
-  first_name?: string | null;
-  last_name?: string | null;
-}
-
-interface Review {
-  id: string;
-  rating: number;
-  comment: string;
-  created_at: string;
-  client?: ProfilLeger | ProfilLeger[] | null;
-}
-
-// ============================================================================
-// Utilitaires
-// ============================================================================
-
-/** Prénom + initiale du nom : on ne publie jamais l'identité complète d'une cliente. */
-function nomAffiche(client: Review["client"]): string {
-  const p = Array.isArray(client) ? client[0] : client;
-  const prenom = p?.first_name?.trim();
-  if (!prenom) return "Cliente Seconde";
-  const initiale = p?.last_name?.trim()?.charAt(0);
-  return initiale ? `${prenom} ${initiale.toUpperCase()}.` : prenom;
-}
-
-function formaterDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
-}
+import { Star, MessageCircle, ShieldCheck } from "lucide-react";
+import { AVIS, noteMoyenne, formaterMois, formaterJour } from "@/data/avis";
 
 function Etoiles({ note, taille = 14 }: { note: number; taille?: number }) {
   return (
@@ -54,54 +19,10 @@ function Etoiles({ note, taille = 14 }: { note: number; taille?: number }) {
   );
 }
 
-// ============================================================================
-// Page
-// ============================================================================
-
 export default function ReviewsPage() {
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const charger = async () => {
-      // La table reviews référence profiles deux fois (cliente et vendeuse) :
-      // il faut donc désigner explicitement la clé étrangère.
-      const avecProfil = await supabase
-        .from("reviews")
-        .select("id, rating, comment, created_at, client:profiles!client_id (first_name, last_name)")
-        .order("created_at", { ascending: false });
-
-      if (!avecProfil.error) {
-        setReviews((avecProfil.data as unknown as Review[]) || []);
-        setLoading(false);
-        return;
-      }
-
-      // Repli : si la jointure échoue, on affiche au moins les avis.
-      console.warn("[Avis] Jointure profil indisponible :", avecProfil.error.message);
-      const simple = await supabase
-        .from("reviews")
-        .select("id, rating, comment, created_at")
-        .order("created_at", { ascending: false });
-
-      if (simple.error) {
-        console.error("[Avis] Chargement impossible :", simple.error.message);
-      }
-      setReviews((simple.data as unknown as Review[]) || []);
-      setLoading(false);
-    };
-
-    charger();
-  }, [supabase]);
-
-  const moyenne =
-    reviews.length > 0
-      ? reviews.reduce((total, avis) => total + (avis.rating || 0), 0) / reviews.length
-      : 0;
+  // Les avis les plus récents d'abord.
+  const avis = [...AVIS].sort((a, b) => b.datePublication.localeCompare(a.datePublication));
+  const moyenne = noteMoyenne(avis);
 
   return (
     <div className="bg-creme text-noir">
@@ -120,7 +41,7 @@ export default function ReviewsPage() {
             qu&apos;elles écrivent — sans trier.
           </p>
 
-          {reviews.length > 0 && (
+          {avis.length > 0 && (
             <div className="flex items-center gap-4 border-t border-noir/10 pt-6">
               <span className="font-serif text-4xl leading-none text-noir">
                 {moyenne.toFixed(1).replace(".", ",")}
@@ -128,7 +49,8 @@ export default function ReviewsPage() {
               <div className="flex flex-col gap-1">
                 <Etoiles note={moyenne} taille={16} />
                 <span className="text-sm text-gris-moyen">
-                  {reviews.length} avis {reviews.length > 1 ? "publiés" : "publié"}
+                  {avis.length} avis {avis.length > 1 ? "publiés" : "publié"} · du plus récent au
+                  plus ancien
                 </span>
               </div>
             </div>
@@ -139,9 +61,7 @@ export default function ReviewsPage() {
       {/* ================= LES AVIS ================= */}
       <section className="bg-gris-clair px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24">
         <div className="max-w-[1200px] mx-auto">
-          {loading ? (
-            <p className="text-gris-moyen">Chargement des avis…</p>
-          ) : reviews.length === 0 ? (
+          {avis.length === 0 ? (
             <div className="max-w-[620px] mx-auto text-center flex flex-col items-center gap-5 bg-gris-tres-clair border border-noir/10 p-10 sm:p-12">
               <MessageCircle className="h-8 w-8 text-sauge" strokeWidth={1.3} />
               <h2 className="text-2xl sm:text-3xl">Les premiers avis arrivent bientôt.</h2>
@@ -151,7 +71,7 @@ export default function ReviewsPage() {
                 qu&apos;elles l&apos;auront écrit.
               </p>
               <Link
-                href="/demande-rdv"
+                href="/#estimation-form"
                 className="mt-2 bg-noir text-blanc border border-noir px-8 py-4 text-[11px] tracking-[0.2em] uppercase hover:bg-transparent hover:text-noir transition-colors"
               >
                 Demander un rendez-vous
@@ -159,17 +79,24 @@ export default function ReviewsPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
-              {reviews.map((avis) => (
+              {avis.map((a) => (
                 <figure
-                  key={avis.id}
+                  key={a.id}
                   className="bg-gris-tres-clair border border-noir/10 p-8 flex flex-col gap-4"
                 >
-                  <Etoiles note={avis.rating} />
+                  <Etoiles note={a.note} />
                   <blockquote className="font-serif text-xl leading-snug text-noir">
-                    « {avis.comment} »
+                    « {a.texte} »
                   </blockquote>
-                  <figcaption className="mt-auto pt-4 border-t border-noir/10 text-sm text-gris-moyen">
-                    {nomAffiche(avis.client)} · {formaterDate(avis.created_at)}
+                  <figcaption className="mt-auto pt-4 border-t border-noir/10 flex flex-col gap-1 text-sm text-gris-moyen">
+                    <span className="text-noir">
+                      {a.prenom}
+                      {a.ville ? ` · ${a.ville}` : ""}
+                    </span>
+                    <span className="text-[13px]">
+                      Prestation de {formaterMois(a.dateExperience)} · publié le{" "}
+                      {formaterJour(a.datePublication)}
+                    </span>
                   </figcaption>
                 </figure>
               ))}
@@ -178,20 +105,60 @@ export default function ReviewsPage() {
         </div>
       </section>
 
+      {/* ================= COMMENT NOUS RECUEILLONS LES AVIS ================= */}
+      <section className="px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24">
+        <div className="max-w-[820px] mx-auto flex flex-col gap-6">
+          <div className="flex items-center gap-3">
+            <ShieldCheck className="h-7 w-7 shrink-0 text-sauge" strokeWidth={1.3} />
+            <h2 className="text-2xl sm:text-3xl">Comment nous recueillons ces avis</h2>
+          </div>
+          <div className="flex flex-col gap-4 text-base text-gris-moyen">
+            <p>
+              Nous écrivons à chaque cliente une fois ses pièces vendues et son virement effectué,
+              en lui proposant de donner son avis. Seules les personnes ayant réellement bénéficié
+              du service peuvent en laisser un : nous ne publions aucun avis venu d&apos;ailleurs.
+            </p>
+            <p>
+              Nous vérifions que l&apos;avis correspond bien à une prestation figurant dans nos
+              dossiers, puis nous le publions tel qu&apos;il a été écrit, sans le reformuler et sans
+              rien retirer. Les avis sont affichés du plus récent au plus ancien, avec le mois de la
+              prestation et la date de mise en ligne.
+            </p>
+            <p>
+              Un avis n&apos;est écarté que s&apos;il est injurieux, diffamatoire ou manifestement
+              étranger au service — et son autrice en est alors informée. Nous ne supprimons jamais
+              un avis au motif qu&apos;il est négatif, et aucune contrepartie n&apos;est offerte en
+              échange d&apos;un avis.
+            </p>
+            <p>
+              Seuls le prénom et la ville sont publiés. Chaque cliente peut à tout moment demander
+              la modification ou le retrait de son avis via{" "}
+              <Link
+                href="/contact"
+                className="text-sauge-fonce underline underline-offset-4 hover:text-noir transition-colors"
+              >
+                notre formulaire de contact
+              </Link>
+              .
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* ================= APPEL À L'ACTION ================= */}
-      {reviews.length > 0 && (
-        <section className="px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24">
+      {avis.length > 0 && (
+        <section className="bg-noir text-creme px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24">
           <div className="max-w-[720px] mx-auto text-center flex flex-col items-center gap-6">
-            <div className="eyebrow">À votre tour</div>
+            <div className="eyebrow text-sauge-clair">À votre tour</div>
             <h2 className="text-3xl sm:text-4xl leading-[1.18]">
               Videz votre dressing, sans effort.
             </h2>
-            <p className="text-base text-gris-moyen max-w-[520px]">
+            <p className="text-base text-creme/75 max-w-[520px]">
               Quelques questions, moins d&apos;une minute, et on vous recontacte sous 24 heures.
             </p>
             <Link
-              href="/demande-rdv"
-              className="mt-2 bg-noir text-blanc border border-noir px-8 py-4 text-[11px] tracking-[0.2em] uppercase hover:bg-transparent hover:text-noir transition-colors"
+              href="/#estimation-form"
+              className="mt-2 bg-creme text-noir border border-creme px-8 py-4 text-[11px] tracking-[0.2em] uppercase hover:bg-transparent hover:text-creme transition-colors"
             >
               Demander un rendez-vous
             </Link>
