@@ -130,8 +130,8 @@ export default function HomePage() {
             <div className="absolute -inset-x-6 -top-6 -bottom-10 bg-sauge-clair/45 rounded-[240px_240px_40px_40px]" />
             <div className="relative w-full h-[360px] sm:h-[440px] lg:h-[520px] rounded-[235px_235px_16px_16px] overflow-hidden">
               <Image
-                src="/tri-portant-hero.jpg"
-                alt="Deux femmes passent en revue les vêtements d'un portant, dans un appartement parisien"
+                src="/tri-dressing-hero.jpg"
+                alt="Deux femmes trient des vêtements pliés sur un lit, devant un portant, dans un appartement parisien"
                 fill
                 sizes="(max-width: 1024px) 100vw, 470px"
                 className="object-cover object-[50%_35%]"
