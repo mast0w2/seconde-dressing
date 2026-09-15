@@ -13,18 +13,24 @@ import { Clock, Euro, Calendar, Truck, Sparkles, Leaf } from "lucide-react";
 const REPARTITION = [
   {
     part: "50 %",
+    largeur: 50,
+    couleur: "bg-noir",
     titre: "Pour vous",
     texte:
       "La moitié du prix de vente de chaque pièce vous revient, versée directement sur votre compte.",
   },
   {
     part: "40 %",
+    largeur: 40,
+    couleur: "bg-sauge",
     titre: "Pour votre vendeuse",
     texte:
       "C'est elle qui trie, photographie, rédige les annonces, répond aux acheteurs et expédie.",
   },
   {
     part: "10 %",
+    largeur: 10,
+    couleur: "bg-sauge-clair",
     titre: "Pour Seconde",
     texte: "Le site, le suivi de vos ventes et les paiements.",
   },
@@ -268,19 +274,37 @@ export default function HomePage() {
             </h2>
           </div>
 
-          {/* Répartition rendue visible : les largeurs suivent les pourcentages. */}
-          <div className="flex w-full gap-1.5" aria-hidden="true">
-            <div style={{ flexGrow: 50 }} className="h-2.5 rounded-full bg-noir" />
-            <div style={{ flexGrow: 40 }} className="h-2.5 rounded-full bg-sauge" />
-            <div style={{ flexGrow: 10 }} className="h-2.5 rounded-full bg-sauge-clair" />
+          {/* Barre d'ensemble : uniquement à partir du moment où les trois
+              colonnes sont côte à côte, sinon elle se retrouve détachée des
+              chiffres qu'elle illustre. */}
+          <div className="hidden sm:flex w-full gap-1.5" aria-hidden="true">
+            {REPARTITION.map(({ titre, largeur, couleur }) => (
+              <div
+                key={titre}
+                style={{ flexGrow: largeur }}
+                className={`h-2.5 rounded-full ${couleur}`}
+              />
+            ))}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-10 lg:gap-14">
-            {REPARTITION.map(({ part, titre, texte }) => (
-              <div key={titre} className="flex flex-col gap-3">
-                <span className="font-serif text-4xl sm:text-5xl leading-none text-noir">
-                  {part}
-                </span>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-0 sm:gap-10 lg:gap-14">
+            {REPARTITION.map(({ part, titre, texte, largeur, couleur }) => (
+              <div
+                key={titre}
+                className="flex flex-col gap-3 border-t border-noir/10 py-6 first:pt-0 sm:border-0 sm:py-0"
+              >
+                <div className="flex items-baseline gap-4 sm:block">
+                  <span className="font-serif text-4xl sm:text-5xl leading-none text-noir">
+                    {part}
+                  </span>
+                  {/* En mobile, chaque part porte sa propre jauge, sinon le
+                      rapport entre les trois chiffres n'est plus lisible. */}
+                  <span
+                    aria-hidden="true"
+                    style={{ width: `${largeur}%` }}
+                    className={`sm:hidden h-2 rounded-full ${couleur}`}
+                  />
+                </div>
                 <span className="text-[11px] tracking-[0.2em] uppercase text-sauge-fonce">
                   {titre}
                 </span>
