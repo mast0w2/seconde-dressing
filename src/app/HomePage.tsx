@@ -219,10 +219,10 @@ export default function HomePage() {
           </div>
 
           <div className="flex flex-col gap-5">
-            <div className="relative w-full h-[260px] sm:h-[340px] lg:h-[375px] rounded-[60px_60px_12px_12px] overflow-hidden">
+            <div className="relative w-full h-[280px] sm:h-[380px] lg:h-[443px] rounded-[60px_60px_12px_12px] overflow-hidden">
               <Image
-                src="/tri-a-deux.jpg"
-                alt="Deux femmes trient des vêtements posés sur un lit, dans un appartement parisien"
+                src="/remise-du-sac.jpg"
+                alt="Une femme remet un sac en toile rempli de vêtements à une vendeuse, sur le pas de la porte"
                 fill
                 sizes="(max-width: 1024px) 100vw, 500px"
                 className="object-cover"
