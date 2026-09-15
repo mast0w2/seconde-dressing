@@ -147,8 +147,8 @@ export default function HomePage() {
         <div className="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-[76px] grid grid-cols-1 lg:grid-cols-[460px_1fr] gap-10 lg:gap-16 items-center">
           <div className="relative w-full h-[300px] sm:h-[380px] lg:h-[420px] rounded-xl overflow-hidden">
             <Image
-              src="/dressing-sort-3.jpg"
-              alt="Des mains plient des pulls sur une table en bois"
+              src="/mise-sous-pli.jpg"
+              alt="Une femme glisse un pull plié dans une pochette d'expédition, sur une table en bois"
               fill
               sizes="(max-width: 1024px) 100vw, 460px"
               className="object-cover"
