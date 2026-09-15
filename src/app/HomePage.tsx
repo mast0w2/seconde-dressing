@@ -221,8 +221,8 @@ export default function HomePage() {
           <div className="flex flex-col gap-5">
             <div className="relative w-full h-[340px] sm:h-[420px] lg:h-[480px] rounded-[200px_200px_12px_12px] overflow-hidden">
               <Image
-                src="/dressing-sort-2.jpg"
-                alt="Une femme choisit une robe dans son dressing"
+                src="/tri-a-deux.jpg"
+                alt="Deux femmes trient des vêtements posés sur un lit, dans un appartement parisien"
                 fill
                 sizes="(max-width: 1024px) 100vw, 400px"
                 className="object-cover"
