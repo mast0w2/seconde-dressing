@@ -4,77 +4,7 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ProgressiveEstimationForm } from "@/components/Form/ProgressiveEstimationForm";
-import Link from "next/link";
-import { Clock, Euro, Calendar, Truck, Sparkles, Leaf, Star } from "lucide-react";
-import { AVIS, noteMoyenne } from "@/data/avis";
-
-// ============================================================================
-// Bandeau d'avis
-// ============================================================================
-
-/**
- * Bandeau de réassurance affiché sous le hero. Il ne montre que de vrais avis
- * de clientes, tirés de src/data/avis.ts : tant qu'aucun avis n'a été recueilli
- * et validé, le bandeau ne s'affiche pas du tout. Aucune preuve sociale
- * fabriquée, jamais.
- */
-function BandeauAvis() {
-  const avis = [...AVIS]
-    .sort((a, b) => b.datePublication.localeCompare(a.datePublication))
-    .slice(0, 3);
-
-  if (avis.length === 0) return null;
-
-  const moyenne = noteMoyenne(AVIS);
-
-  return (
-    <section className="border-y border-noir/10 bg-gris-clair px-6 sm:px-10 lg:px-[76px] py-10 sm:py-12">
-      <div className="max-w-[1200px] mx-auto flex flex-col gap-8">
-        <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
-          <span className="font-serif text-3xl leading-none text-noir">
-            {moyenne.toFixed(1).replace(".", ",")}
-          </span>
-          <span className="inline-flex items-center gap-1" aria-label={`${moyenne.toFixed(1)} sur 5`}>
-            {[1, 2, 3, 4, 5].map((i) => (
-              <Star
-                key={i}
-                className={
-                  i <= Math.round(moyenne) ? "fill-sauge text-sauge" : "text-sauge-clair"
-                }
-                style={{ width: 15, height: 15 }}
-                strokeWidth={1.3}
-              />
-            ))}
-          </span>
-          <span className="text-sm text-gris-moyen">
-            {AVIS.length} avis {AVIS.length > 1 ? "publiés" : "publié"} par des clientes
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {avis.map((a) => (
-            <figure key={a.id} className="flex flex-col gap-3">
-              <blockquote className="font-serif text-lg leading-snug text-noir">
-                « {a.texte} »
-              </blockquote>
-              <figcaption className="text-sm text-gris-moyen">
-                {a.prenom}
-                {a.ville ? ` · ${a.ville}` : ""}
-              </figcaption>
-            </figure>
-          ))}
-        </div>
-
-        <Link
-          href="/reviews"
-          className="self-start text-[11px] tracking-[0.18em] uppercase text-sauge-fonce hover:text-noir transition-colors"
-        >
-          Lire tous les avis →
-        </Link>
-      </div>
-    </section>
-  );
-}
+import { Clock, Euro, Calendar, Truck, Sparkles, Leaf } from "lucide-react";
 
 // ============================================================================
 // Data
@@ -211,9 +141,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* ================= AVIS CLIENTES ================= */}
-      <BandeauAvis />
 
       {/* ================= NOTRE CONCEPT ================= */}
       <section id="concept" className="bg-gris-clair py-16 sm:py-20 lg:py-24">
