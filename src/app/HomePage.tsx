@@ -130,11 +130,11 @@ export default function HomePage() {
             <div className="absolute -inset-x-6 -top-6 -bottom-10 bg-sauge-clair/45 rounded-[240px_240px_40px_40px]" />
             <div className="relative w-full h-[360px] sm:h-[440px] lg:h-[520px] rounded-[235px_235px_16px_16px] overflow-hidden">
               <Image
-                src="/dressing-sort-1.jpg"
-                alt="Deux femmes trient des vêtements devant un portant"
+                src="/tri-chambre-parisienne.jpg"
+                alt="Deux femmes trient des vêtements étalés sur un lit, dans une chambre parisienne"
                 fill
                 sizes="(max-width: 1024px) 100vw, 470px"
-                className="object-cover"
+                className="object-cover object-[50%_35%]"
                 priority
               />
             </div>
@@ -196,7 +196,7 @@ export default function HomePage() {
 
       {/* ================= COMMENT ÇA FONCTIONNE ================= */}
       <section id="etapes" className="bg-noir text-creme py-16 sm:py-20 lg:py-24">
-        <div className="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-[76px] grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-10 lg:gap-16 items-start">
+        <div className="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-[76px] grid grid-cols-1 lg:grid-cols-[1fr_500px] gap-10 lg:gap-14 items-start">
           <div className="flex flex-col gap-3.5">
             <h2 className="text-3xl sm:text-4xl text-creme mb-4">Comment ça fonctionne ?</h2>
 
@@ -219,12 +219,12 @@ export default function HomePage() {
           </div>
 
           <div className="flex flex-col gap-5">
-            <div className="relative w-full h-[340px] sm:h-[420px] lg:h-[480px] rounded-[200px_200px_12px_12px] overflow-hidden">
+            <div className="relative w-full h-[260px] sm:h-[340px] lg:h-[375px] rounded-[60px_60px_12px_12px] overflow-hidden">
               <Image
                 src="/tri-a-deux.jpg"
                 alt="Deux femmes trient des vêtements posés sur un lit, dans un appartement parisien"
                 fill
-                sizes="(max-width: 1024px) 100vw, 400px"
+                sizes="(max-width: 1024px) 100vw, 500px"
                 className="object-cover"
               />
             </div>
