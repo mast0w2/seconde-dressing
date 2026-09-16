@@ -172,14 +172,14 @@ export default function ClientDashboardPage() {
           </Button>
           <div>
             <h1 className="text-3xl">Tableau de bord</h1>
-            <p className="text-gris-moyen">Suivez l'état de vos demandes de rendez-vous</p>
+            <p className="text-gris-moyen">Suivez l&apos;état de vos demandes de rendez-vous</p>
           </div>
         </div>
 
         <Card>
           <CardHeader>
             <CardTitle>Mes demandes</CardTitle>
-            <CardDescription>Suivez l'état de vos demandes de rendez-vous</CardDescription>
+            <CardDescription>Suivez l&apos;état de vos demandes de rendez-vous</CardDescription>
           </CardHeader>
           <CardContent>
             {requests.length === 0 ? (

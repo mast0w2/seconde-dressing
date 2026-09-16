@@ -124,7 +124,7 @@ export default function AppointmentRequestPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [supabase, router, toast]);
+  }, [supabase, router, toast, form]);
 
   useEffect(() => {
     loadData();
@@ -220,13 +220,13 @@ export default function AppointmentRequestPage() {
                     <HelpCircle className="h-4 w-4 text-gris-moyen cursor-help" />
                     <span className="absolute left-1/2 bottom-full z-10 mb-2 hidden -translate-x-1/2 group-hover:block w-64 rounded-md border border-noir/15 bg-blanc p-3 text-xs text-noir shadow-lg">
                       <strong className="block mb-1">Déjà trié (10 €) :</strong>
-                      Vos vêtements sont déjà mis de côté, vous remplissez l'inventaire. On vient les récupérer.
+                      Vos vêtements sont déjà mis de côté, vous remplissez l&apos;inventaire. On vient les récupérer.
                       <br /><br />
                       <strong className="block mb-1">Tri sur place (30 €) :</strong>
                       On passe 30 min à 1 h chez vous pour trier et repérer les pièces qui se revendront.
                       <br /><br />
                       <strong className="block mb-1">Tri & conseil (50 €) :</strong>
-                      Rendez-vous d'1 h à 1 h 30 : on trie avec vous et on vous conseille.
+                      Rendez-vous d&apos;1 h à 1 h 30 : on trie avec vous et on vous conseille.
                     </span>
                   </span>
                 </div>

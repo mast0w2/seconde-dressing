@@ -216,7 +216,7 @@ function LoginForm() {
           {showEmailPending && (
             <div className="mb-4 rounded-md border border-sauge/50 bg-sauge-clair/30 p-4">
               <p className="text-sm text-sauge-fonce">
-                N'oubliez pas de confirmer votre adresse e-mail pour activer votre
+                N&apos;oubliez pas de confirmer votre adresse e-mail pour activer votre
                 compte. Cliquez sur le lien reçu par e-mail, puis connectez-vous.
               </p>
             </div>

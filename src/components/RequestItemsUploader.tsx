@@ -237,6 +237,7 @@ function ItemCard({
         {item.uploading ? (
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         ) : item.photoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img src={item.photoUrl} alt="Vêtement" className="h-full w-full object-cover" />
         ) : (
           <ImageIcon className="h-6 w-6 text-muted-foreground" />
