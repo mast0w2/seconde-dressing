@@ -15,11 +15,11 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // RLS automatically filters: client_id = auth.uid() OR seller_id = auth.uid()
   const { data, error } = await supabase
     .from("requests")
     .select("*")
     .eq("request_type", "appointment")
-    .or(`client_id.eq.${user.id},seller_id.eq.${user.id}`)
     .order("created_at", { ascending: false });
 
   if (error) {
