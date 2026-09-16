@@ -114,7 +114,7 @@ export interface HttpResponse<T> {
 // Business Domain Types
 // ============================================================================
 
-/** Appointment slot availability */
+/** Appointment slot availabilityy */
 export interface AppointmentSlot {
   id: string;
   date: Date;

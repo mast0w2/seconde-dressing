@@ -37,6 +37,7 @@ interface FormuleOption {
   titre: string;
   prix: string;
   description: string;
+  isFirstFree?: boolean;
 }
 
 interface Question {
@@ -63,6 +64,7 @@ const FORMULES: FormuleOption[] = [
     id: "deja-trie",
     titre: "Dressing déjà trié",
     prix: "10 €",
+    isFirstFree: true,
     description:
       "Vos vêtements sont déjà mis de côté, et vous remplirez vous-même l'inventaire de vos pièces avant notre passage. On vient simplement les récupérer.",
   },
@@ -70,6 +72,7 @@ const FORMULES: FormuleOption[] = [
     id: "tri-sur-place",
     titre: "Tri sur place",
     prix: "30 €",
+    isFirstFree: false,
     description:
       "Vous avez mis de côté ce dont vous ne voulez plus, mais vous ne savez pas ce qui a de la valeur. On passe 30 min à 1 h chez vous pour trier et repérer les pièces qui se revendront.",
   },
@@ -77,6 +80,7 @@ const FORMULES: FormuleOption[] = [
     id: "tri-et-conseil",
     titre: "Tri & conseil",
     prix: "50 €",
+    isFirstFree: false,
     description:
       "Rendez-vous d'1 h à 1 h 30 : on trie avec vous et on vous conseille — ce qui vaut le coup d'être vendu, ce qui vous va le mieux, ce que vous avez intérêt à garder.",
   },
@@ -637,9 +641,20 @@ export function ProgressiveEstimationForm({ onCompleteChange }: ProgressiveEstim
                 >
                   <div className="flex items-baseline justify-between gap-4 mb-1">
                     <span className="font-serif text-xl text-noir">{option.titre}</span>
-                    <span className="text-[11px] tracking-[0.16em] uppercase text-sauge-fonce whitespace-nowrap">
-                      {option.prix}
-                    </span>
+                    {option.isFirstFree ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] tracking-[0.16em] uppercase text-gris-moyen line-through">
+                          {option.prix}
+                        </span>
+                        <span className="text-[11px] tracking-[0.16em] uppercase text-sauge-fonce font-medium">
+                          Gratuit
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-[11px] tracking-[0.16em] uppercase text-sauge-fonce whitespace-nowrap">
+                        {option.prix}
+                      </span>
+                    )}
                   </div>
                   <p className="text-sm text-gris-moyen">{option.description}</p>
                 </button>

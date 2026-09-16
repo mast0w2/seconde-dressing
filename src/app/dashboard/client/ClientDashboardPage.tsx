@@ -53,7 +53,7 @@ export default function ClientDashboardPage() {
       setProfile(profileData as Profile);
 
       if (profileData.role !== "client") {
-        router.push("/dashboard/vendeur");
+        router.push("/dashboard/seller");
         return;
       }
 
@@ -186,7 +186,7 @@ export default function ClientDashboardPage() {
               <div className="text-center py-12 text-gris-moyen">
                 <p className="mb-4">Aucune demande trouvée.</p>
                 <Button asChild>
-                  <Link href="/demande-rdv">Faire une nouvelle demande</Link>
+                  <Link href="/appointment-request">Faire une nouvelle demande</Link>
                 </Button>
               </div>
             ) : (

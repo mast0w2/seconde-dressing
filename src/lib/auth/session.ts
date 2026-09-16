@@ -56,7 +56,7 @@ export async function requireSession() {
 export async function requireRole(role: Role) {
   const { user, profile } = await requireSession();
   if (profile.role !== role) {
-    redirect(profile.role === 'seller' ? '/dashboard/vendeur' : '/dashboard/client');
+    redirect(profile.role === 'seller' ? '/dashboard/seller' : '/dashboard/client');
   }
   return { user, profile };
 }

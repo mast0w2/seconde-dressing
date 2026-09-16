@@ -9,5 +9,5 @@ export const metadata: Metadata = noIndexMetadata("Tableau de bord");
 
 export default async function DashboardPage() {
   const { profile } = await requireSession();
-  redirect(profile.role === "seller" ? "/dashboard/vendeur" : "/dashboard/client");
+  redirect(profile.role === "seller" ? "/dashboard/seller" : "/dashboard/client");
 }

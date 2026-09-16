@@ -8,8 +8,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 const PROTECTED_ROUTES = [
   '/dashboard',
   '/profile',
-  '/preferences',
-  '/demande-rdv',
+  '/appointment-request',
 ];
 
 export async function middleware(request: NextRequest) {
@@ -60,11 +59,9 @@ export const config = {
   matcher: [
     '/dashboard/:path*',
     '/profile/:path*',
-    '/preferences/:path*',
-    '/demande-rdv/:path*',
+    '/appointment-request/:path*',
     '/dashboard',
     '/profile',
-    '/preferences',
-    '/demande-rdv',
+    '/appointment-request',
   ],
 };

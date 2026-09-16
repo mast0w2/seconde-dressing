@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { noIndexMetadata } from "@/lib/seo";
-import DemandeRdvPage from "./DemandeRdvPage";
+import AppointmentRequestPage from "./AppointmentRequestPage";
 
 // Page réservée aux clientes déjà connectées : elle demande un rendez-vous
 // supplémentaire sans ressaisir ses coordonnées. Le parcours public passe par
@@ -9,5 +9,5 @@ import DemandeRdvPage from "./DemandeRdvPage";
 export const metadata: Metadata = noIndexMetadata("Demande de rendez-vous");
 
 export default function Page() {
-  return <DemandeRdvPage />;
+  return <AppointmentRequestPage />;
 }

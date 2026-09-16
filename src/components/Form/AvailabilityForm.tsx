@@ -25,7 +25,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-interface DisponibiliteFormProps {
+interface AvailabilityFormProps {
   onSuccess?: () => void;
   initialData?: {
     date: Date;
@@ -36,7 +36,7 @@ interface DisponibiliteFormProps {
   };
 }
 
-export function DisponibiliteForm({ onSuccess, initialData }: DisponibiliteFormProps) {
+export function AvailabilityForm({ onSuccess, initialData }: AvailabilityFormProps) {
   const { toast } = useToast();
   const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
   const [date, setDate] = React.useState<Date>(initialData?.date || new Date());
@@ -72,7 +72,7 @@ export function DisponibiliteForm({ onSuccess, initialData }: DisponibiliteFormP
 
       const formattedDate = format(data.date, "yyyy-MM-dd");
 
-      const availabilityData = {
+      const availabilityyData = {
         user_id: user.id,
         date: formattedDate,
         start_time: data.start_time,
@@ -83,8 +83,8 @@ export function DisponibiliteForm({ onSuccess, initialData }: DisponibiliteFormP
       };
 
       const { error } = await supabase
-        .from("availabilities")
-        .insert([availabilityData]);
+        .from("availabilityies")
+        .insert([availabilityyData]);
 
       if (error) {
         throw error;

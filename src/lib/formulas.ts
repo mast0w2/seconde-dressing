@@ -1,6 +1,6 @@
 // src/lib/formulas.ts
 // Detailed French descriptions for the priced service formulas.
-// Used by tooltips across the demande-rdv form and other client-facing UI.
+// Used by tooltips across the appointment-request form and other client-facing UI.
 // The short English descriptions live in the `formulas` table; these long
 // descriptions match the wording from the homepage estimation form.
 

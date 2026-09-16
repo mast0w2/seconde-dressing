@@ -1,21 +1,21 @@
-// src/data/avis.ts
+// src/data/reviews.ts
 //
 // Avis clientes publiés sur /reviews.
 //
-// RÈGLE ABSOLUE : on ne publie ici QUE des avis réellement écrits par une
+// RÈGLE ABSOLUE : on ne publie ici QUE des reviews réellement écrits par une
 // cliente, après une vente réellement conclue, et avec son accord écrit pour
-// la publication. Inventer un avis est une pratique commerciale trompeuse
+// la publication. Inventer un reviews est une pratique commerciale trompeuse
 // (article L121-2 du code de la consommation) et détruirait la confiance qui
 // est le seul actif de Seconde.
 //
-// Pour publier un avis reçu :
+// Pour publier un reviews reçu :
 //   1. vérifier qu'on a bien l'accord écrit de la cliente (email conservé),
 //   2. ajouter une entrée ci-dessous, en recopiant son texte SANS le retoucher
 //      (on peut corriger une faute de frappe évidente, rien d'autre),
 //   3. conserver l'email d'origine : c'est la preuve en cas de contrôle.
 //
-// Ne jamais supprimer un avis parce qu'il est négatif : la loi l'interdit.
-// Seuls les avis illicites (diffamatoires, injurieux) ou manifestement faux
+// Ne jamais supprimer un reviews parce qu'il est négatif : la loi l'interdit.
+// Seuls les reviews illicites (diffamatoires, injurieux) ou manifestement faux
 // peuvent être écartés, et l'autrice doit en être informée.
 
 export interface Avis {
@@ -36,7 +36,7 @@ export interface Avis {
 }
 
 export const AVIS: Avis[] = [
-  // Exemple de structure — à remplacer par le premier vrai avis :
+  // Exemple de structure — à remplacer par le premier vrai reviews :
   // {
   //   id: "camille-2026-09",
   //   prenom: "Camille",
@@ -48,10 +48,10 @@ export const AVIS: Avis[] = [
   // },
 ];
 
-/** Note moyenne. Retourne 0 s'il n'y a aucun avis. */
-export function noteMoyenne(avis: Avis[] = AVIS): number {
-  if (avis.length === 0) return 0;
-  return avis.reduce((total, a) => total + a.note, 0) / avis.length;
+/** Note moyenne. Retourne 0 s'il n'y a aucun reviews. */
+export function noteMoyenne(reviews: Avis[] = AVIS): number {
+  if (reviews.length === 0) return 0;
+  return reviews.reduce((total, a) => total + a.note, 0) / reviews.length;
 }
 
 const MOIS = [

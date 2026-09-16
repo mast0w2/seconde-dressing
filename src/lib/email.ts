@@ -463,7 +463,7 @@ class NotificationService {
       
       <p>Connectez-vous à votre espace personnel pour accepter ou refuser cette demande :</p>
       <p>
-        <a href="${EMAIL_CONFIG.siteUrl}/dashboard/vendeur" class="button">Voir les demandes</a>
+        <a href="${EMAIL_CONFIG.siteUrl}/dashboard/seller" class="button">Voir les demandes</a>
       </p>
       
       <p>Ne répondez pas à cet email, utilisez plutôt la plateforme pour gérer vos rendez-vous.</p>
@@ -489,7 +489,7 @@ class NotificationService {
       
       <p>Vous pouvez prendre un nouveau rendez-vous quand vous le souhaitez :</p>
       <p>
-        <a href="${EMAIL_CONFIG.siteUrl}/demande-rdv" class="button">Prendre un nouveau rendez-vous</a>
+        <a href="${EMAIL_CONFIG.siteUrl}/appointment-request" class="button">Prendre un nouveau rendez-vous</a>
       </p>
       
       <p>Nous nous excusons pour la gêne occasionnée.</p>
@@ -551,7 +551,7 @@ class NotificationService {
       
       <p>Nous vous invitons à essayer avec une autre vendeuse ou un autre créneau :</p>
       <p>
-        <a href="${EMAIL_CONFIG.siteUrl}/demande-rdv" class="button">Voir les disponibilités</a>
+        <a href="${EMAIL_CONFIG.siteUrl}/appointment-request" class="button">Voir les disponibilités</a>
       </p>
       
       <p>Vous pouvez également nous contacter directement via notre 
@@ -648,7 +648,7 @@ class NotificationService {
           <li>Suivre vos rendez-vous et vos ventes</li>
         </ul>
         <p style="text-align: center; margin: 20px 0;">
-          <a href="${EMAIL_CONFIG.siteUrl}/demande-rdv" class="button">Prendre un rendez-vous</a>
+          <a href="${EMAIL_CONFIG.siteUrl}/appointment-request" class="button">Prendre un rendez-vous</a>
         </p>
       `
       : `
@@ -659,14 +659,14 @@ class NotificationService {
           <li>Suivre vos clients et vos ventes</li>
         </ul>
         <p style="text-align: center; margin: 20px 0;">
-          <a href="${EMAIL_CONFIG.siteUrl}/dashboard/vendeur" class="button">Voir les demandes</a>
+          <a href="${EMAIL_CONFIG.siteUrl}/dashboard/seller" class="button">Voir les demandes</a>
         </p>
       `;
 
     const content = `
       <h2>\ud83c\udf89 Bienvenue, ${name} !</h2>
       <p>Merci de vous être inscrit(e) sur <strong>Seconde</strong> !</p>
-      <p>Nous sommes ravis de vous compter parmi nous.</p>
+      <p>Nous sommes rreviews de vous compter parmi nous.</p>
       
       ${roleSpecificContent}
       
