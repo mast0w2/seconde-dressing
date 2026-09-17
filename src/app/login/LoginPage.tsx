@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -21,7 +21,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const dashboardForRole = (role: string) =>
-  role === "seller" ? "/dashboard/vendeur" : "/dashboard/client";
+  role === "seller" ? "/dashboard/seller" : "/dashboard/client";
 
 function LoginForm() {
   const router = useRouter();
@@ -31,6 +31,31 @@ function LoginForm() {
   const redirectTarget = searchParams.get("redirect");
   const showEmailPending = searchParams.get("email_pending") === "1";
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [isChecking, setIsChecking] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .single();
+
+          const dashboard = profile ? dashboardForRole(profile.role) : "/dashboard/client";
+          router.push(dashboard);
+          return;
+        }
+      } catch (error) {
+        console.error("Auth check error:", error);
+      }
+      setIsChecking(false);
+    };
+
+    checkAuth();
+  }, [supabase, router]);
   // Connexion sans mot de passe : la cliente reçoit un lien par email.
   // C'est le mode par défaut pour les comptes créés depuis le formulaire
   // de demande, qui n'ont jamais défini de mot de passe.
@@ -170,6 +195,14 @@ function LoginForm() {
     }
   };
 
+  if (isChecking) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-creme">
+        <p className="text-gris-moyen">Vérification de votre session...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-creme p-4">
       <Card className="w-full max-w-md">
@@ -183,7 +216,7 @@ function LoginForm() {
           {showEmailPending && (
             <div className="mb-4 rounded-md border border-sauge/50 bg-sauge-clair/30 p-4">
               <p className="text-sm text-sauge-fonce">
-                N'oubliez pas de confirmer votre adresse e-mail pour activer votre
+                N&apos;oubliez pas de confirmer votre adresse e-mail pour activer votre
                 compte. Cliquez sur le lien reçu par e-mail, puis connectez-vous.
               </p>
             </div>

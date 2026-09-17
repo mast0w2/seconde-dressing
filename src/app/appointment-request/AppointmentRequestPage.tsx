@@ -31,7 +31,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export default function DemandeRdvPage() {
+export default function AppointmentRequestPage() {
   const router = useRouter();
   const { toast } = useToast();
   const supabase = createBrowserClient(
@@ -41,6 +41,7 @@ export default function DemandeRdvPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [formulas, setFormulas] = useState<Formula[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFirstRequest, setIsFirstRequest] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -83,7 +84,7 @@ export default function DemandeRdvPage() {
       setProfile(profileData as Profile);
 
       if (profileData.role !== "client") {
-        router.push("/dashboard/vendeur");
+        router.push("/dashboard/seller");
         return;
       }
 
@@ -94,6 +95,17 @@ export default function DemandeRdvPage() {
 
       if (profileData.street_address) {
         form.setValue("address", profileData.street_address);
+      }
+
+      // Check if this is the user's first request
+      const { data: userRequests, error: requestsError } = await supabase
+        .from("requests")
+        .select("id")
+        .eq("client_id", user.id)
+        .limit(1);
+
+      if (!requestsError && (!userRequests || userRequests.length === 0)) {
+        setIsFirstRequest(true);
       }
 
       const { data: formulasData, error: formulasError } = await supabase
@@ -112,7 +124,7 @@ export default function DemandeRdvPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [supabase, router, toast]);
+  }, [supabase, router, toast, form]);
 
   useEffect(() => {
     loadData();
@@ -208,19 +220,21 @@ export default function DemandeRdvPage() {
                     <HelpCircle className="h-4 w-4 text-gris-moyen cursor-help" />
                     <span className="absolute left-1/2 bottom-full z-10 mb-2 hidden -translate-x-1/2 group-hover:block w-64 rounded-md border border-noir/15 bg-blanc p-3 text-xs text-noir shadow-lg">
                       <strong className="block mb-1">Déjà trié (10 €) :</strong>
-                      Vos vêtements sont déjà mis de côté, vous remplissez l'inventaire. On vient les récupérer.
+                      Vos vêtements sont déjà mis de côté, vous remplissez l&apos;inventaire. On vient les récupérer.
                       <br /><br />
                       <strong className="block mb-1">Tri sur place (30 €) :</strong>
                       On passe 30 min à 1 h chez vous pour trier et repérer les pièces qui se revendront.
                       <br /><br />
                       <strong className="block mb-1">Tri & conseil (50 €) :</strong>
-                      Rendez-vous d'1 h à 1 h 30 : on trie avec vous et on vous conseille.
+                      Rendez-vous d&apos;1 h à 1 h 30 : on trie avec vous et on vous conseille.
                     </span>
                   </span>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-3">
                   {formulas.map((formula) => {
                     const detail = getFormulaDetail(formula.slug);
+                    const isPresorted = formula.slug === "pre-sorted";
+                    const isFreeFirstRequest = isFirstRequest && isPresorted;
                     return (
                     <label
                       key={formula.id}
@@ -238,7 +252,17 @@ export default function DemandeRdvPage() {
                         className="sr-only"
                       />
                       <span className="font-medium">{formula.label}</span>
-                      <span className="text-sm text-gris-moyen">{formula.price} €</span>
+                      {isFreeFirstRequest ? (
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm line-through text-gris-moyen">{formula.price} €</span>
+                          <span className="text-sm font-medium text-sauge">Gratuit</span>
+                        </div>
+                      ) : (
+                        <span className="text-sm text-gris-moyen">{formula.price} €</span>
+                      )}
+                      {isFreeFirstRequest && (
+                        <span className="text-xs text-sauge font-medium">Première commande gratuite!</span>
+                      )}
                       {detail && (
                         <span className="text-xs text-gris-moyen mt-1 line-clamp-2">{detail}</span>
                       )}

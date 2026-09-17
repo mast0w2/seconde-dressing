@@ -148,26 +148,14 @@ export function Navbar() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
-                    <Link href="/preferences">
-                      Préférences
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
                     <Link href="/dashboard">
                       Tableau de bord
                     </Link>
                   </DropdownMenuItem>
                   {isClient && (
                     <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
-                      <Link href="/demande-rdv">
+                      <Link href="/appointment-request">
                         Demande de RDV
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
-                  {isSeller && (
-                    <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
-                      <Link href="/vendeur">
-                        Espace Vendeur
                       </Link>
                     </DropdownMenuItem>
                   )}

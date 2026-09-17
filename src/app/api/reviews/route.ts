@@ -171,7 +171,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { 
           success: false, 
-          error: 'Vous avez déjà soumis un avis.' 
+          error: 'Vous avez déjà soumis un reviews.' 
         },
         { status: 400 }
       );
@@ -192,7 +192,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: 'Votre avis a été soumis avec succès. Merci !',
+      message: 'Votre reviews a été soumis avec succès. Merci !',
       data: dbResult.data,
     });
   } catch (error) {

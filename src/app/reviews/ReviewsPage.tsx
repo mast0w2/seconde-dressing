@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Star, MessageCircle } from "lucide-react";
-import { AVIS, noteMoyenne, formaterMois, formaterJour } from "@/data/avis";
+import { AVIS, noteMoyenne, formaterMois, formaterJour } from "@/data/reviews";
 
 function Etoiles({ note, taille = 14 }: { note: number; taille?: number }) {
   return (
@@ -20,9 +20,9 @@ function Etoiles({ note, taille = 14 }: { note: number; taille?: number }) {
 }
 
 export default function ReviewsPage() {
-  // Les avis les plus récents d'abord.
-  const avis = [...AVIS].sort((a, b) => b.datePublication.localeCompare(a.datePublication));
-  const moyenne = noteMoyenne(avis);
+  // Les reviews les plus récents d'abord.
+  const reviews = [...AVIS].sort((a, b) => b.datePublication.localeCompare(a.datePublication));
+  const moyenne = noteMoyenne(reviews);
 
   return (
     <div className="bg-creme text-noir">
@@ -36,12 +36,12 @@ export default function ReviewsPage() {
             <span className="italic text-sauge-fonce">une fois leurs pièces vendues.</span>
           </h1>
           <p className="text-base sm:text-lg text-gris-moyen">
-            Chaque avis publié ici vient d&apos;une cliente à qui nous avons réellement vendu des
+            Chaque reviews publié ici vient d&apos;une cliente à qui nous avons réellement vendu des
             vêtements. Nous les sollicitons par email à la fin de la vente, et nous publions ce
             qu&apos;elles écrivent — sans trier.
           </p>
 
-          {avis.length > 0 && (
+          {reviews.length > 0 && (
             <div className="flex items-center gap-4 border-t border-noir/10 pt-6">
               <span className="font-serif text-4xl leading-none text-noir">
                 {moyenne.toFixed(1).replace(".", ",")}
@@ -49,7 +49,7 @@ export default function ReviewsPage() {
               <div className="flex flex-col gap-1">
                 <Etoiles note={moyenne} taille={16} />
                 <span className="text-sm text-gris-moyen">
-                  {avis.length} avis {avis.length > 1 ? "publiés" : "publié"} · du plus récent au
+                  {reviews.length} reviews {reviews.length > 1 ? "publiés" : "publié"} · du plus récent au
                   plus ancien
                 </span>
               </div>
@@ -61,13 +61,13 @@ export default function ReviewsPage() {
       {/* ================= LES AVIS ================= */}
       <section className="bg-gris-clair px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24">
         <div className="max-w-[1200px] mx-auto">
-          {avis.length === 0 ? (
+          {reviews.length === 0 ? (
             <div className="max-w-[620px] mx-auto text-center flex flex-col items-center gap-5 bg-gris-tres-clair border border-noir/10 p-10 sm:p-12">
               <MessageCircle className="h-8 w-8 text-sauge" strokeWidth={1.3} />
-              <h2 className="text-2xl sm:text-3xl">Les premiers avis arrivent bientôt.</h2>
+              <h2 className="text-2xl sm:text-3xl">Les premiers reviews arrivent bientôt.</h2>
               <p className="text-gris-moyen">
                 Nous venons d&apos;ouvrir. Dès que les premières ventes seront conclues, les clientes
-                concernées recevront une invitation à donner leur avis, et il apparaîtra ici tel
+                concernées recevront une invitation à donner leur reviews, et il apparaîtra ici tel
                 qu&apos;elles l&apos;auront écrit.
               </p>
               <Link
@@ -79,7 +79,7 @@ export default function ReviewsPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
-              {avis.map((a) => (
+              {reviews.map((a) => (
                 <figure
                   key={a.id}
                   className="bg-gris-tres-clair border border-noir/10 p-8 flex flex-col gap-4"
@@ -106,7 +106,7 @@ export default function ReviewsPage() {
       </section>
 
       {/* ================= APPEL À L'ACTION ================= */}
-      {avis.length > 0 && (
+      {reviews.length > 0 && (
         <section className="bg-noir text-creme px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24">
           <div className="max-w-[720px] mx-auto text-center flex flex-col items-center gap-6">
             <div className="eyebrow text-sauge-clair">À votre tour</div>

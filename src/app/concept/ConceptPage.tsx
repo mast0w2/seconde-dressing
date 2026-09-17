@@ -35,18 +35,21 @@ const FORMULES = [
   {
     titre: "Dressing déjà trié",
     prix: "10 €",
+    isFirstFree: true,
     texte:
       "Vos vêtements sont déjà mis de côté, et vous remplirez vous-même l'inventaire de vos pièces avant notre passage. On vient simplement les récupérer.",
   },
   {
     titre: "Tri sur place",
     prix: "30 €",
+    isFirstFree: false,
     texte:
       "Vous avez mis de côté ce dont vous ne voulez plus, mais vous ne savez pas ce qui a de la valeur. On passe 30 min à 1 h chez vous pour trier et repérer les pièces qui se revendront.",
   },
   {
     titre: "Tri & conseil",
     prix: "50 €",
+    isFirstFree: false,
     texte:
       "Rendez-vous d'1 h à 1 h 30 : on trie avec vous et on vous conseille — ce qui vaut le coup d'être vendu, ce qui vous va le mieux, ce que vous avez intérêt à garder.",
   },
@@ -194,12 +197,22 @@ export default function ConceptPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-7">
-            {FORMULES.map(({ titre, prix, texte }) => (
+            {FORMULES.map(({ titre, prix, texte, isFirstFree }) => (
               <div
                 key={titre}
                 className="bg-gris-tres-clair border border-gris-clair p-8 flex flex-col gap-3"
               >
-                <span className="font-serif text-4xl leading-none text-sauge">{prix}</span>
+                {isFirstFree ? (
+                  <div className="flex flex-col gap-1">
+                    <span className="font-serif text-4xl leading-none text-gris-moyen line-through">{prix}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-serif text-2xl leading-none text-sauge">Gratuit</span>
+                      <span className="text-xs text-sauge font-medium">1ère commande</span>
+                    </div>
+                  </div>
+                ) : (
+                  <span className="font-serif text-4xl leading-none text-sauge">{prix}</span>
+                )}
                 <h3 className="text-xl">{titre}</h3>
                 <p className="text-sm text-gris-moyen">{texte}</p>
               </div>

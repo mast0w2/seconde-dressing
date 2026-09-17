@@ -13,7 +13,7 @@ export async function GET() {
   }
 
   const { data, error } = await supabase
-    .from("availabilities")
+    .from("availabilityies")
     .select("*")
     .eq("user_id", user.id)
     .order("date", { ascending: true });
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
 
   const body = await request.json();
 
-  const { error } = await supabase.from("availabilities").insert([
+  const { error } = await supabase.from("availabilityies").insert([
     {
       user_id: user.id,
       date: body.date,

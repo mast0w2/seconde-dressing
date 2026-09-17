@@ -18,7 +18,7 @@ const VIDE = {
   consentement: false,
 };
 
-export default function LaisserAvisPage() {
+export default function LeaveReviewPage() {
   const [form, setForm] = useState(VIDE);
   const [envoi, setEnvoi] = useState(false);
   const [envoye, setEnvoye] = useState(false);
@@ -28,7 +28,7 @@ export default function LaisserAvisPage() {
   // à la cliente quel champ bloque : elle abandonne.
   const manquants: string[] = [];
   if (form.note < 1) manquants.push("une note en étoiles");
-  if (form.texte.trim().length < 5) manquants.push("votre avis");
+  if (form.texte.trim().length < 5) manquants.push("votre reviews");
   if (form.prenom.trim() === "") manquants.push("votre prénom");
   if (form.nom.trim() === "") manquants.push("votre nom");
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) manquants.push("un email valide");
@@ -50,7 +50,7 @@ export default function LaisserAvisPage() {
 
     setEnvoi(true);
     try {
-      const reponse = await fetch("/api/avis", {
+      const reponse = await fetch("/api/reviews", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -83,7 +83,7 @@ export default function LaisserAvisPage() {
             <Check className="h-8 w-8 text-sauge" strokeWidth={1.3} />
             <h1 className="text-3xl sm:text-4xl">Merci beaucoup.</h1>
             <p className="text-gris-moyen">
-              Votre avis nous est bien parvenu. Nous le publierons tel que vous l&apos;avez écrit,
+              Votre reviews nous est bien parvenu. Nous le publierons tel que vous l&apos;avez écrit,
               avec votre prénom seul, dans les prochains jours. Vous pouvez à tout moment nous
               demander de le modifier ou de le retirer.
             </p>
@@ -91,7 +91,7 @@ export default function LaisserAvisPage() {
               href="/reviews"
               className="mt-2 bg-noir text-blanc border border-noir px-8 py-4 text-[11px] tracking-[0.2em] uppercase hover:bg-transparent hover:text-noir transition-colors"
             >
-              Voir les avis
+              Voir les reviews
             </Link>
           </div>
         </section>
@@ -104,14 +104,14 @@ export default function LaisserAvisPage() {
       <section className="px-6 sm:px-10 lg:px-[76px] pt-12 sm:pt-16 pb-16 sm:pb-20 lg:pb-24">
         <div className="max-w-[620px] mx-auto flex flex-col gap-10">
           <div className="flex flex-col gap-5">
-            <div className="eyebrow">Votre avis</div>
+            <div className="eyebrow">Votre reviews</div>
             <h1 className="text-4xl sm:text-5xl leading-[1.14]">
               Vos pièces sont vendues.
               <br />
               <span className="italic text-sauge-fonce">Dites-nous comment ça s&apos;est passé.</span>
             </h1>
             <p className="text-base text-gris-moyen">
-              Votre avis sera publié sur notre page avis, tel que vous l&apos;écrivez, avec votre
+              Votre reviews sera publié sur notre page reviews, tel que vous l&apos;écrivez, avec votre
               prénom seul. Deux minutes, et vous aidez les prochaines clientes à savoir à quoi
               s&apos;attendre.
             </p>
@@ -141,7 +141,7 @@ export default function LaisserAvisPage() {
 
             <div className="flex flex-col gap-2">
               <label htmlFor="texte" className={LABEL}>
-                Votre avis *
+                Votre reviews *
               </label>
               <textarea
                 id="texte"
@@ -216,9 +216,9 @@ export default function LaisserAvisPage() {
                 className="mt-1 h-4 w-4 shrink-0 accent-[#6f7d62]"
               />
               <span className="text-sm text-gris-moyen">
-                J&apos;autorise Seconde à publier cet avis sur son site avec mon prénom et ma ville.
+                J&apos;autorise Seconde à publier cet reviews sur son site avec mon prénom et ma ville.
                 Mon nom et mon email ne seront pas publiés et servent uniquement à vérifier que
-                l&apos;avis provient bien d&apos;une cliente. Je peux demander sa modification ou son
+                l&apos;reviews provient bien d&apos;une cliente. Je peux demander sa modification ou son
                 retrait à tout moment.
               </span>
             </label>
@@ -230,7 +230,7 @@ export default function LaisserAvisPage() {
               disabled={envoi}
               className="self-start bg-noir text-blanc border border-noir px-8 py-4 text-[11px] tracking-[0.2em] uppercase hover:bg-transparent hover:text-noir transition-colors disabled:opacity-50"
             >
-              {envoi ? "Envoi en cours…" : "Envoyer mon avis"}
+              {envoi ? "Envoi en cours…" : "Envoyer mon reviews"}
             </button>
           </form>
         </div>

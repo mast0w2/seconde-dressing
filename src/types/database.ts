@@ -307,7 +307,7 @@ export interface UpdatePreference {
 }
 
 // ============================================================================
-// availabilities table
+// availabilityies table
 // ============================================================================
 export interface Availability {
   id: string;
@@ -552,7 +552,7 @@ export interface Database {
         Insert: InsertPreference;
         Update: UpdatePreference;
       };
-      availabilities: {
+      availabilityies: {
         Row: Availability;
         Insert: InsertAvailability;
         Update: UpdateAvailability;

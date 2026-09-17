@@ -1,3 +1,3 @@
-export * from "./DisponibiliteForm";
+export * from "./AvailabilityForm";
 export * from "./ProfileForm";
 export * from "./ProgressiveEstimationForm";

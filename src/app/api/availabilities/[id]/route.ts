@@ -17,7 +17,7 @@ export async function GET(
   }
 
   const { data, error } = await supabase
-    .from("availabilities")
+    .from("availabilityies")
     .select("*")
     .eq("id", id)
     .eq("user_id", user.id)
@@ -48,7 +48,7 @@ export async function PUT(
   const body = await request.json();
 
   const { error } = await supabase
-    .from("availabilities")
+    .from("availabilityies")
     .update(body)
     .eq("id", id)
     .eq("user_id", user.id);
@@ -76,7 +76,7 @@ export async function DELETE(
   }
 
   const { error } = await supabase
-    .from("availabilities")
+    .from("availabilityies")
     .delete()
     .eq("id", id)
     .eq("user_id", user.id);

@@ -48,7 +48,7 @@ export async function GET(request: Request) {
         }
         const dashboard =
           profile.role === "seller"
-            ? "/dashboard/vendeur"
+            ? "/dashboard/seller"
             : "/dashboard/client";
         return NextResponse.redirect(new URL(dashboard, requestUrl.origin).toString());
       }

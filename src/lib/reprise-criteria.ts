@@ -1,6 +1,6 @@
 // src/lib/reprise-criteria.ts
 // Shared reprise criteria for the homepage estimation form and the
-// demande-rdv confirmation checkbox tooltip.
+// appointment-request confirmation checkbox tooltip.
 
 import { Users, Sparkles, Gem, Ban } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
