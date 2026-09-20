@@ -2,6 +2,8 @@
 // Brevo (ex Sendinblue) Email Service Implementation
 // Follows industry best practices: SOLID principles, dependency injection, separation of concerns
 
+import { PART_CLIENTE, formatShare } from "@/lib/pricing";
+
 // ============================================================================
 // Types and Interfaces
 // ============================================================================
@@ -728,7 +730,7 @@ class NotificationService {
       <p><strong>Nombre de vêtements:</strong> ${data.nombreVetements}</p>
       <p><strong>Valeur moyenne par vêtement:</strong> ${data.valeurMoyenne}€</p>
       <p><strong>Marques:</strong> ${data.marques}</p>
-      <p><strong>Part cliente (40% du prix de vente):</strong> ${data.estimation.toFixed(0)}€</p>
+      <p><strong>Part cliente (${formatShare(PART_CLIENTE, { compact: true })} du prix de vente):</strong> ${data.estimation.toFixed(0)}€</p>
       
       <h3>Description supplémentaire:</h3>
       <div class="highlight">

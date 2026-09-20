@@ -5,31 +5,40 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ProgressiveRequestForm } from "@/components/Form/ProgressiveRequestForm";
 import { Clock, Euro, Calendar, Truck, Sparkles, Leaf } from "lucide-react";
+import {
+  PART_CLIENTE,
+  PART_VENDEUSE,
+  PART_PLATEFORME,
+  formatShare,
+  sharePercent,
+} from "@/lib/pricing";
 
 // ============================================================================
 // Data
 // ============================================================================
 
+// Les pourcentages viennent tous de src/lib/pricing.ts : c'est le seul
+// endroit à modifier pour changer la répartition.
 const REPARTITION = [
   {
-    part: "50 %",
-    largeur: 50,
+    part: formatShare(PART_CLIENTE),
+    largeur: sharePercent(PART_CLIENTE),
     couleur: "bg-noir",
     titre: "Pour vous",
     texte:
-      "La moitié du prix de vente de chaque pièce vous revient, versée directement sur votre compte.",
+      "Votre part du prix de vente de chaque pièce vous revient, versée directement sur votre compte.",
   },
   {
-    part: "40 %",
-    largeur: 40,
+    part: formatShare(PART_VENDEUSE),
+    largeur: sharePercent(PART_VENDEUSE),
     couleur: "bg-sauge",
     titre: "Pour votre vendeuse",
     texte:
       "C'est elle qui trie, photographie, rédige les annonces, répond aux acheteurs et expédie.",
   },
   {
-    part: "10 %",
-    largeur: 10,
+    part: formatShare(PART_PLATEFORME),
+    largeur: sharePercent(PART_PLATEFORME),
     couleur: "bg-sauge-clair",
     titre: "Pour Seconde",
     texte: "Le site, le suivi de vos ventes et les paiements.",
@@ -270,7 +279,7 @@ export default function HomePage() {
           <div className="flex flex-col gap-4 max-w-[620px]">
             <div className="eyebrow">Ce que vous touchez</div>
             <h2 className="text-3xl sm:text-4xl leading-[1.18]">
-              Vous touchez 50 % de chaque vente.
+              Vous touchez {formatShare(PART_CLIENTE)} de chaque vente.
             </h2>
           </div>
 
