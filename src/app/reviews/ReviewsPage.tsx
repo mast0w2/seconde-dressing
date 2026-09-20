@@ -1,23 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Star, MessageCircle } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { AVIS, noteMoyenne, formaterMois, formaterJour } from "@/data/reviews";
-
-function Etoiles({ note, taille = 14 }: { note: number; taille?: number }) {
-  return (
-    <span className="inline-flex items-center gap-1" aria-label={`${note} sur 5`}>
-      {[1, 2, 3, 4, 5].map((i) => (
-        <Star
-          key={i}
-          style={{ width: taille, height: taille }}
-          strokeWidth={1.3}
-          className={i <= Math.round(note) ? "fill-sauge text-sauge" : "text-sauge-clair"}
-        />
-      ))}
-    </span>
-  );
-}
+import { Etoiles } from "@/components/Etoiles";
 
 export default function ReviewsPage() {
   // Les reviews les plus récents d'abord.

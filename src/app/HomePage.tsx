@@ -2,8 +2,11 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ProgressiveRequestForm } from "@/components/Form/ProgressiveRequestForm";
+import { Etoiles } from "@/components/Etoiles";
+import { AVIS } from "@/data/reviews";
 import { Clock, Euro, Calendar, Truck, Sparkles, Leaf } from "lucide-react";
 
 // ============================================================================
@@ -68,6 +71,11 @@ const BENEFITS = [
     text: "Une seconde vie pour vos vêtements, c'est une mode plus durable et responsable.",
   },
 ];
+
+// Les trois avis les plus récents, affichés en bandeau sous le hero.
+const DERNIERS_AVIS = [...AVIS]
+  .sort((a, b) => b.datePublication.localeCompare(a.datePublication))
+  .slice(0, 3);
 
 const STEPS = [
   {
@@ -167,6 +175,52 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ================= DERNIERS AVIS ================= */}
+      {DERNIERS_AVIS.length > 0 && (
+        <section
+          aria-label="Derniers avis clientes"
+          className="border-y border-noir/10 px-6 sm:px-10 lg:px-[76px] py-10 sm:py-12"
+        >
+          <div className="max-w-[1200px] mx-auto flex flex-col gap-8">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+              <div className="eyebrow">Elles nous ont fait confiance</div>
+              <Link
+                href="/reviews"
+                className="text-[11px] tracking-[0.18em] uppercase text-sauge-fonce underline-offset-4 hover:underline"
+              >
+                Tous les avis →
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
+              {DERNIERS_AVIS.map((a) => {
+                const initials = a.prenom.replace(/\s+/g, "").substring(0, 2).toUpperCase();
+                return (
+                  <figure
+                    key={a.id}
+                    className="flex flex-col gap-4 md:border-l md:border-noir/10 md:pl-6 first:md:border-0 first:md:pl-0"
+                  >
+                    <Etoiles note={a.note} />
+                    <blockquote className="font-serif text-lg leading-snug text-noir">
+                      « {a.texte} »
+                    </blockquote>
+                    <figcaption className="mt-auto flex items-center gap-3 text-sm text-gris-moyen">
+                      <span className="h-9 w-9 rounded-full bg-sauge text-creme flex items-center justify-center font-serif text-xs flex-shrink-0">
+                        {initials}
+                      </span>
+                      <span className="text-noir">
+                        {a.prenom}
+                        {a.ville ? ` · ${a.ville}` : ""}
+                      </span>
+                    </figcaption>
+                  </figure>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ================= NOTRE CONCEPT ================= */}
       <section id="concept" className="bg-gris-clair py-16 sm:py-20 lg:py-24">
