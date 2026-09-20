@@ -20,6 +20,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { SignaturePad } from "@/components/SignaturePad";
 import { ContractSetupDialog, UNSOLD_CHOICE_LABEL } from "@/components/ContractSetupDialog";
 import { fetchContract, generateContract, signContract, type ContractSetup } from "@/lib/contract-api";
+import { attachAnonymousRequests } from "@/lib/requests-attach";
 import {
   contractArticles,
   contractRoleFor,
@@ -88,6 +89,9 @@ export default function ContractPage({ requestId }: ContractPageProps) {
         const p = profileData as Profile;
         setProfile(p);
         setSignatureName(`${p.first_name} ${p.last_name}`.trim());
+        // Une cliente arrivant ici directement (lien reçu) peut ne pas encore
+        // être rattachée à sa demande : sans ça, le contrat lui est invisible.
+        if (p.role === "client") await attachAnonymousRequests(supabase);
         await loadContract();
       } catch (error: any) {
         setLoadError(error.message || "Une erreur est survenue.");

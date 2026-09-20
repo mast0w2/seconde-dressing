@@ -13,6 +13,7 @@ import { RequestItemsUploader } from "@/components/RequestItemsUploader";
 import { RequestAccordion } from "@/components/RequestAccordion";
 import { ContractStatus } from "@/components/ContractStatus";
 import { embeddedContract } from "@/lib/contract-api";
+import { attachAnonymousRequests } from "@/lib/requests-attach";
 import {
   requestStatusConfig,
 } from "@/lib/request-status";
@@ -72,6 +73,11 @@ export default function ClientDashboardPage() {
         router.push("/profile?incomplete=1");
         return;
       }
+
+      // Les demandes faites depuis le formulaire public avant de se connecter
+      // ne portent pas encore de client_id : on les rattache ici, au cas où
+      // la session n'est pas passée par /api/auth/login ou le lien magique.
+      await attachAnonymousRequests(supabase);
 
       const { data: requestsData, error } = await supabase
         .from("requests")
