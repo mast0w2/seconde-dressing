@@ -78,28 +78,38 @@ export default function ReviewsPage() {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
-              {reviews.map((a) => (
-                <figure
-                  key={a.id}
-                  className="bg-gris-tres-clair border border-noir/10 p-8 flex flex-col gap-4"
-                >
-                  <Etoiles note={a.note} />
-                  <blockquote className="font-serif text-xl leading-snug text-noir">
-                    « {a.texte} »
-                  </blockquote>
-                  <figcaption className="mt-auto pt-4 border-t border-noir/10 flex flex-col gap-1 text-sm text-gris-moyen">
-                    <span className="text-noir">
-                      {a.prenom}
-                      {a.ville ? ` · ${a.ville}` : ""}
-                    </span>
-                    <span className="text-[13px]">
-                      Prestation de {formaterMois(a.dateExperience)} · publié le{" "}
-                      {formaterJour(a.datePublication)}
-                    </span>
-                  </figcaption>
-                </figure>
-              ))}
+            <div className="max-w-[820px] mx-auto flex flex-col gap-6">
+              {reviews.map((a) => {
+                const initials = a.prenom.replace(/\s+/g, "").substring(0, 2).toUpperCase();
+                return (
+                  <figure
+                    key={a.id}
+                    className="bg-gris-tres-clair border border-noir/10 p-8 flex flex-col gap-4"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="h-12 w-12 rounded-full bg-sauge text-creme flex items-center justify-center font-serif font-medium text-sm flex-shrink-0">
+                        {initials}
+                      </div>
+                      <div className="flex flex-col gap-4 flex-1">
+                        <Etoiles note={a.note} />
+                        <blockquote className="font-serif text-xl leading-snug text-noir">
+                          « {a.texte} »
+                        </blockquote>
+                      </div>
+                    </div>
+                    <figcaption className="pt-4 border-t border-noir/10 flex flex-col gap-1 text-sm text-gris-moyen">
+                      <span className="text-noir">
+                        {a.prenom}
+                        {a.ville ? ` · ${a.ville}` : ""}
+                      </span>
+                      <span className="text-[13px]">
+                        Prestation de {formaterMois(a.dateExperience)} · publié le{" "}
+                        {formaterJour(a.datePublication)}
+                      </span>
+                    </figcaption>
+                  </figure>
+                );
+              })}
             </div>
           )}
         </div>
