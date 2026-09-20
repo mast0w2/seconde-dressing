@@ -20,8 +20,8 @@
     --sauge-fonce: #6f7d62;
 
     /* Font Families */
-    --font-titres: 'Cormorant Garamond', Georgia, serif;
-    --font-texte: 'Jost', 'Avenir Next', sans-serif;
+    --font-titres: var(--font-cormorant), 'Cormorant Garamond', Georgia, serif;
+    --font-texte: var(--font-jost), 'Jost', 'Avenir Next', sans-serif;
 
     /* Semantic colors for Tailwind */
     --background: 42 30% 94%;

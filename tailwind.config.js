@@ -16,8 +16,8 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        serif: ['Cormorant Garamond', 'Georgia', 'Times New Roman', 'serif'],
-        sans: ['Jost', 'Avenir Next', 'Helvetica Neue', 'sans-serif'],
+        serif: ['var(--font-cormorant)', 'Cormorant Garamond', 'Georgia', 'Times New Roman', 'serif'],
+        sans: ['var(--font-jost)', 'Jost', 'Avenir Next', 'Helvetica Neue', 'sans-serif'],
       },
       colors: {
         // Seconde — palette chaleureuse & responsable (vert forêt / sauge / crème)

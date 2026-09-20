@@ -12,6 +12,7 @@ import {
   ShoppingBag,
   Users,
 } from "lucide-react";
+import { PART_CLIENTE, PART_VENDEUSE, PART_PLATEFORME, formatShare } from "@/lib/pricing";
 
 // ============================================================================
 // Données
@@ -55,20 +56,22 @@ const FORMULES = [
   },
 ];
 
+// Les pourcentages viennent tous de src/lib/pricing.ts : c'est le seul
+// endroit à modifier pour changer la répartition.
 const REPARTITION = [
   {
-    part: "50 %",
+    part: formatShare(PART_CLIENTE),
     titre: "Pour vous",
     texte: "Votre part sur chaque pièce vendue, versée sur votre compte après la vente.",
   },
   {
-    part: "40 %",
+    part: formatShare(PART_VENDEUSE),
     titre: "Pour votre vendeuse",
     texte:
       "Elle se déplace, trie, photographie, rédige les annonces, répond aux acheteurs et expédie.",
   },
   {
-    part: "10 %",
+    part: formatShare(PART_PLATEFORME),
     titre: "Pour Seconde",
     texte: "La plateforme, le suivi de vos ventes, les paiements sécurisés et le service client.",
   },

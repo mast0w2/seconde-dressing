@@ -6,6 +6,7 @@ import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/components/ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
 import { capitalizeName } from "@/lib/text";
+import { PART_CLIENTE, formatShare, montantCliente } from "@/lib/pricing";
 import { Users, Sparkles, Gem, Ban } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -188,8 +189,6 @@ const QUESTIONS: Question[] = [
   },
 ];
 
-const PART_CLIENTE = 0.5;
-
 // ============================================================================
 // Validation
 // ============================================================================
@@ -259,7 +258,7 @@ async function submitForm(
         valeurMoyenne: data.valeurMoyenne,
         marques: data.marques,
         description: data.description,
-        estimation: data.nombreVetements * data.valeurMoyenne * PART_CLIENTE,
+        estimation: montantCliente(data.nombreVetements * data.valeurMoyenne),
       }),
     });
 
@@ -474,7 +473,7 @@ export function ProgressiveRequestForm({ onCompleteChange }: ProgressiveRequestF
   const isLastStep = currentStep === QUESTIONS.length - 1;
 
   const totalEstime = formData.nombreVetements * formData.valeurMoyenne;
-  const versementEstime = totalEstime * PART_CLIENTE;
+  const versementEstime = montantCliente(totalEstime);
 
   const handleChange = (value: any) => {
     setFormData((prev) => ({ ...prev, [currentQuestion.id]: value }));
@@ -748,7 +747,8 @@ export function ProgressiveRequestForm({ onCompleteChange }: ProgressiveRequestF
           {formData.nombreVetements} vêtement{formData.nombreVetements > 1 ? "s" : ""} ×{" "}
           {formData.valeurMoyenne} € ={" "}
           {totalEstime.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} € de ventes estimées,
-          dont vous touchez 50 %. Estimation indicative, ajustée après le tri.
+          dont vous touchez {formatShare(PART_CLIENTE)}. Estimation indicative, ajustée après le
+          tri.
         </p>
       </div>
     );
