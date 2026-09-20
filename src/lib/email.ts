@@ -50,9 +50,9 @@ export interface ContactFormData {
 }
 
 /**
- * Estimation form data
+ * Appointment request form data
  */
-export interface EstimationFormData {
+export interface RequestFormData {
   nom: string;
   prenom: string;
   email: string;
@@ -682,10 +682,10 @@ class NotificationService {
   }
 
   /**
-   * Send estimation form notification to admin with all details
+   * Send request notification to admin with all details
    */
-  public async sendEstimationNotification(
-    data: EstimationFormData
+  public async sendRequestNotification(
+    data: RequestFormData
   ): Promise<EmailSendResult> {
     const adminEmails = env.email.admin;
     const clientSubject = '\u2705 Demande d\'estimation reçue';
@@ -702,9 +702,9 @@ class NotificationService {
 
     // Email to client (confirmation)
     const clientContent = `
-      <h2>\u2705 Demande reçue</h2>
+      <h2>\u2705 Votre demande a été reçue</h2>
       <p>Bonjour ${data.prenom} ${data.nom},</p>
-      <p>Nous avons bien reçu votre demande d'estimation.</p>
+      <p>Nous avons bien reçu votre demande.</p>
       <p>Notre équipe vous recontactera sous 24h pour définir votre rendez-vous.</p>
       
       ${actionsHtml}
@@ -714,7 +714,7 @@ class NotificationService {
 
     // Email to admin with ALL details
     const adminContent = `
-      <h2>\ud83d\udce7 Nouvelle demande d'estimation</h2>
+      <h2>\ud83d\udce7 Nouvelle demande</h2>
       
       <h3>Informations du client:</h3>
       <p><strong>Nom:</strong> ${data.nom}</p>
@@ -724,11 +724,11 @@ class NotificationService {
       <p><strong>Adresse:</strong> ${data.adresse || 'Non renseignée'}</p>
       <p><strong>Formule choisie:</strong> ${formulaLabel}</p>
       
-      <h3>Détails de l'estimation:</h3>
+      <h3>Détails de la demande:</h3>
       <p><strong>Nombre de vêtements:</strong> ${data.nombreVetements}</p>
       <p><strong>Valeur moyenne par vêtement:</strong> ${data.valeurMoyenne}€</p>
       <p><strong>Marques:</strong> ${data.marques}</p>
-      <p><strong>Part cliente estimée (40% du prix de vente):</strong> ${data.estimation.toFixed(0)}€</p>
+      <p><strong>Part cliente (40% du prix de vente):</strong> ${data.estimation.toFixed(0)}€</p>
       
       <h3>Description supplémentaire:</h3>
       <div class="highlight">

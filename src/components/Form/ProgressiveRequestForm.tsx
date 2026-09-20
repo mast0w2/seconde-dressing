@@ -244,7 +244,7 @@ async function submitForm(
   data: FormData
 ): Promise<{ success: boolean; message?: string; requestId?: string }> {
   try {
-    const response = await fetch("/api/estimation", {
+    const response = await fetch("/api/appointment-request", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -267,7 +267,7 @@ async function submitForm(
     if (!response.ok) return { success: false, ...result };
     return { success: true, ...result };
   } catch (error) {
-    console.error("[Estimation Form] Submission error:", error);
+    console.error("[Request Form] Submission error:", error);
     return { success: false, message: "Une erreur est survenue. Veuillez réessayer." };
   }
 }
@@ -419,11 +419,11 @@ const EMPTY_FORM: FormData = {
   description: "",
 };
 
-interface ProgressiveEstimationFormProps {
+interface ProgressiveRequestFormProps {
   onCompleteChange?: (isComplete: boolean) => void;
 }
 
-export function ProgressiveEstimationForm({ onCompleteChange }: ProgressiveEstimationFormProps = {}) {
+export function ProgressiveRequestForm({ onCompleteChange }: ProgressiveRequestFormProps = {}) {
   const { toast } = useToast();
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -766,7 +766,7 @@ export function ProgressiveEstimationForm({ onCompleteChange }: ProgressiveEstim
             <h3 className="font-serif text-3xl text-noir">Demande envoyée</h3>
           </div>
           <p className="text-gris-moyen">
-            Merci {capitalizeName(formData.prenom)} ! Votre demande d’estimation a bien été enregistrée.
+            Merci {capitalizeName(formData.prenom)} ! Votre demande a bien été enregistrée.
             Nous vous recontacterons sous 24 h pour valider la formule et organiser la collecte.
           </p>
           <div className="text-sm text-gris-moyen bg-gris-tres-clair p-4 border border-noir/10">
@@ -839,8 +839,8 @@ export function ProgressiveEstimationForm({ onCompleteChange }: ProgressiveEstim
 
         {renderEstimation()}
 
-        {/* Dernière étape : proposition d'espace de suivi, sans champ à remplir.
-            L'adresse email a déjà été saisie plus haut dans le formulaire. */}
+        {/* Last step: offer tracking space, no field to fill.
+            Email address was already provided earlier in the form. */}
         {isLastStep && !dejaConnectee && (
           <label className="flex items-start gap-3 cursor-pointer border border-noir/10 bg-gris-tres-clair p-5">
             <input
@@ -898,4 +898,4 @@ export function ProgressiveEstimationForm({ onCompleteChange }: ProgressiveEstim
   );
 }
 
-export default ProgressiveEstimationForm;
+export default ProgressiveRequestForm;

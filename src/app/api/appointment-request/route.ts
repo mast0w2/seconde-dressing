@@ -1,4 +1,4 @@
-// src/app/api/estimation/route.ts
+// src/app/api/appointment-request/route.ts
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { capitalizeName } from "@/lib/text";
 import { notificationService } from "@/lib/email";
@@ -9,7 +9,7 @@ import { NextResponse } from 'next/server';
 // Types
 // ============================================================================
 
-interface EstimationRequest {
+interface AppointmentRequestData {
   nom: string;
   prenom: string;
   email: string;
@@ -34,45 +34,45 @@ interface EstimationRequest {
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_REGEX = /^[\+]?[0-9\s\-()]{10,}$/;
 
-function validateEstimationData(data: unknown): { valid: boolean; errors?: string[]; data?: EstimationRequest } {
+function validateRequestData(data: unknown): { valid: boolean; errors?: string[]; data?: AppointmentRequestData } {
   const errors: string[] = [];
 
   if (!data || typeof data !== 'object') {
     return { valid: false, errors: ['Invalid request body'] };
   }
 
-  const estimationData = data as Record<string, unknown>;
+  const requestData = data as Record<string, unknown>;
 
   // Required fields
-  if (!estimationData.nom || typeof estimationData.nom !== 'string' || estimationData.nom.trim() === '') {
+  if (!requestData.nom || typeof requestData.nom !== 'string' || requestData.nom.trim() === '') {
     errors.push('Nom is required');
   }
 
-  if (!estimationData.prenom || typeof estimationData.prenom !== 'string' || estimationData.prenom.trim() === '') {
+  if (!requestData.prenom || typeof requestData.prenom !== 'string' || requestData.prenom.trim() === '') {
     errors.push('Prénom is required');
   }
 
-  if (!estimationData.email || typeof estimationData.email !== 'string' || !EMAIL_REGEX.test(estimationData.email)) {
+  if (!requestData.email || typeof requestData.email !== 'string' || !EMAIL_REGEX.test(requestData.email)) {
     errors.push('Valid email is required');
   }
 
-  if (!estimationData.telephone || typeof estimationData.telephone !== 'string' || !PHONE_REGEX.test(estimationData.telephone)) {
+  if (!requestData.telephone || typeof requestData.telephone !== 'string' || !PHONE_REGEX.test(requestData.telephone)) {
     errors.push('Valid phone number is required');
   }
 
-  if (!estimationData.adresse || typeof estimationData.adresse !== 'string' || estimationData.adresse.trim() === '') {
+  if (!requestData.adresse || typeof requestData.adresse !== 'string' || requestData.adresse.trim() === '') {
     errors.push('Adresse is required');
   }
 
-  if (!estimationData.nombreVetements || typeof estimationData.nombreVetements !== 'number' || estimationData.nombreVetements < 1) {
+  if (!requestData.nombreVetements || typeof requestData.nombreVetements !== 'number' || requestData.nombreVetements < 1) {
     errors.push('Nombre de vêtements must be a positive number');
   }
 
-  if (!estimationData.valeurMoyenne || typeof estimationData.valeurMoyenne !== 'number' || estimationData.valeurMoyenne < 0) {
+  if (!requestData.valeurMoyenne || typeof requestData.valeurMoyenne !== 'number' || requestData.valeurMoyenne < 0) {
     errors.push('Valeur moyenne must be a valid number');
   }
 
-  if (!estimationData.marques || typeof estimationData.marques !== 'string' || estimationData.marques.trim() === '') {
+  if (!requestData.marques || typeof requestData.marques !== 'string' || requestData.marques.trim() === '') {
     errors.push('Marques is required');
   }
 
@@ -83,21 +83,21 @@ function validateEstimationData(data: unknown): { valid: boolean; errors?: strin
   return {
     valid: true,
     data: {
-      nom: (estimationData.nom as string).trim(),
-      prenom: (estimationData.prenom as string).trim(),
-      email: (estimationData.email as string).trim().toLowerCase(),
-      telephone: (estimationData.telephone as string).trim(),
-      adresse: (estimationData.adresse as string).trim(),
-      conditionsAcceptees: estimationData.conditionsAcceptees === true,
-      formule: estimationData.formule ? (estimationData.formule as string).trim() : undefined,
-      nombreVetements: estimationData.nombreVetements as number,
-      valeurMoyenne: estimationData.valeurMoyenne as number,
-      marques: (estimationData.marques as string).trim(),
-      description: estimationData.description ? (estimationData.description as string).trim() : undefined,
-      estimation: estimationData.estimation as number,
-      address: estimationData.address ? (estimationData.address as string).trim() : undefined,
-      formulaId: estimationData.formulaId ? (estimationData.formulaId as string).trim() : undefined,
-      conditionsAccepted: Boolean(estimationData.conditionsAccepted),
+      nom: (requestData.nom as string).trim(),
+      prenom: (requestData.prenom as string).trim(),
+      email: (requestData.email as string).trim().toLowerCase(),
+      telephone: (requestData.telephone as string).trim(),
+      adresse: (requestData.adresse as string).trim(),
+      conditionsAcceptees: requestData.conditionsAcceptees === true,
+      formule: requestData.formule ? (requestData.formule as string).trim() : undefined,
+      nombreVetements: requestData.nombreVetements as number,
+      valeurMoyenne: requestData.valeurMoyenne as number,
+      marques: (requestData.marques as string).trim(),
+      description: requestData.description ? (requestData.description as string).trim() : undefined,
+      estimation: requestData.estimation as number,
+      address: requestData.address ? (requestData.address as string).trim() : undefined,
+      formulaId: requestData.formulaId ? (requestData.formulaId as string).trim() : undefined,
+      conditionsAccepted: Boolean(requestData.conditionsAccepted),
     },
   };
 }
@@ -106,10 +106,10 @@ function validateEstimationData(data: unknown): { valid: boolean; errors?: strin
 // Database Operations
 // ============================================================================
 
-async function saveEstimationRequest(data: EstimationRequest) {
+async function saveAppointmentRequest(data: AppointmentRequestData) {
   const supabase = createSupabaseServerClient();
 
-  // Estimation requests can be submitted anonymously from the homepage form:
+  // Appointment requests can be submitted anonymously from the homepage form:
   // when the submitter is not authenticated, client_id is null and the
   // contact details are stored in the denormalized client_* columns. If a
   // logged-in client submits, the request is linked to their profile.
@@ -174,29 +174,29 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     // Validate data
-    const validation = validateEstimationData(body);
+    const validation = validateRequestData(body);
     if (!validation.valid) {
       return NextResponse.json(
-        { 
-          success: false, 
-          errors: validation.errors 
+        {
+          success: false,
+          errors: validation.errors
         },
         { status: 400 }
       );
     }
 
-    const estimationData = validation.data!;
+    const requestData = validation.data!;
 
     // Save to database
-    const dbResult = await saveEstimationRequest(estimationData);
+    const dbResult = await saveAppointmentRequest(requestData);
     if (!dbResult.success) {
-      console.error('[Estimation API] Database error:', dbResult.error);
+      console.error('[Appointment Request API] Database error:', dbResult.error);
       const detail =
         (dbResult.error as { message?: string } | null)?.message ||
-        'Failed to save estimation request';
+        'Failed to save appointment request';
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: detail
         },
         { status: 500 }
@@ -209,44 +209,44 @@ export async function POST(request: Request) {
     // Brevo response so failures (rejected sender, invalid key, etc.) are
     // visible in the server logs instead of being swallowed silently.
     if (process.env.BREVO_API_KEY) {
-      const emailResult = await notificationService.sendEstimationNotification({
-        nom: estimationData.nom,
-        prenom: estimationData.prenom,
-        email: estimationData.email,
-        telephone: estimationData.telephone,
-        adresse: estimationData.adresse,
-        formule: estimationData.formule,
-        nombreVetements: estimationData.nombreVetements,
-        valeurMoyenne: estimationData.valeurMoyenne,
-        marques: estimationData.marques,
-        description: estimationData.description,
-        estimation: estimationData.estimation,
+      const emailResult = await notificationService.sendRequestNotification({
+        nom: requestData.nom,
+        prenom: requestData.prenom,
+        email: requestData.email,
+        telephone: requestData.telephone,
+        adresse: requestData.adresse,
+        formule: requestData.formule,
+        nombreVetements: requestData.nombreVetements,
+        valeurMoyenne: requestData.valeurMoyenne,
+        marques: requestData.marques,
+        description: requestData.description,
+        estimation: requestData.estimation,
       });
       if (!emailResult.success) {
         console.error(
-          '[Estimation API] Email sending failed for',
-          estimationData.email,
+          '[Appointment Request API] Email sending failed for',
+          requestData.email,
           '-',
           emailResult.error || emailResult.message
         );
       }
     } else {
       console.warn(
-        '[Estimation API] BREVO_API_KEY is not set: email notification skipped.'
+        '[Appointment Request API] BREVO_API_KEY is not set: email notification skipped.'
       );
     }
 
     return NextResponse.json({
       success: true,
       requestId: dbResult.requestId,
-      message: 'Votre demande d\'estimation a été envoyée avec succès. Nous vous recontacterons sous 24h.'
+      message: 'Votre demande a été envoyée avec succès. Nous vous recontacterons sous 24h.'
     });
   } catch (error) {
-    console.error('[Estimation API] Error:', error);
+    console.error('[Appointment Request API] Error:', error);
     return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Internal server error' 
+      {
+        success: false,
+        error: 'Internal server error'
       },
       { status: 500 }
     );

@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { ProgressiveEstimationForm } from "@/components/Form/ProgressiveEstimationForm";
+import { ProgressiveRequestForm } from "@/components/Form/ProgressiveRequestForm";
 import { Clock, Euro, Calendar, Truck, Sparkles, Leaf } from "lucide-react";
 
 // ============================================================================
@@ -323,7 +323,7 @@ export default function HomePage() {
       {/* ================= DEMANDEZ UN RENDEZ-VOUS ================= */}
       <section
         ref={formRef}
-        id="estimation-form"
+        id="appointment-request-form"
         className="border-t border-noir/10 px-6 sm:px-10 lg:px-[76px] py-16 sm:py-20 lg:py-24"
       >
         <div className="max-w-[760px] mx-auto flex flex-col items-center gap-10">
@@ -340,7 +340,7 @@ export default function HomePage() {
               </div>
             </div>
           )}
-          <ProgressiveEstimationForm onCompleteChange={setFormSubmitted} />
+          <ProgressiveRequestForm onCompleteChange={setFormSubmitted} />
         </div>
       </section>
     </div>

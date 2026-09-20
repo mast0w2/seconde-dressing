@@ -140,7 +140,7 @@ function SignupForm() {
             Créez votre compte vendeuse pour accompagner les clientes et vendre leurs
             pièces. Vous cherchez à faire vendre vos propres vêtements ?{" "}
             <Link
-              href="/#estimation-form"
+              href="/#appointment-request-form"
               className="text-sauge-fonce underline underline-offset-4 hover:text-noir transition-colors"
             >
               Demandez un rendez-vous
