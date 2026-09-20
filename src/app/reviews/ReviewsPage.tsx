@@ -35,7 +35,7 @@ export default function ReviewsPage() {
             <br />
             <span className="italic text-sauge-fonce">une fois leurs pièces vendues.</span>
           </h1>
-          <p className="text-base sm:text-lg text-gris-moyen">
+          <p>
             Chaque reviews publié ici vient d&apos;une cliente à qui nous avons réellement vendu des
             vêtements. Nous les sollicitons par email à la fin de la vente, et nous publions ce
             qu&apos;elles écrivent — sans trier.
