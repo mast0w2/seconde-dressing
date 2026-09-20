@@ -251,6 +251,15 @@ export interface RequestItem {
   request_id: string;
   photo_url: string;
   description: string | null;
+  /** Prix minimal souhaité (cliente ou vendeuse selon la formule), validé par la cliente. */
+  min_price: number | null;
+  /** Validation du prix minimal par la cliente : verrouille min_price. */
+  min_price_validated_at: string | null;
+  /** Prix de vente final, renseigné par la vendeuse seule. */
+  sale_price: number | null;
+  /** Justificatif de vente déposé par la vendeuse. */
+  sale_proof_url: string | null;
+  sold_at: string | null;
   created_at: string;
 }
 
@@ -259,6 +268,7 @@ export interface InsertRequestItem {
   request_id: string;
   photo_url: string;
   description?: string | null;
+  min_price?: number | null;
   created_at?: string;
 }
 
@@ -267,7 +277,91 @@ export interface UpdateRequestItem {
   request_id?: string;
   photo_url?: string;
   description?: string | null;
+  min_price?: number | null;
+  min_price_validated_at?: string | null;
+  sale_price?: number | null;
+  sale_proof_url?: string | null;
+  sold_at?: string | null;
   created_at?: string;
+}
+
+// ============================================================================
+// request_contracts table (contrat de dépôt-vente)
+// Generated when the seller sets a request to `items_collected`; one per
+// request. `content` is a frozen snapshot (see src/lib/contract.ts).
+// ============================================================================
+export interface RequestContract {
+  id: string;
+  request_id: string;
+  client_id: string | null;
+  seller_id: string | null;
+  version: string;
+  content: ContractContent;
+  client_signed_at: string | null;
+  client_signature: string | null;
+  client_signature_name: string | null;
+  seller_signed_at: string | null;
+  seller_signature: string | null;
+  seller_signature_name: string | null;
+  created_at: string;
+}
+
+export interface InsertRequestContract {
+  id?: string;
+  request_id: string;
+  client_id?: string | null;
+  seller_id?: string | null;
+  version: string;
+  content: ContractContent;
+  client_signed_at?: string | null;
+  client_signature?: string | null;
+  client_signature_name?: string | null;
+  seller_signed_at?: string | null;
+  seller_signature?: string | null;
+  seller_signature_name?: string | null;
+  created_at?: string;
+}
+
+export interface UpdateRequestContract {
+  client_signed_at?: string | null;
+  client_signature?: string | null;
+  client_signature_name?: string | null;
+  seller_signed_at?: string | null;
+  seller_signature?: string | null;
+  seller_signature_name?: string | null;
+}
+
+/** Ce que la cliente souhaite pour les pièces invendues. */
+export type UnsoldItemsChoice = 'return' | 'donate';
+
+/** Identity of one contracting party, as frozen in the contract. */
+export interface ContractParty {
+  first_name: string;
+  last_name: string;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+}
+
+/** Frozen snapshot stored in request_contracts.content. */
+export interface ContractContent {
+  reference: string;
+  generated_at: string;
+  client: ContractParty;
+  seller: ContractParty;
+  formula: { label: string; price: number } | null;
+  /**
+   * Pièces confiées : seulement le nombre compté à la remise. L'inventaire
+   * détaillé (photos, descriptions) vit dans l'espace Seconde et peut être
+   * complété après la signature, il ne fait donc pas partie du contrat.
+   */
+  items: {
+    count: number;
+  };
+  /** Choix de la cliente pour les invendus, saisi par la vendeuse à la remise. */
+  unsold_items: UnsoldItemsChoice;
+  /** Répartition du prix de vente en pourcentages entiers. */
+  split: { cliente: number; vendeuse: number; plateforme: number };
 }
 
 // ============================================================================
@@ -546,6 +640,11 @@ export interface Database {
         Row: RequestItem;
         Insert: InsertRequestItem;
         Update: UpdateRequestItem;
+      };
+      request_contracts: {
+        Row: RequestContract;
+        Insert: InsertRequestContract;
+        Update: UpdateRequestContract;
       };
       preferences: {
         Row: Preference;

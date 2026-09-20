@@ -72,6 +72,14 @@ export const SELLER_STATUS_OPTIONS: RequestStatus[] = [
   "completed",
 ];
 
+// Once the items are collected (contract signed by both parties), the seller
+// moves the request forward with these statuses only.
+export const POST_COLLECTION_STATUS_OPTIONS: RequestStatus[] = [
+  "items_collected",
+  "items_on_sale",
+  "completed",
+];
+
 export type RequestFilterTab =
   | "all"
   | "pending"

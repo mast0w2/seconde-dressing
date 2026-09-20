@@ -9,16 +9,21 @@ import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
 import { isProfileComplete } from "@/lib/profile";
-import type { Request, Profile, Formula, RequestStatus } from "@/types/database";
-import { requestStatusConfig, SELLER_STATUS_OPTIONS } from "@/lib/request-status";
+import type { Request, Profile, Formula, RequestStatus, RequestContract } from "@/types/database";
+import { requestStatusConfig, POST_COLLECTION_STATUS_OPTIONS } from "@/lib/request-status";
 import { ArrowLeft } from "lucide-react";
 import { RequestItemsUploader } from "@/components/RequestItemsUploader";
 import { RequestAccordion } from "@/components/RequestAccordion";
+import { ContractStatus } from "@/components/ContractStatus";
+import { embeddedContract } from "@/lib/contract-api";
 
 interface RequestWithRelations extends Request {
   client: Profile | null;
   formula: Formula | null;
+  contract: RequestContract | RequestContract[] | null;
 }
+
+const REQUEST_SELECT = `*, client:client_id (id, first_name, last_name, email, phone), formula:formula_id (id, slug, label, price), contract:request_contracts (*)`;
 
 export default function SellerDashboardPage() {
   const router = useRouter();
@@ -38,12 +43,12 @@ export default function SellerDashboardPage() {
     const [acceptedRes, openRes, refusRes] = await Promise.all([
       supabase
         .from("requests")
-        .select(`*, client:client_id (id, first_name, last_name, email, phone), formula:formula_id (id, slug, label, price)`)
+        .select(REQUEST_SELECT)
         .eq("seller_id", userId)
         .order("created_at", { ascending: false }),
       supabase
         .from("requests")
-        .select(`*, client:client_id (id, first_name, last_name, email, phone), formula:formula_id (id, slug, label, price)`)
+        .select(REQUEST_SELECT)
         .eq("status", "pending")
         .order("created_at", { ascending: false }),
       supabase
@@ -180,8 +185,10 @@ export default function SellerDashboardPage() {
     }
   };
 
-  // Update the status of a request the seller accepted. Works for any of the
-  // post-acceptance statuses, so the seller can move forward or revert.
+  // Update the status of a request the seller accepted. Passing to
+  // « Articles récupérés » (or beyond) requires the deposit contract signed
+  // by both parties: the database trigger refuses otherwise and its message
+  // is shown as is.
   const handleUpdateStatus = async (requestId: string, newStatus: RequestStatus) => {
     if (!user) return;
     try {
@@ -293,7 +300,23 @@ export default function SellerDashboardPage() {
             </div>
           )}
 
-          <RequestItemsUploader requestId={request.id} />
+          {isAssignedToMe && (
+            <ContractStatus
+              requestId={request.id}
+              status={request.status}
+              role="seller"
+              contract={embeddedContract(request.contract)}
+              defaultItemsCount={request.number_of_items}
+              onGenerated={() => user && fetchRequests(user.id)}
+              onConfirmCollected={() => handleUpdateStatus(request.id, "items_collected")}
+            />
+          )}
+
+          <RequestItemsUploader
+            requestId={request.id}
+            role="seller"
+            formulaSlug={formula?.slug ?? null}
+          />
         </div>
 
         <div className="flex flex-col gap-2 shrink-0 min-w-[180px]">
@@ -317,7 +340,10 @@ export default function SellerDashboardPage() {
             </>
           )}
 
-          {tab === "accepted" && (
+          {/* Avant la récupération, l'avancement passe par le panneau
+              contrat (préparer → signatures → confirmer). Ensuite seulement,
+              la vendeuse fait évoluer le statut ici. */}
+          {tab === "accepted" && request.status !== "accepted" && (
             <div className="flex flex-col gap-1">
               <label className="text-xs font-medium text-gris-moyen mb-1">
                 Statut de la commande
@@ -329,7 +355,7 @@ export default function SellerDashboardPage() {
                 }
                 className="h-9"
               >
-                {SELLER_STATUS_OPTIONS.map((status) => (
+                {POST_COLLECTION_STATUS_OPTIONS.map((status) => (
                   <option key={status} value={status}>
                     {requestStatusConfig[status].label}
                   </option>
