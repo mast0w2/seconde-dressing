@@ -638,19 +638,16 @@ export function ProgressiveRequestForm({ onCompleteChange }: ProgressiveRequestF
                       : "border-noir/20 bg-gris-tres-clair hover:border-noir/50"
                   }`}
                 >
-                  <div className="flex items-baseline justify-between gap-4 mb-1">
+                  {/* flex-wrap + ml-auto : le prix passe à la ligne (aligné à droite) sur mobile
+                      quand le libellé est long, au lieu de casser le titre. */}
+                  <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 mb-1">
                     <span className="font-serif text-xl text-noir">{option.titre}</span>
                     {option.isFirstFree ? (
-                      <div className="flex items-center gap-2">
-                        <span className="text-[11px] tracking-[0.16em] uppercase text-gris-moyen line-through">
-                          {option.prix}
-                        </span>
-                        <span className="text-[11px] tracking-[0.16em] uppercase text-sauge-fonce font-medium">
-                          Gratuit
-                        </span>
-                      </div>
+                      <span className="ml-auto text-[11px] tracking-[0.16em] uppercase text-sauge-fonce font-medium whitespace-nowrap">
+                        Gratuit pour la première commande
+                      </span>
                     ) : (
-                      <span className="text-[11px] tracking-[0.16em] uppercase text-sauge-fonce whitespace-nowrap">
+                      <span className="ml-auto text-[11px] tracking-[0.16em] uppercase text-sauge-fonce whitespace-nowrap">
                         {option.prix}
                       </span>
                     )}

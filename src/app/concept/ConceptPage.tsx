@@ -206,12 +206,15 @@ export default function ConceptPage() {
                 className="bg-gris-tres-clair border border-gris-clair p-8 flex flex-col gap-3"
               >
                 {isFirstFree ? (
-                  <div className="flex flex-col gap-1">
-                    <span className="font-serif text-4xl leading-none text-gris-moyen line-through">{prix}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="font-serif text-2xl leading-none text-sauge">Gratuit</span>
-                      <span className="text-xs text-sauge font-medium">1ère commande</span>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                      <span className="font-serif text-4xl leading-none text-sauge">Gratuit</span>
+                      {/* Barré maison : le line-through natif n'est pas centré sur la Cormorant */}
+                      <span className="relative whitespace-nowrap font-serif text-2xl leading-none text-gris-moyen after:absolute after:inset-x-0 after:top-[58%] after:h-px after:bg-current">
+                        {prix}
+                      </span>
                     </div>
+                    <span className="eyebrow">Première commande</span>
                   </div>
                 ) : (
                   <span className="font-serif text-4xl leading-none text-sauge">{prix}</span>
