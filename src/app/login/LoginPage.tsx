@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { createBrowserClient } from "@supabase/ssr";
+import { getSupabaseClient } from "@/lib/supabase/client";
 
 const formSchema = z.object({
   email: z.string().email("Adresse email invalide"),
@@ -27,7 +27,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
-  const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+  const supabase = getSupabaseClient();
   const redirectTarget = searchParams.get("redirect");
   const showEmailPending = searchParams.get("email_pending") === "1";
   const [loginError, setLoginError] = useState<string | null>(null);

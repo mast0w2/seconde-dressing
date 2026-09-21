@@ -4,6 +4,7 @@
 // and the middleware itself see a valid access token.
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { getSupabaseEnv } from '@/lib/supabase/env';
 
 const PROTECTED_ROUTES = [
   '/dashboard',
@@ -20,25 +21,22 @@ export async function middleware(request: NextRequest) {
 
   let response = NextResponse.next({ request });
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(key: string) {
-          return request.cookies.get(key)?.value;
-        },
-        set(key: string, value: string, options: CookieOptions) {
-          request.cookies.set(key, value);
-          response.cookies.set(key, value, options);
-        },
-        remove(key: string, options: CookieOptions) {
-          request.cookies.delete(key);
-          response.cookies.set(key, '', { ...options, maxAge: 0 });
-        },
+  const { url, anonKey } = getSupabaseEnv();
+  const supabase = createServerClient(url, anonKey, {
+    cookies: {
+      get(key: string) {
+        return request.cookies.get(key)?.value;
       },
-    }
-  );
+      set(key: string, value: string, options: CookieOptions) {
+        request.cookies.set(key, value);
+        response.cookies.set(key, value, options);
+      },
+      remove(key: string, options: CookieOptions) {
+        request.cookies.delete(key);
+        response.cookies.set(key, '', { ...options, maxAge: 0 });
+      },
+    },
+  });
 
   // Refresh the session (also refreshes the access token if needed).
   const {

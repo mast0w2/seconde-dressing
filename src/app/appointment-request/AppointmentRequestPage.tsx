@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { createBrowserClient } from "@supabase/ssr";
+import { getSupabaseClient } from "@/lib/supabase/client";
 import { ArrowLeft, HelpCircle } from "lucide-react";
 import type { Profile, Formula } from "@/types/database";
 import { isProfileComplete } from "@/lib/profile";
@@ -34,10 +34,7 @@ type FormValues = z.infer<typeof formSchema>;
 export default function AppointmentRequestPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = getSupabaseClient();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [formulas, setFormulas] = useState<Formula[]>([]);
   const [isLoading, setIsLoading] = useState(true);

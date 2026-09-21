@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/components/ui/use-toast";
-import { createBrowserClient } from "@supabase/ssr";
+import { getSupabaseClient } from "@/lib/supabase/client";
 import { capitalizeName } from "@/lib/text";
 import { PART_CLIENTE, formatShare, montantCliente } from "@/lib/pricing";
 import { Users, Sparkles, Gem, Ban } from "lucide-react";
@@ -424,10 +424,7 @@ interface ProgressiveRequestFormProps {
 
 export function ProgressiveRequestForm({ onCompleteChange }: ProgressiveRequestFormProps = {}) {
   const { toast } = useToast();
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = getSupabaseClient();
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<FormData>(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);

@@ -11,7 +11,7 @@ import { Label } from "../ui/label";
 import { Calendar } from "../Calendar/Calendar";
 import { cn } from "@/lib/utils";
 import { useToast } from "../ui/use-toast";
-import { createBrowserClient } from "@supabase/ssr";
+import { getSupabaseClient } from "@/lib/supabase/client";
 
 const formSchema = z.object({
   date: z.date({
@@ -38,7 +38,7 @@ interface AvailabilityFormProps {
 
 export function AvailabilityForm({ onSuccess, initialData }: AvailabilityFormProps) {
   const { toast } = useToast();
-  const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+  const supabase = getSupabaseClient();
   const [date, setDate] = React.useState<Date>(initialData?.date || new Date());
 
   const form = useForm<FormValues>({
