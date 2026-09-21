@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
-import { createBrowserClient } from "@supabase/ssr";
+import { getSupabaseClient } from "@/lib/supabase/client";
 import type { Request, Profile, Formula, RequestContract, RequestItem } from "@/types/database";
 import { RequestItemsUploader } from "@/components/RequestItemsUploader";
 import { RequestAccordion } from "@/components/RequestAccordion";
@@ -37,7 +37,7 @@ function pricesToValidate(request: RequestWithRelations): number {
 export default function ClientDashboardPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+  const supabase = getSupabaseClient();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [requests, setRequests] = useState<RequestWithRelations[]>([]);
   const [isLoading, setIsLoading] = useState(true);

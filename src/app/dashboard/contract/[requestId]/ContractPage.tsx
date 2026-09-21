@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createBrowserClient } from "@supabase/ssr";
+import { getSupabaseClient } from "@/lib/supabase/client";
 import { ArrowLeft, CheckCircle, Clock, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,10 +45,7 @@ const ROLE_LABEL: Record<ContractRole, string> = {
 export default function ContractPage({ requestId }: ContractPageProps) {
   const router = useRouter();
   const { toast } = useToast();
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = getSupabaseClient();
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [contract, setContract] = useState<RequestContract | null>(null);

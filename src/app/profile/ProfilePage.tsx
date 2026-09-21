@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/components/ui/use-toast";
-import { createBrowserClient } from "@supabase/ssr";
+import { getSupabaseClient } from "@/lib/supabase/client";
 import { Profile } from "@/types/database";
 import { Mail, Phone, User, Home, MapPin, ArrowLeft, Edit, Save, X, Camera } from "lucide-react";
 import { AddressInput } from "@/components/ui/address-input";
@@ -34,7 +34,7 @@ function ProfileForm() {
   const searchParams = useSearchParams();
   const showIncompleteBanner = searchParams.get("incomplete") === "1";
   const { toast } = useToast();
-  const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+  const supabase = getSupabaseClient();
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);

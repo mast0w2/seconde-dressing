@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { createBrowserClient } from "@supabase/ssr";
+import { getSupabaseClient } from "@/lib/supabase/client";
 import { isProfileComplete } from "@/lib/profile";
 import type { Request, Profile, Formula, RequestStatus, RequestContract } from "@/types/database";
 import { requestStatusConfig, POST_COLLECTION_STATUS_OPTIONS } from "@/lib/request-status";
@@ -28,7 +28,7 @@ const REQUEST_SELECT = `*, client:client_id (id, first_name, last_name, email, p
 export default function SellerDashboardPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+  const supabase = getSupabaseClient();
   const [user, setUser] = useState<{ id: string } | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [requests, setRequests] = useState<RequestWithRelations[]>([]);

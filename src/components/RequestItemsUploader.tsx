@@ -10,7 +10,7 @@
 // l'UI se contente de ne pas proposer ce qui n'est pas permis.
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createBrowserClient } from "@supabase/ssr";
+import { getSupabaseClient } from "@/lib/supabase/client";
 import {
   Mic,
   Upload,
@@ -95,10 +95,7 @@ export function RequestItemsUploader({
 }: RequestItemsUploaderProps) {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = getSupabaseClient();
   const [items, setItems] = useState<DraftItem[]>([]);
   const [loadingExisting, setLoadingExisting] = useState(true);
   const [validating, setValidating] = useState(false);

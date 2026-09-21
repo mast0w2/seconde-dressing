@@ -10,7 +10,7 @@ import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 import { cn } from "@/lib/utils";
 import { useToast } from "../ui/use-toast";
-import { createBrowserClient } from "@supabase/ssr";
+import { getSupabaseClient } from "@/lib/supabase/client";
 import { Profile, Role } from "@/types/database";
 
 const clientSchema = z.object({
@@ -38,7 +38,7 @@ interface ProfileFormProps {
 
 export function ProfileForm({ profile, role, onSuccess }: ProfileFormProps) {
   const { toast } = useToast();
-  const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+  const supabase = getSupabaseClient();
 
   const schema = role === "seller" ? sellerSchema : clientSchema;
 

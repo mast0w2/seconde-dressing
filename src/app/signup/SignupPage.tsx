@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { createBrowserClient } from "@supabase/ssr";
+import { getSupabaseClient } from "@/lib/supabase/client";
 import { capitalizeName } from "@/lib/text";
 import type { Role } from "@/types/database";
 
@@ -27,7 +27,7 @@ type FormValues = z.infer<typeof formSchema>;
 function SignupForm() {
   const router = useRouter();
   const { toast } = useToast();
-  const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+  const supabase = getSupabaseClient();
 
   // Cette page ne crée que des comptes vendeuse. Les clientes n'ont pas à
   // s'inscrire : leur espace est créé quand elles envoient leur demande de
