@@ -7,7 +7,7 @@ Ce projet utilise **GitHub Actions** pour automatiser:
 - ✅ **Linting** - Vérification ESLint
 - ✅ **Build** - Compilation Next.js
 - ✅ **E2E Tests** - Tests Playwright
-- ✅ **Deploy** - Déploiement en production sur Vercel
+- 🚀 **Deploy** - Déploiement en production géré par l'intégration GitHub de Vercel (hors GitHub Actions)
 
 ---
 
@@ -30,43 +30,36 @@ Ce projet utilise **GitHub Actions** pour automatiser:
 
 ---
 
-### 2️⃣ `deploy.yml` - Deploy to Production
+### 2️⃣ `deploy.yml` - Production Checks
 
 **Déclenché par:**
 - Push vers `main`
-- Déploiement manuel (workflow_dispatch)
-
-**Conditions:**
-- ✅ Tous les tests doivent passer
-- ✅ Build doit réussir
-- ❌ Déploiement bloqué si tests échouent
+- Lancement manuel (workflow_dispatch)
 
 **Étapes:**
-1. ✅ Exécuter tous les tests
-2. ✅ Vérifier la build
-3. 🚀 Déployer vers Vercel Production
-4. 📝 Commenter la PR avec status
+1. ✅ Linting (ESLint)
+2. ✅ Tests unitaires (Jest)
+3. ✅ Tests E2E (Playwright)
+4. ✅ Build (Next.js)
 
-**Duration:** ~10-15 minutes
+**Duration:** ~5 minutes
+
+> ℹ️ Ce workflow **ne déploie pas**. Le déploiement en production est fait par
+> l'intégration GitHub de Vercel à chaque push sur `main`, indépendamment de la CI.
+> Ce workflow sert de contrôle post-merge : si un job est rouge sur `main`, la
+> prod contient une régression et il faut corriger (ou rollback dans Vercel).
 
 ---
 
 ## 🔐 Secrets GitHub Requis
-
-### Pour tous les workflows:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL      # URL Supabase (public)
 NEXT_PUBLIC_SUPABASE_ANON_KEY # Clé anon Supabase (public)
 ```
 
-### Pour déploiement production:
-
-```bash
-VERCEL_TOKEN       # Token d'authentification Vercel
-VERCEL_ORG_ID      # ID de l'organisation Vercel
-VERCEL_PROJECT_ID  # ID du projet Vercel
-```
+Aucun secret Vercel n'est nécessaire : le déploiement passe par l'intégration
+GitHub ↔ Vercel, configurée côté Vercel (Project → Settings → Git).
 
 ---
 
@@ -88,18 +81,6 @@ Value: https://xxxx.supabase.co
 
 Name: NEXT_PUBLIC_SUPABASE_ANON_KEY
 Value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
-#### Secrets Vercel (pour déploiement)
-```
-Name: VERCEL_TOKEN
-Value: [Génère depuis Vercel → Settings → Tokens]
-
-Name: VERCEL_ORG_ID
-Value: [Trouve dans Vercel → Settings → General]
-
-Name: VERCEL_PROJECT_ID
-Value: [Trouve dans Vercel → Settings → General]
 ```
 
 ---
@@ -170,9 +151,9 @@ Configuration recommandée:
 3. Corriger et repusher
 
 ### ❌ Déploiement échoue
-1. Vérifier les secrets Vercel
-2. Vérifier la connexion GitHub ↔ Vercel
-3. Vérifier les logs Vercel
+1. Vérifier la connexion GitHub ↔ Vercel (Vercel → Project → Settings → Git)
+2. Vérifier les logs de build dans le dashboard Vercel
+3. Vérifier les variables d'environnement côté Vercel
 
 ---
 
@@ -216,9 +197,9 @@ npm run test:all
    ↓
 7. Push vers main
    ↓
-8. Tests automatiques sur main
+8. 🚀 Vercel déploie automatiquement en production
    ↓
-9. 🚀 Déploiement automatique en production!
+9. Tests automatiques sur main (contrôle post-merge)
 ```
 
 ---
