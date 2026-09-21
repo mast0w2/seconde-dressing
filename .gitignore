@@ -42,3 +42,9 @@ next-env.d.ts
 
 # Sorties générées par Claude (affiches, visuels) — hors du dépôt
 Claude outputs/
+
+# playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
