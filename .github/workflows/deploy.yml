@@ -8,6 +8,9 @@ on:
 jobs:
   test-before-deploy:
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
     steps:
     - uses: actions/checkout@v4
@@ -15,7 +18,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20.x'
+        node-version: '22.x'
         cache: 'npm'
 
     - name: Install dependencies
@@ -27,18 +30,14 @@ jobs:
     - name: Run unit tests
       run: npm test -- --passWithNoTests
 
-    - name: Install Playwright
+    - name: Install Playwright browsers
       run: npx playwright install --with-deps
 
     - name: Run e2e tests
       run: npm run test:e2e
-      continue-on-error: true
 
     - name: Build application
       run: npm run build
-      env:
-        NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
     - name: Verify build
       run: |
