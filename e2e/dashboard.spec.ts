@@ -124,20 +124,17 @@ test.describe('Dashboard Navigation', () => {
     // Go to dashboard
     await page.goto('/dashboard');
 
-    // Should redirect to role-specific dashboard
-    // Client or seller depending on user role
-    const url = page.url();
-    expect(url).toMatch(/\/(dashboard\/(client|seller))/);
+    // Without a session the middleware sends visitors to /login, keeping the
+    // original destination so they come back after signing in.
+    await expect(page).toHaveURL(/\/login\?redirect=%2Fdashboard/);
   });
 
   test('should have navigation back to home', async ({ page }) => {
     await page.goto('/dashboard/client');
 
-    // Should have logo or home link
-    const homeLink = page.locator('a[href="/"]');
-    if (await homeLink.isVisible()) {
-      await expect(homeLink).toBeVisible();
-    }
+    // Should have logo or home link (there can be several: logo + "Accueil")
+    const homeLink = page.locator('a[href="/"]').first();
+    await expect(homeLink).toBeVisible();
   });
 
   test('should have user menu for logout', async ({ page }) => {
