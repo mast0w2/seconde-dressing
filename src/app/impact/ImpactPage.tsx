@@ -240,7 +240,7 @@ export default function ImpactPage() {
             produit. C&apos;est là que se joue l&apos;essentiel.
           </p>
           <Link
-            href="/#estimation-form"
+            href="/#appointment-request-form"
             className="mt-2 bg-noir text-blanc border border-noir px-8 py-4 text-[11px] tracking-[0.2em] uppercase hover:bg-transparent hover:text-noir transition-colors"
           >
             Demander un rendez-vous

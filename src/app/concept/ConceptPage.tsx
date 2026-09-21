@@ -12,6 +12,7 @@ import {
   ShoppingBag,
   Users,
 } from "lucide-react";
+import { PART_CLIENTE, PART_VENDEUSE, PART_PLATEFORME, formatShare } from "@/lib/pricing";
 
 // ============================================================================
 // Données
@@ -55,20 +56,22 @@ const FORMULES = [
   },
 ];
 
+// Les pourcentages viennent tous de src/lib/pricing.ts : c'est le seul
+// endroit à modifier pour changer la répartition.
 const REPARTITION = [
   {
-    part: "50 %",
+    part: formatShare(PART_CLIENTE),
     titre: "Pour vous",
     texte: "Votre part sur chaque pièce vendue, versée sur votre compte après la vente.",
   },
   {
-    part: "40 %",
+    part: formatShare(PART_VENDEUSE),
     titre: "Pour votre vendeuse",
     texte:
       "Elle se déplace, trie, photographie, rédige les annonces, répond aux acheteurs et expédie.",
   },
   {
-    part: "10 %",
+    part: formatShare(PART_PLATEFORME),
     titre: "Pour Seconde",
     texte: "La plateforme, le suivi de vos ventes, les paiements sécurisés et le service client.",
   },
@@ -203,12 +206,15 @@ export default function ConceptPage() {
                 className="bg-gris-tres-clair border border-gris-clair p-8 flex flex-col gap-3"
               >
                 {isFirstFree ? (
-                  <div className="flex flex-col gap-1">
-                    <span className="font-serif text-4xl leading-none text-gris-moyen line-through">{prix}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="font-serif text-2xl leading-none text-sauge">Gratuit</span>
-                      <span className="text-xs text-sauge font-medium">1ère commande</span>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                      <span className="font-serif text-4xl leading-none text-sauge">Gratuit</span>
+                      {/* Barré maison : le line-through natif n'est pas centré sur la Cormorant */}
+                      <span className="relative whitespace-nowrap font-serif text-2xl leading-none text-gris-moyen after:absolute after:inset-x-0 after:top-[58%] after:h-px after:bg-current">
+                        {prix}
+                      </span>
                     </div>
+                    <span className="eyebrow">Première commande</span>
                   </div>
                 ) : (
                   <span className="font-serif text-4xl leading-none text-sauge">{prix}</span>
@@ -316,7 +322,7 @@ export default function ConceptPage() {
             caler le rendez-vous.
           </p>
           <Link
-            href="/#estimation-form"
+            href="/#appointment-request-form"
             className="mt-2 bg-noir text-blanc border border-noir px-8 py-4 text-[11px] tracking-[0.2em] uppercase hover:bg-transparent hover:text-noir transition-colors"
           >
             Demander un rendez-vous

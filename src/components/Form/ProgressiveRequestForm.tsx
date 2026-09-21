@@ -6,6 +6,7 @@ import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/components/ui/use-toast";
 import { createBrowserClient } from "@supabase/ssr";
 import { capitalizeName } from "@/lib/text";
+import { PART_CLIENTE, formatShare, montantCliente } from "@/lib/pricing";
 import { Users, Sparkles, Gem, Ban } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -188,8 +189,6 @@ const QUESTIONS: Question[] = [
   },
 ];
 
-const PART_CLIENTE = 0.5;
-
 // ============================================================================
 // Validation
 // ============================================================================
@@ -244,7 +243,7 @@ async function submitForm(
   data: FormData
 ): Promise<{ success: boolean; message?: string; requestId?: string }> {
   try {
-    const response = await fetch("/api/estimation", {
+    const response = await fetch("/api/appointment-request", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -259,7 +258,7 @@ async function submitForm(
         valeurMoyenne: data.valeurMoyenne,
         marques: data.marques,
         description: data.description,
-        estimation: data.nombreVetements * data.valeurMoyenne * PART_CLIENTE,
+        estimation: montantCliente(data.nombreVetements * data.valeurMoyenne),
       }),
     });
 
@@ -267,7 +266,7 @@ async function submitForm(
     if (!response.ok) return { success: false, ...result };
     return { success: true, ...result };
   } catch (error) {
-    console.error("[Estimation Form] Submission error:", error);
+    console.error("[Request Form] Submission error:", error);
     return { success: false, message: "Une erreur est survenue. Veuillez réessayer." };
   }
 }
@@ -419,11 +418,11 @@ const EMPTY_FORM: FormData = {
   description: "",
 };
 
-interface ProgressiveEstimationFormProps {
+interface ProgressiveRequestFormProps {
   onCompleteChange?: (isComplete: boolean) => void;
 }
 
-export function ProgressiveEstimationForm({ onCompleteChange }: ProgressiveEstimationFormProps = {}) {
+export function ProgressiveRequestForm({ onCompleteChange }: ProgressiveRequestFormProps = {}) {
   const { toast } = useToast();
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -474,7 +473,7 @@ export function ProgressiveEstimationForm({ onCompleteChange }: ProgressiveEstim
   const isLastStep = currentStep === QUESTIONS.length - 1;
 
   const totalEstime = formData.nombreVetements * formData.valeurMoyenne;
-  const versementEstime = totalEstime * PART_CLIENTE;
+  const versementEstime = montantCliente(totalEstime);
 
   const handleChange = (value: any) => {
     setFormData((prev) => ({ ...prev, [currentQuestion.id]: value }));
@@ -639,19 +638,16 @@ export function ProgressiveEstimationForm({ onCompleteChange }: ProgressiveEstim
                       : "border-noir/20 bg-gris-tres-clair hover:border-noir/50"
                   }`}
                 >
-                  <div className="flex items-baseline justify-between gap-4 mb-1">
+                  {/* flex-wrap + ml-auto : le prix passe à la ligne (aligné à droite) sur mobile
+                      quand le libellé est long, au lieu de casser le titre. */}
+                  <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 mb-1">
                     <span className="font-serif text-xl text-noir">{option.titre}</span>
                     {option.isFirstFree ? (
-                      <div className="flex items-center gap-2">
-                        <span className="text-[11px] tracking-[0.16em] uppercase text-gris-moyen line-through">
-                          {option.prix}
-                        </span>
-                        <span className="text-[11px] tracking-[0.16em] uppercase text-sauge-fonce font-medium">
-                          Gratuit
-                        </span>
-                      </div>
+                      <span className="ml-auto text-[11px] tracking-[0.16em] uppercase text-sauge-fonce font-medium whitespace-nowrap">
+                        Gratuit pour la première commande
+                      </span>
                     ) : (
-                      <span className="text-[11px] tracking-[0.16em] uppercase text-sauge-fonce whitespace-nowrap">
+                      <span className="ml-auto text-[11px] tracking-[0.16em] uppercase text-sauge-fonce whitespace-nowrap">
                         {option.prix}
                       </span>
                     )}
@@ -748,7 +744,8 @@ export function ProgressiveEstimationForm({ onCompleteChange }: ProgressiveEstim
           {formData.nombreVetements} vêtement{formData.nombreVetements > 1 ? "s" : ""} ×{" "}
           {formData.valeurMoyenne} € ={" "}
           {totalEstime.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} € de ventes estimées,
-          dont vous touchez 50 %. Estimation indicative, ajustée après le tri.
+          dont vous touchez {formatShare(PART_CLIENTE)}. Estimation indicative, ajustée après le
+          tri.
         </p>
       </div>
     );
@@ -766,7 +763,7 @@ export function ProgressiveEstimationForm({ onCompleteChange }: ProgressiveEstim
             <h3 className="font-serif text-3xl text-noir">Demande envoyée</h3>
           </div>
           <p className="text-gris-moyen">
-            Merci {capitalizeName(formData.prenom)} ! Votre demande d’estimation a bien été enregistrée.
+            Merci {capitalizeName(formData.prenom)} ! Votre demande a bien été enregistrée.
             Nous vous recontacterons sous 24 h pour valider la formule et organiser la collecte.
           </p>
           <div className="text-sm text-gris-moyen bg-gris-tres-clair p-4 border border-noir/10">
@@ -839,8 +836,8 @@ export function ProgressiveEstimationForm({ onCompleteChange }: ProgressiveEstim
 
         {renderEstimation()}
 
-        {/* Dernière étape : proposition d'espace de suivi, sans champ à remplir.
-            L'adresse email a déjà été saisie plus haut dans le formulaire. */}
+        {/* Last step: offer tracking space, no field to fill.
+            Email address was already provided earlier in the form. */}
         {isLastStep && !dejaConnectee && (
           <label className="flex items-start gap-3 cursor-pointer border border-noir/10 bg-gris-tres-clair p-5">
             <input
@@ -898,4 +895,4 @@ export function ProgressiveEstimationForm({ onCompleteChange }: ProgressiveEstim
   );
 }
 
-export default ProgressiveEstimationForm;
+export default ProgressiveRequestForm;

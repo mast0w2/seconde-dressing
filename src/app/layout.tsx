@@ -6,11 +6,22 @@ import { Footer } from "@/components/Footer";
 import { ToastProvider } from "@/components/ToastProvider";
 import { siteConfig, buildJsonLd, buildOrganizationLd, buildWebsiteLd } from "@/lib/seo";
 
-const jost = Jost({ subsets: ["latin"], weight: ["300", "400", "500", "600"] });
+// next/font héberge les polices sous un nom généré (ex. __Jost_744fae). Les
+// désigner par leur nom public dans le CSS ne fonctionne donc pas : il faut
+// passer par les variables ci-dessous, sinon le navigateur retombe sur les
+// polices système (Georgia pour les titres, Avenir Next pour le texte).
+const jost = Jost({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-jost",
+  display: "swap",
+});
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   style: ["normal", "italic"],
+  variable: "--font-cormorant",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -60,8 +71,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className={cormorant.className}>
-      <body className={jost.className}>
+    <html lang="fr" className={`${cormorant.variable} ${jost.variable}`}>
+      <body>
         <div className="flex min-h-screen flex-col">
           <Navbar />
           <main className="flex-1">{children}</main>

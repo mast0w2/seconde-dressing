@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { isProfileComplete } from "@/lib/profile";
+import { attachAnonymousRequests } from "@/lib/requests-attach";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
@@ -24,20 +25,8 @@ export async function GET(request: Request) {
       }
 
       // Rattache au compte les demandes envoyées anonymement avec cette même
-      // adresse. C'est ce qui relie le formulaire public au tableau de bord :
-      // la cliente remplit sa demande sans compte, puis clique sur le lien
-      // reçu par email et retrouve sa demande dans son espace.
-      const rattacherDemandes = async () => {
-        if (!user.email) return;
-        const { error } = await supabase
-          .from("requests")
-          .update({ client_id: user.id })
-          .eq("client_email", user.email)
-          .is("client_id", null);
-        if (error) {
-          console.error("[Auth callback] Rattachement des demandes impossible :", error.message);
-        }
-      };
+      // adresse (voir src/lib/requests-attach.ts).
+      const rattacherDemandes = () => attachAnonymousRequests(supabase);
 
       if (profile) {
         await rattacherDemandes();

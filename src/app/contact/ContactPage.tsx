@@ -152,7 +152,7 @@ export default function ContactPage() {
               On vous répond sous 24 heures. Si vous souhaitez faire estimer votre dressing, passez
               plutôt par la{" "}
               <Link
-                href="/#estimation-form"
+                href="/#appointment-request-form"
                 className="text-sauge-fonce underline underline-offset-4 hover:text-noir transition-colors"
               >
                 demande de rendez-vous
