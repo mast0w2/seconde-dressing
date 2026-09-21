@@ -29,9 +29,9 @@ test.describe('Authentication', () => {
     // In a real scenario, you'd set up a test user account
     await page.goto('/login');
 
-    // Verify page structure
-    const loginCard = page.locator('text=Se connecter');
-    await expect(loginCard).toBeVisible();
+    // Verify page structure ("Se connecter" is both the heading and the submit button)
+    const loginHeading = page.getByRole('heading', { name: 'Se connecter' });
+    await expect(loginHeading).toBeVisible();
   });
 });
 
