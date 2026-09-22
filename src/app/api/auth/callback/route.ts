@@ -72,8 +72,33 @@ export async function GET(request: Request) {
         }
       }
 
-      // Dernier recours : la page de connexion crée un profil minimal et
-      // redirige vers /profile pour le compléter.
+      // Dernier recours : ni un profil existant, ni les métadonnées attendues
+      // (typiquement une connexion Google, qui ne fournit pas prénom/nom
+      // séparés). On crée un profil minimal — avec le rôle choisi sur /signup,
+      // transmis ici dans l'URL de retour — plutôt que de renvoyer vers
+      // /login : la personne y est déjà authentifiée, retenter un signUp par
+      // mot de passe échouerait puisque le compte existe déjà.
+      if (user.email) {
+        const roleParam = requestUrl.searchParams.get("role");
+        const role: Role = roleParam === "seller" ? "seller" : "client";
+        const displayName = (meta.full_name || meta.name || "") as string;
+        const [first_name = "", ...rest] = displayName.trim().split(/\s+/).filter(Boolean);
+        const last_name = rest.join(" ");
+
+        const { error: creationError } = await supabase.from("profiles").insert({
+          id: user.id,
+          email: user.email,
+          first_name,
+          last_name,
+          role,
+        });
+
+        if (!creationError) {
+          return NextResponse.redirect(new URL("/profile?incomplete=1", requestUrl.origin).toString());
+        }
+        console.error("[Auth callback] Création du profil minimal impossible :", creationError.message);
+      }
+
       return NextResponse.redirect(new URL("/login", requestUrl.origin).toString());
     }
   }

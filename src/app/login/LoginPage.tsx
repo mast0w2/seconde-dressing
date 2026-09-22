@@ -297,29 +297,26 @@ function LoginForm() {
             )}
           </div>
 
-          {/* Une cliente n'a pas à s'inscrire : son espace est créé quand elle
-              envoie sa demande. L'inscription directe ne concerne que les
-              vendeuses. Envoyer tout le monde vers /signup créait des comptes
-              vides, sans aucune demande à suivre. On le rappelle explicitement
-              ici : c'est le seul endroit où une cliente qui cherche à "créer
-              un compte" atterrit, et rien sur cette page ne le lui disait. */}
-          <div className="mt-6 border-t border-noir/10 pt-6 flex flex-col gap-4 text-sm text-gris-moyen">
-            <div className="rounded-md border border-noir/10 bg-gris-tres-clair p-4">
-              <p className="text-noir font-medium mb-1">Vous êtes cliente et n&apos;avez pas encore de compte ?</p>
-              <p>
-                Il n&apos;y a rien à créer ici : faites votre{" "}
-                <Link href="/#appointment-request-form" className="text-sauge-fonce underline underline-offset-4 hover:text-noir transition-colors">
-                  demande de rendez-vous depuis la page d&apos;accueil
-                </Link>{" "}
-                — votre espace de suivi se crée automatiquement, sans mot de passe.
-              </p>
-            </div>
+          {/* /signup demande maintenant explicitement "cliente ou vendeuse ?",
+              donc un lien générique suffit ici — plus besoin de deux blocs
+              séparés par rôle. On garde un mot sur le formulaire de demande
+              pour la cliente qui veut juste envoyer une demande sans créer de
+              compte tout de suite : son espace se crée alors automatiquement. */}
+          <div className="mt-6 border-t border-noir/10 pt-6 flex flex-col gap-3 text-sm text-gris-moyen">
             <p>
-              Vous souhaitez devenir vendeuse ?{" "}
-              <Link href="/signup?vendeur=true" className="text-sauge-fonce underline underline-offset-4 hover:text-noir transition-colors">
-                Créer un compte vendeuse
+              Vous n&apos;avez pas encore de compte ?{" "}
+              <Link href="/signup" className="text-sauge-fonce underline underline-offset-4 hover:text-noir transition-colors">
+                Créer un compte
               </Link>
               .
+            </p>
+            <p className="text-xs">
+              Vous êtes cliente et voulez juste envoyer une demande, sans créer de compte tout
+              de suite ?{" "}
+              <Link href="/#appointment-request-form" className="text-sauge-fonce underline underline-offset-4 hover:text-noir transition-colors">
+                Faites votre demande depuis la page d&apos;accueil
+              </Link>{" "}
+              — votre espace se crée alors automatiquement.
             </p>
           </div>
         </CardContent>
