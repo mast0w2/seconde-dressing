@@ -19,6 +19,19 @@ export async function GET(request: Request) {
 
   if (error) {
     console.error("[Auth callback] Échange du code impossible :", error.message);
+
+    // Même raison qu'en /api/auth/confirm : un lien déjà consommé rouvert
+    // depuis la boîte mail ne doit pas renvoyer une erreur à quelqu'un dont
+    // la session tient toujours.
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      const destination = await resolvePostSignInDestination(supabase);
+      return NextResponse.redirect(new URL(destination, requestUrl.origin).toString());
+    }
+
     return NextResponse.redirect(
       new URL("/login?lien=invalide", requestUrl.origin).toString()
     );

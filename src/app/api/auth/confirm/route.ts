@@ -28,9 +28,24 @@ export async function GET(request: Request) {
   const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
 
   if (error) {
-    // Lien déjà utilisé ou expiré : on le dit clairement sur la page de
-    // connexion, d'où un nouveau lien peut être demandé.
     console.warn("[Auth confirm] Lien refusé :", error.message);
+
+    // Un lien de connexion ne sert qu'une fois. Mais rouvrir l'email plus
+    // tard est le réflexe le plus naturel du monde, et à ce moment-là la
+    // session ouverte au premier clic est presque toujours encore valide :
+    // inutile de renvoyer vers une page d'erreur quelqu'un qui est déjà
+    // connecté. On le mène simplement à son espace.
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user && type !== "recovery") {
+      const destination = await resolvePostSignInDestination(supabase);
+      return NextResponse.redirect(new URL(destination, requestUrl.origin).toString());
+    }
+
+    // Réellement personne derrière : on l'explique, et la page de connexion
+    // permet d'en redemander un.
     return NextResponse.redirect(
       new URL("/login?lien=expire", requestUrl.origin).toString()
     );
