@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -28,6 +28,7 @@ function SignupForm() {
   const router = useRouter();
   const { toast } = useToast();
   const supabase = getSupabaseClient();
+  const [confirmationEmail, setConfirmationEmail] = useState<string | null>(null);
 
   // Cette page ne crée que des comptes vendeuse. Les clientes n'ont pas à
   // s'inscrire : leur espace est créé quand elles envoient leur demande de
@@ -91,11 +92,12 @@ function SignupForm() {
       }
 
       if (!session) {
-        toast({
-          title: "Inscription réussie",
-          description: "N'oubliez pas de confirmer votre adresse e-mail pour activer votre compte.",
-        });
-        router.push("/login?email_pending=1");
+        // Confirmation d'email requise : on le montre sur un écran dédié
+        // plutôt qu'un toast (qui disparaît) suivi d'une redirection vers
+        // /login — c'était trop facile à manquer et laissait penser que
+        // l'inscription avait échoué ou qu'on pouvait se connecter tout de
+        // suite.
+        setConfirmationEmail(data.email);
         return;
       }
 
@@ -131,6 +133,38 @@ function SignupForm() {
     }
   };
 
+  if (confirmationEmail) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-creme p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl">Vérifiez votre boîte mail</CardTitle>
+            <CardDescription>
+              Confirmez votre adresse pour activer votre compte vendeuse.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-md border border-sauge/50 bg-sauge-clair/30 p-4">
+              <p className="text-sm text-sauge-fonce">
+                Un email de confirmation vient de partir vers{" "}
+                <span className="font-medium">{confirmationEmail}</span>. Cliquez sur le
+                lien qu&apos;il contient pour activer votre compte — vous pourrez ensuite
+                vous connecter avec le mot de passe que vous venez de choisir.
+              </p>
+            </div>
+            <p className="text-sm text-gris-moyen">
+              Rien reçu au bout de quelques minutes ? Pensez à regarder dans vos
+              indésirables.
+            </p>
+            <Button asChild className="w-full">
+              <Link href="/login">Aller à la page de connexion</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-creme p-4">
       <Card className="w-full max-w-md">
@@ -138,17 +172,23 @@ function SignupForm() {
           <CardTitle className="text-2xl">Devenir vendeuse</CardTitle>
           <CardDescription>
             Créez votre compte vendeuse pour accompagner les clientes et vendre leurs
-            pièces. Vous cherchez à faire vendre vos propres vêtements ?{" "}
-            <Link
-              href="/#appointment-request-form"
-              className="text-sauge-fonce underline underline-offset-4 hover:text-noir transition-colors"
-            >
-              Demandez un rendez-vous
-            </Link>{" "}
-            — votre espace se crée tout seul.
+            pièces.
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-6 rounded-md border border-noir/10 bg-gris-tres-clair p-4">
+            <p className="text-sm text-noir font-medium mb-1">
+              Vous cherchez plutôt à vendre vos propres vêtements ?
+            </p>
+            <p className="text-sm text-gris-moyen mb-3">
+              Ce formulaire ne concerne que les vendeuses. En tant que cliente, il n&apos;y a
+              pas de compte à créer ici : votre espace se crée tout seul dès que vous
+              envoyez une demande.
+            </p>
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/#appointment-request-form">Demander un rendez-vous</Link>
+            </Button>
+          </div>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -202,6 +242,11 @@ function SignupForm() {
                 <p className="text-sm text-destructive">{errors.password.message}</p>
               )}
             </div>
+
+            <p className="text-xs text-gris-moyen">
+              Un email de confirmation vous sera envoyé : il faudra cliquer sur son lien
+              avant de pouvoir vous connecter.
+            </p>
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? "Inscription..." : "S'inscrire"}

@@ -106,7 +106,7 @@ export default function SellerDashboardPage() {
       }
 
       if (!isProfileComplete(profileData)) {
-        router.push("/profile?incomplete=1");
+        router.push("/profile?incomplete=1&redirect=/dashboard/seller");
         return;
       }
 

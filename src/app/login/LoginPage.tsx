@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { getSupabaseClient } from "@/lib/supabase/client";
+import { isProfileComplete, dashboardPathForRole } from "@/lib/profile";
 
 const formSchema = z.object({
   email: z.string().email("Adresse email invalide"),
@@ -19,9 +20,6 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
-
-const dashboardForRole = (role: string) =>
-  role === "seller" ? "/dashboard/seller" : "/dashboard/client";
 
 function LoginForm() {
   const router = useRouter();
@@ -44,7 +42,7 @@ function LoginForm() {
             .eq("id", user.id)
             .single();
 
-          const dashboard = profile ? dashboardForRole(profile.role) : "/dashboard/client";
+          const dashboard = profile ? dashboardPathForRole(profile.role) : "/dashboard/client";
           router.push(dashboard);
           return;
         }
@@ -169,14 +167,16 @@ function LoginForm() {
         throw profileError;
       }
 
-      const isProfileComplete =
-        profile && profile.first_name && profile.last_name;
+      // Same completeness rule everywhere (dashboards, the email-link callback,
+      // and here) so a login never bounces the user between pages depending
+      // on which path they signed in through.
+      const profileComplete = isProfileComplete(profile);
 
       const destination = redirectTarget
         ? redirectTarget
-        : isProfileComplete
-        ? dashboardForRole(profile.role)
-        : "/profile";
+        : profileComplete
+        ? dashboardPathForRole(profile.role)
+        : "/profile?incomplete=1";
 
       // Refresh the router cache so the middleware and server components
       // pick up the new auth session before navigating to a protected route.
@@ -185,7 +185,7 @@ function LoginForm() {
 
       toast({
         title: "Connexion réussie",
-        description: isProfileComplete
+        description: profileComplete
           ? "Vous êtes maintenant connecté."
           : "Veuillez compléter votre profil pour finaliser votre compte.",
       });
@@ -292,8 +292,20 @@ function LoginForm() {
           {/* Une cliente n'a pas à s'inscrire : son espace est créé quand elle
               envoie sa demande. L'inscription directe ne concerne que les
               vendeuses. Envoyer tout le monde vers /signup créait des comptes
-              vides, sans aucune demande à suivre. */}
-          <div className="mt-6 border-t border-noir/10 pt-6 flex flex-col gap-3 text-sm text-gris-moyen">
+              vides, sans aucune demande à suivre. On le rappelle explicitement
+              ici : c'est le seul endroit où une cliente qui cherche à "créer
+              un compte" atterrit, et rien sur cette page ne le lui disait. */}
+          <div className="mt-6 border-t border-noir/10 pt-6 flex flex-col gap-4 text-sm text-gris-moyen">
+            <div className="rounded-md border border-noir/10 bg-gris-tres-clair p-4">
+              <p className="text-noir font-medium mb-1">Vous êtes cliente et n&apos;avez pas encore de compte ?</p>
+              <p>
+                Il n&apos;y a rien à créer ici : faites votre{" "}
+                <Link href="/#appointment-request-form" className="text-sauge-fonce underline underline-offset-4 hover:text-noir transition-colors">
+                  demande de rendez-vous depuis la page d&apos;accueil
+                </Link>{" "}
+                — votre espace de suivi se crée automatiquement, sans mot de passe.
+              </p>
+            </div>
             <p>
               Vous souhaitez devenir vendeuse ?{" "}
               <Link href="/signup?vendeur=true" className="text-sauge-fonce underline underline-offset-4 hover:text-noir transition-colors">

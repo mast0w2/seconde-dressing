@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { isProfileComplete } from "@/lib/profile";
+import { isProfileComplete, dashboardPathForRole } from "@/lib/profile";
 import { attachAnonymousRequests } from "@/lib/requests-attach";
+import type { Role } from "@/types/database";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
@@ -33,13 +34,11 @@ export async function GET(request: Request) {
         // Profile exists: send to /profile to fill phone/address when incomplete,
         // otherwise to the role dashboard.
         if (!isProfileComplete(profile)) {
-          return NextResponse.redirect(new URL("/profile", requestUrl.origin).toString());
+          return NextResponse.redirect(new URL("/profile?incomplete=1", requestUrl.origin).toString());
         }
-        const dashboard =
-          profile.role === "seller"
-            ? "/dashboard/seller"
-            : "/dashboard/client";
-        return NextResponse.redirect(new URL(dashboard, requestUrl.origin).toString());
+        return NextResponse.redirect(
+          new URL(dashboardPathForRole(profile.role), requestUrl.origin).toString()
+        );
       }
 
       // Pas encore de profil : c'est une première connexion par lien envoyé
@@ -48,22 +47,27 @@ export async function GET(request: Request) {
       // ici, sans rien redemander à la cliente.
       const meta = (user.user_metadata ?? {}) as Record<string, string | undefined>;
       if (meta.first_name && meta.last_name && user.email) {
-        const { error: creationError } = await supabase.from("profiles").insert({
+        const role: Role = meta.role === "seller" ? "seller" : "client";
+        const newProfile = {
           id: user.id,
           email: user.email,
           first_name: meta.first_name,
           last_name: meta.last_name,
           phone: meta.phone ?? null,
           street_address: meta.street_address ?? null,
-          role: meta.role === "seller" ? "seller" : "client",
-        });
+          role,
+        };
+        const { error: creationError } = await supabase.from("profiles").insert(newProfile);
 
         if (creationError) {
           console.error("[Auth callback] Création du profil impossible :", creationError.message);
         } else {
           await rattacherDemandes();
           return NextResponse.redirect(
-            new URL("/dashboard/client", requestUrl.origin).toString()
+            new URL(
+              isProfileComplete(newProfile) ? dashboardPathForRole(role) : "/profile?incomplete=1",
+              requestUrl.origin
+            ).toString()
           );
         }
       }

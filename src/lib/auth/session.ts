@@ -1,6 +1,7 @@
 // src/lib/auth/session.ts
 // Server-side authentication and RBAC helpers
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { dashboardPathForRole } from '@/lib/profile';
 import { redirect } from 'next/navigation';
 import type { Profile, Role } from '@/types/database';
 
@@ -56,7 +57,7 @@ export async function requireSession() {
 export async function requireRole(role: Role) {
   const { user, profile } = await requireSession();
   if (profile.role !== role) {
-    redirect(profile.role === 'seller' ? '/dashboard/seller' : '/dashboard/client');
+    redirect(dashboardPathForRole(profile.role));
   }
   return { user, profile };
 }
