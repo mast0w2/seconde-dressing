@@ -229,7 +229,7 @@ function SignupForm() {
                     <Label htmlFor="prenom">Prénom</Label>
                     <Input
                       id="prenom"
-                      placeholder="Jean"
+                      placeholder="Léa"
                       {...register("prenom")}
                       className={errors.prenom ? "border-destructive" : ""}
                     />
@@ -241,7 +241,7 @@ function SignupForm() {
                     <Label htmlFor="nom">Nom</Label>
                     <Input
                       id="nom"
-                      placeholder="Dupont"
+                      placeholder="Martin"
                       {...register("nom")}
                       className={errors.nom ? "border-destructive" : ""}
                     />
