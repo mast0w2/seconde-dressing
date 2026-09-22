@@ -25,6 +25,17 @@ interface RequestWithRelations extends Request {
 
 const REQUEST_SELECT = `*, client:client_id (id, first_name, last_name, email, phone), formula:formula_id (id, slug, label, price), contract:request_contracts (*)`;
 
+// Les demandes encore ouvertes viennent de la vue `requests_ouvertes`, qui ne
+// porte aucune coordonnée : ni nom, ni email, ni téléphone. La table
+// `requests` ne les laisse plus lire tant qu'on ne s'est pas attribué la
+// demande — l'écran masquait déjà ces informations, mais elles arrivaient
+// quand même dans la réponse réseau.
+//
+// Pas de jointure imbriquée ici : PostgREST ne déduit pas toujours les
+// relations depuis une vue. La formule est rattachée en JS, à partir de la
+// table de référence chargée en parallèle.
+const OPEN_REQUEST_SELECT = "*";
+
 export default function SellerDashboardPage() {
   const router = useRouter();
   const { toast } = useToast();
@@ -40,33 +51,44 @@ export default function SellerDashboardPage() {
     // Accepted requests (assigned to this seller, any status) + open requests
     // (pending). Refusals are tracked per seller so a refused request stays
     // open for others but is hidden from this seller's "nouvelles".
-    const [acceptedRes, openRes, refusRes] = await Promise.all([
+    const [acceptedRes, openRes, refusRes, formulasRes] = await Promise.all([
       supabase
         .from("requests")
         .select(REQUEST_SELECT)
         .eq("seller_id", userId)
         .order("created_at", { ascending: false }),
       supabase
-        .from("requests")
-        .select(REQUEST_SELECT)
-        .eq("status", "pending")
+        .from("requests_ouvertes")
+        .select(OPEN_REQUEST_SELECT)
         .order("created_at", { ascending: false }),
       supabase
         .from("request_refusals")
         .select("request_id")
         .eq("seller_id", userId),
+      supabase.from("formulas").select("id, slug, label, price"),
     ]);
 
     if (acceptedRes.error) throw acceptedRes.error;
     if (openRes.error) throw openRes.error;
     if (refusRes.error) throw refusRes.error;
+    if (formulasRes.error) throw formulasRes.error;
+
+    const formulasById = new Map<string, Formula>(
+      (formulasRes.data || []).map((f) => [f.id as string, f as Formula])
+    );
+    const openRequests = (openRes.data || []).map((r) => ({
+      ...r,
+      client: null,
+      formula: r.formula_id ? formulasById.get(r.formula_id as string) ?? null : null,
+      contract: null,
+    }));
 
     setRefusedIds(new Set<string>((refusRes.data || []).map((r) => r.request_id)));
 
     // Merge, dedupe by id, keep newest first
     const merged: RequestWithRelations[] = [
       ...(acceptedRes.data || []),
-      ...(openRes.data || []),
+      ...openRequests,
     ] as unknown as RequestWithRelations[];
     const seen = new Set<string>();
     const unique = merged.filter((r) => {
@@ -217,13 +239,23 @@ export default function SellerDashboardPage() {
     }
   };
 
-  const renderRequestSummary = (request: RequestWithRelations) => {
-    const statusInfo = requestStatusConfig[request.status];
+  // Le nom ne s'affiche qu'une fois la demande attribuée. La garde reste ici
+  // même si la base ne livre plus rien avant : les demandes déjà acceptées
+  // passent par le même rendu.
+  const nomClient = (request: RequestWithRelations, userId?: string) => {
+    if (request.seller_id !== userId) return "";
     const client = request.client;
-    const formula = request.formula;
-    const clientDisplayName = client
+    return client
       ? `${client.first_name} ${client.last_name}`.trim()
       : `${request.client_first_name ?? ""} ${request.client_last_name ?? ""}`.trim();
+  };
+
+  const renderRequestSummary = (request: RequestWithRelations) => {
+    const statusInfo = requestStatusConfig[request.status];
+    const formula = request.formula;
+    // Avant attribution, la demande n'arrive plus avec la moindre coordonnée :
+    // nomClient est alors vide, et seule l'adresse renseigne la vendeuse.
+    const clientDisplayName = nomClient(request, user?.id);
 
     return (
       <div className="flex flex-wrap items-center gap-3">
@@ -255,11 +287,9 @@ export default function SellerDashboardPage() {
     const client = request.client;
     const formula = request.formula;
     const isAssignedToMe = request.seller_id === user?.id;
-    const clientDisplayName = client
-      ? `${client.first_name} ${client.last_name}`.trim()
-      : `${request.client_first_name ?? ""} ${request.client_last_name ?? ""}`.trim();
-    const clientEmail = client?.email ?? request.client_email ?? null;
-    const clientPhone = client?.phone ?? request.client_phone ?? null;
+    const clientDisplayName = nomClient(request, user?.id);
+    const clientEmail = isAssignedToMe ? client?.email ?? request.client_email ?? null : null;
+    const clientPhone = isAssignedToMe ? client?.phone ?? request.client_phone ?? null : null;
 
     return (
       <div className="flex items-start justify-between gap-4">
