@@ -65,75 +65,102 @@ function SignupForm() {
   const { handleSubmit, register, formState } = form;
   const { errors, isSubmitting } = formState;
 
+  // Repli quand la route serveur n'est pas disponible (clé service role ou
+  // clé Brevo absente) : Supabase envoie lui-même la confirmation.
+  // Renvoie la session quand la confirmation d'email est désactivée.
+  const inscrireViaSupabase = async (data: FormValues, roleChoisi: Role) => {
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+      options: {
+        // Marque cette confirmation comme issue d'une inscription : le
+        // callback y répond en renvoyant vers /login (pour se connecter
+        // avec le mot de passe qu'on vient de choisir), pas vers le
+        // tableau de bord directement comme pour un lien de connexion.
+        emailRedirectTo: `${window.location.origin}/api/auth/callback?flow=signup`,
+        // Le rôle et l'identité voyagent dans les métadonnées : le profil est
+        // créé à la confirmation, côté serveur, à partir de ces valeurs.
+        // Les insérer depuis le navigateur juste après signUp() échouait sur
+        // la RLS de `profiles`, faute de session — et l'erreur masquait
+        // l'écran « vérifiez votre boîte mail ».
+        data: {
+          first_name: capitalizeName(data.prenom),
+          last_name: capitalizeName(data.nom),
+          role: roleChoisi,
+        },
+      },
+    });
+
+    if (error) {
+      throw new Error(
+        /already.*registered|already exists/i.test(error.message)
+          ? "Un compte existe déjà avec cette adresse email."
+          : error.message
+      );
+    }
+
+    return session;
+  };
+
   const onSubmit = async (data: FormValues) => {
     if (!role) return;
 
     try {
-      const {
-        data: { user, session },
-        error: authError,
-      } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          // Marque cette confirmation comme issue d'une inscription : le
-          // callback y répond en renvoyant vers /login (pour se connecter
-          // avec le mot de passe qu'on vient de choisir), pas vers le
-          // tableau de bord directement comme pour un lien de connexion.
-          emailRedirectTo: `${window.location.origin}/api/auth/callback?flow=signup`,
-        },
-      });
-
-      if (authError) {
-        throw authError;
-      }
-
-      if (!user) {
-        throw new Error("User not found after signup");
-      }
-
-      const { error: profileError } = await supabase.from("profiles").insert([
-        {
-          id: user.id,
-          email: user.email,
-          first_name: capitalizeName(data.prenom),
-          last_name: capitalizeName(data.nom),
-          phone: null,
-          photo_url: null,
-          street_address: null,
+      const reponse = await fetch("/api/auth/inscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+          prenom: data.prenom,
+          nom: data.nom,
           role,
-          bio: null,
-          specialization: null,
-          hourly_rate: null,
-          years_experience: null,
-        },
-      ]);
-
-      if (profileError) {
-        throw profileError;
-      }
-
-      if (!session) {
-        // Confirmation d'email requise : on le montre sur un écran dédié
-        // plutôt qu'un toast (qui disparaît) suivi d'une redirection vers
-        // /login — c'était trop facile à manquer et laissait penser que
-        // l'inscription avait échoué ou qu'on pouvait se connecter tout de
-        // suite.
-        setConfirmationEmail(data.email);
-        return;
-      }
-
-      // Une cliente a pu envoyer une demande anonymement avant de créer ce
-      // compte : on rattache ces demandes maintenant (idempotent, sans effet
-      // si aucune ne correspond à cette adresse).
-      await attachAnonymousRequests(supabase);
-
-      toast({
-        title: "Bienvenue sur Seconde !",
-        description: "Votre compte a été créé. Complétez votre profil pour finaliser votre inscription.",
+        }),
       });
 
-      router.push("/profile");
+      const corps = (await reponse.json().catch(() => ({}))) as { statut?: string };
+
+      switch (corps.statut) {
+        case "envoye":
+          break;
+        case "indisponible": {
+          const session = await inscrireViaSupabase(data, role);
+          if (session) {
+            // Confirmation d'email désactivée : la personne est déjà
+            // connectée. Une cliente a pu envoyer une demande anonymement
+            // avant de créer ce compte, on la rattache maintenant
+            // (idempotent, sans effet si aucune ne correspond).
+            await attachAnonymousRequests(supabase);
+            toast({
+              title: "Bienvenue sur Seconde !",
+              description:
+                "Votre compte a été créé. Complétez votre profil pour finaliser votre inscription.",
+            });
+            router.push("/profile?incomplete=1");
+            return;
+          }
+          break;
+        }
+        case "email_deja_utilise":
+          throw new Error("Un compte existe déjà avec cette adresse email.");
+        case "mot_de_passe_court":
+          throw new Error("Le mot de passe doit contenir au moins 6 caractères.");
+        case "erreur_envoi":
+          throw new Error(
+            "Votre compte est créé, mais l'email de confirmation n'est pas parti. Demandez un nouveau lien depuis la page de connexion."
+          );
+        default:
+          throw new Error("L'inscription a échoué. Réessayez dans un instant.");
+      }
+
+      // Confirmation d'email requise : on le montre sur un écran dédié plutôt
+      // qu'un toast (qui disparaît) suivi d'une redirection vers /login —
+      // c'était trop facile à manquer et laissait penser que l'inscription
+      // avait échoué ou qu'on pouvait se connecter tout de suite.
+      setConfirmationEmail(data.email);
     } catch (error: any) {
       toast({
         title: "Erreur d'inscription",

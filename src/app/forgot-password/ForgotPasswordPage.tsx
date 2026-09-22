@@ -35,18 +35,11 @@ export default function ForgotPasswordPage() {
 
   const onSubmit = async (data: FormValues) => {
     try {
-      // Check if email exists in profiles
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("email")
-        .eq("email", data.email)
-        .single();
-
-      if (!profile) {
-        throw new Error("Aucun compte trouvé avec cette adresse email.");
-      }
-
-      // Use Supabase auth reset password
+      // On ne vérifie plus l'existence du compte avant d'envoyer : cette
+      // lecture de `profiles` en anonyme disait à qui le demandait quelles
+      // adresses ont un compte chez nous, et c'était la dernière chose qui
+      // obligeait à laisser la table lisible sans être connecté.
+      // resetPasswordForEmail() n'envoie déjà rien pour une adresse inconnue.
       const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
@@ -79,9 +72,10 @@ export default function ForgotPasswordPage() {
           <CardContent className="space-y-4">
             <div className="rounded-md border border-sauge/50 bg-sauge-clair/30 p-4">
               <p className="text-sm text-sauge-fonce">
-                Un email de réinitialisation vient de partir vers{" "}
-                <span className="font-medium">{sentTo}</span>. Cliquez sur le lien
-                qu&apos;il contient pour choisir un nouveau mot de passe.
+                Si un compte existe avec l&apos;adresse{" "}
+                <span className="font-medium">{sentTo}</span>, un email de
+                réinitialisation vient de partir. Cliquez sur le lien qu&apos;il
+                contient pour choisir un nouveau mot de passe.
               </p>
             </div>
             <p className="text-sm text-gris-moyen">

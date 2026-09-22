@@ -18,6 +18,7 @@ import { Mail, Phone, User, Home, MapPin, ArrowLeft, Edit, Save, X, Camera } fro
 import { AddressInput } from "@/components/ui/address-input";
 import { Badge } from "@/components/ui/badge";
 import { capitalizeName } from "@/lib/text";
+import { roleFromMetadata } from "@/lib/auth/role";
 import Link from "next/link";
 
 const profileFormSchema = z.object({
@@ -115,7 +116,7 @@ function ProfileForm() {
               email: currentUser.email,
               last_name: null,
               first_name: null,
-              role: "client",
+              role: roleFromMetadata(currentUser.user_metadata),
             }]);
           
           if (createError) {

@@ -1,0 +1,27 @@
+-- 0009_profiles_lecture_anonyme.sql
+-- Ferme la lecture anonyme de `profiles`.
+--
+-- La politique `profiles_read_anon` était en `USING (true)` pour le rôle
+-- `anon`. Or la clé anon est publiée dans le bundle JS du site : n'importe qui
+-- pouvait lire l'email, le téléphone et l'adresse postale de toutes les
+-- clientes et vendeuses avec un simple curl.
+--
+-- Rien de public n'en dépend, vérifié sur l'ensemble de src/ :
+--   * les avis stockent le nom en clair dans `reviews`, sans jointure ;
+--   * il n'existe pas d'annuaire de vendeuses ;
+--   * /appointment-request est derrière le middleware d'authentification ;
+--   * /forgot-password lisait la table pour vérifier qu'un compte existait
+--     avant d'envoyer le lien : ce contrôle disait au passage à qui le
+--     demandait quelles adresses ont un compte. Il a été supprimé, car
+--     resetPasswordForEmail() n'envoie déjà rien pour une adresse inconnue.
+--
+-- RESTE À TRAITER : `profiles_read_own_or_any` est également en `USING (true)`
+-- pour le rôle `authenticated`. Tout compte connecté lit donc encore tous les
+-- profils, et un compte se crée en une minute depuis le formulaire public.
+-- Le resserrer demande de décider ce qu'une vendeuse voit d'une demande
+-- `pending` qui ne lui est pas encore attribuée : le tableau de bord vendeuse
+-- affiche aujourd'hui nom, email et téléphone de la cliente dès le tableau
+-- (SellerDashboardPage.tsx, REQUEST_SELECT).
+-- Safe to re-run.
+
+DROP POLICY IF EXISTS "profiles_read_anon" ON profiles;

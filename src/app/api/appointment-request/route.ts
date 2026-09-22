@@ -1,5 +1,6 @@
 // src/app/api/appointment-request/route.ts
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { capitalizeName } from "@/lib/text";
 import { notificationService } from "@/lib/email";
 
@@ -109,6 +110,14 @@ function validateRequestData(data: unknown): { valid: boolean; errors?: string[]
 async function saveAppointmentRequest(data: AppointmentRequestData) {
   const supabase = createSupabaseServerClient();
 
+  // L'écriture passe par le client service role quand il est disponible.
+  // Deux raisons : la RLS de `requests` peut alors être activée sans que le
+  // formulaire public en pâtisse (une insertion anonyme suivie d'un RETURNING
+  // exige une politique de lecture, qu'une visiteuse non connectée n'a pas),
+  // et les données à écrire sont déjà validées juste au-dessus.
+  // À défaut de clé, on retombe sur le client porteur des cookies.
+  const ecriture = getSupabaseAdminClient() ?? supabase;
+
   // Appointment requests can be submitted anonymously from the homepage form:
   // when the submitter is not authenticated, client_id is null and the
   // contact details are stored in the denormalized client_* columns. If a
@@ -136,7 +145,7 @@ async function saveAppointmentRequest(data: AppointmentRequestData) {
     }
   }
 
-  const { data: insertedRow, error } = await supabase
+  const { data: insertedRow, error } = await ecriture
     .from('requests')
     .insert([
       {
