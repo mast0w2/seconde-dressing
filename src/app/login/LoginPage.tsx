@@ -299,9 +299,7 @@ function LoginForm() {
 
           {/* /signup demande maintenant explicitement "cliente ou vendeuse ?",
               donc un lien générique suffit ici — plus besoin de deux blocs
-              séparés par rôle. On garde un mot sur le formulaire de demande
-              pour la cliente qui veut juste envoyer une demande sans créer de
-              compte tout de suite : son espace se crée alors automatiquement. */}
+              séparés par rôle. */}
           <div className="mt-6 border-t border-noir/10 pt-6 flex flex-col gap-3 text-sm text-gris-moyen">
             <p>
               Vous n&apos;avez pas encore de compte ?{" "}
@@ -309,14 +307,6 @@ function LoginForm() {
                 Créer un compte
               </Link>
               .
-            </p>
-            <p className="text-xs">
-              Vous êtes cliente et voulez juste envoyer une demande, sans créer de compte tout
-              de suite ?{" "}
-              <Link href="/#appointment-request-form" className="text-sauge-fonce underline underline-offset-4 hover:text-noir transition-colors">
-                Faites votre demande depuis la page d&apos;accueil
-              </Link>{" "}
-              — votre espace se crée alors automatiquement.
             </p>
           </div>
         </CardContent>
