@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -19,9 +19,9 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function ForgotPasswordPage() {
-  const router = useRouter();
   const { toast } = useToast();
   const supabase = getSupabaseClient();
+  const [sentTo, setSentTo] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -55,12 +55,9 @@ export default function ForgotPasswordPage() {
         throw error;
       }
 
-      toast({
-        title: "Email de réinitialisation envoyé",
-        description: "Veuillez vérifier votre boîte mail pour réinitialiser votre mot de passe.",
-      });
-
-      router.push("/login");
+      // Écran dédié plutôt qu'un toast (qui disparaît) suivi d'une
+      // redirection immédiate vers /login — c'était trop facile à manquer.
+      setSentTo(data.email);
     } catch (error: any) {
       console.error("Forgot password error:", error);
       toast({
@@ -70,6 +67,35 @@ export default function ForgotPasswordPage() {
       });
     }
   };
+
+  if (sentTo) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-creme p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl">Vérifiez votre boîte mail</CardTitle>
+            <CardDescription>Réinitialisez votre mot de passe depuis cet email.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-md border border-sauge/50 bg-sauge-clair/30 p-4">
+              <p className="text-sm text-sauge-fonce">
+                Un email de réinitialisation vient de partir vers{" "}
+                <span className="font-medium">{sentTo}</span>. Cliquez sur le lien
+                qu&apos;il contient pour choisir un nouveau mot de passe.
+              </p>
+            </div>
+            <p className="text-sm text-gris-moyen">
+              Rien reçu au bout de quelques minutes ? Pensez à regarder dans vos
+              indésirables.
+            </p>
+            <Button asChild className="w-full">
+              <Link href="/login">Aller à la page de connexion</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-creme p-4">

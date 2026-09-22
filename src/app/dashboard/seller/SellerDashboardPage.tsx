@@ -106,7 +106,7 @@ export default function SellerDashboardPage() {
       }
 
       if (!isProfileComplete(profileData)) {
-        router.push("/profile?incomplete=1");
+        router.push("/profile?incomplete=1&redirect=/dashboard/seller");
         return;
       }
 
@@ -262,7 +262,10 @@ export default function SellerDashboardPage() {
     const clientPhone = client?.phone ?? request.client_phone ?? null;
 
     return (
-      <div className="flex items-start justify-between gap-4">
+      // flex-col sur mobile : la colonne de boutons à largeur fixe (min-w-[180px])
+      // ne pouvait pas rétrécir dans une rangée non empilable et débordait,
+      // désalignant les boutons sur petit écran.
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div className="flex-1">
           {clientDisplayName && (
             <div className="text-sm text-gris-moyen mb-2">
@@ -319,13 +322,13 @@ export default function SellerDashboardPage() {
           />
         </div>
 
-        <div className="flex flex-col gap-2 shrink-0 min-w-[180px]">
+        <div className="flex flex-col gap-2 sm:shrink-0 sm:min-w-[180px]">
           {tab === "new" && (
             <>
               <Button
                 size="sm"
                 onClick={() => handleAccept(request.id)}
-                className="h-8 px-3"
+                className="h-8 px-3 w-full sm:w-auto"
               >
                 Accepter
               </Button>
@@ -333,7 +336,7 @@ export default function SellerDashboardPage() {
                 size="sm"
                 variant="outline"
                 onClick={() => handleRefuse(request.id)}
-                className="h-8 px-3"
+                className="h-8 px-3 w-full sm:w-auto"
               >
                 Refuser
               </Button>
@@ -413,22 +416,26 @@ export default function SellerDashboardPage() {
         </div>
 
         <Tabs defaultValue="new">
+          {/* whitespace-normal + h-auto : les libellés avec compteur ("Nouvelles
+              demandes (3)") débordaient de leur colonne sur mobile (base
+              TabsTrigger a whitespace-nowrap, ici surchargé) et se
+              chevauchaient avec l'onglet voisin. */}
           <TabsList className="w-full grid grid-cols-3 border-b border-noir/10">
             <TabsTrigger
               value="new"
-              className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-noir data-[state=active]:text-noir data-[state=inactive]:text-gris-moyen text-sm tracking-wide"
+              className="h-auto min-h-12 py-2 rounded-none border-b-2 border-transparent data-[state=active]:border-noir data-[state=active]:text-noir data-[state=inactive]:text-gris-moyen text-xs sm:text-sm tracking-wide whitespace-normal text-center leading-tight px-1"
             >
               Nouvelles demandes ({newRequests.length})
             </TabsTrigger>
             <TabsTrigger
               value="accepted"
-              className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-noir data-[state=active]:text-noir data-[state=inactive]:text-gris-moyen text-sm tracking-wide"
+              className="h-auto min-h-12 py-2 rounded-none border-b-2 border-transparent data-[state=active]:border-noir data-[state=active]:text-noir data-[state=inactive]:text-gris-moyen text-xs sm:text-sm tracking-wide whitespace-normal text-center leading-tight px-1"
             >
               Demandes acceptées ({acceptedRequests.length})
             </TabsTrigger>
             <TabsTrigger
               value="refused"
-              className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-noir data-[state=active]:text-noir data-[state=inactive]:text-gris-moyen text-sm tracking-wide"
+              className="h-auto min-h-12 py-2 rounded-none border-b-2 border-transparent data-[state=active]:border-noir data-[state=active]:text-noir data-[state=inactive]:text-gris-moyen text-xs sm:text-sm tracking-wide whitespace-normal text-center leading-tight px-1"
             >
               Demandes refusées ({refusedRequests.length})
             </TabsTrigger>

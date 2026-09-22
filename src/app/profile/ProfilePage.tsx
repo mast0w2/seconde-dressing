@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/components/ui/use-toast";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { Profile } from "@/types/database";
+import { isProfileComplete, dashboardPathForRole } from "@/lib/profile";
 import { Mail, Phone, User, Home, MapPin, ArrowLeft, Edit, Save, X, Camera } from "lucide-react";
 import { AddressInput } from "@/components/ui/address-input";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +34,7 @@ function ProfileForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const showIncompleteBanner = searchParams.get("incomplete") === "1";
+  const redirectTarget = searchParams.get("redirect");
   const { toast } = useToast();
   const supabase = getSupabaseClient();
   const [user, setUser] = useState<any>(null);
@@ -41,6 +43,12 @@ function ProfileForm() {
   const [isEditing, setIsEditing] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Set once, from the profile as first loaded: whether completing the form
+  // below should take the user onward to their dashboard, or just save in
+  // place. An already-complete profile being edited (e.g. updating a phone
+  // number) should never force-navigate the user away.
+  const wasIncompleteRef = useRef(false);
+  const hasSetWasIncompleteRef = useRef(false);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -86,6 +94,10 @@ function ProfileForm() {
 
         if (profileData) {
           setProfile(profileData);
+          if (!hasSetWasIncompleteRef.current) {
+            wasIncompleteRef.current = !isProfileComplete(profileData);
+            hasSetWasIncompleteRef.current = true;
+          }
           // Populate form with profile data
           reset({
             last_name: profileData.last_name || "",
@@ -116,7 +128,11 @@ function ProfileForm() {
             .select("*")
             .eq("id", currentUser.id)
             .single();
-          
+
+          if (!hasSetWasIncompleteRef.current) {
+            wasIncompleteRef.current = !isProfileComplete(newProfile);
+            hasSetWasIncompleteRef.current = true;
+          }
           setProfile(newProfile || null);
         }
       } catch (error: any) {
@@ -184,6 +200,18 @@ function ProfileForm() {
 
       setProfile(updatedProfile);
       setIsEditing(false);
+
+      // The profile was incomplete when this page was reached (fresh signup,
+      // or bounced here from a dashboard/request page) and is now complete:
+      // move the user forward instead of leaving them stranded on this page.
+      if (wasIncompleteRef.current && isProfileComplete(updatedProfile)) {
+        toast({
+          title: "Profil complété",
+          description: "Merci ! Direction votre tableau de bord.",
+        });
+        router.push(redirectTarget || dashboardPathForRole(updatedProfile.role));
+        return;
+      }
 
       toast({
         title: "Profil mis à jour",

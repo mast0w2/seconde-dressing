@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { getSupabaseClient } from "@/lib/supabase/client";
+import { isProfileComplete, dashboardPathForRole } from "@/lib/profile";
 
 const formSchema = z.object({
   email: z.string().email("Adresse email invalide"),
@@ -20,16 +21,13 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const dashboardForRole = (role: string) =>
-  role === "seller" ? "/dashboard/seller" : "/dashboard/client";
-
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const supabase = getSupabaseClient();
   const redirectTarget = searchParams.get("redirect");
-  const showEmailPending = searchParams.get("email_pending") === "1";
+  const showConfirmed = searchParams.get("confirmed") === "1";
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isChecking, setIsChecking] = useState(true);
 
@@ -44,7 +42,7 @@ function LoginForm() {
             .eq("id", user.id)
             .single();
 
-          const dashboard = profile ? dashboardForRole(profile.role) : "/dashboard/client";
+          const dashboard = profile ? dashboardPathForRole(profile.role) : "/dashboard/client";
           router.push(dashboard);
           return;
         }
@@ -90,7 +88,15 @@ function LoginForm() {
         },
       });
       if (error) {
-        setLoginError(error.message);
+        // shouldCreateUser: false renvoie ce message technique quand l'adresse
+        // n'a pas encore d'espace (ex : demande envoyée sans cocher "Créer mon
+        // espace") — on le traduit en piste d'action plutôt que de laisser
+        // remonter le message brut de Supabase.
+        setLoginError(
+          error.message.toLowerCase().includes("not allowed for otp")
+            ? "Aucun espace n'existe encore pour cette adresse. Faites votre demande de rendez-vous depuis la page d'accueil : votre espace se créera automatiquement."
+            : error.message
+        );
         return;
       }
       setLienEnvoye(true);
@@ -169,14 +175,16 @@ function LoginForm() {
         throw profileError;
       }
 
-      const isProfileComplete =
-        profile && profile.first_name && profile.last_name;
+      // Same completeness rule everywhere (dashboards, the email-link callback,
+      // and here) so a login never bounces the user between pages depending
+      // on which path they signed in through.
+      const profileComplete = isProfileComplete(profile);
 
       const destination = redirectTarget
         ? redirectTarget
-        : isProfileComplete
-        ? dashboardForRole(profile.role)
-        : "/profile";
+        : profileComplete
+        ? dashboardPathForRole(profile.role)
+        : "/profile?incomplete=1";
 
       // Refresh the router cache so the middleware and server components
       // pick up the new auth session before navigating to a protected route.
@@ -185,7 +193,7 @@ function LoginForm() {
 
       toast({
         title: "Connexion réussie",
-        description: isProfileComplete
+        description: profileComplete
           ? "Vous êtes maintenant connecté."
           : "Veuillez compléter votre profil pour finaliser votre compte.",
       });
@@ -213,11 +221,11 @@ function LoginForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {showEmailPending && (
+          {showConfirmed && (
             <div className="mb-4 rounded-md border border-sauge/50 bg-sauge-clair/30 p-4">
               <p className="text-sm text-sauge-fonce">
-                N&apos;oubliez pas de confirmer votre adresse e-mail pour activer votre
-                compte. Cliquez sur le lien reçu par e-mail, puis connectez-vous.
+                Votre adresse email est confirmée. Vous pouvez maintenant vous connecter avec
+                le mot de passe choisi lors de l&apos;inscription.
               </p>
             </div>
           )}
@@ -289,15 +297,14 @@ function LoginForm() {
             )}
           </div>
 
-          {/* Une cliente n'a pas à s'inscrire : son espace est créé quand elle
-              envoie sa demande. L'inscription directe ne concerne que les
-              vendeuses. Envoyer tout le monde vers /signup créait des comptes
-              vides, sans aucune demande à suivre. */}
+          {/* /signup demande maintenant explicitement "cliente ou vendeuse ?",
+              donc un lien générique suffit ici — plus besoin de deux blocs
+              séparés par rôle. */}
           <div className="mt-6 border-t border-noir/10 pt-6 flex flex-col gap-3 text-sm text-gris-moyen">
             <p>
-              Vous souhaitez devenir vendeuse ?{" "}
-              <Link href="/signup?vendeur=true" className="text-sauge-fonce underline underline-offset-4 hover:text-noir transition-colors">
-                Créer un compte vendeuse
+              Vous n&apos;avez pas encore de compte ?{" "}
+              <Link href="/signup" className="text-sauge-fonce underline underline-offset-4 hover:text-noir transition-colors">
+                Créer un compte
               </Link>
               .
             </p>

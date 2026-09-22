@@ -86,7 +86,7 @@ export default function AppointmentRequestPage() {
       }
 
       if (!isProfileComplete(profileData)) {
-        router.push("/profile?incomplete=1");
+        router.push("/profile?incomplete=1&redirect=/appointment-request");
         return;
       }
 
