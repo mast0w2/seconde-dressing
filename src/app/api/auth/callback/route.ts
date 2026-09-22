@@ -31,6 +31,17 @@ export async function GET(request: Request) {
 
       if (profile) {
         await rattacherDemandes();
+
+        if (requestUrl.searchParams.get("flow") === "signup") {
+          // Confirmation d'inscription (pas un lien de connexion) : on ne
+          // connecte pas automatiquement la personne, on la renvoie vers
+          // /login pour qu'elle se connecte avec le mot de passe qu'elle
+          // vient de choisir — c'est ce que l'écran de confirmation lui a
+          // annoncé juste après l'inscription.
+          await supabase.auth.signOut();
+          return NextResponse.redirect(new URL("/login?confirmed=1", requestUrl.origin).toString());
+        }
+
         // Profile exists: send to /profile to fill phone/address when incomplete,
         // otherwise to the role dashboard.
         if (!isProfileComplete(profile)) {

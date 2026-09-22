@@ -27,7 +27,7 @@ function LoginForm() {
   const { toast } = useToast();
   const supabase = getSupabaseClient();
   const redirectTarget = searchParams.get("redirect");
-  const showEmailPending = searchParams.get("email_pending") === "1";
+  const showConfirmed = searchParams.get("confirmed") === "1";
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isChecking, setIsChecking] = useState(true);
 
@@ -221,11 +221,11 @@ function LoginForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {showEmailPending && (
+          {showConfirmed && (
             <div className="mb-4 rounded-md border border-sauge/50 bg-sauge-clair/30 p-4">
               <p className="text-sm text-sauge-fonce">
-                N&apos;oubliez pas de confirmer votre adresse e-mail pour activer votre
-                compte. Cliquez sur le lien reçu par e-mail, puis connectez-vous.
+                Votre adresse email est confirmée. Vous pouvez maintenant vous connecter avec
+                le mot de passe choisi lors de l&apos;inscription.
               </p>
             </div>
           )}

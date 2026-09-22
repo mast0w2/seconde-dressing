@@ -76,7 +76,11 @@ function SignupForm() {
         email: data.email,
         password: data.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+          // Marque cette confirmation comme issue d'une inscription : le
+          // callback y répond en renvoyant vers /login (pour se connecter
+          // avec le mot de passe qu'on vient de choisir), pas vers le
+          // tableau de bord directement comme pour un lien de connexion.
+          emailRedirectTo: `${window.location.origin}/api/auth/callback?flow=signup`,
         },
       });
 
@@ -271,14 +275,6 @@ function SignupForm() {
                   {errors.password && (
                     <p className="text-sm text-destructive">{errors.password.message}</p>
                   )}
-                </div>
-
-                <div className="rounded-md border border-sauge/50 bg-sauge-clair/30 p-4">
-                  <p className="text-sm text-sauge-fonce">
-                    <span className="font-medium">Un email de confirmation vous sera envoyé.</span>{" "}
-                    Vous devrez cliquer sur le lien qu&apos;il contient avant de pouvoir vous
-                    connecter.
-                  </p>
                 </div>
 
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
