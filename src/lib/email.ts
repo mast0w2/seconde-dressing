@@ -822,6 +822,37 @@ class NotificationService {
   }
 
   /**
+   * Password-setup link, for a space that does not have one yet.
+   *
+   * Sent from the login page when the address does have a space but no
+   * password: that is the case for every space born from the appointment
+   * request form (see /api/auth/password-setup).
+   */
+  public async sendPasswordSetupLink(
+    email: string,
+    lien: string
+  ): Promise<EmailSendResult> {
+    const subject = 'Créez le mot de passe de votre compte Seconde';
+
+    const content = `
+      <h2>Bonjour,</h2>
+      <p>Votre espace Seconde existe déjà, mais aucun mot de passe ne lui est encore associé. Le bouton ci-dessous vous permet d'en choisir un, une bonne fois pour toutes.</p>
+      <p style="text-align: center; margin: 28px 0;">
+        <a href="${lien}" class="button">Créer mon mot de passe</a>
+      </p>
+      <p>Vous pourrez ensuite vous connecter avec votre adresse e-mail et ce mot de passe, sans repasser par un lien.</p>
+      <p style="color: #6b7280; font-size: 14px;">Ce lien est valable une heure et ne fonctionne qu'une seule fois. Passé ce délai, demandez-en un nouveau depuis la page de connexion.</p>
+      <p style="color: #6b7280; font-size: 14px;">Si le bouton ne fonctionne pas, copiez cette adresse dans votre navigateur :<br>
+        <span style="word-break: break-all;">${this.templateService.escapeHtml(lien)}</span>
+      </p>
+      <p style="color: #6b7280; font-size: 14px;">Vous n'êtes pas à l'origine de cette demande ? Ignorez simplement ce message : votre espace reste inchangé.</p>
+    `;
+
+    const html = this.templateService.generateBaseTemplate(content, subject);
+    return this.emailService.sendEmailWithFallback(email, subject, html);
+  }
+
+  /**
    * Confirmation d'inscription, expédiée par Brevo plutôt que par le mailer
    * de Supabase (voir /api/auth/inscription).
    */

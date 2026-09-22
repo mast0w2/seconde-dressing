@@ -55,7 +55,9 @@ function SignupForm() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
+      // The login page lands here with the address it could not find
+      // anywhere: no need to make anyone type it again.
+      email: searchParams.get("email") ?? "",
       password: "",
       prenom: "",
       nom: "",

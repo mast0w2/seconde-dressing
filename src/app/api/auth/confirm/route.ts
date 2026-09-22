@@ -51,6 +51,14 @@ export async function GET(request: Request) {
     );
   }
 
+  // A "recovery" link is there to set a password, not to walk into the space:
+  // the session it just opened allows updateUser(), which is exactly what
+  // /reset-password does. Sending this person to the dashboard would leave
+  // them without the password they came to create.
+  if (type === "recovery") {
+    return NextResponse.redirect(new URL("/reset-password", requestUrl.origin).toString());
+  }
+
   // Une confirmation d'inscription ne connecte pas : la personne se connecte
   // ensuite avec le mot de passe qu'elle a choisi.
   const destination = await resolvePostSignInDestination(supabase, {
