@@ -88,7 +88,15 @@ function LoginForm() {
         },
       });
       if (error) {
-        setLoginError(error.message);
+        // shouldCreateUser: false renvoie ce message technique quand l'adresse
+        // n'a pas encore d'espace (ex : demande envoyée sans cocher "Créer mon
+        // espace") — on le traduit en piste d'action plutôt que de laisser
+        // remonter le message brut de Supabase.
+        setLoginError(
+          error.message.toLowerCase().includes("not allowed for otp")
+            ? "Aucun espace n'existe encore pour cette adresse. Faites votre demande de rendez-vous depuis la page d'accueil : votre espace se créera automatiquement."
+            : error.message
+        );
         return;
       }
       setLienEnvoye(true);
