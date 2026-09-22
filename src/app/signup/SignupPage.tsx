@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -25,9 +24,12 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 function SignupForm() {
-  const router = useRouter();
   const { toast } = useToast();
   const supabase = getSupabaseClient();
+  // Adresse à confirmer : tant qu'elle est posée, la carte affiche l'écran
+  // « vérifiez votre boîte mail » au lieu du formulaire. Un toast passait
+  // inaperçu et rien ne disait qu'un e-mail était parti.
+  const [emailAConfirmer, setEmailAConfirmer] = useState<string | null>(null);
 
   // Cette page ne crée que des comptes vendeuse. Les clientes n'ont pas à
   // s'inscrire : leur espace est créé quand elles envoient leur demande de
@@ -48,63 +50,68 @@ function SignupForm() {
   const { handleSubmit, register, formState } = form;
   const { errors, isSubmitting } = formState;
 
-  const onSubmit = async (data: FormValues) => {
-    try {
-      const {
-        data: { user, session },
-        error: authError,
-      } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/api/auth/callback`,
-        },
-      });
-
-      if (authError) {
-        throw authError;
-      }
-
-      if (!user) {
-        throw new Error("User not found after signup");
-      }
-
-      const { error: profileError } = await supabase.from("profiles").insert([
-        {
-          id: user.id,
-          email: user.email,
+  // Repli quand la route serveur n'est pas disponible (clé service role ou
+  // clé Brevo absente) : Supabase envoie lui-même la confirmation.
+  const inscrireViaSupabase = async (data: FormValues) => {
+    const { error } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+        // Le rôle et l'identité voyagent dans les métadonnées : le profil est
+        // créé à la confirmation, côté serveur, à partir de ces valeurs.
+        // Les insérer ici échouait sur la RLS, faute de session.
+        data: {
           first_name: capitalizeName(data.prenom),
           last_name: capitalizeName(data.nom),
-          phone: null,
-          photo_url: null,
-          street_address: null,
           role: ROLE,
-          bio: null,
-          specialization: null,
-          hourly_rate: null,
-          years_experience: null,
         },
-      ]);
+      },
+    });
 
-      if (profileError) {
-        throw profileError;
-      }
+    if (error) {
+      throw new Error(
+        /already.*registered|already exists/i.test(error.message)
+          ? "Un compte existe déjà avec cette adresse email."
+          : error.message
+      );
+    }
+  };
 
-      if (!session) {
-        toast({
-          title: "Inscription réussie",
-          description: "N'oubliez pas de confirmer votre adresse e-mail pour activer votre compte.",
-        });
-        router.push("/login?email_pending=1");
-        return;
-      }
-
-      toast({
-        title: "Bienvenue sur Seconde !",
-        description: "Votre compte a été créé. Complétez votre profil pour finaliser votre inscription.",
+  const onSubmit = async (data: FormValues) => {
+    try {
+      const reponse = await fetch("/api/auth/inscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+          prenom: data.prenom,
+          nom: data.nom,
+        }),
       });
 
-      router.push("/profile");
+      const corps = (await reponse.json().catch(() => ({}))) as { statut?: string };
+
+      switch (corps.statut) {
+        case "envoye":
+          break;
+        case "indisponible":
+          await inscrireViaSupabase(data);
+          break;
+        case "email_deja_utilise":
+          throw new Error("Un compte existe déjà avec cette adresse email.");
+        case "mot_de_passe_court":
+          throw new Error("Le mot de passe doit contenir au moins 6 caractères.");
+        case "erreur_envoi":
+          throw new Error(
+            "Votre compte est créé, mais l'email de confirmation n'est pas parti. Demandez un nouveau lien depuis la page de connexion."
+          );
+        default:
+          throw new Error("L'inscription a échoué. Réessayez dans un instant.");
+      }
+
+      setEmailAConfirmer(data.email.trim().toLowerCase());
     } catch (error: any) {
       toast({
         title: "Erreur d'inscription",
@@ -130,6 +137,39 @@ function SignupForm() {
       });
     }
   };
+
+  if (emailAConfirmer) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-creme p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl">Confirmez votre adresse email</CardTitle>
+            <CardDescription>
+              Un email vient de partir vers{" "}
+              <span className="text-noir">{emailAConfirmer}</span>.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4 text-sm text-gris-moyen">
+            <p>
+              Cliquez sur le lien qu&apos;il contient pour activer votre compte vendeuse.
+              Vous pourrez ensuite compléter votre profil et recevoir les demandes des
+              clientes.
+            </p>
+            <p>
+              Rien reçu au bout de quelques minutes ? Pensez à regarder dans vos
+              indésirables.
+            </p>
+            <Link
+              href="/login"
+              className="inline-block text-sauge-fonce underline underline-offset-4 hover:text-noir transition-colors"
+            >
+              Aller à la page de connexion
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-creme p-4">

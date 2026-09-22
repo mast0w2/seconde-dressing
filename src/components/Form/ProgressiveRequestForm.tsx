@@ -6,6 +6,7 @@ import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/components/ui/use-toast";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { capitalizeName } from "@/lib/text";
+import { envoyerLienEspace, type StatutLien } from "@/lib/auth/espace-link";
 import { PART_CLIENTE, formatShare, montantCliente } from "@/lib/pricing";
 import { Users, Sparkles, Gem, Ban } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -430,10 +431,13 @@ export function ProgressiveRequestForm({ onCompleteChange }: ProgressiveRequestF
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  // Option B : pas de mot de passe. À la validation, on envoie un lien de
-  // connexion à l'adresse déjà saisie. La case est cochée par défaut.
+  // Pas de mot de passe : à la validation, un lien de connexion part vers
+  // l'adresse déjà saisie. La case est cochée par défaut.
   const [creerEspace, setCreerEspace] = useState(true);
-  const [lienEnvoye, setLienEnvoye] = useState(false);
+  // Statut de l'envoi du lien : null quand l'espace n'a pas été demandé.
+  // Un échec doit se voir — avant, il partait dans un console.warn et l'écran
+  // de confirmation ne disait plus rien de l'espace.
+  const [statutEspace, setStatutEspace] = useState<StatutLien | null>(null);
   // Vrai quand la visiteuse est déjà connectée : inutile de lui proposer un espace.
   const [dejaConnectee, setDejaConnectee] = useState(false);
   // True when the signed-in user is a seller: they cannot submit a request
@@ -523,27 +527,16 @@ export function ProgressiveRequestForm({ onCompleteChange }: ProgressiveRequestF
       // métadonnées du compte ; le profil est créé côté serveur au moment où
       // la cliente clique sur le lien (src/app/api/auth/callback/route.ts).
       if (creerEspace && !dejaConnectee) {
-        const { error: otpError } = await supabase.auth.signInWithOtp({
+        const resultat = await envoyerLienEspace({
           email: formData.email,
-          options: {
-            shouldCreateUser: true,
-            emailRedirectTo: `${window.location.origin}/api/auth/callback`,
-            data: {
-              first_name: capitalizeName(formData.prenom),
-              last_name: capitalizeName(formData.nom),
-              phone: formData.telephone,
-              street_address: formData.adresse,
-              role: "client",
-            },
-          },
+          prenom: formData.prenom,
+          nom: formData.nom,
+          telephone: formData.telephone,
+          adresse: formData.adresse,
         });
-        if (otpError) {
-          // La demande est enregistrée : on ne transforme pas cet échec en
-          // erreur bloquante, on le dit simplement à la cliente.
-          console.warn("[Estimation Form] Lien de connexion non envoyé :", otpError.message);
-        } else {
-          setLienEnvoye(true);
-        }
+        // La demande est enregistrée : un échec ici n'est jamais bloquant,
+        // mais il est affiché à la cliente au lieu d'être passé sous silence.
+        setStatutEspace(resultat.statut);
       }
 
       setIsComplete(true);
@@ -557,7 +550,7 @@ export function ProgressiveRequestForm({ onCompleteChange }: ProgressiveRequestF
     setCurrentStep(0);
     setIsComplete(false);
     setErrors({});
-    setLienEnvoye(false);
+    setStatutEspace(null);
     setCreerEspace(true);
   };
 
@@ -781,7 +774,7 @@ export function ProgressiveRequestForm({ onCompleteChange }: ProgressiveRequestF
               Vous pouvez suivre son avancement depuis votre tableau de bord.
             </p>
           </div>
-        ) : lienEnvoye ? (
+        ) : statutEspace === "envoye" ? (
           <div className="border-t border-noir/10 pt-6 space-y-3">
             <p className="font-serif text-xl text-noir">Votre espace de suivi vous attend</p>
             <p className="text-gris-moyen">
@@ -792,6 +785,25 @@ export function ProgressiveRequestForm({ onCompleteChange }: ProgressiveRequestF
             </p>
             <p className="text-sm text-gris-moyen">
               Rien reçu au bout de quelques minutes ? Pensez à regarder dans vos indésirables.
+            </p>
+          </div>
+        ) : statutEspace ? (
+          <div className="border-t border-noir/10 pt-6 space-y-3">
+            <p className="font-serif text-xl text-noir">Votre espace n&apos;a pas pu être ouvert</p>
+            <p className="text-gris-moyen">
+              {statutEspace === "trop_de_demandes"
+                ? "Un lien a déjà été envoyé à cette adresse il y a quelques instants. Regardez votre boîte mail, puis réessayez dans une heure si vous ne trouvez rien."
+                : "Votre demande est bien enregistrée — c'est seulement l'email contenant votre lien de connexion qui n'est pas parti."}
+            </p>
+            <p className="text-gris-moyen">
+              Vous pouvez en redemander un depuis la{" "}
+              <a
+                href="/login"
+                className="text-sauge-fonce underline underline-offset-4 hover:text-noir transition-colors"
+              >
+                page de connexion
+              </a>
+              , ou attendre notre appel : nous vous recontactons sous 24 h dans tous les cas.
             </p>
           </div>
         ) : null}

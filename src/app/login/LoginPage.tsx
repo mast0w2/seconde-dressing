@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { getSupabaseClient } from "@/lib/supabase/client";
+import { envoyerLienEspace } from "@/lib/auth/espace-link";
+import { roleFromMetadata } from "@/lib/auth/role";
 
 const formSchema = z.object({
   email: z.string().email("Adresse email invalide"),
@@ -30,6 +32,8 @@ function LoginForm() {
   const supabase = getSupabaseClient();
   const redirectTarget = searchParams.get("redirect");
   const showEmailPending = searchParams.get("email_pending") === "1";
+  // Renvoyé par /api/auth/confirm quand le lien a expiré ou a déjà servi.
+  const etatLien = searchParams.get("lien");
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isChecking, setIsChecking] = useState(true);
 
@@ -61,6 +65,7 @@ function LoginForm() {
   // de demande, qui n'ont jamais défini de mot de passe.
   const [envoiLien, setEnvoiLien] = useState(false);
   const [lienEnvoye, setLienEnvoye] = useState(false);
+  const [messageLien, setMessageLien] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -75,25 +80,36 @@ function LoginForm() {
 
   const envoyerLien = async () => {
     setLoginError(null);
+    setMessageLien(null);
     const email = (form.getValues("email") || "").trim().toLowerCase();
     if (!email || !email.includes("@")) {
-      setLoginError("Indiquez d'abord votre adresse email ci-dessus.");
+      setMessageLien("Indiquez d'abord votre adresse email ci-dessus.");
       return;
     }
     setEnvoiLien(true);
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          shouldCreateUser: false,
-          emailRedirectTo: `${window.location.origin}/api/auth/callback`,
-        },
-      });
-      if (error) {
-        setLoginError(error.message);
-        return;
+      // creerCompte: false — depuis la connexion, on ne fabrique pas de
+      // compte à la volée : un espace naît avec une demande, pas ici.
+      const resultat = await envoyerLienEspace({ email, creerCompte: false });
+      switch (resultat.statut) {
+        case "envoye":
+          setLienEnvoye(true);
+          return;
+        case "compte_inconnu":
+          setMessageLien(
+            "Aucun espace n'existe encore pour cette adresse. Votre espace est créé en même temps que votre première demande d'estimation."
+          );
+          return;
+        case "trop_de_demandes":
+          setMessageLien(
+            "Un lien vient déjà de partir vers cette adresse. Regardez votre boîte mail — et vos indésirables — avant d'en redemander un."
+          );
+          return;
+        default:
+          setMessageLien(
+            "L'envoi du lien a échoué. Réessayez dans un instant, ou écrivez-nous si cela persiste."
+          );
       }
-      setLienEnvoye(true);
     } finally {
       setEnvoiLien(false);
     }
@@ -104,32 +120,23 @@ function LoginForm() {
     try {
       const normalizedEmail = data.email.trim().toLowerCase();
 
-      // Supabase Auth returns the same "Invalid login credentials" for both a
-      // non-existent email and a wrong password. To give a precise message, we
-      // first check whether a profile exists for this email: if not, the email
-      // is not linked to any account; otherwise a sign-in failure means the
-      // password is wrong.
-      const { data: existingProfile, error: profileLookupError } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("email", normalizedEmail)
-        .maybeSingle();
-
-      if (profileLookupError) {
-        throw profileLookupError;
-      }
-
-      if (!existingProfile) {
-        throw new Error("Aucun compte n'est lié à cette adresse email.");
-      }
-
+      // On ne cherche plus le profil avant de tenter la connexion. Un espace
+      // créé depuis le formulaire de demande n'a de profil qu'à partir du
+      // premier clic sur son lien : la vérification annonçait donc « aucun
+      // compte » à des clientes dont le compte existait bel et bien. Elle
+      // lisait en prime la table profiles en anonyme.
       const { error, data: authData } = await supabase.auth.signInWithPassword({
         email: normalizedEmail,
         password: data.password,
       });
 
       if (error) {
-        throw new Error("Mauvais mot de passe.");
+        // Supabase renvoie la même erreur pour une adresse inconnue et un
+        // mauvais mot de passe : on couvre les deux, et on oriente vers le
+        // lien de connexion, seule voie pour les espaces sans mot de passe.
+        throw new Error(
+          "Adresse email ou mot de passe incorrect. Si votre espace a été créé depuis le formulaire de demande, vous n'avez pas de mot de passe : demandez un lien de connexion ci-dessous."
+        );
       }
 
       if (!authData.user) {
@@ -154,7 +161,7 @@ function LoginForm() {
               email: authData.user.email,
               first_name: "",
               last_name: "",
-              role: "client",
+              role: roleFromMetadata(authData.user.user_metadata),
             },
           ])
           .select()
@@ -213,6 +220,15 @@ function LoginForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {etatLien && (
+            <div className="mb-4 rounded-md border border-sauge/50 bg-sauge-clair/30 p-4">
+              <p className="text-sm text-sauge-fonce">
+                {etatLien === "expire"
+                  ? "Ce lien de connexion a expiré ou a déjà servi. Indiquez votre adresse ci-dessous pour en recevoir un nouveau."
+                  : "Ce lien de connexion n'est pas valide. Indiquez votre adresse ci-dessous pour en recevoir un nouveau."}
+              </p>
+            </div>
+          )}
           {showEmailPending && (
             <div className="mb-4 rounded-md border border-sauge/50 bg-sauge-clair/30 p-4">
               <p className="text-sm text-sauge-fonce">
@@ -277,6 +293,11 @@ function LoginForm() {
                   Vous avez créé votre espace depuis le formulaire de demande et vous
                   n&apos;avez pas de mot de passe ?
                 </p>
+                {messageLien && (
+                  <p className="mt-3 text-sm text-gris-moyen border-l-2 border-sauge-clair pl-4">
+                    {messageLien}
+                  </p>
+                )}
                 <button
                   type="button"
                   onClick={envoyerLien}

@@ -379,7 +379,7 @@ class EmailTemplateService {
   /**
    * Escape HTML to prevent XSS
    */
-  private escapeHtml(text: string): string {
+  public escapeHtml(text: string): string {
     const map: Record<string, string> = {
       '&': '&amp;',
       '<': '&lt;',
@@ -780,6 +780,73 @@ class NotificationService {
     }
 
     return clientResult;
+  }
+
+  /**
+   * Envoie le lien de connexion à l'espace de suivi.
+   *
+   * Ce lien est généré côté serveur par l'API admin de Supabase puis expédié
+   * par Brevo, et non par le mailer intégré de Supabase : celui-ci est plafonné
+   * à quelques envois par heure, ce qui faisait silencieusement disparaître la
+   * plupart des liens.
+   */
+  public async sendEspaceLink(
+    email: string,
+    prenom: string,
+    lien: string,
+    { premiereConnexion }: { premiereConnexion: boolean }
+  ): Promise<EmailSendResult> {
+    const subject = premiereConnexion
+      ? 'Votre espace de suivi Seconde'
+      : 'Votre lien de connexion Seconde';
+
+    const intro = premiereConnexion
+      ? `<p>Votre demande est bien enregistrée. Votre espace de suivi est prêt : un clic sur le bouton ci-dessous vous y connecte, sans mot de passe à créer.</p>`
+      : `<p>Voici votre lien de connexion. Un clic suffit pour accéder à votre espace, sans mot de passe.</p>`;
+
+    const content = `
+      <h2>Bonjour ${this.templateService.escapeHtml(prenom)},</h2>
+      ${intro}
+      <p style="text-align: center; margin: 28px 0;">
+        <a href="${lien}" class="button">Accéder à mon espace</a>
+      </p>
+      <p>Depuis votre espace, vous suivez l'avancement de votre demande et retrouvez le détail de votre estimation.</p>
+      <p style="color: #6b7280; font-size: 14px;">Ce lien est valable une heure et ne fonctionne qu'une seule fois. Passé ce délai, demandez-en un nouveau depuis la page de connexion.</p>
+      <p style="color: #6b7280; font-size: 14px;">Si le bouton ne fonctionne pas, copiez cette adresse dans votre navigateur :<br>
+        <span style="word-break: break-all;">${this.templateService.escapeHtml(lien)}</span>
+      </p>
+    `;
+
+    const html = this.templateService.generateBaseTemplate(content, subject);
+    return this.emailService.sendEmailWithFallback(email, subject, html);
+  }
+
+  /**
+   * Confirmation d'inscription vendeuse, expédiée par Brevo plutôt que par le
+   * mailer de Supabase (voir /api/auth/inscription).
+   */
+  public async sendConfirmationInscription(
+    email: string,
+    prenom: string,
+    lien: string
+  ): Promise<EmailSendResult> {
+    const subject = 'Confirmez votre compte vendeuse Seconde';
+
+    const content = `
+      <h2>Bienvenue ${this.templateService.escapeHtml(prenom)},</h2>
+      <p>Votre compte vendeuse est presque prêt. Il ne reste qu'à confirmer votre adresse e-mail.</p>
+      <p style="text-align: center; margin: 28px 0;">
+        <a href="${lien}" class="button">Confirmer mon compte</a>
+      </p>
+      <p>Vous pourrez ensuite compléter votre profil et recevoir les demandes des clientes.</p>
+      <p style="color: #6b7280; font-size: 14px;">Si le bouton ne fonctionne pas, copiez cette adresse dans votre navigateur :<br>
+        <span style="word-break: break-all;">${this.templateService.escapeHtml(lien)}</span>
+      </p>
+      <p style="color: #6b7280; font-size: 14px;">Vous n'êtes pas à l'origine de cette inscription ? Ignorez simplement ce message.</p>
+    `;
+
+    const html = this.templateService.generateBaseTemplate(content, subject);
+    return this.emailService.sendEmailWithFallback(email, subject, html);
   }
 }
 
