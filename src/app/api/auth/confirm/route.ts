@@ -1,5 +1,5 @@
 // Point d'arrivée des liens de connexion que nous expédions nous-mêmes par
-// Brevo (voir /api/auth/espace).
+// Brevo (voir /api/auth/espace et /api/auth/inscription).
 //
 // Le lien porte un token_hash plutôt qu'un code PKCE : c'est le seul format
 // qu'un serveur peut valider. Les liens « implicites » de Supabase déposent
@@ -36,6 +36,10 @@ export async function GET(request: Request) {
     );
   }
 
-  const destination = await resolvePostSignInDestination(supabase);
+  // Une confirmation d'inscription ne connecte pas : la personne se connecte
+  // ensuite avec le mot de passe qu'elle a choisi.
+  const destination = await resolvePostSignInDestination(supabase, {
+    flowSignup: type === "signup",
+  });
   return NextResponse.redirect(new URL(destination, requestUrl.origin).toString());
 }

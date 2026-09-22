@@ -1,4 +1,4 @@
-// Inscription vendeuse : création du compte et envoi du mail de confirmation.
+// Inscription : création du compte et envoi du mail de confirmation.
 //
 // Même raison que /api/auth/espace : le mailer intégré de Supabase plafonne à
 // deux envois par heure et renvoyait des « 429 » sur /signup. Ici, l'API admin
@@ -24,6 +24,7 @@ interface CorpsRequete {
   password?: unknown;
   prenom?: unknown;
   nom?: unknown;
+  role?: unknown;
 }
 
 export async function POST(request: Request) {
@@ -40,6 +41,10 @@ export async function POST(request: Request) {
   const prenom =
     typeof corps.prenom === "string" ? capitalizeName(corps.prenom.trim()) : "";
   const nom = typeof corps.nom === "string" ? capitalizeName(corps.nom.trim()) : "";
+  // Le rôle est choisi explicitement à l'inscription. Toute autre valeur que
+  // « seller » vaut cliente : on ne se fie pas à ce que poste le navigateur
+  // pour accorder des droits vendeuse par accident.
+  const role = corps.role === "seller" ? "seller" : "client";
 
   if (!EMAIL_REGEX.test(email)) {
     return NextResponse.json({ statut: "email_invalide" }, { status: 400 });
@@ -70,7 +75,7 @@ export async function POST(request: Request) {
       data: {
         first_name: prenom,
         last_name: nom,
-        role: "seller",
+        role,
       },
     },
   });
@@ -98,7 +103,9 @@ export async function POST(request: Request) {
     hashedToken
   )}&type=signup`;
 
-  const envoi = await notificationService.sendConfirmationInscription(email, prenom, lien);
+  const envoi = await notificationService.sendConfirmationInscription(email, prenom, lien, {
+    vendeuse: role === "seller",
+  });
 
   if (!envoi.success) {
     console.error(

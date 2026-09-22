@@ -3,11 +3,12 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireSession } from "@/lib/auth/session";
+import { dashboardPathForRole } from "@/lib/profile";
 import { noIndexMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = noIndexMetadata("Tableau de bord");
 
 export default async function DashboardPage() {
   const { profile } = await requireSession();
-  redirect(profile.role === "seller" ? "/dashboard/seller" : "/dashboard/client");
+  redirect(dashboardPathForRole(profile.role));
 }

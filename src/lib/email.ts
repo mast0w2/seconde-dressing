@@ -822,23 +822,30 @@ class NotificationService {
   }
 
   /**
-   * Confirmation d'inscription vendeuse, expédiée par Brevo plutôt que par le
-   * mailer de Supabase (voir /api/auth/inscription).
+   * Confirmation d'inscription, expédiée par Brevo plutôt que par le mailer
+   * de Supabase (voir /api/auth/inscription).
    */
   public async sendConfirmationInscription(
     email: string,
     prenom: string,
-    lien: string
+    lien: string,
+    { vendeuse }: { vendeuse: boolean }
   ): Promise<EmailSendResult> {
-    const subject = 'Confirmez votre compte vendeuse Seconde';
+    const subject = vendeuse
+      ? 'Confirmez votre compte vendeuse Seconde'
+      : 'Confirmez votre compte Seconde';
+
+    const suite = vendeuse
+      ? "Vous pourrez ensuite compléter votre profil et recevoir les demandes des clientes."
+      : "Vous pourrez ensuite suivre vos demandes depuis votre espace.";
 
     const content = `
       <h2>Bienvenue ${this.templateService.escapeHtml(prenom)},</h2>
-      <p>Votre compte vendeuse est presque prêt. Il ne reste qu'à confirmer votre adresse e-mail.</p>
+      <p>Votre compte est presque prêt. Il ne reste qu'à confirmer votre adresse e-mail.</p>
       <p style="text-align: center; margin: 28px 0;">
         <a href="${lien}" class="button">Confirmer mon compte</a>
       </p>
-      <p>Vous pourrez ensuite compléter votre profil et recevoir les demandes des clientes.</p>
+      <p>${suite}</p>
       <p style="color: #6b7280; font-size: 14px;">Si le bouton ne fonctionne pas, copiez cette adresse dans votre navigateur :<br>
         <span style="word-break: break-all;">${this.templateService.escapeHtml(lien)}</span>
       </p>

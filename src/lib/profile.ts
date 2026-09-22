@@ -1,7 +1,7 @@
 // src/lib/profile.ts
 // Shared helpers to determine whether a profile has all mandatory fields filled.
 
-import type { Profile } from "@/types/database";
+import type { Profile, Role } from "@/types/database";
 
 export interface ProfileCompletenessResult {
   isComplete: boolean;
@@ -36,4 +36,9 @@ export function isProfileComplete(
   profile: Partial<Profile> | null | undefined
 ): boolean {
   return getProfileMissingFields(profile).length === 0;
+}
+
+/** Single source of truth for "which dashboard does this role land on". */
+export function dashboardPathForRole(role: Role): string {
+  return role === "seller" ? "/dashboard/seller" : "/dashboard/client";
 }

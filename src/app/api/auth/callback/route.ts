@@ -1,6 +1,6 @@
 // Point d'arrivée des liens générés par Supabase lui-même (flux PKCE :
 // réinitialisation de mot de passe, confirmation d'inscription).
-// Les liens de l'espace de suivi, eux, passent par /api/auth/confirm.
+// Les liens que nous expédions par Brevo passent par /api/auth/confirm.
 
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -24,6 +24,8 @@ export async function GET(request: Request) {
     );
   }
 
-  const destination = await resolvePostSignInDestination(supabase);
+  const destination = await resolvePostSignInDestination(supabase, {
+    flowSignup: requestUrl.searchParams.get("flow") === "signup",
+  });
   return NextResponse.redirect(new URL(destination, requestUrl.origin).toString());
 }
