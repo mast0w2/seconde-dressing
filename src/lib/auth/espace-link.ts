@@ -46,6 +46,8 @@ async function replierSurSupabase(demande: DemandeLien): Promise<ResultatLien> {
             phone: demande.telephone ?? null,
             street_address: demande.adresse ?? null,
             role: "client",
+            // Same flag as the server route: no password on this account.
+            password_set: false,
           }
         : undefined,
     },

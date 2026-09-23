@@ -83,6 +83,9 @@ export default function ResetPasswordPage() {
     try {
       const { data: updated, error: updateError } = await supabase.auth.updateUser({
         password: data.password,
+        // The moment the account really gains a password. Without this the
+        // login page would keep offering to create the account forever.
+        data: { password_set: true },
       });
 
       if (updateError) throw updateError;

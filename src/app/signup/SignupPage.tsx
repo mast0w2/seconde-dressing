@@ -92,6 +92,8 @@ function SignupForm() {
           first_name: capitalizeName(data.prenom),
           last_name: capitalizeName(data.nom),
           role: roleChoisi,
+          // Same flag as the server route: this account has a password.
+          password_set: true,
         },
       },
     });

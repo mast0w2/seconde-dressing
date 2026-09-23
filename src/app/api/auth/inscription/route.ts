@@ -76,6 +76,8 @@ export async function POST(request: Request) {
         first_name: prenom,
         last_name: nom,
         role,
+        // A password is chosen right here, so the login page must ask for it.
+        password_set: true,
       },
     },
   });
