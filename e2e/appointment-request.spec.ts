@@ -9,7 +9,7 @@ test.describe('Appointment Request Flow', () => {
     await page.goto('/appointment-request');
 
     await expect(page).toHaveURL(/\/login\?redirect=%2Fappointment-request/);
-    await expect(page.getByRole('heading', { name: 'Se connecter' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: "S'authentifier" })).toBeVisible();
   });
 
   test('should not render the protected form for visitors', async ({ page }) => {

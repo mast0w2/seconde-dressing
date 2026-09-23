@@ -153,6 +153,10 @@ export async function POST(request: Request) {
         phone: telephone || null,
         street_address: adresse || null,
         role: "client",
+        // No password here: the login page reads this flag to know it must
+        // offer account creation rather than a password field. Nothing in
+        // auth.users records it (see migration 0014).
+        password_set: false,
       },
     });
 
