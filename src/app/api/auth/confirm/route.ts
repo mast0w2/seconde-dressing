@@ -9,7 +9,7 @@
 import { NextResponse } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { resolvePostSignInDestination } from "@/lib/auth/post-signin";
+import { ensureProfile, resolvePostSignInDestination } from "@/lib/auth/post-signin";
 
 const TYPES_ACCEPTES: EmailOtpType[] = ["magiclink", "email", "signup", "invite", "recovery"];
 
@@ -56,6 +56,12 @@ export async function GET(request: Request) {
   // /reset-password does. Sending this person to the dashboard would leave
   // them without the password they came to create.
   if (type === "recovery") {
+    // The profile still has to be created here. For an account born from the
+    // appointment request form, this link is often the very first arrival,
+    // and /reset-password does not create anything: skipping this left people
+    // signed in with no profile row, which requireSession() answers by
+    // redirecting them to /signup.
+    await ensureProfile(supabase);
     return NextResponse.redirect(new URL("/reset-password", requestUrl.origin).toString());
   }
 

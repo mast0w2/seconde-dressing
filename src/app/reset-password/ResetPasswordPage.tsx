@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/components/ui/use-toast";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { isProfileComplete, dashboardPathForRole } from "@/lib/profile";
+import { roleFromMetadata } from "@/lib/auth/role";
 
 const formSchema = z
   .object({
@@ -94,11 +95,34 @@ export default function ResetPasswordPage() {
       let destination = "/profile?incomplete=1";
 
       if (user) {
-        const { data: profile } = await supabase
+        let { data: profile } = await supabase
           .from("profiles")
           .select("*")
           .eq("id", user.id)
           .maybeSingle();
+
+        // /api/auth/confirm creates the profile before sending anyone here,
+        // but the /forgot-password link never passes through it: it drops its
+        // tokens straight into this page. Without this net, such an account
+        // would end up signed in with no profile, and requireSession() would
+        // bounce it to /signup from its own dashboard.
+        if (!profile) {
+          const meta = (user.user_metadata ?? {}) as Record<string, string | undefined>;
+          const { data: created } = await supabase
+            .from("profiles")
+            .insert({
+              id: user.id,
+              email: user.email,
+              first_name: meta.first_name ?? "",
+              last_name: meta.last_name ?? "",
+              phone: meta.phone ?? null,
+              street_address: meta.street_address ?? null,
+              role: roleFromMetadata(user.user_metadata),
+            })
+            .select()
+            .maybeSingle();
+          profile = created;
+        }
 
         // Same completeness rule as everywhere else, so we do not send anyone
         // to a dashboard that would bounce straight back to /profile.

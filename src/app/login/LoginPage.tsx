@@ -43,7 +43,7 @@ type PasswordValues = z.infer<typeof passwordSchema>;
  * There is no degraded mode. When the server cannot tell which case we are in,
  * we stay on step 1 and say so, rather than quietly showing a password field
  * to someone who may not have a password at all. That makes the page depend on
- * migration 0012 and on SUPABASE_SERVICE_ROLE_KEY: both must be in place
+ * migration 0014 and on SUPABASE_SERVICE_ROLE_KEY: both must be in place
  * before this code ships.
  */
 type Step =
@@ -196,17 +196,22 @@ function LoginForm() {
         .single();
 
       // No profile row yet (e.g. table recreated by the SQL migration, or the
-      // signup profile insert failed): create a minimal one so the user can
-      // land on a dashboard, then complete their details from /profile.
+      // signup profile insert failed): create one so the user can land on a
+      // dashboard. Everything typed at signup or in the request form travels
+      // in the account metadata, so we read it from there rather than start
+      // from a blank row and make them type it all again.
       if (profileError && profileError.code === "PGRST116") {
+        const meta = (authData.user.user_metadata ?? {}) as Record<string, string | undefined>;
         const { data: newProfile, error: createError } = await supabase
           .from("profiles")
           .insert([
             {
               id: authData.user.id,
               email: authData.user.email,
-              first_name: "",
-              last_name: "",
+              first_name: meta.first_name ?? "",
+              last_name: meta.last_name ?? "",
+              phone: meta.phone ?? null,
+              street_address: meta.street_address ?? null,
               role: roleFromMetadata(authData.user.user_metadata),
             },
           ])
