@@ -13,7 +13,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/components/ui/use-toast";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { isProfileComplete, dashboardPathForRole } from "@/lib/profile";
-import { envoyerLienEspace } from "@/lib/auth/espace-link";
 import { readAccountState, sendPasswordSetupLink } from "@/lib/auth/account-state";
 import { roleFromMetadata } from "@/lib/auth/role";
 
@@ -32,20 +31,26 @@ type PasswordValues = z.infer<typeof passwordSchema>;
  * Signing in happens in two steps: the address first, then whatever that
  * address actually turns out to be.
  *
- *  - no account           → say so, and offer to create one;
- *  - space with no password → send the link that lets them choose one;
+ *  - no account             → say so, and offer to create one;
+ *  - space with no password → the account does not exist yet; a setup link
+ *                             goes out and the screen says so;
  *  - account with password  → ask for the password.
  *
- * `fallback` is the fourth case, the one where the server cannot answer
- * (service role key missing, migration 0012 not applied yet): we then go back
- * to the former screen, password and emailed link side by side, rather than
- * leaving anyone in front of a closed door.
+ * Every screen offers exactly one way forward. In particular the password
+ * screen offers nothing but the password: no emailed-link escape hatch beside
+ * it, which would only invite people to take the wrong door.
+ *
+ * There is no degraded mode. When the server cannot tell which case we are in,
+ * we stay on step 1 and say so, rather than quietly showing a password field
+ * to someone who may not have a password at all. That makes the page depend on
+ * migration 0012 and on SUPABASE_SERVICE_ROLE_KEY: both must be in place
+ * before this code ships.
  */
 type Step =
   | { name: "email" }
-  | { name: "password"; email: string; fallback: boolean }
+  | { name: "password"; email: string }
   | { name: "noAccount"; email: string }
-  | { name: "linkSent"; email: string };
+  | { name: "passwordSetup"; email: string };
 
 function LoginForm() {
   const router = useRouter();
@@ -58,7 +63,7 @@ function LoginForm() {
   const linkState = searchParams.get("lien");
   const [step, setStep] = useState<Step>({ name: "email" });
   const [loginError, setLoginError] = useState<string | null>(null);
-  const [linkMessage, setLinkMessage] = useState<string | null>(null);
+  const [setupNotice, setSetupNotice] = useState<string | null>(null);
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
@@ -97,7 +102,7 @@ function LoginForm() {
 
   const backToEmail = () => {
     setLoginError(null);
-    setLinkMessage(null);
+    setSetupNotice(null);
     passwordForm.reset({ password: "" });
     setStep({ name: "email" });
   };
@@ -105,14 +110,14 @@ function LoginForm() {
   // Step 1: what does this address correspond to?
   const onSubmitEmail = async ({ email }: EmailValues) => {
     setLoginError(null);
-    setLinkMessage(null);
+    setSetupNotice(null);
     const normalizedEmail = email.trim().toLowerCase();
 
     const state = await readAccountState(normalizedEmail);
 
     switch (state) {
       case "has_password":
-        setStep({ name: "password", email: normalizedEmail, fallback: false });
+        setStep({ name: "password", email: normalizedEmail });
         return;
 
       case "no_account":
@@ -121,20 +126,21 @@ function LoginForm() {
 
       case "no_password": {
         // The space exists — born from the request form — but nobody ever set
-        // a password on it. Send the link that lets them choose one instead of
-        // asking for one that does not exist.
+        // a password on it, so there is no account to sign into yet. Send the
+        // setup link straight away: asking for a second click here would add a
+        // button without adding a decision.
         const sent = await sendPasswordSetupLink(normalizedEmail);
         if (sent === "sent" || sent === "rate_limited") {
-          setLinkMessage(
+          setSetupNotice(
             sent === "rate_limited"
-              ? "Un lien vient déjà de partir vers cette adresse. Regardez votre boîte mail — et vos indésirables — avant d'en redemander un."
+              ? "Un email vient déjà de partir vers cette adresse. Regardez votre boîte mail — et vos indésirables — avant d'en redemander un."
               : null
           );
-          setStep({ name: "linkSent", email: normalizedEmail });
+          setStep({ name: "passwordSetup", email: normalizedEmail });
           return;
         }
         setLoginError(
-          "L'envoi du lien a échoué. Réessayez dans un instant, ou écrivez-nous si cela persiste."
+          "L'envoi de l'email a échoué. Réessayez dans un instant, ou écrivez-nous si cela persiste."
         );
         return;
       }
@@ -150,8 +156,12 @@ function LoginForm() {
         return;
 
       default:
-        // We do not know: show the complete screen rather than blocking.
-        setStep({ name: "password", email: normalizedEmail, fallback: true });
+        // We could not find out. Showing a password field here would be a
+        // guess, and a wrong one for anyone whose space has no password: we
+        // stay put and say what happened.
+        setLoginError(
+          "La vérification de votre adresse n'a pas abouti. Réessayez dans un instant, ou écrivez-nous si cela persiste."
+        );
     }
   };
 
@@ -167,14 +177,11 @@ function LoginForm() {
       });
 
       if (error) {
-        // On the nominal path we already know the account exists and has a
-        // password: the error can only be the password itself. In fallback
-        // mode Supabase conflates an unknown address with a wrong password,
-        // hence the broader wording.
+        // We already know the account exists and has a password, so the error
+        // can only be the password itself. No need for the vaguer wording
+        // Supabase would push us towards.
         throw new Error(
-          step.fallback
-            ? "Adresse email ou mot de passe incorrect. Si votre espace a été créé depuis le formulaire de demande, vous n'avez pas de mot de passe : demandez un lien de connexion ci-dessous."
-            : "Mot de passe incorrect. Réessayez, ou utilisez « Mot de passe oublié ? » pour en choisir un nouveau."
+          "Mot de passe incorrect. Réessayez, ou utilisez « Mot de passe oublié ? » pour en choisir un nouveau."
         );
       }
 
@@ -239,45 +246,7 @@ function LoginForm() {
       });
     } catch (error: any) {
       console.error("Login error:", error);
-      setLoginError(error.message || "Email ou mot de passe incorrect.");
-    }
-  };
-
-  // Fallback path only: when the server could not tell us which case we are
-  // in, this button stays the only way through for a space with no password.
-  const [sendingLink, setSendingLink] = useState(false);
-  const [linkSent, setLinkSent] = useState(false);
-
-  const sendSignInLink = async () => {
-    if (step.name !== "password") return;
-    setLoginError(null);
-    setLinkMessage(null);
-    setSendingLink(true);
-    try {
-      // creerCompte: false — from the login page we do not mint an account on
-      // the fly: a space is born with a request, not here.
-      const result = await envoyerLienEspace({ email: step.email, creerCompte: false });
-      switch (result.statut) {
-        case "envoye":
-          setLinkSent(true);
-          return;
-        case "compte_inconnu":
-          setLinkMessage(
-            "Aucun espace n'existe encore pour cette adresse. Faites votre demande de rendez-vous depuis la page d'accueil : votre espace se créera automatiquement."
-          );
-          return;
-        case "trop_de_demandes":
-          setLinkMessage(
-            "Un lien vient déjà de partir vers cette adresse. Regardez votre boîte mail — et vos indésirables — avant d'en redemander un."
-          );
-          return;
-        default:
-          setLinkMessage(
-            "L'envoi du lien a échoué. Réessayez dans un instant, ou écrivez-nous si cela persiste."
-          );
-      }
-    } finally {
-      setSendingLink(false);
+      setLoginError(error.message || "Mot de passe incorrect.");
     }
   };
 
@@ -291,7 +260,7 @@ function LoginForm() {
 
   const heading = {
     email: {
-      title: "Se connecter",
+      title: "S'authentifier",
       subtitle: "Indiquez votre adresse email pour continuer",
     },
     password: {
@@ -299,12 +268,12 @@ function LoginForm() {
       subtitle: "Dernière étape avant votre espace",
     },
     noAccount: {
-      title: "Aucun compte trouvé",
-      subtitle: "Cette adresse ne correspond à aucun compte",
+      title: "Aucun compte pour cette adresse",
+      subtitle: "Créez votre compte, ou corrigez l'adresse",
     },
-    linkSent: {
-      title: "Vérifiez votre boîte mail",
-      subtitle: "Un lien de création de compte vient de partir",
+    passwordSetup: {
+      title: "Votre compte n'est pas encore créé",
+      subtitle: "Un email vient de partir pour le finaliser",
     },
   }[step.name];
 
@@ -320,8 +289,8 @@ function LoginForm() {
             <div className="mb-4 rounded-md border border-sauge/50 bg-sauge-clair/30 p-4">
               <p className="text-sm text-sauge-fonce">
                 {linkState === "expire"
-                  ? "Ce lien de connexion a expiré ou a déjà servi. Indiquez votre adresse ci-dessous pour en recevoir un nouveau."
-                  : "Ce lien de connexion n'est pas valide. Indiquez votre adresse ci-dessous pour en recevoir un nouveau."}
+                  ? "Ce lien a expiré ou a déjà servi. Indiquez votre adresse ci-dessous pour en recevoir un nouveau."
+                  : "Ce lien n'est pas valide. Indiquez votre adresse ci-dessous pour en recevoir un nouveau."}
               </p>
             </div>
           )}
@@ -334,56 +303,44 @@ function LoginForm() {
             </div>
           )}
 
-          {/* --- Step 1: the address --- */}
+          {/* --- Step 1: the address, and nothing else. What it turns out to
+              be is what decides between signing in and signing up, so this
+              screen offers neither. --- */}
           {step.name === "email" && (
-            <>
-              <form onSubmit={emailForm.handleSubmit(onSubmitEmail)} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="votre@email.com"
-                    autoComplete="email"
-                    {...emailForm.register("email")}
-                    className={emailForm.formState.errors.email ? "border-destructive" : ""}
-                  />
-                  {emailForm.formState.errors.email && (
-                    <p className="text-sm text-destructive">
-                      {emailForm.formState.errors.email.message}
-                    </p>
-                  )}
-                </div>
-                {loginError && (
-                  <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3">
-                    <p className="text-sm text-destructive">{loginError}</p>
-                  </div>
+            <form onSubmit={emailForm.handleSubmit(onSubmitEmail)} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="votre@email.com"
+                  autoComplete="email"
+                  autoFocus
+                  {...emailForm.register("email")}
+                  className={emailForm.formState.errors.email ? "border-destructive" : ""}
+                />
+                {emailForm.formState.errors.email && (
+                  <p className="text-sm text-destructive">
+                    {emailForm.formState.errors.email.message}
+                  </p>
                 )}
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={emailForm.formState.isSubmitting}
-                >
-                  {emailForm.formState.isSubmitting ? "Vérification..." : "Continuer"}
-                </Button>
-              </form>
-
-              <div className="mt-6 border-t border-noir/10 pt-6 text-sm text-gris-moyen">
-                <p>
-                  Vous n&apos;avez pas encore de compte ?{" "}
-                  <Link
-                    href="/signup"
-                    className="text-sauge-fonce underline underline-offset-4 hover:text-noir transition-colors"
-                  >
-                    Créer un compte
-                  </Link>
-                  .
-                </p>
               </div>
-            </>
+              {loginError && (
+                <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3">
+                  <p className="text-sm text-destructive">{loginError}</p>
+                </div>
+              )}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={emailForm.formState.isSubmitting}
+              >
+                {emailForm.formState.isSubmitting ? "Vérification..." : "Continuer"}
+              </Button>
+            </form>
           )}
 
-          {/* --- Step 2a: the password --- */}
+          {/* --- Step 2a: the password, on its own --- */}
           {step.name === "password" && (
             <>
               <div className="mb-4 flex items-center justify-between gap-3 rounded-md border border-noir/10 bg-creme/60 px-3 py-2">
@@ -445,39 +402,6 @@ function LoginForm() {
                   {passwordForm.formState.isSubmitting ? "Connexion..." : "Se connecter"}
                 </Button>
               </form>
-
-              {/* Fallback only: on the nominal path a space with no password
-                  never reaches this screen. */}
-              {step.fallback && (
-                <div className="mt-6 border-t border-noir/10 pt-6">
-                  {linkSent ? (
-                    <p className="text-sm text-gris-moyen">
-                      Un lien de connexion vient de partir vers votre adresse. Cliquez dessus
-                      pour accéder à votre espace — pensez à regarder dans vos indésirables.
-                    </p>
-                  ) : (
-                    <>
-                      <p className="text-sm text-gris-moyen">
-                        Vous avez créé votre espace depuis le formulaire de demande et vous
-                        n&apos;avez pas de mot de passe ?
-                      </p>
-                      {linkMessage && (
-                        <p className="mt-3 text-sm text-gris-moyen border-l-2 border-sauge-clair pl-4">
-                          {linkMessage}
-                        </p>
-                      )}
-                      <button
-                        type="button"
-                        onClick={sendSignInLink}
-                        disabled={sendingLink}
-                        className="mt-3 w-full border border-noir px-6 py-3 text-[11px] tracking-[0.2em] uppercase text-noir hover:bg-noir hover:text-blanc transition-colors disabled:opacity-50"
-                      >
-                        {sendingLink ? "Envoi en cours…" : "Recevoir un lien de connexion"}
-                      </button>
-                    </>
-                  )}
-                </div>
-              )}
             </>
           )}
 
@@ -487,12 +411,11 @@ function LoginForm() {
               <div className="rounded-md border border-destructive/40 bg-destructive/5 p-4">
                 <p className="text-sm text-destructive">
                   L&apos;adresse <span className="font-medium">{step.email}</span> n&apos;est
-                  associée à aucun compte.
+                  liée à aucun compte.
                 </p>
               </div>
               <p className="text-sm text-gris-moyen">
-                Vous avez peut-être utilisé une autre adresse — sinon, créez votre compte, cela
-                prend une minute.
+                Soit vous avez utilisé une autre adresse, soit votre compte reste à créer.
               </p>
               <Button asChild className="w-full">
                 <Link href={`/signup?email=${encodeURIComponent(step.email)}`}>
@@ -504,25 +427,29 @@ function LoginForm() {
                 onClick={backToEmail}
                 className="w-full border border-noir px-6 py-3 text-[11px] tracking-[0.2em] uppercase text-noir hover:bg-noir hover:text-blanc transition-colors"
               >
-                Saisir une autre adresse
+                Modifier l&apos;adresse email
               </button>
             </div>
           )}
 
-          {/* --- Step 2c: space with no password --- */}
-          {step.name === "linkSent" && (
+          {/* --- Step 2c: a space exists, but no account behind it yet --- */}
+          {step.name === "passwordSetup" && (
             <div className="space-y-4">
               <div className="rounded-md border border-sauge/50 bg-sauge-clair/30 p-4">
                 <p className="text-sm text-sauge-fonce">
-                  Votre espace existe, mais aucun mot de passe ne lui est encore associé. Un
-                  lien de création de compte vient de partir vers{" "}
-                  <span className="font-medium">{step.email}</span> : cliquez dessus pour
-                  choisir votre mot de passe.
+                  L&apos;adresse <span className="font-medium">{step.email}</span> a bien un
+                  espace chez nous, mais aucun mot de passe ne lui est associé : votre compte
+                  n&apos;est donc pas encore créé.
                 </p>
               </div>
-              {linkMessage && (
+              <p className="text-sm text-gris-moyen">
+                Un email de création de compte vient de partir vers cette adresse. Le lien
+                qu&apos;il contient vous permettra de choisir votre mot de passe, et votre
+                compte sera créé.
+              </p>
+              {setupNotice && (
                 <p className="text-sm text-gris-moyen border-l-2 border-sauge-clair pl-4">
-                  {linkMessage}
+                  {setupNotice}
                 </p>
               )}
               <p className="text-sm text-gris-moyen">
@@ -533,7 +460,7 @@ function LoginForm() {
                 onClick={backToEmail}
                 className="w-full border border-noir px-6 py-3 text-[11px] tracking-[0.2em] uppercase text-noir hover:bg-noir hover:text-blanc transition-colors"
               >
-                Saisir une autre adresse
+                Modifier l&apos;adresse email
               </button>
             </div>
           )}
