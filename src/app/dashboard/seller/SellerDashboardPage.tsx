@@ -150,25 +150,34 @@ export default function SellerDashboardPage() {
 
   // Seller accepts a request: it becomes theirs and leaves the open pool for
   // everyone else. The first seller to accept wins.
+  //
+  // Pas d'UPDATE direct ici : sous RLS, la vendeuse n'a aucune politique de
+  // lecture sur une demande qui ne lui est pas encore attribuée, et Postgres
+  // exige cette visibilité pour filtrer les lignes d'un UPDATE. L'UPDATE ne
+  // touchait donc aucune ligne et PostgREST répondait 204 — succès, zéro
+  // ligne, aucune erreur remontée. `accept_request` est le pendant en
+  // écriture de la vue `requests_ouvertes` (voir 0018).
   const handleAccept = async (requestId: string) => {
     if (!user) return;
     try {
-      const { error } = await supabase
-        .from("requests")
-        .update({
-          status: "accepted",
-          seller_id: user.id,
-          confirmed_date: new Date().toISOString().slice(0, 10),
-          confirmed_time: new Date().toTimeString().slice(0, 8),
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", requestId)
-        .is("seller_id", null)
-        .eq("status", "pending");
+      const { data: claimed, error } = await supabase.rpc("accept_request", {
+        request_id: requestId,
+      });
 
       if (error) throw error;
 
       await fetchRequests(user.id);
+
+      // La fonction renvoie false quand une autre vendeuse a gagné la course.
+      if (!claimed) {
+        toast({
+          title: "Demande déjà prise",
+          description: "Une autre vendeuse l'a acceptée avant vous.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       toast({ title: "Demande acceptée", description: "Le client a été notifié." });
     } catch (error: any) {
       toast({

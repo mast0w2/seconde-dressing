@@ -1,0 +1,29 @@
+-- 0015_contact_messages_rls.sql
+-- Closes public read access on `contact_messages`.
+--
+-- FINDING: the `contact_messages_read_all` policy is `USING (true)` for the
+-- `public` role, and `anon` holds the default grants — SELECT, UPDATE and
+-- DELETE included. The anon key ships in the site's JS bundle, so anyone could
+-- read every message sent through the contact form (name, email, phone, body)
+-- with a single curl, and delete them too. This is the same hole 0009 and 0011
+-- closed on `profiles` and `requests`; this table was missed.
+--
+-- The table is empty today, so nothing has leaked yet — but the first message
+-- received would be public.
+--
+-- NO READ POLICY REPLACES IT: nothing in src/ ever reads this table. The only
+-- reference is the INSERT in /api/contact. Messages are read from the Supabase
+-- dashboard, which uses the service role key and bypasses RLS entirely.
+--
+-- THE INSERT KEEPS WORKING: /api/contact writes with the anon key
+-- (createSupabaseServerClient) and does not chain .select(), so there is no
+-- RETURNING to satisfy — unlike the `requests` case handled in 0011, no code
+-- change is needed alongside this migration. The existing
+-- `contact_messages_insert_auth` policy (WITH CHECK (true), roles anon and
+-- authenticated) is left untouched.
+-- Safe to re-run.
+
+-- ---------------------------------------------------------------------------
+-- 1. Table grants: insert only, for both roles.
+-- ---------------------------------------------------------------------------
+x²
