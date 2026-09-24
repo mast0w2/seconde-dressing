@@ -30,20 +30,11 @@ export type RequestStatus =
   | 'items_on_sale'
   | 'completed';
 
-/** Availability status */
-export type AvailabilityStatus = 'available' | 'booked';
-
 /** Contact message status */
 export type ContactMessageStatus = 'pending' | 'read' | 'resolved';
 
 /** Request type */
 export type RequestType = 'appointment' | 'estimation';
-
-/** Language preference */
-export type Language = 'FR' | 'EN';
-
-/** Theme preference */
-export type Theme = 'light' | 'dark';
 
 /** Formula slugs (priced service formulas) */
 export type FormulaSlug = 'pre-sorted' | 'on-site-sorting' | 'sorting-and-advice';
@@ -365,81 +356,6 @@ export interface ContractContent {
 }
 
 // ============================================================================
-// preferences table
-// ============================================================================
-export interface Preference {
-  id: string;
-  user_id: string;
-  language: Language;
-  timezone: string;
-  theme: Theme;
-  email_notifications: boolean;
-  sms_notifications: boolean;
-  created_at: string;
-}
-
-export interface InsertPreference {
-  id?: string;
-  user_id: string;
-  language?: Language;
-  timezone?: string;
-  theme?: Theme;
-  email_notifications?: boolean;
-  sms_notifications?: boolean;
-  created_at?: string;
-}
-
-export interface UpdatePreference {
-  id?: string;
-  user_id?: string;
-  language?: Language;
-  timezone?: string;
-  theme?: Theme;
-  email_notifications?: boolean;
-  sms_notifications?: boolean;
-  created_at?: string;
-}
-
-// ============================================================================
-// availabilityies table
-// ============================================================================
-export interface Availability {
-  id: string;
-  user_id: string;
-  date: string;
-  start_time: string;
-  end_time: string;
-  status: AvailabilityStatus;
-  is_recurring: boolean;
-  recurrence_day: string | null;
-  created_at: string;
-}
-
-export interface InsertAvailability {
-  id?: string;
-  user_id: string;
-  date: string;
-  start_time: string;
-  end_time: string;
-  status?: AvailabilityStatus;
-  is_recurring?: boolean;
-  recurrence_day?: string | null;
-  created_at?: string;
-}
-
-export interface UpdateAvailability {
-  id?: string;
-  user_id?: string;
-  date?: string;
-  start_time?: string;
-  end_time?: string;
-  status?: AvailabilityStatus;
-  is_recurring?: boolean;
-  recurrence_day?: string | null;
-  created_at?: string;
-}
-
-// ============================================================================
 // reviews table
 // ============================================================================
 export interface Review {
@@ -591,15 +507,6 @@ export interface ReviewFormData {
   comment: string;
 }
 
-/** Availability form data */
-export interface AvailabilityFormData {
-  date: string;
-  start_time: string;
-  end_time: string;
-  is_recurring: boolean;
-  recurrence_day?: string;
-}
-
 // ============================================================================
 // Utility Types
 // ============================================================================
@@ -646,15 +553,11 @@ export interface Database {
         Insert: InsertRequestContract;
         Update: UpdateRequestContract;
       };
-      preferences: {
-        Row: Preference;
-        Insert: InsertPreference;
-        Update: UpdatePreference;
-      };
-      availabilityies: {
-        Row: Availability;
-        Insert: InsertAvailability;
-        Update: UpdateAvailability;
+      request_refusals: {
+        Row: RequestRefusal;
+        Insert: InsertRequestRefusal;
+        /** Un refus ne se modifie pas : il s'insère ou se supprime. */
+        Update: Partial<InsertRequestRefusal>;
       };
       reviews: {
         Row: Review;
