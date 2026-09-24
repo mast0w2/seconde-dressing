@@ -141,6 +141,31 @@ export const env = {
   },
 } as const;
 
+/**
+ * Outside production, keeps emails away from real customers.
+ *
+ * The preprod database is a copy of production, real addresses included, and
+ * both local development and Vercel previews use it. With EMAIL_REDIRECT_TO
+ * set, every email goes to that address instead, the intended recipient
+ * shown in the subject. Production never sets it.
+ *
+ * A preview deployment without the variable sends nothing (returns null):
+ * forgetting to configure it must not mean writing to customers.
+ */
+export function routeRecipient(
+  to: string,
+  subject: string
+): { to: string; subject: string } | null {
+  const redirectTo = process.env.EMAIL_REDIRECT_TO?.trim();
+  if (redirectTo) {
+    return { to: redirectTo, subject: `[test → ${to}] ${subject}` };
+  }
+  if (process.env.VERCEL_ENV === 'preview') {
+    return null;
+  }
+  return { to, subject };
+}
+
 // ============================================================================
 // Email Service Class (Singleton pattern)
 // ============================================================================
@@ -173,6 +198,14 @@ class EmailService {
     subject: string,
     html: string
   ): Promise<EmailSendResult> {
+    const routed = routeRecipient(to, subject);
+    if (!routed) {
+      console.warn(`[EmailService] Preview deployment without EMAIL_REDIRECT_TO: email to ${to} not sent.`);
+      return { success: true, message: 'Email not sent (preview without EMAIL_REDIRECT_TO)' };
+    }
+    to = routed.to;
+    subject = routed.subject;
+
     try {
       const response = await fetch(`${this.baseUrl}/email`, {
         method: 'POST',

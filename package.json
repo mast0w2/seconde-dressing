@@ -12,7 +12,8 @@
     "test:coverage": "jest --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:all": "npm run lint && npm run test && npm run test:e2e"
+    "test:all": "npm run lint && npm run test && npm run test:e2e",
+    "db:sync-preprod": "node scripts/sync-preprod.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
