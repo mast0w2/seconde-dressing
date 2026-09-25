@@ -254,9 +254,15 @@ export function RequestItemsUploader({
   const handleRemove = async (localId: string) => {
     const item = items.find((it) => it.localId === localId);
     if (item?.savedItemId) {
-      const { error } = await supabase.from("request_items").delete().eq("id", item.savedItemId);
-      if (error) {
-        toast({ title: "Erreur", description: "Suppression impossible.", variant: "destructive" });
+      // Through the server: it also removes the files, whoever uploaded them.
+      const response = await fetch(`/api/request-items/${item.savedItemId}`, { method: "DELETE" });
+      if (!response.ok) {
+        const body = (await response.json().catch(() => ({}))) as { error?: string };
+        toast({
+          title: "Suppression impossible",
+          description: body.error || "Réessayez dans un instant.",
+          variant: "destructive",
+        });
         return;
       }
     }
@@ -565,16 +571,18 @@ function ItemCard({
           </div>
         </div>
 
-        <Button
-          type="button"
-          variant="ghost"
-          className="h-9 w-9 p-0"
-          onClick={onRemove}
-          aria-label="Retirer ce vêtement"
-          disabled={sold}
-        >
-          <X className="h-4 w-4" />
-        </Button>
+        {/* A validated or sold item is part of the record: no delete (0024). */}
+        {!sold && !item.minPriceValidatedAt && (
+          <Button
+            type="button"
+            variant="ghost"
+            className="h-9 w-9 p-0"
+            onClick={onRemove}
+            aria-label="Retirer ce vêtement"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
       </div>
 
       {item.savedItemId && (

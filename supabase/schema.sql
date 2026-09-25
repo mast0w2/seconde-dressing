@@ -1,9 +1,9 @@
 -- supabase/schema.sql
 -- Snapshot of the production schema (public tables, functions, RLS, grants,
 -- storage buckets and policies), read from the production catalog on
--- 2026-09-24, then brought up to date with migrations 0019 to 0023
+-- 2026-09-24, then brought up to date with migrations 0019 to 0024
 -- (seller approval, locked requests, server-only contracts, private storage,
--- shared rate limits).
+-- shared rate limits, deletable draft items).
 --
 -- WHY THIS FILE: supabase/migrations/ can no longer rebuild the database from
 -- scratch. Several RLS policies were created outside the repo, and migrations
@@ -666,6 +666,11 @@ CREATE POLICY request_items_update_involved ON public.request_items FOR UPDATE T
         WHERE requests.client_id = auth.uid() OR requests.seller_id = auth.uid()))
     WITH CHECK (request_id IN (SELECT requests.id FROM requests
         WHERE requests.client_id = auth.uid() OR requests.seller_id = auth.uid()));
+-- Deletable while still a draft: not validated, not sold (0024).
+CREATE POLICY request_items_delete_unlocked ON public.request_items FOR DELETE TO authenticated
+    USING (request_id IN (SELECT requests.id FROM requests
+        WHERE requests.client_id = auth.uid() OR requests.seller_id = auth.uid())
+        AND min_price_validated_at IS NULL AND sold_at IS NULL);
 
 CREATE POLICY request_refusals_read_own ON public.request_refusals FOR SELECT TO authenticated
     USING (auth.uid() = seller_id);
