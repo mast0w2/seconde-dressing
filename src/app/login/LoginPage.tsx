@@ -15,6 +15,7 @@ import { getSupabaseClient } from "@/lib/supabase/client";
 import { isProfileComplete, dashboardPathForRole } from "@/lib/profile";
 import { readAccountState, sendPasswordSetupLink } from "@/lib/auth/account-state";
 import { roleFromMetadata } from "@/lib/auth/role";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 
 const emailSchema = z.object({
   email: z.string().email("Adresse email invalide"),
@@ -57,7 +58,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const supabase = getSupabaseClient();
-  const redirectTarget = searchParams.get("redirect");
+  const redirectTarget = safeRedirectPath(searchParams.get("redirect"));
   const showConfirmed = searchParams.get("confirmed") === "1";
   // Set by /api/auth/confirm when the link expired or had already been used.
   const linkState = searchParams.get("lien");

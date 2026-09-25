@@ -50,7 +50,7 @@ export default function LeaveReviewPage() {
 
     setEnvoi(true);
     try {
-      const reponse = await fetch("/api/reviews", {
+      const reponse = await fetch("/api/reviews/avis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

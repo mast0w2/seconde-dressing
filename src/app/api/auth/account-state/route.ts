@@ -14,35 +14,16 @@
 
 import { NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
+import { allowRequest, clientIp } from "@/lib/rate-limit";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // This route tells the caller who has an account here. That is deliberate —
 // the flow requires it — but we do not let it sweep a whole address book:
-// a per-IP cap, held in process memory (so per instance at best: a guardrail,
-// not a guarantee).
-const WINDOW_MS = 600_000;
+// 30 lookups per IP every 10 minutes, counted in the database so every
+// server instance shares the same numbers.
+const WINDOW_SECONDS = 600;
 const MAX_PER_WINDOW = 30;
-const history = new Map<string, number[]>();
-
-function tooManyRequests(key: string): boolean {
-  const now = Date.now();
-  const calls = (history.get(key) ?? []).filter((t) => now - t < WINDOW_MS);
-
-  if (calls.length >= MAX_PER_WINDOW) {
-    history.set(key, calls);
-    return true;
-  }
-
-  calls.push(now);
-  history.set(key, calls);
-  return false;
-}
-
-function callerAddress(request: Request): string {
-  const forwarded = request.headers.get("x-forwarded-for");
-  return (forwarded?.split(",")[0] ?? "").trim() || "unknown";
-}
 
 interface AccountRow {
   account_exists: boolean | null;
@@ -71,7 +52,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ status: "unavailable" });
   }
 
-  if (tooManyRequests(callerAddress(request))) {
+  const allowed = await allowRequest({
+    key: `account-state:ip:${clientIp(request)}`,
+    max: MAX_PER_WINDOW,
+    windowSeconds: WINDOW_SECONDS,
+  });
+  if (!allowed) {
     return NextResponse.json({ status: "rate_limited" }, { status: 429 });
   }
 

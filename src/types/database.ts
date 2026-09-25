@@ -21,6 +21,12 @@ export type Json =
 /** User roles in the application */
 export type Role = 'client' | 'seller';
 
+/**
+ * Seller approval (migration 0019). A seller sees and accepts requests only
+ * once approved by an admin. NULL for clients.
+ */
+export type SellerStatus = 'pending' | 'approved' | 'rejected';
+
 /** Request status (merged appointment + estimation workflow) */
 export type RequestStatus =
   | 'pending'
@@ -51,6 +57,9 @@ export interface Profile {
   photo_url: string | null;
   street_address: string | null;
   role: Role;
+  /** Set by admins only; the database ignores or refuses any other writer. */
+  seller_status: SellerStatus | null;
+  seller_reviewed_at: string | null;
   bio: string | null;
   specialization: string | null;
   hourly_rate: number | null;

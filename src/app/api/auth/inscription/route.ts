@@ -15,6 +15,7 @@ import { NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { notificationService } from "@/lib/email";
 import { capitalizeName } from "@/lib/text";
+import { allowRequest, clientIp } from "@/lib/rate-limit";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const LONGUEUR_MOT_DE_PASSE_MIN = 6;
@@ -63,6 +64,15 @@ export async function POST(request: Request) {
       "[Auth inscription] Clé service role ou Brevo absente : inscription déléguée au mailer Supabase."
     );
     return NextResponse.json({ statut: "indisponible" });
+  }
+
+  // Each call creates an account and emails the address typed in the form.
+  const allowed = await allowRequest(
+    { key: `signup:ip:${clientIp(request)}`, max: 10, windowSeconds: 3600 },
+    { key: `signup:to:${email}`, max: 3, windowSeconds: 3600 }
+  );
+  if (!allowed) {
+    return NextResponse.json({ statut: "trop_de_demandes" }, { status: 429 });
   }
 
   // type "signup" crée le compte (non confirmé) et renvoie le jeton, sans
@@ -117,6 +127,21 @@ export async function POST(request: Request) {
       envoi.error || envoi.message
     );
     return NextResponse.json({ statut: "erreur_envoi" }, { status: 500 });
+  }
+
+  // A seller account opens nothing until an admin approves it: tell the
+  // admins there is someone to review. A failure here must not fail the
+  // signup, the account is already created.
+  if (role === "seller") {
+    const alerte = await notificationService.sendSellerSignupToAdmins({ prenom, nom, email });
+    if (!alerte.success) {
+      console.error(
+        "[Auth inscription] Alerte admin non envoyée pour",
+        email,
+        "-",
+        alerte.error || alerte.message
+      );
+    }
   }
 
   return NextResponse.json({ statut: "envoye" });

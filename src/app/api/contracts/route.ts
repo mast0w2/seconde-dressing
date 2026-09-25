@@ -7,8 +7,14 @@
 //      avant que la demande puisse passer en « Articles récupérés » (trigger
 //      requests_require_signed_contract). Idempotent : si le contrat existe
 //      déjà, il est renvoyé tel quel (les paramètres sont ignorés).
+//
+// Users have no write access to request_contracts (migration 0021): the
+// caller is checked with her own session, then the contract is written with
+// the service role. That is what guarantees its content comes from
+// buildContractContent() and nowhere else.
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { buildContractContent, CONTRACT_VERSION } from "@/lib/contract";
 import type {
   Formula,
@@ -140,6 +146,12 @@ export async function POST(request: Request) {
     unsoldItems,
   });
 
+  const admin = getSupabaseAdminClient();
+  if (!admin) {
+    console.error("[Contracts] SUPABASE_SERVICE_ROLE_KEY missing: cannot write the contract.");
+    return NextResponse.json({ error: "Configuration serveur incomplète" }, { status: 500 });
+  }
+
   const insert: InsertRequestContract = {
     request_id: requestId,
     client_id: requestRow.client_id,
@@ -148,7 +160,7 @@ export async function POST(request: Request) {
     content,
   };
 
-  const { data: created, error: insertError } = await supabase
+  const { data: created, error: insertError } = await admin
     .from("request_contracts")
     .insert([insert])
     .select("*")

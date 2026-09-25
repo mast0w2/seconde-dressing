@@ -1,4 +1,4 @@
-// src/app/api/reviews/route.ts
+// src/app/api/reviews/avis/route.ts
 //
 // Réception d'un reviews cliente. Volontairement SANS base de données : un reviews
 // n'a pas besoin d'être stocké pour être utile, et faire dépendre l'envoi de
@@ -8,6 +8,7 @@
 
 import { NextResponse } from "next/server";
 import { emailService } from "@/lib/email";
+import { allowRequest, clientIp } from "@/lib/rate-limit";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -88,6 +89,18 @@ export async function POST(request: Request) {
     }
 
     const a = validation.reviews;
+
+    const allowed = await allowRequest({
+      key: `review:ip:${clientIp(request)}`,
+      max: 5,
+      windowSeconds: 3600,
+    });
+    if (!allowed) {
+      return NextResponse.json(
+        { success: false, error: "Trop d'avis envoyés. Merci de réessayer un peu plus tard." },
+        { status: 429 }
+      );
+    }
     const message = corpsEmail(a);
 
     // On journalise TOUJOURS l'reviews, quoi qu'il arrive ensuite. C'est le filet

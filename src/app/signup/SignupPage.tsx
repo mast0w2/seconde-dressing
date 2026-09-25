@@ -34,7 +34,8 @@ const ROLE_OPTIONS: Array<{ role: Role; title: string; description: string }> = 
   {
     role: "seller",
     title: "Vendeuse",
-    description: "J'accompagne des clientes et je vends leurs pièces pour elles.",
+    description:
+      "J'accompagne des clientes et je vends leurs pièces pour elles. Chaque compte vendeuse est validé par notre équipe.",
   },
 ];
 
@@ -150,6 +151,8 @@ function SignupForm() {
         }
         case "email_deja_utilise":
           throw new Error("Un compte existe déjà avec cette adresse email.");
+        case "trop_de_demandes":
+          throw new Error("Trop de tentatives d'inscription. Réessayez dans un moment.");
         case "mot_de_passe_court":
           throw new Error("Le mot de passe doit contenir au moins 6 caractères.");
         case "erreur_envoi":
@@ -191,6 +194,12 @@ function SignupForm() {
                 vous connecter avec le mot de passe que vous venez de choisir.
               </p>
             </div>
+            {role === "seller" && (
+              <p className="text-sm text-gris-moyen">
+                Notre équipe valide ensuite chaque compte vendeuse avant de lui ouvrir
+                les demandes des clientes. Vous recevrez un e-mail dès que ce sera fait.
+              </p>
+            )}
             <p className="text-sm text-gris-moyen">
               Rien reçu au bout de quelques minutes ? Pensez à regarder dans vos
               indésirables.
