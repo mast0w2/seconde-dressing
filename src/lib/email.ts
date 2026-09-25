@@ -134,7 +134,12 @@ export const env = {
   },
   email: {
     from: EMAIL_FROM,
-    admin: process.env.CONTACT_ADMIN_EMAILS ? process.env.CONTACT_ADMIN_EMAILS.split(',').map(e => e.trim()).filter(e => e) : [],
+    // Both spellings: production was configured with CONTACT_ADMIN_EMAIL
+    // (singular), see /api/reviews/avis.
+    admin: (process.env.CONTACT_ADMIN_EMAILS || process.env.CONTACT_ADMIN_EMAIL || '')
+      .split(',')
+      .map((e) => e.trim())
+      .filter((e) => e),
   },
   app: {
     url: process.env.NEXT_PUBLIC_SITE_URL || 'https://seconde.fr',
@@ -276,6 +281,27 @@ class EmailService {
 // Template Service
 // ============================================================================
 
+/**
+ * Escapes a value before it goes into an email's HTML.
+ *
+ * Every value typed by a visitor (name, subject, message, address…) must go
+ * through this: several of these emails are sent to an address the visitor
+ * chose, from our own domain, so unescaped HTML would let anyone send
+ * branded phishing.
+ */
+export function escapeHtml(value: unknown): string {
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;',
+  };
+  return String(value ?? '').replace(/[&<>"']/g, (m) => map[m]);
+}
+
+const esc = escapeHtml;
+
 class EmailTemplateService {
   /**
    * Generate base HTML template with consistent styling
@@ -413,14 +439,7 @@ class EmailTemplateService {
    * Escape HTML to prevent XSS
    */
   public escapeHtml(text: string): string {
-    const map: Record<string, string> = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#039;',
-    };
-    return text.replace(/[&<>"']/g, (m) => map[m]);
+    return escapeHtml(text);
   }
 
   /**
@@ -460,11 +479,11 @@ class NotificationService {
     const content = `
       <h2>\u2705 Votre rendez-vous est confirmé</h2>
       <p>Bonjour,</p>
-      <p>Votre rendez-vous avec <strong>${data.sellerName}</strong> a été confirmé avec succès.</p>
+      <p>Votre rendez-vous avec <strong>${esc(data.sellerName)}</strong> a été confirmé avec succès.</p>
       
       <div class="highlight">
         <p><strong>Date:</strong> ${this.templateService.formatDate(data.date)}</p>
-        <p><strong>Heure:</strong> ${data.time}</p>
+        <p><strong>Heure:</strong> ${esc(data.time)}</p>
       </div>
       
       <p>Merci de vous présenter à l'heure convenue avec vos vêtements à vendre.</p>
@@ -489,11 +508,11 @@ class NotificationService {
     const content = `
       <h2>\ud83d\udcc5 Nouvelle demande reçue</h2>
       <p>Bonjour,</p>
-      <p>Vous avez reçu une nouvelle demande de rendez-vous de la part de <strong>${data.clientName}</strong>.</p>
+      <p>Vous avez reçu une nouvelle demande de rendez-vous de la part de <strong>${esc(data.clientName)}</strong>.</p>
       
       <div class="highlight">
         <p><strong>Date demandée:</strong> ${this.templateService.formatDate(data.date)}</p>
-        <p><strong>Heure demandée:</strong> ${data.time}</p>
+        <p><strong>Heure demandée:</strong> ${esc(data.time)}</p>
       </div>
       
       <p>Connectez-vous à votre espace personnel pour accepter ou refuser cette demande :</p>
@@ -517,8 +536,8 @@ class NotificationService {
     const subject = '\u274c Annulation de rendez-vous';
     const content = `
       <h2>\u274c Rendez-vous annulé</h2>
-      <p>Bonjour ${data.clientName || ''},</p>
-      <p>Votre rendez-vous prévu le <strong>${this.templateService.formatDate(data.date)} à ${data.time}</strong> a été annulé.</p>
+      <p>Bonjour ${esc(data.clientName)},</p>
+      <p>Votre rendez-vous prévu le <strong>${this.templateService.formatDate(data.date)} à ${esc(data.time)}</strong> a été annulé.</p>
       
       <p>Cela peut être dû à un créneau déjà pris ou à un problème de disponibilité de la vendeuse.</p>
       
@@ -544,11 +563,11 @@ class NotificationService {
     const content = `
       <h2>\u2705 Demande acceptée</h2>
       <p>Bonjour,</p>
-      <p>Votre demande de rendez-vous avec <strong>${data.sellerName}</strong> a été acceptée.</p>
+      <p>Votre demande de rendez-vous avec <strong>${esc(data.sellerName)}</strong> a été acceptée.</p>
       
       <div class="highlight">
         <p><strong>Date:</strong> ${this.templateService.formatDate(data.date)}</p>
-        <p><strong>Heure:</strong> ${data.time}</p>
+        <p><strong>Heure:</strong> ${esc(data.time)}</p>
       </div>
       
       <p>Nous vous attendons avec plaisir ! N'oubliez pas d'apporter vos vêtements à vendre.</p>
@@ -579,8 +598,8 @@ class NotificationService {
     const content = `
       <h2>\u274c Demande refusée</h2>
       <p>Bonjour,</p>
-      <p>Malheureusement, votre demande de rendez-vous avec <strong>${data.sellerName}</strong> 
-      pour le <strong>${this.templateService.formatDate(data.date)} à ${data.time}</strong> a été refusée.</p>
+      <p>Malheureusement, votre demande de rendez-vous avec <strong>${esc(data.sellerName)}</strong> 
+      pour le <strong>${this.templateService.formatDate(data.date)} à ${esc(data.time)}</strong> a été refusée.</p>
       
       <p>Cela peut être dû à un créneau déjà pris ou à un problème de disponibilité.</p>
       
@@ -606,14 +625,16 @@ class NotificationService {
     data: ContactFormData
   ): Promise<EmailSendResult> {
     const adminEmails = env.email.admin;
-    const clientSubject = `\u2705 Nous avons reçu votre message - ${data.subject}`;
+    // Fixed subject: this email goes to whatever address the visitor typed,
+    // so its subject line must not carry text of her choosing.
+    const clientSubject = '✅ Nous avons bien reçu votre message';
     const adminSubject = `\ud83d\udce7 Nouveau message de contact: ${data.subject}`;
 
     // Email to client (confirmation)
     const clientContent = `
       <h2>\u2705 Message reçu</h2>
-      <p>Bonjour ${data.name},</p>
-      <p>Nous avons bien reçu votre message concernant : <strong>${data.subject}</strong>.</p>
+      <p>Bonjour ${esc(data.name)},</p>
+      <p>Nous avons bien reçu votre message concernant : <strong>${esc(data.subject)}</strong>.</p>
       <p>Notre équipe vous répondra dans les plus brefs délais (généralement sous 24-48h).</p>
       <p>Merci de votre confiance !</p>
     `;
@@ -621,14 +642,14 @@ class NotificationService {
     // Email to admin
     const adminContent = `
       <h2>\ud83d\udce7 Nouveau message de contact</h2>
-      <p><strong>De:</strong> ${data.name} &lt;${data.email}&gt;</p>
-      <p><strong>Sujet:</strong> ${data.subject}</p>
-      <p><strong>Téléphone:</strong> ${data.phone || 'Non fourni'}</p>
+      <p><strong>De:</strong> ${esc(data.name)} &lt;${esc(data.email)}&gt;</p>
+      <p><strong>Sujet:</strong> ${esc(data.subject)}</p>
+      <p><strong>Téléphone:</strong> ${esc(data.phone || 'Non fourni')}</p>
       <p><strong>Message:</strong></p>
       <div class="highlight">
-        <p>${data.message}</p>
+        <p style="white-space: pre-wrap;">${esc(data.message)}</p>
       </div>
-      <p>Répondez directement à ${data.email} pour contacter ce client.</p>
+      <p>Répondez directement à ${esc(data.email)} pour contacter ce client.</p>
     `;
 
     const clientHtml = this.templateService.generateBaseTemplate(
@@ -699,7 +720,7 @@ class NotificationService {
       `;
 
     const content = `
-      <h2>\ud83c\udf89 Bienvenue, ${name} !</h2>
+      <h2>\ud83c\udf89 Bienvenue, ${esc(name)} !</h2>
       <p>Merci de vous être inscrit(e) sur <strong>Seconde</strong> !</p>
       <p>Nous sommes rreviews de vous compter parmi nous.</p>
       
@@ -738,7 +759,7 @@ class NotificationService {
     // Email to client (confirmation)
     const clientContent = `
       <h2>\u2705 Votre demande a été reçue</h2>
-      <p>Bonjour ${data.prenom} ${data.nom},</p>
+      <p>Bonjour ${esc(data.prenom)} ${esc(data.nom)},</p>
       <p>Nous avons bien reçu votre demande.</p>
       <p>Notre équipe vous recontactera sous 24h pour définir votre rendez-vous.</p>
       
@@ -752,22 +773,22 @@ class NotificationService {
       <h2>\ud83d\udce7 Nouvelle demande</h2>
       
       <h3>Informations du client:</h3>
-      <p><strong>Nom:</strong> ${data.nom}</p>
-      <p><strong>Prénom:</strong> ${data.prenom}</p>
-      <p><strong>Email:</strong> ${data.email}</p>
-      <p><strong>Téléphone:</strong> ${data.telephone}</p>
-      <p><strong>Adresse:</strong> ${data.adresse || 'Non renseignée'}</p>
+      <p><strong>Nom:</strong> ${esc(data.nom)}</p>
+      <p><strong>Prénom:</strong> ${esc(data.prenom)}</p>
+      <p><strong>Email:</strong> ${esc(data.email)}</p>
+      <p><strong>Téléphone:</strong> ${esc(data.telephone)}</p>
+      <p><strong>Adresse:</strong> ${esc(data.adresse || 'Non renseignée')}</p>
       <p><strong>Formule choisie:</strong> ${formulaLabel}</p>
       
       <h3>Détails de la demande:</h3>
-      <p><strong>Nombre de vêtements:</strong> ${data.nombreVetements}</p>
-      <p><strong>Valeur moyenne par vêtement:</strong> ${data.valeurMoyenne}€</p>
-      <p><strong>Marques:</strong> ${data.marques}</p>
-      <p><strong>Part cliente (${formatShare(PART_CLIENTE, { compact: true })} du prix de vente):</strong> ${data.estimation.toFixed(0)}€</p>
+      <p><strong>Nombre de vêtements:</strong> ${esc(data.nombreVetements)}</p>
+      <p><strong>Valeur moyenne par vêtement:</strong> ${esc(data.valeurMoyenne)}€</p>
+      <p><strong>Marques:</strong> ${esc(data.marques)}</p>
+      <p><strong>Part cliente (${formatShare(PART_CLIENTE, { compact: true })} du prix de vente):</strong> ${esc(Number(data.estimation).toFixed(0))}€</p>
       
       <h3>Description supplémentaire:</h3>
       <div class="highlight">
-        <p>${data.description || 'Aucune description supplémentaire'}</p>
+        <p style="white-space: pre-wrap;">${esc(data.description || 'Aucune description supplémentaire')}</p>
       </div>
       
       <p><strong>Date de la demande:</strong> ${new Date().toLocaleDateString('fr-FR', {
@@ -900,7 +921,7 @@ class NotificationService {
       : 'Confirmez votre compte Seconde';
 
     const suite = vendeuse
-      ? "Vous pourrez ensuite compléter votre profil et recevoir les demandes des clientes."
+      ? "Vous pourrez ensuite compléter votre profil. Notre équipe valide chaque compte vendeuse avant de lui ouvrir les demandes des clientes : vous recevrez un e-mail dès que ce sera fait."
       : "Vous pourrez ensuite suivre vos demandes depuis votre espace.";
 
     const content = `
@@ -916,6 +937,55 @@ class NotificationService {
       <p style="color: #6b7280; font-size: 14px;">Vous n'êtes pas à l'origine de cette inscription ? Ignorez simplement ce message.</p>
     `;
 
+    const html = this.templateService.generateBaseTemplate(content, subject);
+    return this.emailService.sendEmailWithFallback(email, subject, html);
+  }
+
+  /**
+   * Tells the admins that a seller signed up and waits for approval in /admin.
+   */
+  public async sendSellerSignupToAdmins(seller: {
+    prenom: string;
+    nom: string;
+    email: string;
+  }): Promise<EmailSendResult> {
+    const admins = env.email.admin;
+    if (admins.length === 0) {
+      return { success: false, message: 'No admin address configured (CONTACT_ADMIN_EMAILS)' };
+    }
+
+    const subject = 'Nouvelle vendeuse à valider';
+    const content = `
+      <h2>Nouvelle vendeuse à valider</h2>
+      <p><strong>${esc(seller.prenom)} ${esc(seller.nom)}</strong> (${esc(seller.email)}) vient de créer un compte vendeuse.</p>
+      <p>Son compte n'a accès à aucune demande tant qu'il n'est pas validé. Il apparaîtra dans la page d'administration dès qu'elle aura confirmé son adresse e-mail.</p>
+      <p style="text-align: center; margin: 28px 0;">
+        <a href="${EMAIL_CONFIG.siteUrl}/admin" class="button">Ouvrir l'administration</a>
+      </p>
+    `;
+    const html = this.templateService.generateBaseTemplate(content, subject);
+
+    let result: EmailSendResult = { success: false };
+    for (const admin of admins) {
+      const sent = await this.emailService.sendEmailWithFallback(admin, subject, html);
+      if (sent.success) result = sent;
+      else if (!result.success) result = sent;
+    }
+    return result;
+  }
+
+  /**
+   * Tells a seller that her account was approved.
+   */
+  public async sendSellerApproved(email: string, prenom: string): Promise<EmailSendResult> {
+    const subject = 'Votre compte vendeuse Seconde est validé';
+    const content = `
+      <h2>Bonjour ${esc(prenom)},</h2>
+      <p>Bonne nouvelle : votre compte vendeuse est validé. Les demandes des clientes vous sont désormais ouvertes depuis votre tableau de bord.</p>
+      <p style="text-align: center; margin: 28px 0;">
+        <a href="${EMAIL_CONFIG.siteUrl}/dashboard/seller" class="button">Voir les demandes</a>
+      </p>
+    `;
     const html = this.templateService.generateBaseTemplate(content, subject);
     return this.emailService.sendEmailWithFallback(email, subject, html);
   }

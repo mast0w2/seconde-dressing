@@ -13,27 +13,19 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { notificationService } from "@/lib/email";
+import { allowRequest, clientIp } from "@/lib/rate-limit";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Same guardrail as /api/auth/espace: this route sends an email to an
-// arbitrary address. Held in process memory, so per instance at best.
-const MIN_DELAY_BETWEEN_SENDS_MS = 60_000;
-const MAX_PER_HOUR = 5;
-const history = new Map<string, number[]>();
-
-function tooManyRequests(email: string): boolean {
-  const now = Date.now();
-  const sends = (history.get(email) ?? []).filter((t) => now - t < 3_600_000);
-
-  if (sends.length >= MAX_PER_HOUR) return true;
-  if (sends.length > 0 && now - sends[sends.length - 1] < MIN_DELAY_BETWEEN_SENDS_MS) {
-    return true;
-  }
-
-  sends.push(now);
-  history.set(email, sends);
-  return false;
+// arbitrary address. Counted in the database, shared by every instance.
+async function tooManyRequests(request: Request, email: string): Promise<boolean> {
+  const allowed = await allowRequest(
+    { key: `password-setup:ip:${clientIp(request)}`, max: 20, windowSeconds: 3600 },
+    { key: `password-setup:to:${email}:minute`, max: 1, windowSeconds: 60 },
+    { key: `password-setup:to:${email}:hour`, max: 5, windowSeconds: 3600 }
+  );
+  return !allowed;
 }
 
 export async function POST(request: Request) {
@@ -58,7 +50,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ status: "unavailable" });
   }
 
-  if (tooManyRequests(email)) {
+  if (await tooManyRequests(request, email)) {
     return NextResponse.json({ status: "rate_limited" }, { status: 429 });
   }
 

@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 import { NextResponse } from 'next/server';
 import { notificationService } from '@/lib/email';
+import { allowRequest, clientIp } from '@/lib/rate-limit';
 
 
 // Mock notification service when BREVO_API_KEY is not configured
@@ -132,6 +133,22 @@ export async function POST(request: Request) {
     }
 
     const contactData = validation.data!;
+
+    // Each call emails the address typed in the form: cap it per caller and
+    // per recipient.
+    const allowed = await allowRequest(
+      { key: `contact:ip:${clientIp(request)}`, max: 5, windowSeconds: 3600 },
+      { key: `contact:to:${contactData.email}`, max: 3, windowSeconds: 3600 }
+    );
+    if (!allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Trop de messages envoyés. Merci de réessayer un peu plus tard.'
+        },
+        { status: 429 }
+      );
+    }
 
     // Save to database
     const dbResult = await saveContactMessage(contactData);

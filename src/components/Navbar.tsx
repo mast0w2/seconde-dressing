@@ -27,6 +27,7 @@ export function Navbar() {
   const supabase = getSupabaseClient();
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -37,12 +38,14 @@ export function Navbar() {
       setUser(user);
 
       if (user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .single();
+        const [{ data: profile }, { data: admin }] = await Promise.all([
+          supabase.from("profiles").select("*").eq("id", user.id).single(),
+          supabase.rpc("is_admin"),
+        ]);
         setProfile(profile);
+        setIsAdmin(admin === true);
+      } else {
+        setIsAdmin(false);
       }
     };
 
@@ -156,6 +159,13 @@ export function Navbar() {
                     <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
                       <Link href="/appointment-request">
                         Demande de RDV
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  {isAdmin && (
+                    <DropdownMenuItem asChild className="focus:bg-noir/5 focus:text-noir">
+                      <Link href="/admin">
+                        Administration
                       </Link>
                     </DropdownMenuItem>
                   )}

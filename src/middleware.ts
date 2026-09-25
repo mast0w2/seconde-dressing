@@ -10,6 +10,7 @@ const PROTECTED_ROUTES = [
   '/dashboard',
   '/profile',
   '/appointment-request',
+  '/admin',
 ];
 
 export async function middleware(request: NextRequest) {
@@ -58,8 +59,10 @@ export const config = {
     '/dashboard/:path*',
     '/profile/:path*',
     '/appointment-request/:path*',
+    '/admin/:path*',
     '/dashboard',
     '/profile',
     '/appointment-request',
+    '/admin',
   ],
 };

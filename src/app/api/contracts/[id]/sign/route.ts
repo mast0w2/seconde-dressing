@@ -2,8 +2,14 @@
 // POST /api/contracts/[id]/sign { signature, signature_name }
 // Signe le contrat pour la partie correspondant à l'utilisateur connecté
 // (cliente ou vendeuse). Une signature posée ne peut pas être remplacée.
+//
+// Users have no write access to request_contracts (migration 0021): the
+// contract is read with the caller's session, which proves she is a party
+// to it, and the signature is written with the service role, in her column
+// only. The request_contracts_guard trigger refuses any other change.
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { contractRoleFor, isSignedBy } from "@/lib/contract";
 import type { RequestContract, UpdateRequestContract } from "@/types/database";
 
@@ -61,6 +67,12 @@ export async function POST(
     return NextResponse.json({ error: "Vous avez déjà signé ce contrat" }, { status: 409 });
   }
 
+  const admin = getSupabaseAdminClient();
+  if (!admin) {
+    console.error("[Contracts] SUPABASE_SERVICE_ROLE_KEY missing: cannot record the signature.");
+    return NextResponse.json({ error: "Configuration serveur incomplète" }, { status: 500 });
+  }
+
   const signedAt = new Date().toISOString();
   const update: UpdateRequestContract =
     role === "client"
@@ -69,7 +81,7 @@ export async function POST(
 
   // Le filtre sur la colonne *_signed_at évite d'écraser une signature posée
   // entre la lecture et l'écriture.
-  const { data: updated, error: updateError } = await supabase
+  const { data: updated, error: updateError } = await admin
     .from("request_contracts")
     .update(update)
     .eq("id", id)

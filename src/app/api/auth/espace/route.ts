@@ -13,30 +13,18 @@ import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { notificationService } from "@/lib/email";
 import { capitalizeName } from "@/lib/text";
+import { allowRequest, clientIp, type RateLimitRule } from "@/lib/rate-limit";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Anti-abus minimal : la route envoie un e-mail à une adresse arbitraire.
-// En mémoire du processus, donc au mieux par instance — c'est un garde-fou,
-// pas une garantie.
-const DELAI_ENTRE_ENVOIS_MS = 60_000;
-const MAX_PAR_HEURE = 5;
-const historique = new Map<string, number[]>();
-
-function tropDeDemandes(email: string): boolean {
-  const maintenant = Date.now();
-  const envois = (historique.get(email) ?? []).filter(
-    (t) => maintenant - t < 3_600_000
-  );
-
-  if (envois.length >= MAX_PAR_HEURE) return true;
-  if (envois.length > 0 && maintenant - envois[envois.length - 1] < DELAI_ENTRE_ENVOIS_MS) {
-    return true;
-  }
-
-  envois.push(maintenant);
-  historique.set(email, envois);
-  return false;
+// The route emails an arbitrary address: one link a minute and five an hour
+// per address, and a cap per caller. Counted in the database, so every
+// server instance shares the same numbers (src/lib/rate-limit.ts).
+function recipientRules(email: string): RateLimitRule[] {
+  return [
+    { key: `espace:to:${email}:minute`, max: 1, windowSeconds: 60 },
+    { key: `espace:to:${email}:hour`, max: 5, windowSeconds: 3600 },
+  ];
 }
 
 /**
@@ -124,6 +112,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ statut: "indisponible" });
   }
 
+  if (!(await allowRequest({ key: `espace:ip:${clientIp(request)}`, max: 20, windowSeconds: 3600 }))) {
+    return NextResponse.json({ statut: "trop_de_demandes" }, { status: 429 });
+  }
+
   const compte = await trouverCompte(email);
   if (compte.erreur) {
     console.error("[Auth espace] Recherche du compte impossible :", compte.erreur);
@@ -134,7 +126,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ statut: "compte_inconnu" });
   }
 
-  if (tropDeDemandes(email)) {
+  if (!(await allowRequest(...recipientRules(email)))) {
     return NextResponse.json({ statut: "trop_de_demandes" }, { status: 429 });
   }
 

@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { capitalizeName } from "@/lib/text";
 import { notificationService } from "@/lib/email";
+import { allowRequest, clientIp } from "@/lib/rate-limit";
 
 import { NextResponse } from 'next/server';
 
@@ -195,6 +196,22 @@ export async function POST(request: Request) {
     }
 
     const requestData = validation.data!;
+
+    // Each call writes a request and emails the address typed in the form:
+    // cap it per caller and per recipient.
+    const allowed = await allowRequest(
+      { key: `appointment:ip:${clientIp(request)}`, max: 5, windowSeconds: 3600 },
+      { key: `appointment:to:${requestData.email}`, max: 3, windowSeconds: 3600 }
+    );
+    if (!allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Trop de demandes envoyées. Merci de réessayer un peu plus tard.'
+        },
+        { status: 429 }
+      );
+    }
 
     // Save to database
     const dbResult = await saveAppointmentRequest(requestData);

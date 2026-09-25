@@ -29,6 +29,7 @@ import { InfoTooltip } from "@/components/ui/info-tooltip";
 import { useToast } from "@/components/ui/use-toast";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { PART_CLIENTE, formatShare } from "@/lib/pricing";
+import { signStoredFiles } from "@/lib/storage";
 import type { RequestItem } from "@/types/database";
 
 type Role = "client" | "seller";
@@ -44,6 +45,7 @@ interface RequestItemsUploaderProps {
 
 interface DraftItem {
   localId: string;
+  /** As stored in request_items: a bare path, or a full URL for older rows. */
   photoUrl: string | null;
   description: string;
   savedItemId?: string;
@@ -99,6 +101,8 @@ export function RequestItemsUploader({
   const [items, setItems] = useState<DraftItem[]>([]);
   const [loadingExisting, setLoadingExisting] = useState(true);
   const [validating, setValidating] = useState(false);
+  // Stored value -> signed URL. The buckets are private (migration 0022).
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
 
   const minPriceEditor = minPriceEditorFor(formulaSlug);
 
@@ -123,11 +127,31 @@ export function RequestItemsUploader({
     };
   }, [requestId, supabase]);
 
+  // Sign the photos and proofs seen for the first time. Each value is asked
+  // for once: a file that cannot be signed must not be retried in a loop.
+  const signingRequested = useRef(new Set<string>());
+  useEffect(() => {
+    const fresh = (values: Array<string | null>) =>
+      values.filter((v): v is string => !!v && !signingRequested.current.has(v));
+    const photos = fresh(items.map((it) => it.photoUrl));
+    const proofs = fresh(items.map((it) => it.saleProofUrl));
+    if (photos.length === 0 && proofs.length === 0) return;
+    [...photos, ...proofs].forEach((v) => signingRequested.current.add(v));
+
+    (async () => {
+      const [signedPhotos, signedProofs] = await Promise.all([
+        signStoredFiles(supabase, "request-items", photos),
+        signStoredFiles(supabase, "sale-proofs", proofs),
+      ]);
+      setSignedUrls((prev) => ({ ...prev, ...signedPhotos, ...signedProofs }));
+    })();
+  }, [items, supabase]);
+
   const persistItem = useCallback(
-    async (photoUrl: string, description: string): Promise<string | null> => {
+    async (photoPath: string, description: string): Promise<string | null> => {
       const { data, error } = await supabase
         .from("request_items")
-        .insert([{ request_id: requestId, photo_url: photoUrl, description: description || null }])
+        .insert([{ request_id: requestId, photo_url: photoPath, description: description || null }])
         .select("id")
         .single();
       if (error) {
@@ -201,13 +225,11 @@ export function RequestItemsUploader({
           );
           continue;
         }
-        const { data: pub } = supabase.storage.from("request-items").getPublicUrl(path);
-        const photoUrl = pub.publicUrl;
-        const savedId = await persistItem(photoUrl, "");
+        const savedId = await persistItem(path, "");
         setItems((prev) =>
           prev.map((it) =>
             it.localId === draft.localId
-              ? { ...it, photoUrl, uploading: false, savedItemId: savedId ?? undefined }
+              ? { ...it, photoUrl: path, uploading: false, savedItemId: savedId ?? undefined }
               : it
           )
         );
@@ -316,12 +338,11 @@ export function RequestItemsUploader({
       toast({ title: "Erreur", description: uploadError.message, variant: "destructive" });
       return;
     }
-    const { data: pub } = supabase.storage.from("sale-proofs").getPublicUrl(path);
-    const ok = await updateItem(item.savedItemId, { sale_proof_url: pub.publicUrl });
+    const ok = await updateItem(item.savedItemId, { sale_proof_url: path });
     setItems((prev) =>
       prev.map((it) =>
         it.localId === localId
-          ? { ...it, uploadingProof: false, saleProofUrl: ok ? pub.publicUrl : it.saleProofUrl }
+          ? { ...it, uploadingProof: false, saleProofUrl: ok ? path : it.saleProofUrl }
           : it
       )
     );
@@ -446,6 +467,8 @@ export function RequestItemsUploader({
             <ItemCard
               key={item.localId}
               item={item}
+              photoSrc={item.photoUrl ? signedUrls[item.photoUrl] ?? null : null}
+              proofHref={item.saleProofUrl ? signedUrls[item.saleProofUrl] ?? null : null}
               role={role}
               canEditMinPrice={minPriceEditor === role && !item.minPriceValidatedAt}
               onDescriptionChange={(v) => handleDescriptionChange(item.localId, v)}
@@ -466,6 +489,8 @@ export function RequestItemsUploader({
 
 function ItemCard({
   item,
+  photoSrc,
+  proofHref,
   role,
   canEditMinPrice,
   onDescriptionChange,
@@ -478,6 +503,9 @@ function ItemCard({
   onMarkSold,
 }: {
   item: DraftItem;
+  /** Signed URL of the photo, null while it is being signed. */
+  photoSrc: string | null;
+  proofHref: string | null;
   role: Role;
   canEditMinPrice: boolean;
   onDescriptionChange: (value: string) => void;
@@ -506,9 +534,9 @@ function ItemCard({
         <div className="h-20 w-20 shrink-0 overflow-hidden rounded-md bg-muted flex items-center justify-center">
           {item.uploading ? (
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-          ) : item.photoUrl ? (
+          ) : photoSrc ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={item.photoUrl} alt="Vêtement" className="h-full w-full object-cover" />
+            <img src={photoSrc} alt="Vêtement" className="h-full w-full object-cover" />
           ) : (
             <ImageIcon className="h-6 w-6 text-muted-foreground" />
           )}
@@ -660,7 +688,7 @@ function ItemCard({
                       Marquer vendue
                     </Button>
                   )}
-                  <ProofLink url={item.saleProofUrl} />
+                  <ProofLink url={proofHref} />
                 </div>
               </div>
             ) : sold && salePrice != null ? (
@@ -669,7 +697,7 @@ function ItemCard({
                   Vendue {euros(salePrice)} le {new Date(item.soldAt as string).toLocaleDateString("fr-FR")}
                 </div>
                 <div className="text-sauge-fonce">Votre part : {euros(salePrice * PART_CLIENTE)}</div>
-                <ProofLink url={item.saleProofUrl} />
+                <ProofLink url={proofHref} />
               </div>
             ) : (
               <div className="text-sm text-gris-moyen">Pas encore vendue</div>

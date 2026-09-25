@@ -19,6 +19,7 @@ import { AddressInput } from "@/components/ui/address-input";
 import { Badge } from "@/components/ui/badge";
 import { capitalizeName } from "@/lib/text";
 import { roleFromMetadata } from "@/lib/auth/role";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 import Link from "next/link";
 
 const profileFormSchema = z.object({
@@ -35,7 +36,7 @@ function ProfileForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const showIncompleteBanner = searchParams.get("incomplete") === "1";
-  const redirectTarget = searchParams.get("redirect");
+  const redirectTarget = safeRedirectPath(searchParams.get("redirect"));
   const { toast } = useToast();
   const supabase = getSupabaseClient();
   const [user, setUser] = useState<any>(null);
@@ -266,9 +267,10 @@ function ProfileForm() {
     try {
       setIsUploadingPhoto(true);
 
+      // One folder per user: the storage policy only lets a user write in
+      // the folder named after her own id (migration 0022).
       const fileExt = file.name.split(".").pop();
-      const fileName = `${user.id}.${fileExt}`;
-      const filePath = fileName;
+      const filePath = `${user.id}/avatar.${fileExt}`;
 
       // Upload to the 'avatars' bucket, replacing any existing photo for this user
       const { error: uploadError } = await supabase.storage

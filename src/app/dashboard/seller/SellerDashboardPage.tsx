@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,7 +10,14 @@ import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { isProfileComplete } from "@/lib/profile";
-import type { Request, Profile, Formula, RequestStatus, RequestContract } from "@/types/database";
+import type {
+  Request,
+  Profile,
+  Formula,
+  RequestStatus,
+  RequestContract,
+  SellerStatus,
+} from "@/types/database";
 import { requestStatusConfig, POST_COLLECTION_STATUS_OPTIONS } from "@/lib/request-status";
 import { ArrowLeft } from "lucide-react";
 import { RequestItemsUploader } from "@/components/RequestItemsUploader";
@@ -35,6 +43,13 @@ const REQUEST_SELECT = `*, client:client_id (id, first_name, last_name, email, p
 // relations depuis une vue. La formule est rattachée en JS, à partir de la
 // table de référence chargée en parallèle.
 const OPEN_REQUEST_SELECT = "*";
+
+// A seller works only once an admin has approved her (migration 0019). The
+// column is missing until that migration runs: treat its absence as
+// approved, the database did not gate anything back then either.
+function sellerStatusOf(profile: Profile): SellerStatus {
+  return profile.seller_status ?? "approved";
+}
 
 export default function SellerDashboardPage() {
   const router = useRouter();
@@ -129,6 +144,11 @@ export default function SellerDashboardPage() {
 
       if (!isProfileComplete(profileData)) {
         router.push("/profile?incomplete=1&redirect=/dashboard/seller");
+        return;
+      }
+
+      // Not approved yet: the database would return nothing anyway.
+      if (sellerStatusOf(profileData as Profile) !== "approved") {
         return;
       }
 
@@ -426,6 +446,11 @@ export default function SellerDashboardPage() {
 
   if (!user || !profile) return null;
 
+  const sellerStatus = sellerStatusOf(profile);
+  if (sellerStatus !== "approved") {
+    return <SellerAwaitingApproval status={sellerStatus} />;
+  }
+
   // Split requests into the three tabs.
   const newRequests: RequestWithRelations[] = [];
   const acceptedRequests: RequestWithRelations[] = [];
@@ -531,6 +556,40 @@ export default function SellerDashboardPage() {
             )}
           </TabsContent>
         </Tabs>
+      </div>
+    </div>
+  );
+}
+
+function SellerAwaitingApproval({ status }: { status: SellerStatus }) {
+  const rejected = status === "rejected";
+
+  return (
+    <div className="container py-8 max-w-3xl">
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl">
+            {rejected
+              ? "Votre compte vendeuse n’a pas été validé"
+              : "Votre compte vendeuse est en cours de validation"}
+          </h1>
+          <p className="text-gris-moyen mt-2">
+            {rejected
+              ? "Notre équipe n’a pas pu valider votre compte vendeuse. Écrivez-nous si vous souhaitez en savoir plus."
+              : "Notre équipe vérifie chaque compte vendeuse avant de lui ouvrir les demandes des clientes. Vous recevrez un e-mail dès que ce sera fait."}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          {rejected ? (
+            <Button asChild>
+              <Link href="/contact">Nous contacter</Link>
+            </Button>
+          ) : (
+            <Button asChild variant="outline">
+              <Link href="/profile">Voir mon profil</Link>
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

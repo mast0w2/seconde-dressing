@@ -1,7 +1,9 @@
 -- supabase/schema.sql
 -- Snapshot of the production schema (public tables, functions, RLS, grants,
 -- storage buckets and policies), read from the production catalog on
--- 2026-09-24.
+-- 2026-09-24, then brought up to date with migrations 0019 to 0023
+-- (seller approval, locked requests, server-only contracts, private storage,
+-- shared rate limits).
 --
 -- WHY THIS FILE: supabase/migrations/ can no longer rebuild the database from
 -- scratch. Several RLS policies were created outside the repo, and migrations
@@ -38,12 +40,28 @@ CREATE TABLE public.profiles (
     photo_url        text,
     street_address   text,
     role             text NOT NULL CHECK (role = ANY (ARRAY['client'::text, 'seller'::text])),
+    seller_status    text CHECK (seller_status IN ('pending', 'approved', 'rejected')),
+    seller_reviewed_at timestamptz,
     bio              text,
     specialization   text,
     hourly_rate      numeric(10,2),
     years_experience integer,
     created_at       timestamptz DEFAULT now(),
-    updated_at       timestamptz DEFAULT now()
+    updated_at       timestamptz DEFAULT now(),
+    CONSTRAINT profiles_seller_status_matches_role
+        CHECK ((role = 'seller') = (seller_status IS NOT NULL))
+);
+
+-- Accounts allowed to approve sellers. No policy: written from the SQL editor.
+CREATE TABLE public.admins (
+    user_id    uuid PRIMARY KEY REFERENCES auth.users (id) ON DELETE CASCADE,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- One row per rate-limited call; key is a SHA-256 hash computed by the app.
+CREATE TABLE public.rate_limit_hits (
+    key    text        NOT NULL,
+    hit_at timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE TABLE public.formulas (
@@ -165,6 +183,8 @@ CREATE INDEX idx_request_refusals_seller_id   ON public.request_refusals (seller
 CREATE INDEX idx_request_contracts_request_id ON public.request_contracts (request_id);
 CREATE INDEX idx_request_contracts_client_id  ON public.request_contracts (client_id);
 CREATE INDEX idx_request_contracts_seller_id  ON public.request_contracts (seller_id);
+CREATE INDEX idx_rate_limit_hits_key_hit_at   ON public.rate_limit_hits (key, hit_at);
+CREATE INDEX idx_rate_limit_hits_hit_at       ON public.rate_limit_hits (hit_at);
 
 -- ---------------------------------------------------------------------------
 -- Functions and triggers
@@ -318,8 +338,11 @@ BEGIN
         RAISE EXCEPTION 'Authentification requise.' USING ERRCODE = 'insufficient_privilege';
     END IF;
 
-    IF NOT EXISTS (SELECT 1 FROM profiles p WHERE p.id = uid AND p.role = 'seller') THEN
-        RAISE EXCEPTION 'Seule une vendeuse peut accepter une demande.'
+    IF NOT EXISTS (
+        SELECT 1 FROM profiles p
+         WHERE p.id = uid AND p.role = 'seller' AND p.seller_status = 'approved'
+    ) THEN
+        RAISE EXCEPTION 'Seule une vendeuse validée peut accepter une demande.'
             USING ERRCODE = 'insufficient_privilege';
     END IF;
 
@@ -340,10 +363,220 @@ $$;
 COMMENT ON FUNCTION public.accept_request(uuid) IS
     'Assigns an open request to the calling seller. SECURITY DEFINER because RLS gives sellers no read access to unassigned requests, which a plain UPDATE would need.';
 
+CREATE FUNCTION public.is_admin()
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+    SELECT EXISTS (SELECT 1 FROM public.admins a WHERE a.user_id = auth.uid());
+$$;
+
+-- A signed-in user can neither change her role nor set her own seller_status;
+-- a seller she creates always starts out pending (0019).
+CREATE FUNCTION public.profiles_guard()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+    untrusted BOOLEAN := current_user IN ('authenticated', 'anon');
+BEGIN
+    IF TG_OP = 'UPDATE' AND untrusted THEN
+        IF NEW.role IS DISTINCT FROM OLD.role THEN
+            RAISE EXCEPTION 'Le rôle d''un compte ne peut pas être modifié.'
+                USING ERRCODE = 'insufficient_privilege';
+        END IF;
+        IF NEW.seller_status IS DISTINCT FROM OLD.seller_status
+           OR NEW.seller_reviewed_at IS DISTINCT FROM OLD.seller_reviewed_at THEN
+            RAISE EXCEPTION 'La validation d''une vendeuse est réservée aux administrateurs.'
+                USING ERRCODE = 'insufficient_privilege';
+        END IF;
+    END IF;
+
+    -- A seller created by the user herself always starts out pending,
+    -- whatever the insert carried.
+    IF TG_OP = 'INSERT' AND untrusted THEN
+        NEW.seller_status      := NULL;
+        NEW.seller_reviewed_at := NULL;
+    END IF;
+
+    -- Keep seller_status consistent with the role for everyone, trusted
+    -- callers included (e.g. an admin turning a client into a seller).
+    IF NEW.role = 'seller' THEN
+        NEW.seller_status := coalesce(NEW.seller_status, 'pending');
+    ELSE
+        NEW.seller_status      := NULL;
+        NEW.seller_reviewed_at := NULL;
+    END IF;
+
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER profiles_guard BEFORE INSERT OR UPDATE ON public.profiles
+    FOR EACH ROW EXECUTE FUNCTION public.profiles_guard();
+
+-- A contract never changes once written, nor a signature once set (0021).
+CREATE FUNCTION public.request_contracts_guard()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SET search_path = public, pg_temp
+AS $$
+BEGIN
+    IF NEW.request_id IS DISTINCT FROM OLD.request_id
+       OR NEW.version IS DISTINCT FROM OLD.version
+       OR NEW.content IS DISTINCT FROM OLD.content
+       OR NEW.created_at IS DISTINCT FROM OLD.created_at THEN
+        RAISE EXCEPTION 'Un contrat généré ne peut plus être modifié.'
+            USING ERRCODE = 'check_violation';
+    END IF;
+
+    -- The parties may only be attached (NULL -> id) or detached (id -> NULL).
+    IF OLD.client_id IS NOT NULL AND NEW.client_id IS NOT NULL
+       AND NEW.client_id <> OLD.client_id THEN
+        RAISE EXCEPTION 'La cliente d''un contrat ne peut pas être changée.'
+            USING ERRCODE = 'check_violation';
+    END IF;
+    IF OLD.seller_id IS NOT NULL AND NEW.seller_id IS NOT NULL
+       AND NEW.seller_id <> OLD.seller_id THEN
+        RAISE EXCEPTION 'La vendeuse d''un contrat ne peut pas être changée.'
+            USING ERRCODE = 'check_violation';
+    END IF;
+    IF OLD.seller_id IS NULL AND NEW.seller_id IS NOT NULL THEN
+        RAISE EXCEPTION 'La vendeuse d''un contrat ne peut pas être changée.'
+            USING ERRCODE = 'check_violation';
+    END IF;
+
+    IF OLD.client_signed_at IS NOT NULL
+       AND (NEW.client_signed_at, NEW.client_signature, NEW.client_signature_name)
+           IS DISTINCT FROM (OLD.client_signed_at, OLD.client_signature, OLD.client_signature_name) THEN
+        RAISE EXCEPTION 'Une signature posée ne peut pas être modifiée.'
+            USING ERRCODE = 'check_violation';
+    END IF;
+    IF OLD.seller_signed_at IS NOT NULL
+       AND (NEW.seller_signed_at, NEW.seller_signature, NEW.seller_signature_name)
+           IS DISTINCT FROM (OLD.seller_signed_at, OLD.seller_signature, OLD.seller_signature_name) THEN
+        RAISE EXCEPTION 'Une signature posée ne peut pas être modifiée.'
+            USING ERRCODE = 'check_violation';
+    END IF;
+
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER request_contracts_guard BEFORE UPDATE ON public.request_contracts
+    FOR EACH ROW EXECUTE FUNCTION public.request_contracts_guard();
+
+CREATE FUNCTION public.admin_list_sellers()
+RETURNS TABLE (
+    id                 UUID,
+    first_name         TEXT,
+    last_name          TEXT,
+    email              TEXT,
+    phone              TEXT,
+    street_address     TEXT,
+    bio                TEXT,
+    seller_status      TEXT,
+    created_at         TIMESTAMPTZ,
+    seller_reviewed_at TIMESTAMPTZ
+)
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+BEGIN
+    IF NOT public.is_admin() THEN
+        RAISE EXCEPTION 'Réservé aux administrateurs.' USING ERRCODE = 'insufficient_privilege';
+    END IF;
+
+    RETURN QUERY
+    SELECT p.id, p.first_name, p.last_name, p.email, p.phone, p.street_address,
+           p.bio, p.seller_status, p.created_at, p.seller_reviewed_at
+      FROM profiles p
+     WHERE p.role = 'seller'
+     ORDER BY (p.seller_status = 'pending') DESC, p.created_at DESC;
+END;
+$$;
+
+-- Returns the seller's email and first name, so the caller can notify her.
+CREATE FUNCTION public.admin_set_seller_status(target_id UUID, new_status TEXT)
+RETURNS TABLE (email TEXT, first_name TEXT, seller_status TEXT)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+BEGIN
+    IF NOT public.is_admin() THEN
+        RAISE EXCEPTION 'Réservé aux administrateurs.' USING ERRCODE = 'insufficient_privilege';
+    END IF;
+
+    IF new_status NOT IN ('pending', 'approved', 'rejected') THEN
+        RAISE EXCEPTION 'Statut inconnu : %', new_status USING ERRCODE = 'check_violation';
+    END IF;
+
+    RETURN QUERY
+    WITH updated AS (
+        UPDATE profiles p
+           SET seller_status      = new_status,
+               seller_reviewed_at = now()
+         WHERE p.id = target_id
+           AND p.role = 'seller'
+        RETURNING p.email, p.first_name, p.seller_status
+    )
+    SELECT u.email, u.first_name, u.seller_status FROM updated u;
+END;
+$$;
+
+-- Shared rate limiting for the server routes (0023).
+CREATE FUNCTION public.rate_limit_hit(
+    bucket_key     TEXT,
+    max_hits       INTEGER,
+    window_seconds INTEGER
+)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+    recent INTEGER;
+BEGIN
+    -- Serialises concurrent calls on the same key, so two simultaneous
+    -- requests cannot both slip under the limit.
+    PERFORM pg_advisory_xact_lock(hashtext(bucket_key));
+
+    DELETE FROM rate_limit_hits WHERE hit_at < now() - interval '1 day';
+
+    SELECT count(*) INTO recent
+      FROM rate_limit_hits
+     WHERE key = bucket_key
+       AND hit_at > now() - make_interval(secs => window_seconds);
+
+    IF recent >= max_hits THEN
+        RETURN false;
+    END IF;
+
+    INSERT INTO rate_limit_hits (key) VALUES (bucket_key);
+    RETURN true;
+END;
+$$;
+
 REVOKE ALL ON FUNCTION public.account_password_state(text) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.account_password_state(text) TO service_role;
 REVOKE ALL ON FUNCTION public.attach_anonymous_requests() FROM PUBLIC;
-REVOKE ALL ON FUNCTION public.accept_request(uuid) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.accept_request(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.accept_request(uuid) TO authenticated;
+REVOKE ALL ON FUNCTION public.is_admin() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.is_admin() TO authenticated;
+REVOKE ALL ON FUNCTION public.admin_list_sellers() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.admin_list_sellers() TO authenticated;
+REVOKE ALL ON FUNCTION public.admin_set_seller_status(uuid, text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.admin_set_seller_status(uuid, text) TO authenticated;
+REVOKE ALL ON FUNCTION public.rate_limit_hit(text, integer, integer) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.rate_limit_hit(text, integer, integer) TO service_role;
 
 -- ---------------------------------------------------------------------------
 -- View: open requests for sellers, without contact details
@@ -355,17 +588,31 @@ SELECT r.id, r.created_at, r.updated_at, r.status, r.request_type, r.address,
   FROM public.requests r
  WHERE r.status = 'pending'
    AND r.seller_id IS NULL
-   AND EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = auth.uid() AND p.role = 'seller');
+   AND EXISTS (
+       SELECT 1 FROM public.profiles p
+        WHERE p.id = auth.uid() AND p.role = 'seller' AND p.seller_status = 'approved'
+   );
 
 REVOKE ALL ON public.requests_ouvertes FROM anon;
 
 -- ---------------------------------------------------------------------------
 -- Table grants that differ from Supabase defaults
 -- ---------------------------------------------------------------------------
+-- requests: the public form writes through the service role; a signed-in
+-- user may only change `status` (and updated_at), as the assigned seller (0020).
 REVOKE ALL ON public.requests FROM anon;
-GRANT INSERT ON public.requests TO anon;
-GRANT SELECT (id) ON public.requests TO anon;
-REVOKE DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.requests FROM authenticated;
+REVOKE UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.requests FROM authenticated;
+GRANT UPDATE (status, updated_at) ON public.requests TO authenticated;
+
+-- request_contracts: read-only for users, written by the server (0021).
+REVOKE ALL ON public.request_contracts FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.request_contracts FROM authenticated;
+
+-- reviews: unused by the site since 0020 (reviews live in src/data/reviews.ts).
+REVOKE ALL ON public.reviews FROM anon, authenticated;
+
+REVOKE ALL ON public.admins FROM anon, authenticated;
+REVOKE ALL ON public.rate_limit_hits FROM anon, authenticated;
 
 REVOKE ALL ON public.contact_messages FROM anon, authenticated;
 GRANT INSERT ON public.contact_messages TO anon, authenticated;
@@ -381,6 +628,8 @@ ALTER TABLE public.request_refusals  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.request_contracts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reviews           ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.contact_messages  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.admins            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.rate_limit_hits   ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY profiles_read_own_or_related ON public.profiles FOR SELECT TO authenticated
     USING (id = auth.uid() OR EXISTS (
@@ -399,13 +648,12 @@ CREATE POLICY requests_read_own_as_client ON public.requests FOR SELECT TO authe
     USING (auth.uid() = client_id);
 CREATE POLICY requests_read_own_as_seller ON public.requests FOR SELECT TO authenticated
     USING (auth.uid() = seller_id);
-CREATE POLICY requests_insert ON public.requests FOR INSERT TO public
-    WITH CHECK (auth.uid() = client_id OR client_id IS NULL);
-CREATE POLICY requests_update_as_client ON public.requests FOR UPDATE TO authenticated
-    USING (auth.uid() = client_id) WITH CHECK (auth.uid() = client_id);
-CREATE POLICY requests_update_as_seller ON public.requests FOR UPDATE TO authenticated
-    USING (auth.uid() = seller_id OR status = 'pending'::request_status)
-    WITH CHECK (auth.uid() = seller_id OR status = 'pending'::request_status);
+CREATE POLICY requests_insert_own_pending ON public.requests FOR INSERT TO authenticated
+    WITH CHECK (client_id = auth.uid() AND seller_id IS NULL AND status = 'pending'
+                AND confirmed_date IS NULL AND confirmed_time IS NULL);
+CREATE POLICY requests_update_status_as_seller ON public.requests FOR UPDATE TO authenticated
+    USING (seller_id = auth.uid())
+    WITH CHECK (seller_id = auth.uid() AND status <> 'pending');
 
 CREATE POLICY request_items_read_involved ON public.request_items FOR SELECT TO authenticated
     USING (request_id IN (SELECT requests.id FROM requests
@@ -430,18 +678,6 @@ CREATE POLICY request_refusals_update_own ON public.request_refusals FOR UPDATE 
 
 CREATE POLICY request_contracts_read_involved ON public.request_contracts FOR SELECT TO authenticated
     USING (auth.uid() = client_id OR auth.uid() = seller_id);
-CREATE POLICY request_contracts_insert_seller ON public.request_contracts FOR INSERT TO authenticated
-    WITH CHECK (auth.uid() = seller_id);
-CREATE POLICY request_contracts_update_involved ON public.request_contracts FOR UPDATE TO authenticated
-    USING (auth.uid() = client_id OR auth.uid() = seller_id)
-    WITH CHECK (auth.uid() = client_id OR auth.uid() = seller_id);
-
-CREATE POLICY reviews_read_all ON public.reviews FOR SELECT TO public USING (true);
-CREATE POLICY reviews_insert_own ON public.reviews FOR INSERT TO authenticated
-    WITH CHECK (auth.uid() = client_id OR auth.uid() = seller_id);
-CREATE POLICY reviews_update_own ON public.reviews FOR UPDATE TO authenticated
-    USING (auth.uid() = client_id OR auth.uid() = seller_id)
-    WITH CHECK (auth.uid() = client_id OR auth.uid() = seller_id);
 
 CREATE POLICY contact_messages_insert_auth ON public.contact_messages FOR INSERT TO anon, authenticated
     WITH CHECK (true);
@@ -458,31 +694,49 @@ INSERT INTO public.formulas (id, slug, label, price, description) VALUES
 -- ---------------------------------------------------------------------------
 -- Storage buckets and policies
 -- ---------------------------------------------------------------------------
-INSERT INTO storage.buckets (id, name, public, file_size_limit) VALUES
-    ('avatars',       'avatars',       true, 20971520),
-    ('request-items', 'request-items', true, NULL),
-    ('sale-proofs',   'sale-proofs',   true, NULL);
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types) VALUES
+    ('avatars',       'avatars',       true,  5242880,
+        ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif']),
+    ('request-items', 'request-items', false, 10485760,
+        ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif']),
+    ('sale-proofs',   'sale-proofs',   false, 10485760,
+        ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'application/pdf']);
 
-CREATE POLICY "Authenticated users can upload avatars" ON storage.objects FOR INSERT TO authenticated
-    WITH CHECK (bucket_id = 'avatars');
+-- avatars: public URLs, but no listing; each user writes in her own folder.
+CREATE POLICY "Users can read their own avatars" ON storage.objects FOR SELECT TO authenticated
+    USING (bucket_id = 'avatars' AND owner = auth.uid());
+CREATE POLICY "Users can upload their own avatar" ON storage.objects FOR INSERT TO authenticated
+    WITH CHECK (bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text);
 CREATE POLICY "Authenticated users can update avatars" ON storage.objects FOR UPDATE TO authenticated
     USING (bucket_id = 'avatars' AND owner = auth.uid())
     WITH CHECK (bucket_id = 'avatars' AND owner = auth.uid());
 CREATE POLICY "Authenticated users can delete avatars" ON storage.objects FOR DELETE TO authenticated
     USING (bucket_id = 'avatars' AND owner = auth.uid());
-CREATE POLICY "Public can read avatars" ON storage.objects FOR SELECT TO public
-    USING (bucket_id = 'avatars');
 
-CREATE POLICY "Authenticated users can upload request items" ON storage.objects FOR INSERT TO authenticated
-    WITH CHECK (bucket_id = 'request-items');
-CREATE POLICY "Public can read request items" ON storage.objects FOR SELECT TO public
-    USING (bucket_id = 'request-items');
+-- request-items, sale-proofs: private, files under {request_id}/, readable by
+-- the two parties of that request through signed URLs.
+CREATE POLICY "Request parties can read request items" ON storage.objects FOR SELECT TO authenticated
+    USING (bucket_id = 'request-items' AND EXISTS (
+        SELECT 1 FROM public.requests r
+         WHERE r.id::text = (storage.foldername(name))[1]
+           AND (r.client_id = auth.uid() OR r.seller_id = auth.uid())));
+CREATE POLICY "Request parties can upload request items" ON storage.objects FOR INSERT TO authenticated
+    WITH CHECK (bucket_id = 'request-items' AND EXISTS (
+        SELECT 1 FROM public.requests r
+         WHERE r.id::text = (storage.foldername(name))[1]
+           AND (r.client_id = auth.uid() OR r.seller_id = auth.uid())));
 CREATE POLICY "Authenticated users can delete their request items" ON storage.objects FOR DELETE TO authenticated
     USING (bucket_id = 'request-items' AND owner = auth.uid());
 
-CREATE POLICY "Authenticated users can upload sale proofs" ON storage.objects FOR INSERT TO authenticated
-    WITH CHECK (bucket_id = 'sale-proofs');
-CREATE POLICY "Public can read sale proofs" ON storage.objects FOR SELECT TO public
-    USING (bucket_id = 'sale-proofs');
+CREATE POLICY "Request parties can read sale proofs" ON storage.objects FOR SELECT TO authenticated
+    USING (bucket_id = 'sale-proofs' AND EXISTS (
+        SELECT 1 FROM public.requests r
+         WHERE r.id::text = (storage.foldername(name))[1]
+           AND (r.client_id = auth.uid() OR r.seller_id = auth.uid())));
+CREATE POLICY "Assigned sellers can upload sale proofs" ON storage.objects FOR INSERT TO authenticated
+    WITH CHECK (bucket_id = 'sale-proofs' AND EXISTS (
+        SELECT 1 FROM public.requests r
+         WHERE r.id::text = (storage.foldername(name))[1]
+           AND r.seller_id = auth.uid()));
 CREATE POLICY "Authenticated users can delete their sale proofs" ON storage.objects FOR DELETE TO authenticated
     USING (bucket_id = 'sale-proofs' AND owner = auth.uid());
