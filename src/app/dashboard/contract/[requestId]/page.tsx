@@ -4,6 +4,7 @@ import ContractPage from "./ContractPage";
 
 export const metadata: Metadata = noIndexMetadata("Contrat de dépôt-vente");
 
-export default function Page({ params }: { params: { requestId: string } }) {
-  return <ContractPage requestId={params.requestId} />;
+export default async function Page({ params }: { params: Promise<{ requestId: string }> }) {
+  const { requestId } = await params;
+  return <ContractPage requestId={requestId} />;
 }

@@ -31,7 +31,7 @@ const CONTRACT_STATUSES: RequestStatus[] = ["accepted", "items_collected", "item
 const UNSOLD_CHOICES: UnsoldItemsChoice[] = ["return", "donate"];
 
 export async function GET(request: Request) {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -59,7 +59,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

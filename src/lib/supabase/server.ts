@@ -2,14 +2,17 @@
 // Supabase server client for server-side usage (API routes, SSR).
 // @supabase/ssr 0.3.0 uses the get/set/remove cookie methods (single cookie
 // at a time). The access token is refreshed and persisted across requests.
+//
+// Async since Next 15: `cookies()` returns a promise, so every caller awaits
+// the client.
 
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { getSupabaseEnv } from './env';
 
-export function createSupabaseServerClient() {
+export async function createSupabaseServerClient() {
   const { url, anonKey } = getSupabaseEnv();
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
 
   return createServerClient(url, anonKey, {
     cookies: {

@@ -92,7 +92,7 @@ function validateContactData(data: unknown): { valid: boolean; errors?: string[]
  * Save contact message to database
  */
 async function saveContactMessage(data: ContactRequest) {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   const { error } = await supabase
     .from('contact_messages')

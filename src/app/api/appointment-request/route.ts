@@ -109,7 +109,7 @@ function validateRequestData(data: unknown): { valid: boolean; errors?: string[]
 // ============================================================================
 
 async function saveAppointmentRequest(data: AppointmentRequestData) {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   // L'écriture passe par le client service role quand il est disponible.
   // Deux raisons : la RLS de `requests` peut alors être activée sans que le
