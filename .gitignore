@@ -48,3 +48,6 @@ Claude outputs/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Claude Code local settings (and their temporary copies)
+.claude/settings.local.json*
