@@ -11,15 +11,17 @@
 // included, so production credentials work on preprod) and every table in
 // `public`. Sessions are not copied: everyone signs in again.
 //
-// WHAT IS NOT: storage files. Photo URLs in the copied rows keep pointing at
-// the production buckets, which are public. Preprod reads them; it cannot
-// modify or delete them, since its keys do not work on production.
+// STORAGE FILES are copied too, after the tables, by
+// scripts/sync-preprod-storage.mjs: item photos and sale proofs are private
+// since migration 0022, so preprod could no longer display the production
+// files its rows point to. Only what changed is transferred.
 //
 // The schema is NOT copied either: preprod is built from supabase/schema.sql,
 // and new migrations are applied to it by hand. If a table gained a column on
 // preprod only, that column is left to its default.
 
 import { pathToFileURL } from 'node:url';
+import { syncStorage } from './sync-preprod-storage.mjs';
 
 const PROD_REF = 'jqjqcgsjkaqsyejfpdco';
 const PREPROD_REF = 'iqwmcbbbgmdjmhjptovg';
@@ -134,6 +136,9 @@ async function main() {
   console.log(`Replacing preprod data (${PREPROD_REF})…`);
   const counts = await runQuery(PREPROD_REF, buildLoadQuery(payload), token);
   console.table(counts[0]);
+
+  console.log('Copying storage files…');
+  await syncStorage({ prodRef: PROD_REF, preprodRef: PREPROD_REF, token });
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

@@ -1,12 +1,13 @@
 name: Sync preprod from production
 
-# Replaces the preprod Supabase data with a copy of production
+# Replaces the preprod Supabase data and storage files with a copy of production
 # (scripts/sync-preprod.mjs): every night, and on demand from the Actions tab
 # ("Run workflow"). Anything created on preprod since the last run is lost.
 #
 # Requires the SUPABASE_ACCESS_TOKEN repository secret (a Supabase personal
-# access token). The copy runs in a single transaction: if it fails, preprod
-# is left untouched and GitHub emails the failure.
+# access token). The table copy runs in a single transaction: if it fails,
+# preprod is left untouched. The file copy follows and only transfers what
+# changed. Either failure marks the run failed and GitHub emails it.
 
 on:
   schedule:
@@ -24,7 +25,7 @@ permissions:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
