@@ -60,12 +60,14 @@ Ce projet utilise **GitHub Actions** pour automatiser:
 | CI GitHub | preprod `iqwmcbbbgmdjmhjptovg` | secrets GitHub |
 | Vercel Production | prod `jqjqcgsjkaqsyejfpdco` | Vercel → variables « Production » |
 
-- **Données preprod** : copie de la prod (comptes, mots de passe et tables),
+- **Données preprod** : copie de la prod (comptes, mots de passe, tables et
+  fichiers des buckets : photos, justificatifs, avatars),
   rafraîchie chaque nuit (02:00 UTC) par le workflow `sync-preprod.yml`, ou à la
   demande via Actions → « Sync preprod from production » → Run workflow.
   Nécessite le secret GitHub `SUPABASE_ACCESS_TOKEN`. En local :
   `SUPABASE_ACCESS_TOKEN=… npm run db:sync-preprod`.
-  Les photos restent servies depuis les buckets de prod.
+  Les fichiers ne sont recopiés que s'ils ont changé ; ceux supprimés en prod
+  le sont aussi en preprod.
 - **Emails** : hors prod, `EMAIL_REDIRECT_TO` envoie tout vers une seule boîte.
   Une preview sans cette variable n'envoie rien.
 - **Schéma** : `supabase/schema.sql` décrit la prod actuelle. Une nouvelle
