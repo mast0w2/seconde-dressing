@@ -246,72 +246,42 @@ export interface InsertRequestRefusal {
 // ============================================================================
 // request_items table (clothing items photographed for a request)
 // ============================================================================
-/**
- * État d'une pièce. Seul `finalized` est irréversible : il signifie que la
- * cliente a été payée, et la ligne est alors verrouillée en base
- * (migration 0024).
- */
-export type ItemStatus =
-  | "photos_taken"
-  | "on_sale"
-  | "sold"
-  | "finalized"
-  | "unsellable";
-
 export interface RequestItem {
   id: string;
   request_id: string;
-  /** Facultatif depuis 0024 : une pièce peut être saisie avant d'être photographiée. */
-  photo_url: string | null;
+  photo_url: string;
   description: string | null;
-  /** Marque, sortie du texte libre pour devenir triable. */
-  brand: string | null;
-  status: ItemStatus;
   /** Prix minimal souhaité (cliente ou vendeuse selon la formule), validé par la cliente. */
   min_price: number | null;
-  /** Validation des prix par la cliente : verrouille min_price et encadre starting_price. */
+  /** Validation du prix minimal par la cliente : verrouille min_price. */
   min_price_validated_at: string | null;
-  /** Prix affiché en ligne. Fixé par la vendeuse, validé par la cliente. */
-  starting_price: number | null;
   /** Prix de vente final, renseigné par la vendeuse seule. */
   sale_price: number | null;
   /** Justificatif de vente déposé par la vendeuse. */
   sale_proof_url: string | null;
   sold_at: string | null;
-  /** Horodatage du virement à la cliente. Non nul = ligne verrouillée. */
-  finalized_at: string | null;
-  /** Commentaire libre. Obligatoire quand status vaut « unsellable ». */
-  notes: string | null;
   created_at: string;
 }
 
 export interface InsertRequestItem {
   id?: string;
   request_id: string;
-  photo_url?: string | null;
+  photo_url: string;
   description?: string | null;
-  brand?: string | null;
   min_price?: number | null;
-  starting_price?: number | null;
-  notes?: string | null;
   created_at?: string;
 }
 
 export interface UpdateRequestItem {
   id?: string;
   request_id?: string;
-  photo_url?: string | null;
+  photo_url?: string;
   description?: string | null;
-  brand?: string | null;
-  status?: ItemStatus;
   min_price?: number | null;
   min_price_validated_at?: string | null;
-  starting_price?: number | null;
   sale_price?: number | null;
   sale_proof_url?: string | null;
   sold_at?: string | null;
-  finalized_at?: string | null;
-  notes?: string | null;
   created_at?: string;
 }
 
