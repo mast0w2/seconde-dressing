@@ -6,6 +6,7 @@ import {
   estVerrouille,
   libelle,
   statutsProposables,
+  venteAcquise,
 } from '@/lib/item-status';
 import { minPriceEditorFor } from '@/lib/formules';
 import { montantCliente, montantPlateforme, montantVendeuse } from '@/lib/pricing';
@@ -88,10 +89,24 @@ describe('statuts de pièce', () => {
 
   it('ne dit pas la même chose à la cliente qu\'à la vendeuse', () => {
     expect(libelle('sold', 'seller')).toBe('Vendu');
-    expect(libelle('sold', 'client')).toBe('Vendue — paiement en cours');
-    expect(libelle('finalized', 'client')).toBe('Vendue — vous avez été payée');
     expect(libelle('awaiting_client', 'seller')).toBe('En attente de la cliente');
     expect(libelle('awaiting_client', 'client')).toBe('Prix à valider');
+  });
+
+  it('ne dit « vendue » à la cliente qu’une fois la vente acquise', () => {
+    // « Vendu » côté vendeuse veut dire que l'acheteur a payé la plateforme ;
+    // la vente peut encore se défaire. La cliente ne l'apprend qu'une fois
+    // l'argent encaissé.
+    expect(libelle('sold', 'client')).toBe('En vente');
+    expect(libelle('on_sale', 'client')).toBe('En vente');
+    expect(libelle('finalized', 'client')).toBe('Vendue — paiement en cours');
+  });
+
+  it('distingue la vente comptable de la vente acquise', () => {
+    expect(estVendue('sold')).toBe(true);
+    expect(venteAcquise('sold')).toBe(false);
+    expect(venteAcquise('finalized')).toBe(true);
+    expect(venteAcquise('on_sale')).toBe(false);
   });
 });
 

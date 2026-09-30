@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { montantCliente } from "@/lib/pricing";
-import { DELAI_VALIDATION_HEURES, attendLaCliente, estVendue } from "@/lib/item-status";
+import { DELAI_VALIDATION_HEURES, attendLaCliente, venteAcquise } from "@/lib/item-status";
 import type { ItemStatus } from "@/types/database";
 import {
   Loupe,
@@ -61,16 +61,9 @@ export function InventaireCliente({ requestId, onItemsChange }: Props) {
   // frustration qu'on veut éviter.
   // -------------------------------------------------------------------------
   const bilan = useMemo(() => {
-    const finalisees = lignes.filter((l) => l.statut === "finalized");
-    const vendues = lignes.filter((l) => estVendue(l.statut));
-    const montantFinalise = finalisees.reduce((s, l) => s + (versPrix(l.prixVente) ?? 0), 0);
-    const montantVendu = vendues.reduce((s, l) => s + (versPrix(l.prixVente) ?? 0), 0);
-    return {
-      nbVendues: vendues.length,
-      nbFinalisees: finalisees.length,
-      partFinalisee: montantCliente(montantFinalise),
-      partAVenir: montantCliente(montantVendu - montantFinalise),
-    };
+    const acquises = lignes.filter((l) => venteAcquise(l.statut));
+    const montant = acquises.reduce((s, l) => s + (versPrix(l.prixVente) ?? 0), 0);
+    return { nbVendues: acquises.length, part: montantCliente(montant) };
   }, [lignes]);
 
   // -------------------------------------------------------------------------
@@ -170,12 +163,7 @@ export function InventaireCliente({ requestId, onItemsChange }: Props) {
           onValiderTout={() => void validerTout()}
         />
       ) : (
-        <Synthese
-          nbVendues={bilan.nbVendues}
-          nbFinalisees={bilan.nbFinalisees}
-          partFinalisee={bilan.partFinalisee}
-          partAVenir={bilan.partAVenir}
-        />
+        <Synthese nbVendues={bilan.nbVendues} part={bilan.part} />
       )}
 
       <div className="space-y-2">
@@ -233,17 +221,7 @@ function AValider({
   );
 }
 
-function Synthese({
-  nbVendues,
-  nbFinalisees,
-  partFinalisee,
-  partAVenir,
-}: {
-  nbVendues: number;
-  nbFinalisees: number;
-  partFinalisee: number;
-  partAVenir: number;
-}) {
+function Synthese({ nbVendues, part }: { nbVendues: number; part: number }) {
   if (nbVendues === 0) {
     return (
       <div className="border border-noir/10 bg-gris-tres-clair p-4 text-sm text-gris-moyen">
@@ -253,23 +231,14 @@ function Synthese({
     );
   }
 
-  const total = partFinalisee + partAVenir;
-
   return (
     <div className="border border-noir/10 bg-gris-tres-clair p-4">
       <p className="font-serif text-xl leading-snug text-noir">
-        Vous allez recevoir {euros(total)} pour {nbVendues} pièce{nbVendues > 1 ? "s" : ""} déjà
+        Vous allez recevoir {euros(part)} pour {nbVendues} pièce{nbVendues > 1 ? "s" : ""}{" "}
         vendue{nbVendues > 1 ? "s" : ""}.
       </p>
       <p className="mt-1.5 text-sm text-gris-moyen">
         Le virement part sous {DELAI_VIREMENT_JOURS} jours après la vente.
-        {nbFinalisees > 0 && partFinalisee > 0 && (
-          <>
-            {" "}
-            {euros(partFinalisee)} vous {nbFinalisees > 1 ? "ont" : "a"} déjà été versé
-            {nbFinalisees > 1 ? "s" : ""}.
-          </>
-        )}
       </p>
     </div>
   );
@@ -408,8 +377,8 @@ function InfosPiece({ ligne }: { ligne: Ligne }) {
         {ligne.noteCliente && <span>Votre remarque : {ligne.noteCliente}</span>}
       </div>
       {motif && (
-        <p className="border-l-2 border-[#cda894] bg-[#fbf4f1] px-2.5 py-1.5 text-[#7a4a37]">
-          Pourquoi cette pièce n&apos;est pas mise en vente : {motif}
+        <p className="inline-block border-l-2 border-[#cda894] bg-[#fbf4f1] px-2 py-1 text-[11px] text-[#7a4a37]">
+          {motif}
         </p>
       )}
     </div>
@@ -423,25 +392,19 @@ function InfosPiece({ ligne }: { ligne: Ligne }) {
 function PartCliente({ ligne }: { ligne: Ligne }) {
   const prix = versPrix(ligne.prixVente);
 
-  if (ligne.statut === "finalized" && prix != null) {
-    return (
-      <span className="inline-flex items-center gap-1 whitespace-nowrap tabular-nums text-noir">
-        {euros(montantCliente(prix))}
-        <span className="text-[11px] text-gris-moyen">versés</span>
-      </span>
-    );
+  // Aucun montant tant que la vente n'est pas acquise : une somme annoncée
+  // puis retirée parce qu'un acheteur a rendu l'article, c'est la pire des
+  // façons de tenir quelqu'un au courant.
+  if (!venteAcquise(ligne.statut) || prix == null) {
+    return <span className="text-gris-moyen">—</span>;
   }
 
-  if (ligne.statut === "sold" && prix != null) {
-    return (
-      <span className="inline-flex items-center gap-1 whitespace-nowrap tabular-nums text-gris-moyen">
-        {euros(montantCliente(prix))}
-        <span className="text-[11px]">à venir</span>
-      </span>
-    );
-  }
-
-  return <span className="text-gris-moyen">—</span>;
+  return (
+    <span className="inline-flex items-center gap-1 whitespace-nowrap tabular-nums text-noir">
+      {euros(montantCliente(prix))}
+      <span className="text-[11px] text-gris-moyen">à venir</span>
+    </span>
+  );
 }
 
 export default InventaireCliente;

@@ -50,14 +50,19 @@ export const STATUTS: Record<ItemStatus, StatutInfo> = {
   },
   sold: {
     label: "Vendu",
-    labelCliente: "Vendue — paiement en cours",
+    // Côté cliente, rien ne change encore : l'acheteur a payé la plateforme,
+    // mais l'argent n'est pas sécurisé et la vente peut encore se défaire.
+    // Annoncer « vendue » pour le reprendre ensuite serait pire que d'attendre.
+    labelCliente: "En vente",
     fond: "#d2e2c4",
     texte: "#3b5029",
     bordure: "#7e9468",
   },
   finalized: {
     label: "Finalisé",
-    labelCliente: "Vendue — vous avez été payée",
+    // « Finalisé » veut dire que la vendeuse a reçu l'argent, pas que la
+    // cliente a été payée : son virement part ensuite.
+    labelCliente: "Vendue — paiement en cours",
     fond: "#dbe4ec",
     texte: "#364a5c",
     bordure: "#8ba3b8",
@@ -124,6 +129,17 @@ export const DELAI_VALIDATION_HEURES = 48;
 /** Une pièce compte dans le chiffre d'affaires dès qu'elle est vendue. */
 export function estVendue(statut: ItemStatus): boolean {
   return statut === "sold" || statut === "finalized";
+}
+
+/**
+ * Une vente acquise, du point de vue de la cliente.
+ *
+ * Seule une pièce finalisée compte : tant que la vendeuse n'a pas encaissé,
+ * l'acheteur peut encore ouvrir un litige et la vente se défaire. C'est aussi
+ * pour cela que « vendu » n'apparaît pas dans son vocabulaire.
+ */
+export function venteAcquise(statut: ItemStatus): boolean {
+  return statut === "finalized";
 }
 
 export function libelle(statut: ItemStatus, pour: "seller" | "client"): string {
