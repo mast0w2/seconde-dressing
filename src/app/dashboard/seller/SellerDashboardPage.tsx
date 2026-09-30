@@ -328,9 +328,10 @@ export default function SellerDashboardPage() {
     const clientPhone = isAssignedToMe ? client?.phone ?? request.client_phone ?? null : null;
 
     return (
-      // flex-col sur mobile : la colonne de boutons à largeur fixe (min-w-[180px])
-      // ne pouvait pas rétrécir dans une rangée non empilable et débordait,
-      // désalignant les boutons sur petit écran.
+      <div className="space-y-4">
+      {/* flex-col sur mobile : la colonne de boutons à largeur fixe
+          (min-w-[180px]) ne pouvait pas rétrécir dans une rangée non
+          empilable et débordait, désalignant les boutons sur petit écran. */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         {/* min-w-0 : sans lui, un enfant flex ne peut pas rétrécir sous la
             largeur de son contenu — le tableau d'inventaire débordait alors
@@ -372,23 +373,6 @@ export default function SellerDashboardPage() {
             </div>
           )}
 
-          {isAssignedToMe && (
-            <ContractStatus
-              requestId={request.id}
-              status={request.status}
-              role="seller"
-              contract={embeddedContract(request.contract)}
-              defaultItemsCount={request.number_of_items}
-              onGenerated={() => user && fetchRequests(user.id)}
-              onConfirmCollected={() => handleUpdateStatus(request.id, "items_collected")}
-            />
-          )}
-
-          <RequestItemsUploader
-            requestId={request.id}
-            role="seller"
-            formulaSlug={formula?.slug ?? null}
-          />
         </div>
 
         <div className="flex flex-col gap-2 sm:shrink-0 sm:min-w-[180px]">
@@ -443,6 +427,26 @@ export default function SellerDashboardPage() {
           )}
         </div>
       </div>
+
+      {/* Contrat et inventaire : pleine largeur de la carte. */}
+      {isAssignedToMe && (
+        <ContractStatus
+          requestId={request.id}
+          status={request.status}
+          role="seller"
+          contract={embeddedContract(request.contract)}
+          defaultItemsCount={request.number_of_items}
+          onGenerated={() => user && fetchRequests(user.id)}
+          onConfirmCollected={() => handleUpdateStatus(request.id, "items_collected")}
+        />
+      )}
+
+      <RequestItemsUploader
+        requestId={request.id}
+        role="seller"
+        formulaSlug={formula?.slug ?? null}
+      />
+      </div>
     );
   };
 
@@ -477,7 +481,7 @@ export default function SellerDashboardPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 max-w-[1440px]">
+    <div className="container mx-auto py-8 max-w-[1280px]">
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" onClick={() => router.back()} className="h-10 w-10 p-0">
