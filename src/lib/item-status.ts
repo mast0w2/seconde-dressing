@@ -79,7 +79,7 @@ export const ORDRE_STATUTS: ItemStatus[] = [
  * Deux états n'y figurent pas, parce qu'ils s'obtiennent par un geste explicite
  * et pas par un choix dans une liste :
  *   * « Vendu » demande un prix de vente — bouton dédié dans la colonne Vendu ;
- *   * « Finalisé » demande un justificatif de virement et verrouille la ligne
+ *   * « Finalisé » demande une preuve de vente et verrouille la ligne
  *     pour de bon — il découle du dépôt de la preuve de vente.
  *
  * Le statut courant reste toujours proposé, sinon le menu afficherait du vide.

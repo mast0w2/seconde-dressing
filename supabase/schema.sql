@@ -772,13 +772,13 @@ ALTER TABLE request_items
     ADD COLUMN IF NOT EXISTS notes          TEXT;
 
 COMMENT ON COLUMN request_items.status IS
-    'État de la pièce. Seul « finalized » est irréversible : il signifie que la cliente a été payée.';
+    'État de la pièce. Seul « finalized » est irréversible : la vente est actée et la somme due à la cliente.';
 COMMENT ON COLUMN request_items.brand IS
     'Marque, extraite de la description pour devenir triable et filtrable.';
 COMMENT ON COLUMN request_items.starting_price IS
     'Prix affiché en ligne. Fixé par la vendeuse, validé par la cliente avec le prix minimal, puis baissable jusqu''à min_price.';
 COMMENT ON COLUMN request_items.finalized_at IS
-    'Horodatage du virement à la cliente. Non nul = ligne verrouillée.';
+    'Horodatage de la finalisation de la vente. Non nul = ligne verrouillée.';
 COMMENT ON COLUMN request_items.notes IS
     'Commentaire libre sur la pièce. Obligatoire quand status = ''unsellable''.';
 
@@ -830,7 +830,7 @@ BEGIN
     -- Ligne finalisée : plus rien ne bouge, pour personne.
     -- .....................................................................
     IF OLD.status = 'finalized' THEN
-        RAISE EXCEPTION 'Cette pièce est finalisée : la cliente a déjà été payée, elle ne peut plus être modifiée.'
+        RAISE EXCEPTION 'Cette vente est finalisée : elle ne peut plus être modifiée.'
             USING ERRCODE = 'check_violation';
     END IF;
 
@@ -914,7 +914,7 @@ BEGIN
                     USING ERRCODE = 'check_violation';
             END IF;
             IF NEW.sale_proof_url IS NULL THEN
-                RAISE EXCEPTION 'Déposez le justificatif de virement avant de finaliser.'
+                RAISE EXCEPTION 'Déposez la preuve de vente avant de finaliser.'
                     USING ERRCODE = 'check_violation';
             END IF;
             NEW.finalized_at := COALESCE(NEW.finalized_at, now());

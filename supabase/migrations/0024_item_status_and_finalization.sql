@@ -6,7 +6,7 @@
 -- CE QUI CHANGE
 --   1. `item_status` : cinq états explicites par pièce. Jusqu'ici une pièce
 --      était « vendue ou pas » (sold_at), ce qui ne disait ni si l'annonce
---      était en ligne, ni si la cliente avait été payée.
+--      était en ligne, ni si la vente était actée.
 --   2. `brand` et `starting_price` : la marque sort du texte libre (elle
 --      devient triable), et le prix affiché en ligne cesse d'être confondu
 --      avec le prix plancher.
@@ -49,13 +49,13 @@ ALTER TABLE request_items
     ADD COLUMN IF NOT EXISTS notes          TEXT;
 
 COMMENT ON COLUMN request_items.status IS
-    'État de la pièce. Seul « finalized » est irréversible : il signifie que la cliente a été payée.';
+    'État de la pièce. Seul « finalized » est irréversible : la vente est actée et la somme due à la cliente.';
 COMMENT ON COLUMN request_items.brand IS
     'Marque, extraite de la description pour devenir triable et filtrable.';
 COMMENT ON COLUMN request_items.starting_price IS
     'Prix affiché en ligne. Fixé par la vendeuse, validé par la cliente avec le prix minimal, puis baissable jusqu''à min_price.';
 COMMENT ON COLUMN request_items.finalized_at IS
-    'Horodatage du virement à la cliente. Non nul = ligne verrouillée.';
+    'Horodatage de la finalisation de la vente. Non nul = ligne verrouillée.';
 COMMENT ON COLUMN request_items.notes IS
     'Commentaire libre sur la pièce. Obligatoire quand status = ''unsellable''.';
 
@@ -66,7 +66,7 @@ ALTER TABLE request_items ALTER COLUMN photo_url DROP NOT NULL;
 -- ---------------------------------------------------------------------------
 -- 2. Reprise de l'existant
 --    Ce qui est déjà vendu le reste. Rien ne part en « finalized » : c'est à
---    la vendeuse de confirmer, preuve à l'appui, les virements déjà faits.
+--    la vendeuse de confirmer, preuve à l'appui, les ventes déjà conclues.
 -- ---------------------------------------------------------------------------
 UPDATE request_items
    SET status = 'sold'
@@ -117,7 +117,7 @@ BEGIN
     -- Ligne finalisée : plus rien ne bouge, pour personne.
     -- .....................................................................
     IF OLD.status = 'finalized' THEN
-        RAISE EXCEPTION 'Cette pièce est finalisée : la cliente a déjà été payée, elle ne peut plus être modifiée.'
+        RAISE EXCEPTION 'Cette vente est finalisée : elle ne peut plus être modifiée.'
             USING ERRCODE = 'check_violation';
     END IF;
 
@@ -201,7 +201,7 @@ BEGIN
                     USING ERRCODE = 'check_violation';
             END IF;
             IF NEW.sale_proof_url IS NULL THEN
-                RAISE EXCEPTION 'Déposez le justificatif de virement avant de finaliser.'
+                RAISE EXCEPTION 'Déposez la preuve de vente avant de finaliser.'
                     USING ERRCODE = 'check_violation';
             END IF;
             NEW.finalized_at := COALESCE(NEW.finalized_at, now());

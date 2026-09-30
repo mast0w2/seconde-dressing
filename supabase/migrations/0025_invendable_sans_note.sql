@@ -52,7 +52,7 @@ BEGIN
     -- Ligne finalisée : plus rien ne bouge, pour personne.
     -- .....................................................................
     IF OLD.status = 'finalized' THEN
-        RAISE EXCEPTION 'Cette pièce est finalisée : la cliente a déjà été payée, elle ne peut plus être modifiée.'
+        RAISE EXCEPTION 'Cette vente est finalisée : elle ne peut plus être modifiée.'
             USING ERRCODE = 'check_violation';
     END IF;
 
@@ -135,7 +135,7 @@ BEGIN
                     USING ERRCODE = 'check_violation';
             END IF;
             IF NEW.sale_proof_url IS NULL THEN
-                RAISE EXCEPTION 'Déposez le justificatif de virement avant de finaliser.'
+                RAISE EXCEPTION 'Déposez la preuve de vente avant de finaliser.'
                     USING ERRCODE = 'check_violation';
             END IF;
             NEW.finalized_at := COALESCE(NEW.finalized_at, now());

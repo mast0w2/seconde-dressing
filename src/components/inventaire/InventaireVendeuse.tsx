@@ -322,7 +322,7 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
       setAFinaliser(null);
       toast({
         title: "Pièce finalisée",
-        description: "La ligne est verrouillée : la cliente a été payée.",
+        description: "La vente est finalisée, la ligne est verrouillée.",
       });
     },
     [ecrire, majLocale, toast]
@@ -1185,7 +1185,7 @@ function ChampPreuve({
       <div className="flex flex-col gap-0.5 text-[11px]">
         <span className="inline-flex items-center gap-1 text-[#364a5c]">
           <Lock className="h-3 w-3" />
-          Payée le {jour(ligne.finaliseeLe)}
+          Finalisée le {jour(ligne.finaliseeLe)}
         </span>
         {preuveHref && (
           <a
@@ -1194,7 +1194,7 @@ function ChampPreuve({
             rel="noreferrer"
             className="inline-flex items-center gap-1 text-gris-moyen underline underline-offset-2 hover:text-noir"
           >
-            Justificatif <ExternalLink className="h-3 w-3" />
+            Preuve <ExternalLink className="h-3 w-3" />
           </a>
         )}
       </div>
@@ -1425,8 +1425,8 @@ function DialogueFinalisation({
               Finaliser la vente
             </AlertDialog.Title>
             <AlertDialog.Description className="text-sm text-gris-moyen">
-              Déposez le justificatif du virement, puis confirmez. C&apos;est ce qui fait
-              entrer cette vente dans le montant dû à la cliente.
+              Déposez la preuve de vente, puis confirmez. C&apos;est ce qui fait entrer
+              cette vente dans le montant dû à la cliente.
             </AlertDialog.Description>
           </div>
 
@@ -1458,7 +1458,7 @@ function DialogueFinalisation({
 
           <div className="space-y-2 border border-noir/10 p-4">
             <span className="text-[10px] uppercase tracking-[0.14em] text-gris-moyen">
-              Justificatif de virement
+              Preuve de vente
             </span>
             {ligne?.preuveUrl ? (
               <p className="text-sm text-noir">
@@ -1476,7 +1476,8 @@ function DialogueFinalisation({
               </p>
             ) : (
               <p className="text-sm text-gris-moyen">
-                Aucun justificatif. Déposez la capture du virement pour pouvoir finaliser.
+                Aucune preuve pour l&apos;instant. Déposez la capture de la vente pour
+                pouvoir finaliser.
               </p>
             )}
             <Button
