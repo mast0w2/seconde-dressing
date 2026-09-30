@@ -15,6 +15,7 @@ import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import {
   ArrowDown,
   ArrowUp,
+  Check,
   ChevronsUpDown,
   ExternalLink,
   ImageIcon,
@@ -64,7 +65,7 @@ import {
   type Ligne,
 } from "./commun";
 
-type Colonne = "description" | "marque" | "prixMin" | "prixDepart" | "prixVente" | "statut";
+type Colonne = "description" | "marque" | "prixDepart" | "prixMin" | "statut" | "prixVente";
 
 interface Props {
   requestId: string;
@@ -225,10 +226,13 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
    * si la colonne est encore vide. On n'écrase jamais ce qui a été saisi.
    */
   const enregistrerDescription = useCallback(
-    async (ligne: Ligne) => {
+    async (ligne: Ligne, texte?: string) => {
       if (!ligne.itemId) return;
-      const patch: Record<string, unknown> = { description: ligne.description || null };
-      const devinee = ligne.marque.trim() === "" ? detecterMarque(ligne.description) : null;
+      // `texte` est fourni par la dictée : la description du state n'est pas
+      // encore à jour au moment où la reconnaissance vocale rend son résultat.
+      const description = texte ?? ligne.description;
+      const patch: Record<string, unknown> = { description: description || null };
+      const devinee = ligne.marque.trim() === "" ? detecterMarque(description) : null;
       if (devinee) {
         patch.brand = devinee;
         majLocale(ligne.localId, { marque: devinee });
@@ -249,7 +253,25 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
   const changerStatut = useCallback(
     async (ligne: Ligne, statut: ItemStatus) => {
       if (!ligne.itemId) return;
-      if (statut === "sold" && versPrix(ligne.prixVente) == null) {
+      const ok = await ecrire(ligne.itemId, { status: statut });
+      if (!ok) return;
+      majLocale(ligne.localId, {
+        statut,
+        venduLe: statut === "sold" ? ligne.venduLe ?? new Date().toISOString() : null,
+      });
+      // « Invendable » sans explication ne sert à personne : on ouvre les
+      // notes tout de suite plutôt que de bloquer le changement de statut.
+      if (statut === "unsellable") setNotesOuvertes(ligne.localId);
+    },
+    [ecrire, majLocale]
+  );
+
+  /** Bouton « Vendu » : le prix de vente est la seule condition. */
+  const marquerVendue = useCallback(
+    async (ligne: Ligne) => {
+      if (!ligne.itemId) return;
+      const prix = versPrix(ligne.prixVente);
+      if (prix == null || prix <= 0) {
         toast({
           title: "Prix de vente manquant",
           description: "Renseignez le prix de vente avant de marquer la pièce vendue.",
@@ -257,21 +279,9 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
         });
         return;
       }
-      if (statut === "unsellable" && ligne.notes.trim() === "") {
-        setNotesOuvertes(ligne.localId);
-        toast({
-          title: "Raison manquante",
-          description: "Expliquez dans les notes pourquoi cette pièce est invendable.",
-          variant: "destructive",
-        });
-        return;
-      }
-      const ok = await ecrire(ligne.itemId, { status: statut });
+      const ok = await ecrire(ligne.itemId, { sale_price: prix, status: "sold" });
       if (ok) {
-        majLocale(ligne.localId, {
-          statut,
-          venduLe: statut === "sold" ? ligne.venduLe ?? new Date().toISOString() : null,
-        });
+        majLocale(ligne.localId, { statut: "sold", venduLe: new Date().toISOString() });
       }
     },
     [ecrire, majLocale, toast]
@@ -296,6 +306,12 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
         uploadingPreuve: false,
         preuveUrl: ok ? chemin : ligne.preuveUrl,
       });
+      // Déposer le justificatif, c'est dire « la cliente a été payée ». On
+      // enchaîne donc sur la finalisation — mais en la faisant confirmer :
+      // après elle, la ligne est verrouillée définitivement.
+      if (ok && estVendue(ligne.statut)) {
+        setAFinaliser({ ...ligne, preuveUrl: chemin, uploadingPreuve: false });
+      }
     },
     [requestId, supabase, majLocale, ecrire, toast]
   );
@@ -398,33 +414,20 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
   return (
     <div className="mt-4 space-y-3">
       {/* ---------------- Barre d'outils ---------------- */}
-      <div className="flex flex-wrap items-center gap-2">
-        <h4 className="text-sm font-medium mr-1">Inventaire</h4>
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
+        <h4 className="font-serif text-xl leading-none text-noir">Inventaire</h4>
         <span className="text-sm text-gris-moyen">
           {lignes.length} {lignes.length > 1 ? "pièces" : "pièce"}
         </span>
-
-        <div className="relative ml-auto">
-          <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gris-moyen" />
-          <Input
-            value={recherche}
-            onChange={(e) => setRecherche(e.target.value)}
-            placeholder="Rechercher une pièce, une marque…"
-            className="h-8 w-[200px] pl-7 text-sm"
-          />
-        </div>
-        <Button type="button" variant="outline" size="sm" onClick={ajouterLigneVide}>
-          <Plus className="h-4 w-4 mr-1.5" />
-          Ligne
-        </Button>
         <Button
           type="button"
           variant="outline"
           size="sm"
           onClick={() => inputPhotos.current?.click()}
+          className="ml-auto"
         >
           <Upload className="h-4 w-4 mr-1.5" />
-          Photos
+          Importer des photos
         </Button>
         <input
           ref={inputPhotos}
@@ -436,6 +439,18 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
             void ajouterPhotos(e.target.files);
             e.target.value = "";
           }}
+        />
+      </div>
+
+      {/* La recherche a sa propre ligne, sur toute la largeur : coincée entre
+          deux boutons, on ne la voyait pas. */}
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gris-moyen" />
+        <Input
+          value={recherche}
+          onChange={(e) => setRecherche(e.target.value)}
+          placeholder="Rechercher une pièce, une marque…"
+          className="h-10 w-full pl-9 text-sm"
         />
       </div>
 
@@ -486,20 +501,22 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
                   <EnTete colonne="marque" tri={tri} onClick={basculerTri}>
                     Marque
                   </EnTete>
-                  <EnTete colonne="prixMin" tri={tri} onClick={basculerTri} droite>
-                    Prix min
-                  </EnTete>
                   <EnTete colonne="prixDepart" tri={tri} onClick={basculerTri} droite>
                     Prix départ
                   </EnTete>
-                  <EnTete colonne="prixVente" tri={tri} onClick={basculerTri} droite>
-                    Prix vente
+                  <EnTete colonne="prixMin" tri={tri} onClick={basculerTri} droite>
+                    Prix min
                   </EnTete>
                   <EnTete colonne="statut" tri={tri} onClick={basculerTri}>
                     Statut
                   </EnTete>
+                  <EnTete colonne="prixVente" tri={tri} onClick={basculerTri} droite>
+                    Prix vente
+                  </EnTete>
+                  <th className="px-2 py-2 w-[92px]">Vendu</th>
+                  <th className="px-2 py-2 w-[128px]">Preuve de vente</th>
                   <th className="px-2 py-2 w-[44px]">Notes</th>
-                  <th className="px-2 py-2 w-[150px]">Actions</th>
+                  <th className="px-2 py-2 w-[44px]"></th>
                 </tr>
               </thead>
               <tbody>
@@ -515,7 +532,9 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
                       setNotesOuvertes((prev) => (prev === ligne.localId ? null : ligne.localId))
                     }
                     onChange={(patch) => majLocale(ligne.localId, patch)}
-                    onEnregistrerDescription={() => void enregistrerDescription(ligne)}
+                    onEnregistrerDescription={(texte) =>
+                      void enregistrerDescription(ligne, texte)
+                    }
                     onEnregistrerMarque={() =>
                       ligne.itemId && void ecrire(ligne.itemId, { brand: ligne.marque || null })
                     }
@@ -524,15 +543,27 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
                     }
                     onEnregistrerPrix={(champ, valeur) => void enregistrerPrix(ligne, champ, valeur)}
                     onStatut={(s) => void changerStatut(ligne, s)}
+                    onVendue={() => void marquerVendue(ligne)}
                     onPhoto={(f) => void remplacerPhoto(ligne, f)}
                     onPreuve={(f) => void deposerPreuve(ligne, f)}
                     onSupprimer={() => void supprimer(ligne)}
                     onLoupe={(src) =>
                       setLoupe({ src, legende: ligne.description || ligne.marque || "Pièce" })
                     }
-                    onFinaliser={() => setAFinaliser(ligne)}
                   />
                 ))}
+                <tr className="border-t border-noir/10">
+                  <td colSpan={11} className="p-0">
+                    <button
+                      type="button"
+                      onClick={ajouterLigneVide}
+                      className="flex w-full items-center gap-2 px-3 py-2.5 text-sm text-gris-moyen transition-colors hover:bg-gris-tres-clair hover:text-noir"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Ajouter une pièce
+                    </button>
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -547,7 +578,7 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
                 photoSrc={ligne.photoUrl ? urlsSignees[ligne.photoUrl] ?? null : null}
                 preuveHref={ligne.preuveUrl ? urlsSignees[ligne.preuveUrl] ?? null : null}
                 onChange={(patch) => majLocale(ligne.localId, patch)}
-                onEnregistrerDescription={() => void enregistrerDescription(ligne)}
+                onEnregistrerDescription={(texte) => void enregistrerDescription(ligne, texte)}
                 onEnregistrerMarque={() =>
                   ligne.itemId && void ecrire(ligne.itemId, { brand: ligne.marque || null })
                 }
@@ -556,14 +587,22 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
                 }
                 onEnregistrerPrix={(champ, valeur) => void enregistrerPrix(ligne, champ, valeur)}
                 onStatut={(s) => void changerStatut(ligne, s)}
+                onVendue={() => void marquerVendue(ligne)}
                 onPreuve={(f) => void deposerPreuve(ligne, f)}
                 onSupprimer={() => void supprimer(ligne)}
                 onLoupe={(src) =>
                   setLoupe({ src, legende: ligne.description || ligne.marque || "Pièce" })
                 }
-                onFinaliser={() => setAFinaliser(ligne)}
               />
             ))}
+            <button
+              type="button"
+              onClick={ajouterLigneVide}
+              className="flex w-full items-center justify-center gap-2 border border-dashed border-noir/20 p-3 text-sm text-gris-moyen transition-colors hover:border-noir/50 hover:text-noir"
+            >
+              <Plus className="h-4 w-4" />
+              Ajouter une pièce
+            </button>
           </div>
 
           {visibles.length === 0 && (
@@ -730,15 +769,16 @@ interface LigneProps {
   photoSrc: string | null;
   preuveHref: string | null;
   onChange: (patch: Partial<Ligne>) => void;
-  onEnregistrerDescription: () => void;
+  /** Le texte est passé explicitement : la dictée arrive après le rendu. */
+  onEnregistrerDescription: (texte?: string) => void;
   onEnregistrerMarque: () => void;
   onEnregistrerNotes: () => void;
   onEnregistrerPrix: (champ: "min_price" | "starting_price" | "sale_price", valeur: string) => void;
   onStatut: (s: ItemStatus) => void;
+  onVendue: () => void;
   onPreuve: (f: File | null) => void;
   onSupprimer: () => void;
   onLoupe: (src: string) => void;
-  onFinaliser: () => void;
 }
 
 function LigneTableau({
@@ -754,11 +794,11 @@ function LigneTableau({
   onEnregistrerNotes,
   onEnregistrerPrix,
   onStatut,
+  onVendue,
   onPhoto,
   onPreuve,
   onSupprimer,
   onLoupe,
-  onFinaliser,
 }: LigneProps & {
   notesOuvertes: boolean;
   onToggleNotes: () => void;
@@ -767,18 +807,12 @@ function LigneTableau({
   const verrouille = estVerrouille(ligne.statut);
   const prixBloques = !!ligne.prixValidesLe || !prixMinEditable;
   const inputPhoto = useRef<HTMLInputElement>(null);
-  const { isListening, start } = useSpeechRecognition({
-    onResult: (texte) => {
-      onChange({ description: ligne.description ? `${ligne.description} ${texte}` : texte });
-      setTimeout(onEnregistrerDescription, 0);
-    },
-  });
 
   return (
     <>
       <tr
         className={`border-t border-noir/10 ${
-          verrouille ? "bg-[#f5f7f9]" : "hover:bg-gris-tres-clair/60"
+          verrouille ? "bg-[#f4f7fa]" : "hover:bg-gris-tres-clair/60"
         }`}
       >
         {/* Photo */}
@@ -823,28 +857,12 @@ function LigneTableau({
 
         {/* Description */}
         <td className={CELLULE}>
-          <div className="flex items-center gap-1">
-            <Input
-              value={ligne.description}
-              onChange={(e) => onChange({ description: e.target.value })}
-              onBlur={onEnregistrerDescription}
-              disabled={verrouille}
-              placeholder="T-shirt bleu coton"
-              className="h-8 min-w-[150px] border-noir/15 bg-transparent px-2 text-sm"
-            />
-            {!verrouille && (
-              <button
-                type="button"
-                onClick={start}
-                aria-label="Dicter la description"
-                className={`shrink-0 p-1 transition-colors ${
-                  isListening ? "text-sauge-fonce" : "text-gris-moyen hover:text-noir"
-                }`}
-              >
-                <Mic className="h-3.5 w-3.5" />
-              </button>
-            )}
-          </div>
+          <ChampDescription
+            valeur={ligne.description}
+            verrouille={verrouille}
+            onChange={(v) => onChange({ description: v })}
+            onEnregistrer={onEnregistrerDescription}
+          />
         </td>
 
         {/* Marque */}
@@ -854,28 +872,9 @@ function LigneTableau({
             onChange={(e) => onChange({ marque: e.target.value })}
             onBlur={onEnregistrerMarque}
             disabled={verrouille}
-            placeholder="—"
+            placeholder=""
             className="h-8 w-[120px] border-noir/15 bg-transparent px-2 text-sm"
           />
-        </td>
-
-        {/* Prix min */}
-        <td className={`${CELLULE} text-right`}>
-          {prixBloques ? (
-            <span className="inline-flex items-center justify-end gap-1 tabular-nums text-noir">
-              <Lock className="h-3 w-3 text-gris-moyen" />
-              {versPrix(ligne.prixMin) != null ? euros(versPrix(ligne.prixMin) as number) : "—"}
-            </span>
-          ) : (
-            <Input
-              value={ligne.prixMin}
-              onChange={(e) => onChange({ prixMin: e.target.value })}
-              onBlur={() => onEnregistrerPrix("min_price", ligne.prixMin)}
-              inputMode="decimal"
-              placeholder="—"
-              className={CHAMP_PRIX}
-            />
-          )}
         </td>
 
         {/* Prix départ */}
@@ -886,12 +885,36 @@ function LigneTableau({
             onBlur={() => onEnregistrerPrix("starting_price", ligne.prixDepart)}
             disabled={verrouille}
             inputMode="decimal"
-            placeholder="—"
+            placeholder=""
             className={CHAMP_PRIX}
           />
         </td>
 
-        {/* Prix vente */}
+        {/* Prix min */}
+        <td className={`${CELLULE} text-right`}>
+          {prixBloques ? (
+            <span className="inline-flex items-center justify-end gap-1 tabular-nums text-noir">
+              {ligne.prixValidesLe && <Lock className="h-3 w-3 text-gris-moyen" />}
+              {versPrix(ligne.prixMin) != null ? euros(versPrix(ligne.prixMin) as number) : "—"}
+            </span>
+          ) : (
+            <Input
+              value={ligne.prixMin}
+              onChange={(e) => onChange({ prixMin: e.target.value })}
+              onBlur={() => onEnregistrerPrix("min_price", ligne.prixMin)}
+              inputMode="decimal"
+              placeholder=""
+              className={CHAMP_PRIX}
+            />
+          )}
+        </td>
+
+        {/* Statut */}
+        <td className={CELLULE}>
+          <ChoixStatut ligne={ligne} onStatut={onStatut} />
+        </td>
+
+        {/* Prix de vente */}
         <td className={`${CELLULE} text-right`}>
           {verrouille ? (
             <span className="tabular-nums text-noir">
@@ -903,34 +926,20 @@ function LigneTableau({
               onChange={(e) => onChange({ prixVente: e.target.value })}
               onBlur={() => onEnregistrerPrix("sale_price", ligne.prixVente)}
               inputMode="decimal"
-              placeholder="—"
+              placeholder=""
               className={CHAMP_PRIX}
             />
           )}
         </td>
 
-        {/* Statut */}
+        {/* Vendu */}
         <td className={CELLULE}>
-          {verrouille ? (
-            <Pastille statut={ligne.statut} />
-          ) : (
-            <Select
-              value={ligne.statut}
-              onChange={(e) => onStatut(e.target.value as ItemStatus)}
-              className="h-8 w-[142px] border px-2 text-xs"
-              style={{
-                backgroundColor: STATUTS[ligne.statut].fond,
-                color: STATUTS[ligne.statut].texte,
-                borderColor: STATUTS[ligne.statut].bordure,
-              }}
-            >
-              {statutsProposables(ligne.statut).map((s) => (
-                <option key={s} value={s}>
-                  {STATUTS[s].label}
-                </option>
-              ))}
-            </Select>
-          )}
+          <BoutonVendue ligne={ligne} onVendue={onVendue} />
+        </td>
+
+        {/* Preuve de vente */}
+        <td className={CELLULE}>
+          <ChampPreuve ligne={ligne} preuveHref={preuveHref} onPreuve={onPreuve} />
         </td>
 
         {/* Notes */}
@@ -947,28 +956,36 @@ function LigneTableau({
           </button>
         </td>
 
-        {/* Actions */}
-        <td className={CELLULE}>
-          <ActionsVente
-            ligne={ligne}
-            preuveHref={preuveHref}
-            onPreuve={onPreuve}
-            onSupprimer={onSupprimer}
-            onFinaliser={onFinaliser}
-          />
+        {/* Suppression */}
+        <td className={`${CELLULE} text-center`}>
+          {!verrouille && (
+            <button
+              type="button"
+              onClick={onSupprimer}
+              aria-label="Supprimer la pièce"
+              className="p-1.5 text-gris-moyen transition-colors hover:text-red-700"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
         </td>
       </tr>
 
       {notesOuvertes && (
-        <tr className={verrouille ? "bg-[#f5f7f9]" : "bg-gris-tres-clair/60"}>
-          <td colSpan={9} className="px-3 pb-3 pt-0">
+        <tr className={verrouille ? "bg-[#f4f7fa]" : "bg-gris-tres-clair/60"}>
+          <td colSpan={11} className="px-3 pb-3 pt-0">
             <Textarea
               value={ligne.notes}
               onChange={(e) => onChange({ notes: e.target.value })}
               onBlur={onEnregistrerNotes}
               disabled={verrouille}
               rows={2}
-              placeholder="Tache sur la manche, taille petit, doublure décousue…"
+              autoFocus={ligne.statut === "unsellable" && !ligne.notes}
+              placeholder={
+                ligne.statut === "unsellable"
+                  ? "Explique pourquoi cet article est invendable."
+                  : "Tache sur la manche, taille petit, doublure décousue…"
+              }
               className="resize-none border-noir/15 bg-blanc text-sm"
             />
           </td>
@@ -979,29 +996,173 @@ function LigneTableau({
 }
 
 // ===========================================================================
-// Actions de vente : justificatif, finalisation, suppression
+// Description : champ texte + dictée
 // ===========================================================================
 
-function ActionsVente({
+/**
+ * La dictée arrive de façon asynchrone, bien après le rendu. Si on se
+ * contentait d'appeler l'enregistrement sans argument, il partirait avec la
+ * description d'avant — c'est le texte dicté qu'on passe explicitement.
+ */
+function ChampDescription({
+  valeur,
+  verrouille,
+  onChange,
+  onEnregistrer,
+}: {
+  valeur: string;
+  verrouille: boolean;
+  onChange: (v: string) => void;
+  onEnregistrer: (texte?: string) => void;
+}) {
+  const valeurRef = useRef(valeur);
+  valeurRef.current = valeur;
+
+  const { isListening, error, start, stop } = useSpeechRecognition({
+    onResult: (texte) => {
+      const complet = valeurRef.current ? `${valeurRef.current} ${texte}` : texte;
+      onChange(complet);
+      onEnregistrer(complet);
+    },
+  });
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <Input
+        value={valeur}
+        onChange={(e) => onChange(e.target.value)}
+        onBlur={() => onEnregistrer()}
+        disabled={verrouille}
+        placeholder=""
+        className={`h-8 min-w-[160px] border-noir/15 bg-transparent px-2 text-sm ${
+          isListening ? "border-sauge-fonce ring-1 ring-sauge-fonce/40" : ""
+        }`}
+      />
+      {!verrouille && (
+        <button
+          type="button"
+          onClick={() => (isListening ? stop() : start())}
+          aria-label={isListening ? "Arrêter la dictée" : "Dicter la description"}
+          title={error ?? (isListening ? "J'écoute… cliquez pour arrêter" : "Dicter")}
+          className={`relative shrink-0 rounded-full p-1.5 transition-colors ${
+            isListening
+              ? "bg-sauge-fonce text-blanc"
+              : "text-gris-moyen hover:bg-gris-clair hover:text-noir"
+          }`}
+        >
+          <Mic className="h-3.5 w-3.5" />
+          {/* Anneau qui bat : on voit sans ambiguïté que le micro écoute. */}
+          {isListening && (
+            <span className="absolute inset-0 animate-ping rounded-full bg-sauge-fonce/40" />
+          )}
+        </button>
+      )}
+      {isListening && (
+        <span className="whitespace-nowrap text-[11px] text-sauge-fonce">J&apos;écoute…</span>
+      )}
+    </div>
+  );
+}
+
+// ===========================================================================
+// Statut, bouton Vendu, preuve de vente
+// ===========================================================================
+
+function ChoixStatut({
+  ligne,
+  onStatut,
+}: {
+  ligne: Ligne;
+  onStatut: (s: ItemStatus) => void;
+}) {
+  // « Vendu » et « Finalisé » ne s'obtiennent pas par la liste : le premier
+  // demande un prix, le second un justificatif. Ils s'affichent en pastille.
+  if (ligne.statut === "finalized" || ligne.statut === "sold") {
+    return (
+      <div className="flex items-center gap-1.5">
+        <Pastille statut={ligne.statut} />
+        {ligne.statut === "sold" && (
+          <button
+            type="button"
+            onClick={() => onStatut("on_sale")}
+            title="Annuler la vente et remettre la pièce en vente"
+            className="text-[11px] text-gris-moyen underline underline-offset-2 hover:text-noir"
+          >
+            annuler
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <Select
+      value={ligne.statut}
+      onChange={(e) => onStatut(e.target.value as ItemStatus)}
+      className="h-8 w-[142px] border px-2 text-xs"
+      style={{
+        backgroundColor: STATUTS[ligne.statut].fond,
+        color: STATUTS[ligne.statut].texte,
+        borderColor: STATUTS[ligne.statut].bordure,
+      }}
+    >
+      {statutsProposables(ligne.statut).map((s) => (
+        <option key={s} value={s}>
+          {STATUTS[s].label}
+        </option>
+      ))}
+    </Select>
+  );
+}
+
+function BoutonVendue({ ligne, onVendue }: { ligne: Ligne; onVendue: () => void }) {
+  if (estVendue(ligne.statut)) {
+    return (
+      <span className="inline-flex items-center gap-1 whitespace-nowrap text-[11px] text-[#3b5029]">
+        <Check className="h-3.5 w-3.5" />
+        {jour(ligne.venduLe) || "Vendue"}
+      </span>
+    );
+  }
+
+  const prix = versPrix(ligne.prixVente);
+  const pret = prix != null && prix > 0;
+
+  return (
+    <Button
+      type="button"
+      size="sm"
+      variant="outline"
+      onClick={onVendue}
+      disabled={!pret}
+      title={pret ? "Marquer la pièce vendue" : "Renseignez d'abord le prix de vente"}
+      className="h-7 w-full px-2 text-[11px]"
+    >
+      Vendu
+    </Button>
+  );
+}
+
+/**
+ * Le dépôt du justificatif est le geste qui finalise : c'est lui qui prouve
+ * que la cliente a été payée. La confirmation qui suit n'est pas une
+ * formalité — après elle, la ligne est verrouillée pour de bon.
+ */
+function ChampPreuve({
   ligne,
   preuveHref,
   onPreuve,
-  onSupprimer,
-  onFinaliser,
 }: {
   ligne: Ligne;
   preuveHref: string | null;
   onPreuve: (f: File | null) => void;
-  onSupprimer: () => void;
-  onFinaliser: () => void;
 }) {
   const inputPreuve = useRef<HTMLInputElement>(null);
-  const verrouille = estVerrouille(ligne.statut);
 
-  if (verrouille) {
+  if (ligne.statut === "finalized") {
     return (
-      <div className="flex flex-col gap-0.5 text-[11px] text-gris-moyen">
-        <span className="inline-flex items-center gap-1 text-[#3f4e5c]">
+      <div className="flex flex-col gap-0.5 text-[11px]">
+        <span className="inline-flex items-center gap-1 text-[#364a5c]">
           <Lock className="h-3 w-3" />
           Payée le {jour(ligne.finaliseeLe)}
         </span>
@@ -1010,7 +1171,7 @@ function ActionsVente({
             href={preuveHref}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1 underline underline-offset-2 hover:text-noir"
+            className="inline-flex items-center gap-1 text-gris-moyen underline underline-offset-2 hover:text-noir"
           >
             Justificatif <ExternalLink className="h-3 w-3" />
           </a>
@@ -1019,23 +1180,27 @@ function ActionsVente({
     );
   }
 
+  if (!estVendue(ligne.statut)) {
+    return <span className="text-[11px] text-gris-moyen">—</span>;
+  }
+
   return (
-    <div className="flex items-center gap-1">
-      <button
+    <div className="flex items-center gap-1.5">
+      <Button
         type="button"
+        size="sm"
+        variant="outline"
         onClick={() => inputPreuve.current?.click()}
-        aria-label={ligne.preuveUrl ? "Remplacer le justificatif" : "Déposer un justificatif"}
-        title={ligne.preuveUrl ? "Justificatif déposé" : "Déposer un justificatif"}
-        className={`p-1.5 transition-colors ${
-          ligne.preuveUrl ? "text-sauge-fonce" : "text-gris-moyen hover:text-noir"
-        }`}
+        disabled={ligne.uploadingPreuve}
+        className="h-7 px-2 text-[11px]"
       >
         {ligne.uploadingPreuve ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
         ) : (
-          <Paperclip className="h-4 w-4" />
+          <Paperclip className="mr-1 h-3.5 w-3.5" />
         )}
-      </button>
+        {ligne.preuveUrl ? "Remplacer" : "Déposer"}
+      </Button>
       <input
         ref={inputPreuve}
         type="file"
@@ -1046,38 +1211,21 @@ function ActionsVente({
           e.target.value = "";
         }}
       />
-
-      {ligne.statut === "sold" && (
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={onFinaliser}
-          disabled={!ligne.preuveUrl || versPrix(ligne.prixVente) == null}
-          title={
-            !ligne.preuveUrl
-              ? "Déposez d'abord le justificatif de virement"
-              : versPrix(ligne.prixVente) == null
-                ? "Renseignez d'abord le prix de vente"
-                : "Marquer la pièce comme payée à la cliente"
-          }
-          className="h-7 px-2 text-[11px]"
+      {preuveHref && (
+        <a
+          href={preuveHref}
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Voir le justificatif"
+          className="text-gris-moyen hover:text-noir"
         >
-          Finaliser
-        </Button>
+          <ExternalLink className="h-3.5 w-3.5" />
+        </a>
       )}
-
-      <button
-        type="button"
-        onClick={onSupprimer}
-        aria-label="Supprimer la pièce"
-        className="p-1.5 text-gris-moyen transition-colors hover:text-red-700"
-      >
-        <Trash2 className="h-4 w-4" />
-      </button>
     </div>
   );
 }
+
 
 // ===========================================================================
 // Liste compacte (mobile et tablette)
@@ -1094,19 +1242,24 @@ function CarteCompacte({
   onEnregistrerNotes,
   onEnregistrerPrix,
   onStatut,
+  onVendue,
   onPreuve,
   onSupprimer,
   onLoupe,
-  onFinaliser,
 }: LigneProps) {
   const verrouille = estVerrouille(ligne.statut);
   const prixBloques = !!ligne.prixValidesLe || !prixMinEditable;
   const [notesOuvertes, setNotesOuvertes] = useState(false);
 
+  // Passer une pièce en invendable ouvre les notes : l'explication est
+  // attendue tout de suite, pendant qu'on a la pièce en main.
+  const changerStatut = (s: ItemStatus) => {
+    onStatut(s);
+    if (s === "unsellable") setNotesOuvertes(true);
+  };
+
   return (
-    <div
-      className={`border border-noir/10 p-3 ${verrouille ? "bg-[#f5f7f9]" : "bg-blanc"}`}
-    >
+    <div className={`border border-noir/10 p-3 ${verrouille ? "bg-[#f4f7fa]" : "bg-blanc"}`}>
       <div className="flex gap-3">
         {photoSrc ? (
           <button type="button" onClick={() => onLoupe(photoSrc)} className="shrink-0">
@@ -1124,13 +1277,11 @@ function CarteCompacte({
         )}
 
         <div className="min-w-0 flex-1 space-y-1.5">
-          <Input
-            value={ligne.description}
-            onChange={(e) => onChange({ description: e.target.value })}
-            onBlur={onEnregistrerDescription}
-            disabled={verrouille}
-            placeholder="T-shirt bleu coton"
-            className="h-8 w-full border-noir/15 bg-transparent px-2 text-sm"
+          <ChampDescription
+            valeur={ligne.description}
+            verrouille={verrouille}
+            onChange={(v) => onChange({ description: v })}
+            onEnregistrer={onEnregistrerDescription}
           />
           <Input
             value={ligne.marque}
@@ -1145,18 +1296,18 @@ function CarteCompacte({
 
       <div className="mt-2 grid grid-cols-3 gap-2">
         <Prix
-          libelle="Prix min"
-          valeur={ligne.prixMin}
-          verrouille={prixBloques}
-          onChange={(v) => onChange({ prixMin: v })}
-          onBlur={() => onEnregistrerPrix("min_price", ligne.prixMin)}
-        />
-        <Prix
           libelle="Prix départ"
           valeur={ligne.prixDepart}
           verrouille={verrouille}
           onChange={(v) => onChange({ prixDepart: v })}
           onBlur={() => onEnregistrerPrix("starting_price", ligne.prixDepart)}
+        />
+        <Prix
+          libelle="Prix min"
+          valeur={ligne.prixMin}
+          verrouille={prixBloques}
+          onChange={(v) => onChange({ prixMin: v })}
+          onBlur={() => onEnregistrerPrix("min_price", ligne.prixMin)}
         />
         <Prix
           libelle="Prix vente"
@@ -1168,45 +1319,30 @@ function CarteCompacte({
       </div>
 
       <div className="mt-2 flex flex-wrap items-center gap-2">
-        {verrouille ? (
-          <Pastille statut={ligne.statut} />
-        ) : (
-          <Select
-            value={ligne.statut}
-            onChange={(e) => onStatut(e.target.value as ItemStatus)}
-            className="h-8 w-[152px] border px-2 text-xs"
-            style={{
-              backgroundColor: STATUTS[ligne.statut].fond,
-              color: STATUTS[ligne.statut].texte,
-              borderColor: STATUTS[ligne.statut].bordure,
-            }}
-          >
-            {statutsProposables(ligne.statut).map((s) => (
-              <option key={s} value={s}>
-                {STATUTS[s].label}
-              </option>
-            ))}
-          </Select>
-        )}
+        <ChoixStatut ligne={ligne} onStatut={changerStatut} />
+        <div className="w-[92px]">
+          <BoutonVendue ligne={ligne} onVendue={onVendue} />
+        </div>
+        <ChampPreuve ligne={ligne} preuveHref={preuveHref} onPreuve={onPreuve} />
 
         <button
           type="button"
           onClick={() => setNotesOuvertes((v) => !v)}
           aria-label="Notes"
-          className={`p-1.5 ${ligne.notes ? "text-sauge-fonce" : "text-gris-moyen"}`}
+          className={`ml-auto p-1.5 ${ligne.notes ? "text-sauge-fonce" : "text-gris-moyen"}`}
         >
           <StickyNote className="h-4 w-4" />
         </button>
-
-        <div className="ml-auto">
-          <ActionsVente
-            ligne={ligne}
-            preuveHref={preuveHref}
-            onPreuve={onPreuve}
-            onSupprimer={onSupprimer}
-            onFinaliser={onFinaliser}
-          />
-        </div>
+        {!verrouille && (
+          <button
+            type="button"
+            onClick={onSupprimer}
+            aria-label="Supprimer la pièce"
+            className="p-1.5 text-gris-moyen transition-colors hover:text-red-700"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
       {notesOuvertes && (
@@ -1216,13 +1352,19 @@ function CarteCompacte({
           onBlur={onEnregistrerNotes}
           disabled={verrouille}
           rows={2}
-          placeholder="Tache sur la manche, taille petit…"
+          autoFocus={ligne.statut === "unsellable" && !ligne.notes}
+          placeholder={
+            ligne.statut === "unsellable"
+              ? "Explique pourquoi cet article est invendable."
+              : "Tache sur la manche, taille petit…"
+          }
           className="mt-2 resize-none border-noir/15 bg-blanc text-sm"
         />
       )}
     </div>
   );
 }
+
 
 function Prix({
   libelle,
@@ -1288,15 +1430,13 @@ function DialogueFinalisation({
           <div className="space-y-2">
             <div className="eyebrow">Finalisation</div>
             <AlertDialog.Title className="font-serif text-2xl">
-              Confirmer le virement
+              Passer cette pièce en finalisé ?
             </AlertDialog.Title>
             <AlertDialog.Description className="text-sm text-gris-moyen">
               {ligne?.description || "Cette pièce"}
               {prix != null ? ` — vendue ${euros(prix)}.` : "."} La cliente touche{" "}
-              <strong className="text-noir">
-                {euros(montantCliente(prix ?? 0))}
-              </strong>{" "}
-              ({formatShare(PART_CLIENTE)}).
+              <strong className="text-noir">{euros(montantCliente(prix ?? 0))}</strong> (
+              {formatShare(PART_CLIENTE)}).
             </AlertDialog.Description>
           </div>
 
@@ -1306,7 +1446,7 @@ function DialogueFinalisation({
             </span>
             {ligne?.preuveUrl ? (
               <p className="text-sm text-noir">
-                Déposé.{" "}
+                Bien reçu.{" "}
                 {preuveHref && (
                   <a
                     href={preuveHref}
@@ -1349,14 +1489,15 @@ function DialogueFinalisation({
             />
           </div>
 
-          <p className="border-l-2 border-[#93a5b5] bg-[#f2f5f8] px-3 py-2 text-sm text-[#3f4e5c]">
+          <p className="border-l-2 border-[#8ba3b8] bg-[#f1f5f9] px-3 py-2 text-sm text-[#364a5c]">
             Une fois finalisée, cette pièce ne pourra plus être modifiée ni supprimée.
+            C&apos;est de l&apos;argent déjà versé à la cliente.
           </p>
 
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <AlertDialog.Cancel asChild>
               <Button type="button" variant="outline">
-                Annuler
+                Pas encore
               </Button>
             </AlertDialog.Cancel>
             <Button type="button" onClick={onConfirmer} disabled={!pret}>

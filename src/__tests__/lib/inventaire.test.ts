@@ -44,10 +44,22 @@ describe('statuts de pièce', () => {
     expect(ORDRE_STATUTS).toHaveLength(5);
   });
 
-  it('ne propose jamais « finalisé » dans le menu déroulant', () => {
+  it('ne propose ni « vendu » ni « finalisé » dans le menu déroulant', () => {
+    // Les deux s'obtiennent par un geste explicite : le prix de vente pour
+    // l'un, le justificatif de virement pour l'autre.
     ORDRE_STATUTS.forEach((s) => {
       expect(statutsProposables(s)).not.toContain('finalized');
     });
+    expect(statutsProposables('photos_taken')).toEqual([
+      'photos_taken',
+      'on_sale',
+      'unsellable',
+    ]);
+  });
+
+  it('garde le statut courant dans la liste, sinon le menu afficherait du vide', () => {
+    expect(statutsProposables('sold')).toContain('sold');
+    expect(statutsProposables('sold')[0]).toBe('sold');
   });
 
   it('ne propose plus rien sur une pièce finalisée', () => {

@@ -1,7 +1,7 @@
 -- supabase/schema.sql
 -- Snapshot of the production schema (public tables, functions, RLS, grants,
 -- storage buckets and policies), read from the production catalog on
--- 2026-09-24, then brought up to date with migrations 0019 to 0024
+-- 2026-09-24, then brought up to date with migrations 0019 to 0025
 -- (seller approval, locked requests, server-only contracts, private storage,
 -- shared rate limits, statut par pièce et finalisation).
 --
@@ -743,8 +743,9 @@ CREATE POLICY "Authenticated users can delete their sale proofs" ON storage.obje
 
 
 -- ===========================================================================
--- 0024 : statut par pièce, marque, prix de départ, notes, finalisation
--- Repris de supabase/migrations/0024_item_status_and_finalization.sql.
+-- 0024 + 0025 : statut par pièce, marque, prix de départ, notes, finalisation
+-- Repris de supabase/migrations/0024_item_status_and_finalization.sql et
+-- 0025_invendable_sans_note.sql.
 -- ===========================================================================
 
 -- ---------------------------------------------------------------------------
@@ -933,11 +934,8 @@ BEGIN
             NEW.sold_at := NULL;
         END IF;
 
-        IF NEW.status = 'unsellable'
-           AND (NEW.notes IS NULL OR btrim(NEW.notes) = '') THEN
-            RAISE EXCEPTION 'Expliquez dans les notes pourquoi cette pièce est invendable.'
-                USING ERRCODE = 'check_violation';
-        END IF;
+        -- « Invendable » ne demande pas de note en base (0025) : c'est
+        -- l'interface qui ouvre le champ et réclame l'explication.
     END IF;
 
     RETURN NEW;

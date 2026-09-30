@@ -291,12 +291,19 @@ export default function SellerDashboardPage() {
         <div className={`p-2 rounded-full ${statusInfo.color}`}>
           {statusInfo.icon}
         </div>
-        <div className="font-semibold">Demande #{request.id.slice(0, 8)}</div>
+        {/* Le nom de la cliente d'abord : c'est ce qu'on cherche des yeux
+            quand on parcourt la liste. Le numéro de demande n'est utile que
+            pour se repérer, il passe en petit avec le reste. Avant
+            attribution, la cliente n'est pas communiquée : on retombe alors
+            sur le numéro de demande. */}
+        <div className="font-semibold">
+          {clientDisplayName || `Demande #${request.id.slice(0, 8)}`}
+        </div>
         <div className="text-sm text-gris-moyen">
           {new Date(request.created_at).toLocaleDateString("fr-FR")}
         </div>
         {clientDisplayName && (
-          <div className="text-sm text-gris-moyen">· {clientDisplayName}</div>
+          <div className="text-sm text-gris-moyen">· #{request.id.slice(0, 8)}</div>
         )}
         {formula && (
           <div className="text-sm text-gris-moyen">
