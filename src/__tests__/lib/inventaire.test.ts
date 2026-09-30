@@ -120,6 +120,9 @@ describe('répartition', () => {
 });
 
 describe('minPriceEditorFor', () => {
+  // Dit à qui revient normalement la saisie, pas qui en a le droit : la
+  // vendeuse peut toujours renseigner un prix minimal, c'est la validation
+  // par la cliente qui le verrouille.
   it('confie le prix minimal à la cliente en formule « Déjà trié »', () => {
     expect(minPriceEditorFor('pre-sorted')).toBe('client');
   });

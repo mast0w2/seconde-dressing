@@ -73,13 +73,28 @@ interface Props {
 }
 
 const CELLULE = "px-2 py-1.5 align-middle overflow-hidden";
+/**
+ * Entrée valide la saisie et quitte la case. On se contente de retirer le
+ * focus : c'est la sortie du champ qui enregistre, partout dans ce tableau.
+ */
+function sortirSurEntree(e: React.KeyboardEvent<HTMLInputElement>) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    e.currentTarget.blur();
+  }
+}
+
 const CHAMP_PRIX =
   "h-8 w-full px-2 text-left tabular-nums text-sm border-noir/15 bg-transparent";
 
 export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Props) {
   const { toast } = useToast();
-  // Formule « Déjà trié » : c'est la cliente qui fixe son plancher.
-  const prixMinEditable = minPriceEditorFor(formulaSlug) === "seller";
+  // Formule « Déjà trié » : la cliente a fait son inventaire et renseigne
+  // elle-même ses planchers. La vendeuse peut quand même les saisir — sinon
+  // elle se retrouve bloquée devant la cliente si rien n'a été rempli avant
+  // son passage. Dans les deux cas, c'est la validation par la cliente qui
+  // verrouille le prix.
+  const clienteFixeLePlancher = minPriceEditorFor(formulaSlug) === "client";
   const { lignes, setLignes, chargement, urlsSignees, supabase } = useInventaire(requestId);
 
   const inputPhotos = useRef<HTMLInputElement>(null);
@@ -449,6 +464,14 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
         />
       )}
 
+      {clienteFixeLePlancher && lignes.length > 0 && (
+        <p className="text-xs text-gris-moyen">
+          Formule <strong className="text-noir">Déjà trié</strong> : c&apos;est la cliente
+          qui renseigne le prix minimal de chaque pièce. Vous pouvez le saisir à sa place,
+          elle le validera — et il sera alors verrouillé.
+        </p>
+      )}
+
       {/* Filtrer et chercher sont le même geste : réduire ce qu'on voit dans
           le tableau. Les deux vivent donc sur une seule ligne, juste au-dessus
           des colonnes — filtres à gauche, recherche à droite. */}
@@ -563,7 +586,6 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
                   <LigneTableau
                     key={ligne.localId}
                     ligne={ligne}
-                    prixMinEditable={prixMinEditable}
                     photoSrc={ligne.photoUrl ? urlsSignees[ligne.photoUrl] ?? null : null}
                     preuveHref={ligne.preuveUrl ? urlsSignees[ligne.preuveUrl] ?? null : null}
                     notesOuvertes={notesOuvertes === ligne.localId}
@@ -613,7 +635,6 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
               <CarteCompacte
                 key={ligne.localId}
                 ligne={ligne}
-                prixMinEditable={prixMinEditable}
                 photoSrc={ligne.photoUrl ? urlsSignees[ligne.photoUrl] ?? null : null}
                 preuveHref={ligne.preuveUrl ? urlsSignees[ligne.preuveUrl] ?? null : null}
                 onChange={(patch) => majLocale(ligne.localId, patch)}
@@ -815,8 +836,6 @@ function FiltreBouton({
 
 interface LigneProps {
   ligne: Ligne;
-  /** Faux quand c'est la cliente qui fixe le prix minimal (formule « Déjà trié »). */
-  prixMinEditable: boolean;
   photoSrc: string | null;
   preuveHref: string | null;
   onChange: (patch: Partial<Ligne>) => void;
@@ -834,7 +853,6 @@ interface LigneProps {
 
 function LigneTableau({
   ligne,
-  prixMinEditable,
   photoSrc,
   preuveHref,
   notesOuvertes,
@@ -856,7 +874,7 @@ function LigneTableau({
   onPhoto: (f: File | null) => void;
 }) {
   const verrouille = estVerrouille(ligne.statut);
-  const prixBloques = !!ligne.prixValidesLe || !prixMinEditable;
+  const prixBloques = !!ligne.prixValidesLe;
   const inputPhoto = useRef<HTMLInputElement>(null);
 
   return (
@@ -922,6 +940,7 @@ function LigneTableau({
             value={ligne.marque}
             onChange={(e) => onChange({ marque: e.target.value })}
             onBlur={onEnregistrerMarque}
+            onKeyDown={sortirSurEntree}
             disabled={verrouille}
             placeholder=""
             className="h-8 w-full border-noir/15 bg-transparent px-2 text-sm"
@@ -934,6 +953,7 @@ function LigneTableau({
             value={ligne.prixDepart}
             onChange={(e) => onChange({ prixDepart: e.target.value })}
             onBlur={() => onEnregistrerPrix("starting_price", ligne.prixDepart)}
+            onKeyDown={sortirSurEntree}
             disabled={verrouille}
             inputMode="decimal"
             placeholder=""
@@ -953,6 +973,7 @@ function LigneTableau({
               value={ligne.prixMin}
               onChange={(e) => onChange({ prixMin: e.target.value })}
               onBlur={() => onEnregistrerPrix("min_price", ligne.prixMin)}
+              onKeyDown={sortirSurEntree}
               inputMode="decimal"
               placeholder=""
               className={CHAMP_PRIX}
@@ -976,6 +997,7 @@ function LigneTableau({
               value={ligne.prixVente}
               onChange={(e) => onChange({ prixVente: e.target.value })}
               onBlur={() => onEnregistrerPrix("sale_price", ligne.prixVente)}
+              onKeyDown={sortirSurEntree}
               inputMode="decimal"
               placeholder=""
               className={CHAMP_PRIX}
@@ -1083,6 +1105,7 @@ function ChampDescription({
         value={valeur}
         onChange={(e) => onChange(e.target.value)}
         onBlur={() => onEnregistrer()}
+        onKeyDown={sortirSurEntree}
         disabled={verrouille}
         placeholder=""
         className={`h-8 w-full min-w-0 border-noir/15 bg-transparent px-2 text-sm ${
@@ -1254,7 +1277,6 @@ function ChampPreuve({
 
 function CarteCompacte({
   ligne,
-  prixMinEditable,
   photoSrc,
   preuveHref,
   onChange,
@@ -1269,7 +1291,7 @@ function CarteCompacte({
   onLoupe,
 }: LigneProps) {
   const verrouille = estVerrouille(ligne.statut);
-  const prixBloques = !!ligne.prixValidesLe || !prixMinEditable;
+  const prixBloques = !!ligne.prixValidesLe;
   const [notesOuvertes, setNotesOuvertes] = useState(false);
 
   // Passer une pièce en invendable ouvre les notes : l'explication est
@@ -1308,6 +1330,7 @@ function CarteCompacte({
             value={ligne.marque}
             onChange={(e) => onChange({ marque: e.target.value })}
             onBlur={onEnregistrerMarque}
+            onKeyDown={sortirSurEntree}
             disabled={verrouille}
             placeholder="Marque"
             className="h-8 w-full border-noir/15 bg-transparent px-2 text-sm"
@@ -1413,6 +1436,7 @@ function Prix({
           value={valeur}
           onChange={(e) => onChange(e.target.value)}
           onBlur={onBlur}
+          onKeyDown={sortirSurEntree}
           inputMode="decimal"
           placeholder="—"
           className="h-8 w-full border-noir/15 bg-transparent px-2 text-left tabular-nums text-sm"
