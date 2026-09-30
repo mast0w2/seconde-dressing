@@ -142,7 +142,20 @@ export function venteAcquise(statut: ItemStatus): boolean {
   return statut === "finalized";
 }
 
+/**
+ * Ce que le statut devient du point de vue de la cliente.
+ *
+ * Son parcours a une étape de moins : « vendu » et « vente en cours » sont le
+ * même moment pour elle, tant que l'argent n'est pas acquis. Deux états qui
+ * portent le même mot doivent aussi porter la même couleur — sinon on lit
+ * deux fois « En vente » dans deux teintes différentes, et on cherche la
+ * différence qu'on ne nous dit pas.
+ */
+export function statutVuCliente(statut: ItemStatus): ItemStatus {
+  return statut === "sold" ? "on_sale" : statut;
+}
+
 export function libelle(statut: ItemStatus, pour: "seller" | "client"): string {
-  const info = STATUTS[statut];
-  return pour === "client" ? info.labelCliente : info.label;
+  if (pour === "client") return STATUTS[statutVuCliente(statut)].labelCliente;
+  return STATUTS[statut].label;
 }

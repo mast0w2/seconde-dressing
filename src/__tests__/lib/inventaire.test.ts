@@ -5,6 +5,7 @@ import {
   estVendue,
   estVerrouille,
   libelle,
+  statutVuCliente,
   statutsProposables,
   venteAcquise,
 } from '@/lib/item-status';
@@ -100,6 +101,20 @@ describe('statuts de pièce', () => {
     expect(libelle('sold', 'client')).toBe('En vente');
     expect(libelle('on_sale', 'client')).toBe('En vente');
     expect(libelle('finalized', 'client')).toBe('Vendue — paiement en cours');
+  });
+
+  it('donne la même couleur aux états qui portent le même mot', () => {
+    // Deux pastilles « En vente » de deux teintes différentes feraient
+    // chercher une distinction qu'on ne nomme pas.
+    expect(statutVuCliente('sold')).toBe('on_sale');
+    expect(STATUTS[statutVuCliente('sold')].fond).toBe(STATUTS.on_sale.fond);
+    expect(libelle('sold', 'client')).toBe(libelle('on_sale', 'client'));
+  });
+
+  it('ne collapse aucun autre statut', () => {
+    (['photos_taken', 'awaiting_client', 'on_sale', 'finalized', 'unsellable'] as const).forEach(
+      (s) => expect(statutVuCliente(s)).toBe(s)
+    );
   });
 
   it('distingue la vente comptable de la vente acquise', () => {

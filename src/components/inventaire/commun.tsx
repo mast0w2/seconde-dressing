@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { signStoredFiles } from "@/lib/storage";
-import { STATUTS } from "@/lib/item-status";
+import { STATUTS, statutVuCliente } from "@/lib/item-status";
 import type { ItemStatus, RequestItem } from "@/types/database";
 
 // ---------------------------------------------------------------------------
@@ -271,7 +271,9 @@ export function Pastille({
   statut: ItemStatus;
   pour?: "seller" | "client";
 }) {
-  const info = STATUTS[statut];
+  // Côté cliente, le libellé ET la couleur viennent de son propre parcours :
+  // « vendu » et « vente en cours » y sont le même moment.
+  const info = STATUTS[pour === "client" ? statutVuCliente(statut) : statut];
   return (
     <span
       className="inline-flex items-center whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[11px] leading-5"
