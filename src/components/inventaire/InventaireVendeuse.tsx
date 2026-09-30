@@ -1087,6 +1087,9 @@ function LigneTableau({
   // parlent de la vente restent inertes plutôt que de laisser croire qu'on
   // peut brûler les étapes.
   const enVente = ligne.statut === "on_sale" || estVendue(ligne.statut);
+  // Une pièce déclarée invendable ne se prépare plus : ses prix n'ont plus
+  // d'objet, on les montre sans inviter à les remplir.
+  const invendable = ligne.statut === "unsellable";
   const inputPhoto = useRef<HTMLInputElement>(null);
 
   return (
@@ -1161,21 +1164,27 @@ function LigneTableau({
 
         {/* Prix départ */}
         <td className={CELLULE}>
-          <ChampLocal
-            valeur={ligne.prixDepart}
-            onCommit={(v) => {
-              onChange({ prixDepart: v });
-              onEnregistrerPrix("starting_price", v);
-            }}
-            disabled={verrouille}
-            inputMode="decimal"
-            className={CHAMP_PRIX}
-          />
+          {invendable ? (
+            <PrixFige valeur={ligne.prixDepart} />
+          ) : (
+            <ChampLocal
+              valeur={ligne.prixDepart}
+              onCommit={(v) => {
+                onChange({ prixDepart: v });
+                onEnregistrerPrix("starting_price", v);
+              }}
+              disabled={verrouille}
+              inputMode="decimal"
+              className={CHAMP_PRIX}
+            />
+          )}
         </td>
 
         {/* Prix min */}
         <td className={CELLULE}>
-          {prixBloques ? (
+          {invendable ? (
+            <PrixFige valeur={ligne.prixMin} />
+          ) : prixBloques ? (
             <span className="inline-flex items-center gap-1 px-2 tabular-nums text-noir">
               {ligne.prixValidesLe && <Lock className="h-3 w-3 text-gris-moyen" />}
               {versPrix(ligne.prixMin) != null ? euros(versPrix(ligne.prixMin) as number) : "—"}
@@ -1289,6 +1298,16 @@ function LigneTableau({
         </tr>
       )}
     </>
+  );
+}
+
+/** Un prix qu'on ne peut plus toucher, affiché sans cadre de saisie. */
+function PrixFige({ valeur }: { valeur: string }) {
+  const montant = versPrix(valeur);
+  return (
+    <span className="px-2 tabular-nums text-gris-moyen">
+      {montant != null ? euros(montant) : "—"}
+    </span>
   );
 }
 
@@ -1527,6 +1546,7 @@ function CarteCompacte({
   const verrouille = estVerrouille(ligne.statut);
   const prixBloques = !!ligne.prixValidesLe;
   const enVente = ligne.statut === "on_sale" || estVendue(ligne.statut);
+  const invendable = ligne.statut === "unsellable";
   const [notesOuvertes, setNotesOuvertes] = useState(false);
 
   // Passer une pièce en invendable ouvre les notes : l'explication est
@@ -1578,7 +1598,7 @@ function CarteCompacte({
         <Prix
           libelle="Prix départ"
           valeur={ligne.prixDepart}
-          verrouille={verrouille}
+          verrouille={verrouille || invendable}
           onCommit={(v) => {
             onChange({ prixDepart: v });
             onEnregistrerPrix("starting_price", v);
@@ -1587,7 +1607,7 @@ function CarteCompacte({
         <Prix
           libelle="Prix min"
           valeur={ligne.prixMin}
-          verrouille={prixBloques}
+          verrouille={prixBloques || invendable}
           onCommit={(v) => {
             onChange({ prixMin: v });
             onEnregistrerPrix("min_price", v);
