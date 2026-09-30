@@ -377,11 +377,6 @@ export default function SellerDashboardPage() {
             </div>
           )}
 
-          {request.description && (
-            <div className="mb-3 text-sm text-gris-moyen">
-              Précisions : {request.description}
-            </div>
-          )}
 
           {/* Avant acceptation, la vendeuse n'a besoin que du secteur pour
               décider. L'adresse exacte n'apparaît qu'une fois la demande
