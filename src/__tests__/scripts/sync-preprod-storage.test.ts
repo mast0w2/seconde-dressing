@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { encodePath, pickServiceKey, planStorageSync } from '../../../scripts/sync-preprod-storage.mjs';
+import { encodePath, isMissingObject, pickServiceKey, planStorageSync } from '../../../scripts/sync-preprod-storage.mjs';
 
 describe('pickServiceKey', () => {
   it('prefers the legacy service_role key', () => {
@@ -57,5 +57,19 @@ describe('planStorageSync', () => {
 describe('encodePath', () => {
   it('encodes each segment but keeps the slashes', () => {
     expect(encodePath('req-1/robe dété #2.jpg')).toBe('req-1/robe%20d%C3%A9t%C3%A9%20%232.jpg');
+  });
+});
+
+describe('isMissingObject', () => {
+  it('recognises a file listed but not stored (400 with a 404 body)', () => {
+    expect(
+      isMissingObject(400, '{"statusCode":"404","error":"not_found","message":"Object not found","code":"NoSuchKey"}')
+    ).toBe(true);
+    expect(isMissingObject(404, '')).toBe(true);
+  });
+
+  it('leaves real failures alone', () => {
+    expect(isMissingObject(400, '{"statusCode":"400","error":"InvalidKey"}')).toBe(false);
+    expect(isMissingObject(500, 'Internal error')).toBe(false);
   });
 });

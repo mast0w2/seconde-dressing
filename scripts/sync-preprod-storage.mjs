@@ -41,6 +41,24 @@ export function planStorageSync(source, target) {
   };
 }
 
+/**
+ * True when a download failed because the file does not exist. Storage can
+ * list an object whose content was never stored (an upload cut short): it
+ * then answers 400 with a 404 body. Nothing can be copied from it.
+ */
+export function isMissingObject(status, body) {
+  if (status === 404) return true;
+  try {
+    const parsed = JSON.parse(body);
+    return String(parsed.statusCode) === '404' || parsed.code === 'NoSuchKey';
+  } catch {
+    return false;
+  }
+}
+
+/** Raised by copyFile() for a file listed on the source but not stored. */
+export class MissingSourceFileError extends Error {}
+
 /** Object path for a storage URL, each segment encoded. */
 export function encodePath(path) {
   return path.split('/').map(encodeURIComponent).join('/');
@@ -95,7 +113,11 @@ export async function copyFile(from, to, bucket, path) {
     headers: from.headers,
   });
   if (!download.ok) {
-    throw new Error(`download ${download.status} ${await download.text()}`);
+    const body = await download.text();
+    if (isMissingObject(download.status, body)) {
+      throw new MissingSourceFileError('listed in production but not stored there');
+    }
+    throw new Error(`download ${download.status} ${body}`);
   }
   const upload = await fetch(`${to.base}/object/${bucket}/${encodePath(path)}`, {
     method: 'POST',
@@ -137,6 +159,7 @@ export async function syncStorage({ prodRef, preprodRef, token }) {
   const preprod = storageApi(preprodRef, preprodKey);
 
   const failures = [];
+  const missing = [];
   const summary = {};
 
   for (const bucket of BUCKETS) {
@@ -147,22 +170,35 @@ export async function syncStorage({ prodRef, preprodRef, token }) {
     const { copy, remove } = planStorageSync(source, target);
 
     let copied = 0;
+    let missingHere = 0;
     for (const path of copy) {
       try {
         await copyFile(prod, preprod, bucket, path);
         copied += 1;
       } catch (err) {
-        failures.push(`${bucket}/${path}: ${err.message}`);
+        if (err instanceof MissingSourceFileError) {
+          missing.push(`${bucket}/${path}`);
+          missingHere += 1;
+        } else {
+          failures.push(`${bucket}/${path}: ${err.message}`);
+        }
       }
     }
     if (remove.length > 0) {
       await removeFiles(preprod, bucket, remove);
     }
 
-    summary[bucket] = { files: source.length, copied, removed: remove.length };
+    summary[bucket] = { files: source.length, copied, missing: missingHere, removed: remove.length };
   }
 
   console.table(summary);
+
+  // Broken in production too: reported, but nothing preprod can fix.
+  if (missing.length > 0) {
+    console.warn(
+      `${missing.length} file(s) listed in production but missing there (the photo is broken in production too):\n${missing.join('\n')}`
+    );
+  }
 
   if (failures.length > 0) {
     throw new Error(`${failures.length} file(s) not copied:\n${failures.join('\n')}`);
