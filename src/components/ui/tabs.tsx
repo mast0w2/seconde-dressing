@@ -32,7 +32,7 @@ const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(
       >
         <div className="flex gap-2 border-b">
           {React.Children.map(props.children, (child) => {
-            if (React.isValidElement(child) && child.type === TabsList) {
+            if (React.isValidElement<TabsListProps>(child) && child.type === TabsList) {
               return React.cloneElement(child, {
                 activeTab,
                 onTabChange: handleTabChange,
@@ -43,7 +43,7 @@ const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(
         </div>
         <div>
           {React.Children.map(props.children, (child) => {
-            if (React.isValidElement(child) && child.type === TabsContent) {
+            if (React.isValidElement<TabsContentProps>(child) && child.type === TabsContent) {
               return React.cloneElement(child, {
                 isActive: activeTab === child.props.value,
               });
@@ -71,7 +71,7 @@ const TabsList = React.forwardRef<HTMLDivElement, TabsListProps>(
         {...props}
       >
         {React.Children.map(props.children, (child) => {
-          if (React.isValidElement(child) && child.type === TabsTrigger) {
+          if (React.isValidElement<TabsTriggerProps>(child) && child.type === TabsTrigger) {
             return React.cloneElement(child, {
               isActive: activeTab === child.props.value,
               onClick: () => onTabChange?.(child.props.value),

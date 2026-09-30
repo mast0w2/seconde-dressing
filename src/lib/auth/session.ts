@@ -12,7 +12,7 @@ export function getAuthClient() {
 
 /** Return the current authenticated user, or null if none. */
 export async function getSessionUser() {
-  const supabase = getAuthClient();
+  const supabase = await getAuthClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -24,7 +24,7 @@ export async function getProfile(): Promise<Profile | null> {
   const user = await getSessionUser();
   if (!user) return null;
 
-  const supabase = getAuthClient();
+  const supabase = await getAuthClient();
   const { data: profile } = await supabase
     .from('profiles')
     .select('*')
