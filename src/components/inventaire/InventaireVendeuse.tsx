@@ -1210,23 +1210,23 @@ function ChampPreuve({
   onFinaliser: () => void;
 }) {
   if (ligne.statut === "finalized") {
+    // La pastille dit déjà « Finalisé » et la colonne Vendu porte la date :
+    // répéter les deux ici chargeait la ligne pour rien. Il ne reste que
+    // l'accès au fichier, avec la date de finalisation en infobulle.
+    const quand = jour(ligne.finaliseeLe);
+    if (!preuveHref) {
+      return <span className="text-[11px] text-gris-moyen">—</span>;
+    }
     return (
-      <div className="flex flex-col gap-0.5 text-[11px]">
-        <span className="inline-flex items-center gap-1 text-[#364a5c]">
-          <Lock className="h-3 w-3" />
-          Finalisée le {jour(ligne.finaliseeLe)}
-        </span>
-        {preuveHref && (
-          <a
-            href={preuveHref}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1 text-gris-moyen underline underline-offset-2 hover:text-noir"
-          >
-            Preuve <ExternalLink className="h-3 w-3" />
-          </a>
-        )}
-      </div>
+      <a
+        href={preuveHref}
+        target="_blank"
+        rel="noreferrer"
+        title={quand ? `Finalisée le ${quand}` : undefined}
+        className="inline-flex items-center gap-1 whitespace-nowrap text-[11px] text-gris-moyen underline underline-offset-2 hover:text-noir"
+      >
+        Voir la preuve <ExternalLink className="h-3 w-3 shrink-0" />
+      </a>
     );
   }
 
