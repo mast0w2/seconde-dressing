@@ -81,6 +81,25 @@ interface Props {
 }
 
 const CELLULE = "px-2 py-1.5 align-middle overflow-hidden";
+
+/**
+ * Ordre par défaut du tableau : le parcours d'une pièce, à l'envers.
+ *
+ * Ce qui est terminé en premier, ce qui n'a pas encore bougé ensuite, ce qui
+ * ne partira pas à la fin. Pendant le remplissage toutes les pièces sont au
+ * même stade, donc le tri est sans effet et elles restent dans l'ordre où
+ * elles ont été saisies — le tri est stable.
+ *
+ * Un clic sur un en-tête prend le pas sur cet ordre.
+ */
+const ORDRE_VENDEUSE: Record<ItemStatus, number> = {
+  finalized: 0,
+  sold: 1,
+  on_sale: 2,
+  awaiting_client: 3,
+  photos_taken: 4,
+  unsellable: 5,
+};
 /**
  * Entrée valide la saisie et quitte la case. On se contente de retirer le
  * focus : c'est la sortie du champ qui enregistre, partout dans ce tableau.
@@ -472,7 +491,7 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
 
   const visibles = useMemo(() => {
     const q = recherche.trim().toLowerCase();
-    let sortie = lignes.filter((l) => {
+    const sortie = lignes.filter((l) => {
       if (filtre !== "tous" && l.statut !== filtre) return false;
       if (!q) return true;
       return (
@@ -480,31 +499,35 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
       );
     });
 
-    if (tri) {
-      const cle = (l: Ligne): string | number => {
-        switch (tri.colonne) {
-          case "description":
-            return l.description.toLowerCase();
-          case "marque":
-            return l.marque.toLowerCase();
-          case "prixMin":
-            return versPrix(l.prixMin) ?? -1;
-          case "prixDepart":
-            return versPrix(l.prixDepart) ?? -1;
-          case "prixVente":
-            return versPrix(l.prixVente) ?? -1;
-          case "statut":
-            return ORDRE_STATUTS.indexOf(l.statut);
-        }
-      };
-      sortie = [...sortie].sort((a, b) => {
-        const x = cle(a);
-        const y = cle(b);
-        if (x === y) return 0;
-        return (x < y ? -1 : 1) * tri.sens;
-      });
+    if (!tri) {
+      return [...sortie].sort(
+        (a, b) => ORDRE_VENDEUSE[a.statut] - ORDRE_VENDEUSE[b.statut]
+      );
     }
-    return sortie;
+
+    const cle = (l: Ligne): string | number => {
+      switch (tri.colonne) {
+        case "description":
+          return l.description.toLowerCase();
+        case "marque":
+          return l.marque.toLowerCase();
+        case "prixMin":
+          return versPrix(l.prixMin) ?? -1;
+        case "prixDepart":
+          return versPrix(l.prixDepart) ?? -1;
+        case "prixVente":
+          return versPrix(l.prixVente) ?? -1;
+        case "statut":
+          return ORDRE_STATUTS.indexOf(l.statut);
+      }
+    };
+
+    return [...sortie].sort((a, b) => {
+      const x = cle(a);
+      const y = cle(b);
+      if (x === y) return 0;
+      return (x < y ? -1 : 1) * tri.sens;
+    });
   }, [lignes, filtre, recherche, tri]);
 
   // -------------------------------------------------------------------------
