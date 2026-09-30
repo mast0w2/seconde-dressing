@@ -84,6 +84,17 @@ function sortirSurEntree(e: React.KeyboardEvent<HTMLInputElement>) {
   }
 }
 
+/**
+ * Première lettre en majuscule. La reconnaissance vocale rend tout en
+ * minuscules : sans ça, une pièce dictée s'écrit « jupe ballon zara » à côté
+ * d'une pièce tapée « Jupe ballon Zara ».
+ */
+function majusculeInitiale(texte: string): string {
+  const propre = texte.trimStart();
+  if (!propre) return texte;
+  return propre.charAt(0).toUpperCase() + propre.slice(1);
+}
+
 const CHAMP_PRIX =
   "h-8 w-full px-2 text-left tabular-nums text-sm border-noir/15 bg-transparent";
 
@@ -1093,7 +1104,9 @@ function ChampDescription({
 
   const { isListening, error, start, stop } = useSpeechRecognition({
     onResult: (texte) => {
-      const complet = valeurRef.current ? `${valeurRef.current} ${texte}` : texte;
+      const complet = majusculeInitiale(
+        valeurRef.current ? `${valeurRef.current} ${texte}` : texte
+      );
       onChange(complet);
       onEnregistrer(complet);
     },
