@@ -13,6 +13,7 @@ import { getSupabaseClient } from "@/lib/supabase/client";
 import { isProfileComplete } from "@/lib/profile";
 import type {
   Request,
+  ItemStatus,
   Profile,
   Formula,
   RequestStatus,
@@ -30,9 +31,11 @@ interface RequestWithRelations extends Request {
   client: Profile | null;
   formula: Formula | null;
   contract: RequestContract | RequestContract[] | null;
+  /** Statuts des pièces, pour faire suivre l'avancement de la commande. */
+  items: { id: string; status: ItemStatus }[] | null;
 }
 
-const REQUEST_SELECT = `*, client:client_id (id, first_name, last_name, email, phone), formula:formula_id (id, slug, label, price), contract:request_contracts (*)`;
+const REQUEST_SELECT = `*, client:client_id (id, first_name, last_name, email, phone), formula:formula_id (id, slug, label, price), contract:request_contracts (*), items:request_items (id, status)`;
 
 // Les demandes encore ouvertes viennent de la vue `requests_ouvertes`, qui ne
 // porte aucune coordonnée : ni nom, ni email, ni téléphone. La table
@@ -97,6 +100,7 @@ export default function SellerDashboardPage() {
       client: null,
       formula: r.formula_id ? formulasById.get(r.formula_id as string) ?? null : null,
       contract: null,
+      items: null,
     }));
 
     setRefusedIds(new Set<string>((refusRes.data || []).map((r) => r.request_id)));
@@ -112,6 +116,23 @@ export default function SellerDashboardPage() {
       seen.add(r.id);
       return true;
     });
+    // La commande suit ses pièces : dès qu'une annonce est en ligne, la
+    // demande passe en « Vente en cours ». C'est la validation des prix par
+    // la cliente qui déclenche la mise en vente, et on ne va pas demander à
+    // la vendeuse de recopier à la main un avancement déjà connu.
+    const aDemarrer = unique.filter(
+      (r) =>
+        r.status === "items_collected" &&
+        (r.items ?? []).some((it) => it.status === "on_sale")
+    );
+    if (aDemarrer.length > 0) {
+      await supabase
+        .from("requests")
+        .update({ status: "items_on_sale", updated_at: new Date().toISOString() })
+        .in("id", aDemarrer.map((r) => r.id));
+      aDemarrer.forEach((r) => (r.status = "items_on_sale"));
+    }
+
     setRequests(unique);
   }, [supabase]);
 

@@ -37,7 +37,7 @@ export const requestStatusConfig: Record<RequestStatus, StatusConfig> = {
     icon: <Package className="h-4 w-4" />,
   },
   items_on_sale: {
-    label: "Articles en vente",
+    label: "Vente en cours",
     color: "bg-sauge/15 text-sauge-fonce",
     icon: <Euro className="h-4 w-4" />,
   },
@@ -56,7 +56,7 @@ export const NEXT_STATUS: Partial<Record<RequestStatus, RequestStatus>> = {
 
 export const NEXT_STATUS_LABEL: Record<RequestStatus, string> = {
   accepted: "Articles récupérés",
-  items_collected: "Articles en vente",
+  items_collected: "Vente en cours",
   items_on_sale: "Terminée",
   pending: "",
   refused: "",

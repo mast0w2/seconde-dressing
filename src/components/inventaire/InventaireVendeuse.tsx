@@ -57,8 +57,10 @@ import {
 } from "@/lib/pricing";
 import type { ItemStatus } from "@/types/database";
 import {
+  ChampLocal,
   Loupe,
   Pastille,
+  ZoneLocale,
   euros,
   formaterDelai,
   heuresRestantes,
@@ -708,11 +710,11 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
                     onEnregistrerDescription={(texte) =>
                       void enregistrerDescription(ligne, texte)
                     }
-                    onEnregistrerMarque={() =>
-                      ligne.itemId && void ecrire(ligne.itemId, { brand: ligne.marque || null })
+                    onEnregistrerMarque={(v) =>
+                      ligne.itemId && void ecrire(ligne.itemId, { brand: v || null })
                     }
-                    onEnregistrerNotes={() =>
-                      ligne.itemId && void ecrire(ligne.itemId, { notes: ligne.notes || null })
+                    onEnregistrerNotes={(v) =>
+                      ligne.itemId && void ecrire(ligne.itemId, { notes: v || null })
                     }
                     onEnregistrerPrix={(champ, valeur) => void enregistrerPrix(ligne, champ, valeur)}
                     onStatut={(s) => void changerStatut(ligne, s)}
@@ -751,11 +753,11 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
                 preuveHref={ligne.preuveUrl ? urlsSignees[ligne.preuveUrl] ?? null : null}
                 onChange={(patch) => majLocale(ligne.localId, patch)}
                 onEnregistrerDescription={(texte) => void enregistrerDescription(ligne, texte)}
-                onEnregistrerMarque={() =>
-                  ligne.itemId && void ecrire(ligne.itemId, { brand: ligne.marque || null })
+                onEnregistrerMarque={(v) =>
+                  ligne.itemId && void ecrire(ligne.itemId, { brand: v || null })
                 }
-                onEnregistrerNotes={() =>
-                  ligne.itemId && void ecrire(ligne.itemId, { notes: ligne.notes || null })
+                onEnregistrerNotes={(v) =>
+                  ligne.itemId && void ecrire(ligne.itemId, { notes: v || null })
                 }
                 onEnregistrerPrix={(champ, valeur) => void enregistrerPrix(ligne, champ, valeur)}
                 onStatut={(s) => void changerStatut(ligne, s)}
@@ -1047,8 +1049,8 @@ interface LigneProps {
   onChange: (patch: Partial<Ligne>) => void;
   /** Le texte est passé explicitement : la dictée arrive après le rendu. */
   onEnregistrerDescription: (texte?: string) => void;
-  onEnregistrerMarque: () => void;
-  onEnregistrerNotes: () => void;
+  onEnregistrerMarque: (valeur: string) => void;
+  onEnregistrerNotes: (valeur: string) => void;
   onEnregistrerPrix: (champ: "min_price" | "starting_price" | "sale_price", valeur: string) => void;
   onStatut: (s: ItemStatus) => void;
   onVendue: () => void;
@@ -1146,27 +1148,27 @@ function LigneTableau({
 
         {/* Marque */}
         <td className={CELLULE}>
-          <Input
-            value={ligne.marque}
-            onChange={(e) => onChange({ marque: e.target.value })}
-            onBlur={onEnregistrerMarque}
-            onKeyDown={sortirSurEntree}
+          <ChampLocal
+            valeur={ligne.marque}
+            onCommit={(v) => {
+              onChange({ marque: v });
+              onEnregistrerMarque(v);
+            }}
             disabled={verrouille}
-            placeholder=""
             className="h-8 w-full border-noir/15 bg-transparent px-2 text-sm"
           />
         </td>
 
         {/* Prix départ */}
         <td className={CELLULE}>
-          <Input
-            value={ligne.prixDepart}
-            onChange={(e) => onChange({ prixDepart: e.target.value })}
-            onBlur={() => onEnregistrerPrix("starting_price", ligne.prixDepart)}
-            onKeyDown={sortirSurEntree}
+          <ChampLocal
+            valeur={ligne.prixDepart}
+            onCommit={(v) => {
+              onChange({ prixDepart: v });
+              onEnregistrerPrix("starting_price", v);
+            }}
             disabled={verrouille}
             inputMode="decimal"
-            placeholder=""
             className={CHAMP_PRIX}
           />
         </td>
@@ -1179,13 +1181,13 @@ function LigneTableau({
               {versPrix(ligne.prixMin) != null ? euros(versPrix(ligne.prixMin) as number) : "—"}
             </span>
           ) : (
-            <Input
-              value={ligne.prixMin}
-              onChange={(e) => onChange({ prixMin: e.target.value })}
-              onBlur={() => onEnregistrerPrix("min_price", ligne.prixMin)}
-              onKeyDown={sortirSurEntree}
+            <ChampLocal
+              valeur={ligne.prixMin}
+              onCommit={(v) => {
+                onChange({ prixMin: v });
+                onEnregistrerPrix("min_price", v);
+              }}
               inputMode="decimal"
-              placeholder=""
               className={CHAMP_PRIX}
             />
           )}
@@ -1203,14 +1205,14 @@ function LigneTableau({
               {versPrix(ligne.prixVente) != null ? euros(versPrix(ligne.prixVente) as number) : "—"}
             </span>
           ) : (
-            <Input
-              value={ligne.prixVente}
-              onChange={(e) => onChange({ prixVente: e.target.value })}
-              onBlur={() => onEnregistrerPrix("sale_price", ligne.prixVente)}
-              onKeyDown={sortirSurEntree}
+            <ChampLocal
+              valeur={ligne.prixVente}
+              onCommit={(v) => {
+                onChange({ prixVente: v });
+                onEnregistrerPrix("sale_price", v);
+              }}
               disabled={!enVente}
               inputMode="decimal"
-              placeholder=""
               title={enVente ? undefined : "La pièce n'est pas encore en vente"}
               className={CHAMP_PRIX}
             />
@@ -1268,12 +1270,13 @@ function LigneTableau({
                 {ligne.noteCliente}
               </p>
             )}
-            <Textarea
-              value={ligne.notes}
-              onChange={(e) => onChange({ notes: e.target.value })}
-              onBlur={onEnregistrerNotes}
+            <ZoneLocale
+              valeur={ligne.notes}
+              onCommit={(v) => {
+                onChange({ notes: v });
+                onEnregistrerNotes(v);
+              }}
               disabled={verrouille}
-              rows={2}
               autoFocus={ligne.statut === "unsellable" && !ligne.notes}
               placeholder={
                 ligne.statut === "unsellable"
@@ -1324,13 +1327,13 @@ function ChampDescription({
 
   return (
     <div className="flex items-center gap-1.5">
-      <Input
-        value={valeur}
-        onChange={(e) => onChange(e.target.value)}
-        onBlur={() => onEnregistrer()}
-        onKeyDown={sortirSurEntree}
+      <ChampLocal
+        valeur={valeur}
+        onCommit={(v) => {
+          onChange(v);
+          onEnregistrer(v);
+        }}
         disabled={verrouille}
-        placeholder=""
         className={`h-8 w-full min-w-0 border-noir/15 bg-transparent px-2 text-sm ${
           isListening ? "border-sauge-fonce ring-1 ring-sauge-fonce/40" : ""
         }`}
@@ -1558,11 +1561,12 @@ function CarteCompacte({
             onChange={(v) => onChange({ description: v })}
             onEnregistrer={onEnregistrerDescription}
           />
-          <Input
-            value={ligne.marque}
-            onChange={(e) => onChange({ marque: e.target.value })}
-            onBlur={onEnregistrerMarque}
-            onKeyDown={sortirSurEntree}
+          <ChampLocal
+            valeur={ligne.marque}
+            onCommit={(v) => {
+              onChange({ marque: v });
+              onEnregistrerMarque(v);
+            }}
             disabled={verrouille}
             placeholder="Marque"
             className="h-8 w-full border-noir/15 bg-transparent px-2 text-sm"
@@ -1575,22 +1579,28 @@ function CarteCompacte({
           libelle="Prix départ"
           valeur={ligne.prixDepart}
           verrouille={verrouille}
-          onChange={(v) => onChange({ prixDepart: v })}
-          onBlur={() => onEnregistrerPrix("starting_price", ligne.prixDepart)}
+          onCommit={(v) => {
+            onChange({ prixDepart: v });
+            onEnregistrerPrix("starting_price", v);
+          }}
         />
         <Prix
           libelle="Prix min"
           valeur={ligne.prixMin}
           verrouille={prixBloques}
-          onChange={(v) => onChange({ prixMin: v })}
-          onBlur={() => onEnregistrerPrix("min_price", ligne.prixMin)}
+          onCommit={(v) => {
+            onChange({ prixMin: v });
+            onEnregistrerPrix("min_price", v);
+          }}
         />
         <Prix
           libelle="Prix vente"
           valeur={ligne.prixVente}
           verrouille={verrouille || !enVente}
-          onChange={(v) => onChange({ prixVente: v })}
-          onBlur={() => onEnregistrerPrix("sale_price", ligne.prixVente)}
+          onCommit={(v) => {
+            onChange({ prixVente: v });
+            onEnregistrerPrix("sale_price", v);
+          }}
         />
       </div>
 
@@ -1622,12 +1632,13 @@ function CarteCompacte({
       </div>
 
       {notesOuvertes && (
-        <Textarea
-          value={ligne.notes}
-          onChange={(e) => onChange({ notes: e.target.value })}
-          onBlur={onEnregistrerNotes}
+        <ZoneLocale
+          valeur={ligne.notes}
+          onCommit={(v) => {
+            onChange({ notes: v });
+            onEnregistrerNotes(v);
+          }}
           disabled={verrouille}
-          rows={2}
           autoFocus={ligne.statut === "unsellable" && !ligne.notes}
           placeholder={
             ligne.statut === "unsellable"
@@ -1646,14 +1657,12 @@ function Prix({
   libelle,
   valeur,
   verrouille,
-  onChange,
-  onBlur,
+  onCommit,
 }: {
   libelle: string;
   valeur: string;
   verrouille: boolean;
-  onChange: (v: string) => void;
-  onBlur: () => void;
+  onCommit: (v: string) => void;
 }) {
   return (
     <label className="flex flex-col gap-1">
@@ -1664,11 +1673,9 @@ function Prix({
           {versPrix(valeur) != null ? euros(versPrix(valeur) as number) : "—"}
         </span>
       ) : (
-        <Input
-          value={valeur}
-          onChange={(e) => onChange(e.target.value)}
-          onBlur={onBlur}
-          onKeyDown={sortirSurEntree}
+        <ChampLocal
+          valeur={valeur}
+          onCommit={onCommit}
           inputMode="decimal"
           placeholder="—"
           className="h-8 w-full border-noir/15 bg-transparent px-2 text-left tabular-nums text-sm"

@@ -7,6 +7,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import { X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { signStoredFiles } from "@/lib/storage";
 import { STATUTS } from "@/lib/item-status";
@@ -153,6 +155,109 @@ export function useInventaire(requestId: string) {
   }, [lignes, supabase]);
 
   return { lignes, setLignes, chargement, urlsSignees, recharger, supabase };
+}
+
+// ---------------------------------------------------------------------------
+// Champs qui gardent leur texte pour eux
+//
+// Un tableau d'inventaire, c'est quarante lignes et onze colonnes. Quand
+// chaque frappe au clavier remonte dans l'état du composant parent, ce sont
+// les quarante lignes qui se redessinent à chaque lettre — et la saisie
+// devient poisseuse.
+//
+// Ces champs gardent donc leur texte en local et ne préviennent le parent
+// qu'à la sortie : une écriture par champ modifié, au lieu d'une par lettre.
+// ---------------------------------------------------------------------------
+
+interface ChampLocalProps {
+  valeur: string;
+  /** Appelé à la sortie du champ, seulement si le texte a changé. */
+  onCommit: (valeur: string) => void;
+  disabled?: boolean;
+  placeholder?: string;
+  className?: string;
+  inputMode?: "text" | "decimal";
+  title?: string;
+  autoFocus?: boolean;
+}
+
+/** Entrée valide la saisie et quitte la case ; c'est la sortie qui enregistre. */
+function sortirSurEntree(e: React.KeyboardEvent<HTMLInputElement>) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    e.currentTarget.blur();
+  }
+}
+
+export function ChampLocal({
+  valeur,
+  onCommit,
+  disabled,
+  placeholder,
+  className,
+  inputMode,
+  title,
+}: ChampLocalProps) {
+  const [texte, setTexte] = useState(valeur);
+  const edite = useRef(false);
+
+  // On ne remplace le texte affiché que si personne n'est en train de
+  // l'écrire : sinon une sauvegarde concurrente effacerait la frappe en cours.
+  useEffect(() => {
+    if (!edite.current) setTexte(valeur);
+  }, [valeur]);
+
+  return (
+    <Input
+      value={texte}
+      onChange={(e) => setTexte(e.target.value)}
+      onFocus={() => (edite.current = true)}
+      onBlur={() => {
+        edite.current = false;
+        if (texte !== valeur) onCommit(texte);
+      }}
+      onKeyDown={sortirSurEntree}
+      disabled={disabled}
+      placeholder={placeholder}
+      inputMode={inputMode}
+      title={title}
+      className={className}
+    />
+  );
+}
+
+export function ZoneLocale({
+  valeur,
+  onCommit,
+  disabled,
+  placeholder,
+  className,
+  rows = 2,
+  autoFocus,
+}: Omit<ChampLocalProps, "inputMode" | "title"> & { rows?: number }) {
+  const [texte, setTexte] = useState(valeur);
+  const edite = useRef(false);
+
+  useEffect(() => {
+    if (!edite.current) setTexte(valeur);
+  }, [valeur]);
+
+  return (
+    <Textarea
+      value={texte}
+      onChange={(e) => setTexte(e.target.value)}
+      onFocus={() => (edite.current = true)}
+      onBlur={() => {
+        edite.current = false;
+        if (texte !== valeur) onCommit(texte);
+      }}
+      disabled={disabled}
+      placeholder={placeholder}
+      rows={rows}
+      autoFocus={autoFocus}
+      className={className}
+    />
+  );
 }
 
 // ---------------------------------------------------------------------------
