@@ -1401,7 +1401,7 @@ function ChoixStatut({
     // Pas de compte à rebours par ligne : le délai est le même pour toute la
     // commande, il est annoncé une fois dans le bandeau d'envoi.
     return (
-      <div className="flex flex-col items-start gap-0.5">
+      <div className="flex items-center gap-1.5">
         <Pastille statut={ligne.statut} />
         {ligne.statut === "sold" && (
           <button
