@@ -37,7 +37,9 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import { alleger } from "@/lib/image";
 import { detecterMarque } from "@/lib/brands";
+import { storagePath } from "@/lib/storage";
 import { minPriceEditorFor } from "@/lib/formules";
 import {
   DELAI_VALIDATION_HEURES,
@@ -208,8 +210,10 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
       setLignes((prev) => [...prev, ...brouillons]);
 
       for (let i = 0; i < liste.length; i++) {
-        const fichier = liste[i];
         const brouillon = brouillons[i];
+        // Une photo de téléphone pèse plusieurs mégaoctets pour finir dans une
+        // vignette de 44 pixels : on la réduit avant de l'envoyer.
+        const fichier = await alleger(liste[i]);
         const ext = fichier.name.split(".").pop() || "jpg";
         const chemin = `${requestId}/${brouillon.localId}.${ext}`;
 
@@ -240,9 +244,10 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
 
   /** Remplace la photo d'une ligne existante. */
   const remplacerPhoto = useCallback(
-    async (ligne: Ligne, fichier: File | null) => {
-      if (!fichier || !ligne.itemId) return;
+    async (ligne: Ligne, brut: File | null) => {
+      if (!brut || !ligne.itemId) return;
       majLocale(ligne.localId, { uploading: true });
+      const fichier = await alleger(brut);
       const ext = fichier.name.split(".").pop() || "jpg";
       const chemin = `${requestId}/${ligne.itemId}-${Date.now()}.${ext}`;
       const { error } = await supabase.storage
@@ -262,10 +267,36 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
   const supprimer = useCallback(
     async (ligne: Ligne) => {
       if (ligne.itemId) {
-        const { error } = await supabase.from("request_items").delete().eq("id", ligne.itemId);
+        // On redemande les lignes supprimées. Sans ça, une suppression que la
+        // base refuse silencieusement — faute de droit, elle ne trouve aucune
+        // ligne à toucher et ne signale rien — passerait pour un succès : la
+        // pièce disparaît de l'écran et revient au rechargement.
+        const { data, error } = await supabase
+          .from("request_items")
+          .delete()
+          .eq("id", ligne.itemId)
+          .select("id");
         if (error) {
           toast({ title: "Suppression refusée", description: error.message, variant: "destructive" });
           return;
+        }
+        if (!data || data.length === 0) {
+          toast({
+            title: "Suppression impossible",
+            description:
+              "La base a refusé de supprimer cette pièce. Rechargez la page : elle est toujours là.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // La photo n'a plus de ligne à laquelle appartenir. Si le nettoyage
+        // échoue on n'en fait pas une affaire : mieux vaut un fichier orphelin
+        // qu'une suppression bloquée.
+        if (ligne.photoUrl) {
+          await supabase.storage
+            .from("request-items")
+            .remove([storagePath(ligne.photoUrl, "request-items")]);
         }
       }
       setLignes((prev) => prev.filter((l) => l.localId !== ligne.localId));
@@ -341,9 +372,10 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
   );
 
   const deposerPreuve = useCallback(
-    async (ligne: Ligne, fichier: File | null) => {
-      if (!fichier || !ligne.itemId) return;
+    async (ligne: Ligne, brut: File | null) => {
+      if (!brut || !ligne.itemId) return;
       majLocale(ligne.localId, { uploadingPreuve: true });
+      const fichier = await alleger(brut);
       const ext = fichier.name.split(".").pop() || "jpg";
       const chemin = `${requestId}/${ligne.itemId}-preuve-${Date.now()}.${ext}`;
       const { error } = await supabase.storage
@@ -1134,6 +1166,10 @@ function LigneTableau({
               <img
                 src={photoSrc}
                 alt={ligne.description || "Pièce"}
+                loading="lazy"
+                decoding="async"
+                width={44}
+                height={44}
                 className="h-11 w-11 object-cover border border-noir/10"
               />
             </button>
@@ -1588,6 +1624,10 @@ function CarteCompacte({
             <img
               src={photoSrc}
               alt={ligne.description || "Pièce"}
+              loading="lazy"
+              decoding="async"
+              width={56}
+              height={56}
               className="h-14 w-14 object-cover border border-noir/10"
             />
           </button>
