@@ -497,45 +497,67 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
                 saisisse. Sans ça, marquer une pièce vendue ajoutait une date
                 et élargissait tout le tableau. */}
             <table className="w-full table-fixed border-collapse text-sm">
+              {/* Réparti pour que chaque en-tête tienne sur une ligne sans
+                  être tronqué, y compris « Minimum » et « Notes ». */}
               <colgroup>
                 <col style={{ width: "6%" }} />
-                <col style={{ width: "18%" }} />
+                <col style={{ width: "17%" }} />
+                <col style={{ width: "11.5%" }} />
+                <col style={{ width: "8.5%" }} />
+                <col style={{ width: "8.5%" }} />
                 <col style={{ width: "12%" }} />
-                <col style={{ width: "8%" }} />
-                <col style={{ width: "8%" }} />
-                <col style={{ width: "13%" }} />
-                <col style={{ width: "8%" }} />
+                <col style={{ width: "8.5%" }} />
                 <col style={{ width: "9%" }} />
-                <col style={{ width: "11%" }} />
-                <col style={{ width: "3.5%" }} />
-                <col style={{ width: "3.5%" }} />
+                <col style={{ width: "10%" }} />
+                <col style={{ width: "5%" }} />
+                <col style={{ width: "4%" }} />
               </colgroup>
               {/* L'en-tête suit le défilement : au-delà de quelques lignes, on
                   ne sait plus si la colonne est le prix min ou le prix départ. */}
               <thead className="sticky top-0 z-10">
-                <tr className="bg-gris-tres-clair text-left text-[11px] uppercase tracking-[0.12em] text-gris-moyen shadow-[0_1px_0_0_rgba(46,58,44,0.12)]">
-                  <th className="px-2 py-2">Photo</th>
+                <tr className="bg-gris-tres-clair text-left align-middle text-[11px] uppercase tracking-[0.08em] text-gris-moyen shadow-[0_1px_0_0_rgba(46,58,44,0.12)]">
+                  <th className="px-2 py-2 whitespace-nowrap">Photo</th>
                   <EnTete colonne="description" tri={tri} onClick={basculerTri}>
                     Description
                   </EnTete>
                   <EnTete colonne="marque" tri={tri} onClick={basculerTri}>
                     Marque
                   </EnTete>
-                  <EnTete colonne="prixDepart" tri={tri} onClick={basculerTri} droite>
-                    Prix départ
+                  <EnTete
+                    colonne="prixDepart"
+                    tri={tri}
+                    onClick={basculerTri}
+                    droite
+                    titre="Prix de départ affiché en ligne"
+                  >
+                    Départ
                   </EnTete>
-                  <EnTete colonne="prixMin" tri={tri} onClick={basculerTri} droite>
-                    Prix min
+                  <EnTete
+                    colonne="prixMin"
+                    tri={tri}
+                    onClick={basculerTri}
+                    droite
+                    titre="Prix minimal accepté par la cliente"
+                  >
+                    Minimum
                   </EnTete>
                   <EnTete colonne="statut" tri={tri} onClick={basculerTri}>
                     Statut
                   </EnTete>
-                  <EnTete colonne="prixVente" tri={tri} onClick={basculerTri} droite>
-                    Prix vente
+                  <EnTete
+                    colonne="prixVente"
+                    tri={tri}
+                    onClick={basculerTri}
+                    droite
+                    titre="Prix auquel la pièce a été vendue"
+                  >
+                    Vente
                   </EnTete>
-                  <th className="px-2 py-2">Vendu</th>
-                  <th className="px-2 py-2">Preuve de vente</th>
-                  <th className="px-2 py-2">Notes</th>
+                  <th className="px-2 py-2 whitespace-nowrap">Vendu</th>
+                  <th className="px-2 py-2 whitespace-nowrap" title="Preuve de vente">
+                    Preuve
+                  </th>
+                  <th className="px-2 py-2 whitespace-nowrap">Notes</th>
                   <th className="px-2 py-2"></th>
                 </tr>
               </thead>
@@ -725,17 +747,27 @@ function Chiffre({
 // En-tête triable
 // ===========================================================================
 
+/**
+ * En-tête de colonne triable.
+ *
+ * La flèche est toujours à droite du libellé, quelle que soit l'alignement de
+ * la colonne : une flèche qui saute d'un côté à l'autre donne un en-tête qui
+ * paraît en désordre. Et le libellé ne passe jamais à la ligne — c'est pour ça
+ * qu'ils sont courts, avec l'intitulé complet en infobulle.
+ */
 function EnTete({
   colonne,
   tri,
   onClick,
   droite = false,
+  titre,
   children,
 }: {
   colonne: Colonne;
   tri: { colonne: Colonne; sens: 1 | -1 } | null;
   onClick: (c: Colonne) => void;
   droite?: boolean;
+  titre?: string;
   children: React.ReactNode;
 }) {
   const actif = tri?.colonne === colonne;
@@ -745,12 +777,13 @@ function EnTete({
       <button
         type="button"
         onClick={() => onClick(colonne)}
-        className={`inline-flex items-center gap-1 uppercase tracking-[0.12em] transition-colors hover:text-noir ${
+        title={titre}
+        className={`inline-flex max-w-full items-center gap-1 whitespace-nowrap uppercase tracking-[0.08em] transition-colors hover:text-noir ${
           actif ? "text-noir" : ""
-        } ${droite ? "flex-row-reverse" : ""}`}
+        }`}
       >
-        {children}
-        <Icone className={`h-3 w-3 ${actif ? "opacity-100" : "opacity-40"}`} />
+        <span className="truncate">{children}</span>
+        <Icone className={`h-3 w-3 shrink-0 ${actif ? "opacity-100" : "opacity-40"}`} />
       </button>
     </th>
   );
