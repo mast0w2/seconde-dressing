@@ -1,4 +1,4 @@
-import { storagePath } from '@/lib/storage';
+import { safeExtension, storagePath } from '@/lib/storage';
 
 describe('storagePath', () => {
   const base = 'https://abc.supabase.co/storage/v1/object/public';
@@ -20,5 +20,19 @@ describe('storagePath', () => {
 
   it('drops a query string', () => {
     expect(storagePath(`${base}/request-items/req-1/photo.jpg?t=123`, 'request-items')).toBe('req-1/photo.jpg');
+  });
+});
+
+describe('safeExtension', () => {
+  it('keeps a plain extension, lowercased', () => {
+    expect(safeExtension("robe d'été.JPG")).toBe('jpg');
+    expect(safeExtension('justificatif.pdf')).toBe('pdf');
+  });
+
+  it('falls back when the extension could not be a storage key', () => {
+    expect(safeExtension('photo')).toBe('jpg');
+    expect(safeExtension('photo.jpég')).toBe('jpg');
+    expect(safeExtension('photo.')).toBe('jpg');
+    expect(safeExtension('scan', 'pdf')).toBe('pdf');
   });
 });
