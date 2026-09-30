@@ -12,7 +12,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Check, FileSignature, PenLine } from "lucide-react";
+import { Check, ChevronDown, FileSignature, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { ContractSetupDialog } from "@/components/ContractSetupDialog";
@@ -48,6 +48,7 @@ export function ContractStatus({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [deplie, setDeplie] = useState(false);
 
   if (status !== "accepted" && !COLLECTED_STATUSES.includes(status)) return null;
 
@@ -151,13 +152,53 @@ export function ContractStatus({
 
   const highlight = (role === "seller" && !contract) || (!!contract && !signedByMe);
 
+  // Une fois le contrat signé et plus rien à faire dessus, il n'a plus à
+  // occuper le haut de la page : il se réduit à une ligne, dépliable pour
+  // qui veut relire le parcours. La vendeuse garde le panneau tant qu'elle
+  // doit encore confirmer la récupération.
+  const replie = fullySigned && (role === "client" || collected) && !deplie;
+
+  if (replie) {
+    return (
+      <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 border border-noir/10 bg-gris-tres-clair px-4 py-2.5 text-sm">
+        <Check className="h-4 w-4 shrink-0 text-sauge-fonce" />
+        <span className="text-noir">Contrat de dépôt-vente signé</span>
+        <Link
+          href={href}
+          className="text-gris-moyen underline underline-offset-2 hover:text-noir"
+        >
+          Le lire
+        </Link>
+        <button
+          type="button"
+          onClick={() => setDeplie(true)}
+          className="ml-auto inline-flex items-center gap-1 text-gris-moyen hover:text-noir"
+        >
+          Détails
+          <ChevronDown className="h-4 w-4" />
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div
       className={`mt-4 border p-4 sm:p-5 space-y-4 ${
         highlight ? "border-sauge-fonce bg-sauge-clair/30" : "border-noir/10 bg-gris-tres-clair"
       }`}
     >
-      <div className="eyebrow">Contrat de dépôt-vente</div>
+      <div className="flex items-center justify-between gap-2">
+        <div className="eyebrow">Contrat de dépôt-vente</div>
+        {deplie && (
+          <button
+            type="button"
+            onClick={() => setDeplie(false)}
+            className="text-xs text-gris-moyen underline underline-offset-2 hover:text-noir"
+          >
+            Réduire
+          </button>
+        )}
+      </div>
 
       <ol className="grid grid-cols-3 gap-2">
         <Step index={1} label="Contrat préparé" done={!!contract} />

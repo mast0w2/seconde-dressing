@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { secteur } from "@/lib/secteur";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
@@ -12,6 +13,7 @@ import { getSupabaseClient } from "@/lib/supabase/client";
 import { isProfileComplete } from "@/lib/profile";
 import type {
   Request,
+  ItemStatus,
   Profile,
   Formula,
   RequestStatus,
@@ -29,9 +31,11 @@ interface RequestWithRelations extends Request {
   client: Profile | null;
   formula: Formula | null;
   contract: RequestContract | RequestContract[] | null;
+  /** Statuts des pièces, pour faire suivre l'avancement de la commande. */
+  items: { id: string; status: ItemStatus }[] | null;
 }
 
-const REQUEST_SELECT = `*, client:client_id (id, first_name, last_name, email, phone), formula:formula_id (id, slug, label, price), contract:request_contracts (*)`;
+const REQUEST_SELECT = `*, client:client_id (id, first_name, last_name, email, phone), formula:formula_id (id, slug, label, price), contract:request_contracts (*), items:request_items (id, status)`;
 
 // Les demandes encore ouvertes viennent de la vue `requests_ouvertes`, qui ne
 // porte aucune coordonnée : ni nom, ni email, ni téléphone. La table
@@ -96,6 +100,7 @@ export default function SellerDashboardPage() {
       client: null,
       formula: r.formula_id ? formulasById.get(r.formula_id as string) ?? null : null,
       contract: null,
+      items: null,
     }));
 
     setRefusedIds(new Set<string>((refusRes.data || []).map((r) => r.request_id)));
@@ -111,6 +116,23 @@ export default function SellerDashboardPage() {
       seen.add(r.id);
       return true;
     });
+    // La commande suit ses pièces : dès qu'une annonce est en ligne, la
+    // demande passe en « Vente en cours ». C'est la validation des prix par
+    // la cliente qui déclenche la mise en vente, et on ne va pas demander à
+    // la vendeuse de recopier à la main un avancement déjà connu.
+    const aDemarrer = unique.filter(
+      (r) =>
+        r.status === "items_collected" &&
+        (r.items ?? []).some((it) => it.status === "on_sale")
+    );
+    if (aDemarrer.length > 0) {
+      await supabase
+        .from("requests")
+        .update({ status: "items_on_sale", updated_at: new Date().toISOString() })
+        .in("id", aDemarrer.map((r) => r.id));
+      aDemarrer.forEach((r) => (r.status = "items_on_sale"));
+    }
+
     setRequests(unique);
   }, [supabase]);
 
@@ -291,12 +313,19 @@ export default function SellerDashboardPage() {
         <div className={`p-2 rounded-full ${statusInfo.color}`}>
           {statusInfo.icon}
         </div>
-        <div className="font-semibold">Demande #{request.id.slice(0, 8)}</div>
+        {/* Le nom de la cliente d'abord : c'est ce qu'on cherche des yeux
+            quand on parcourt la liste. Le numéro de demande n'est utile que
+            pour se repérer, il passe en petit avec le reste. Avant
+            attribution, la cliente n'est pas communiquée : on retombe alors
+            sur le numéro de demande. */}
+        <div className="font-semibold">
+          {clientDisplayName || `Demande #${request.id.slice(0, 8)}`}
+        </div>
         <div className="text-sm text-gris-moyen">
           {new Date(request.created_at).toLocaleDateString("fr-FR")}
         </div>
         {clientDisplayName && (
-          <div className="text-sm text-gris-moyen">· {clientDisplayName}</div>
+          <div className="text-sm text-gris-moyen">· #{request.id.slice(0, 8)}</div>
         )}
         {formula && (
           <div className="text-sm text-gris-moyen">
@@ -312,7 +341,6 @@ export default function SellerDashboardPage() {
     request: RequestWithRelations,
     tab: "new" | "accepted" | "refused"
   ) => {
-    const statusInfo = requestStatusConfig[request.status];
     const client = request.client;
     const formula = request.formula;
     const isAssignedToMe = request.seller_id === user?.id;
@@ -321,11 +349,15 @@ export default function SellerDashboardPage() {
     const clientPhone = isAssignedToMe ? client?.phone ?? request.client_phone ?? null : null;
 
     return (
-      // flex-col sur mobile : la colonne de boutons à largeur fixe (min-w-[180px])
-      // ne pouvait pas rétrécir dans une rangée non empilable et débordait,
-      // désalignant les boutons sur petit écran.
+      <div className="space-y-4">
+      {/* flex-col sur mobile : la colonne de boutons à largeur fixe
+          (min-w-[180px]) ne pouvait pas rétrécir dans une rangée non
+          empilable et débordait, désalignant les boutons sur petit écran. */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div className="flex-1">
+        {/* min-w-0 : sans lui, un enfant flex ne peut pas rétrécir sous la
+            largeur de son contenu — le tableau d'inventaire débordait alors
+            de la carte et décalait toute la mise en page vers la droite. */}
+        <div className="flex-1 min-w-0">
           {clientDisplayName && (
             <div className="text-sm text-gris-moyen mb-2">
               {clientDisplayName}
@@ -343,18 +375,49 @@ export default function SellerDashboardPage() {
             </div>
           )}
 
-          {formula && (
-            <div className="text-sm text-gris-moyen mb-3">
-              Formule : {formula.label} ({formula.price} €)
-            </div>
-          )}
-          {request.address && (
-            <div className="text-sm text-gris-moyen mb-3">
-              Adresse : {request.address}
+          {/* Ce que la cliente a déclaré dans le formulaire. C'est sur ces
+              trois éléments qu'une vendeuse décide d'accepter ou non, donc ils
+              s'affichent dès les nouvelles demandes : ils parlent des
+              vêtements, pas de la personne. */}
+          <div className="mb-3 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm">
+            {request.number_of_items != null && (
+              <span className="text-noir">
+                {request.number_of_items} vêtement{request.number_of_items > 1 ? "s" : ""}
+              </span>
+            )}
+            {request.average_value != null && (
+              <span className="text-gris-moyen">
+                ~{request.average_value} € la pièce
+              </span>
+            )}
+          </div>
+
+          {request.brands && (
+            <div className="mb-3 text-sm text-gris-moyen">
+              Marques : <span className="text-noir">{request.brands}</span>
             </div>
           )}
 
-          <Badge className={statusInfo.color}>{statusInfo.label}</Badge>
+
+          {/* Avant acceptation, la vendeuse n'a besoin que du secteur pour
+              décider. L'adresse exacte n'apparaît qu'une fois la demande
+              attribuée — c'est le domicile d'une cliente, et la liste des
+              demandes ouvertes est visible par toutes les vendeuses. */}
+          {request.address &&
+            (isAssignedToMe ? (
+              <div className="text-sm text-gris-moyen mb-3">
+                Adresse : {request.address}
+              </div>
+            ) : (
+              secteur(request.address) && (
+                <div className="text-sm text-gris-moyen mb-3">
+                  Secteur : {secteur(request.address)}
+                </div>
+              )
+            ))}
+
+          {/* Le statut est déjà affiché dans le titre de la demande : le
+              répéter ici n'ajoutait rien. */}
 
           {request.message && (
             <div className="mt-3 p-3 bg-muted/50 rounded">
@@ -362,23 +425,6 @@ export default function SellerDashboardPage() {
             </div>
           )}
 
-          {isAssignedToMe && (
-            <ContractStatus
-              requestId={request.id}
-              status={request.status}
-              role="seller"
-              contract={embeddedContract(request.contract)}
-              defaultItemsCount={request.number_of_items}
-              onGenerated={() => user && fetchRequests(user.id)}
-              onConfirmCollected={() => handleUpdateStatus(request.id, "items_collected")}
-            />
-          )}
-
-          <RequestItemsUploader
-            requestId={request.id}
-            role="seller"
-            formulaSlug={formula?.slug ?? null}
-          />
         </div>
 
         <div className="flex flex-col gap-2 sm:shrink-0 sm:min-w-[180px]">
@@ -433,6 +479,32 @@ export default function SellerDashboardPage() {
           )}
         </div>
       </div>
+
+      {/* Contrat et inventaire : pleine largeur de la carte. */}
+      {isAssignedToMe && (
+        <ContractStatus
+          requestId={request.id}
+          status={request.status}
+          role="seller"
+          contract={embeddedContract(request.contract)}
+          defaultItemsCount={request.number_of_items}
+          onGenerated={() => user && fetchRequests(user.id)}
+          onConfirmCollected={() => handleUpdateStatus(request.id, "items_collected")}
+        />
+      )}
+
+      {/* L'inventaire n'apparaît qu'une fois la demande attribuée. Sur une
+          nouvelle demande, n'importe quelle vendeuse le voit passer : lui
+          proposer d'importer des photos n'a pas de sens, et n'a rien à faire
+          dans les pièces d'une cliente qui ne lui est pas encore confiée. */}
+      {isAssignedToMe && (
+        <RequestItemsUploader
+          requestId={request.id}
+          role="seller"
+          formulaSlug={formula?.slug ?? null}
+        />
+      )}
+      </div>
     );
   };
 
@@ -467,7 +539,7 @@ export default function SellerDashboardPage() {
   }
 
   return (
-    <div className="container py-8 max-w-6xl">
+    <div className="container mx-auto py-8 max-w-[1280px]">
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" onClick={() => router.back()} className="h-10 w-10 p-0">
