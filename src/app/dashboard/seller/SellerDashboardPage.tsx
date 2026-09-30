@@ -354,7 +354,40 @@ export default function SellerDashboardPage() {
             </div>
           )}
 
-          {/* La formule est déjà dans le titre de la demande. */}
+          {/* Ce que la cliente a déclaré dans le formulaire. C'est sur ces
+              trois éléments qu'une vendeuse décide d'accepter ou non, donc ils
+              s'affichent dès les nouvelles demandes : ils parlent des
+              vêtements, pas de la personne. L'estimation est celle qui a été
+              annoncée à la cliente — sa part, pas le total des ventes. */}
+          <div className="mb-3 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm">
+            {request.number_of_items != null && (
+              <span className="text-noir">
+                {request.number_of_items} vêtement{request.number_of_items > 1 ? "s" : ""}
+              </span>
+            )}
+            {request.average_value != null && (
+              <span className="text-gris-moyen">
+                ~{request.average_value} € la pièce
+              </span>
+            )}
+            {request.estimate != null && (
+              <span className="text-gris-moyen">
+                estimation annoncée : {request.estimate} € pour la cliente
+              </span>
+            )}
+          </div>
+
+          {request.brands && (
+            <div className="mb-3 text-sm text-gris-moyen">
+              Marques : <span className="text-noir">{request.brands}</span>
+            </div>
+          )}
+
+          {request.description && (
+            <div className="mb-3 text-sm text-gris-moyen">
+              Précisions : {request.description}
+            </div>
+          )}
 
           {/* Avant acceptation, la vendeuse n'a besoin que du secteur pour
               décider. L'adresse exacte n'apparaît qu'une fois la demande
