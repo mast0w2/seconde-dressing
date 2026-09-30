@@ -354,11 +354,8 @@ export default function SellerDashboardPage() {
             </div>
           )}
 
-          {formula && (
-            <div className="text-sm text-gris-moyen mb-3">
-              Formule : {formula.label} ({formula.price} €)
-            </div>
-          )}
+          {/* La formule est déjà dans le titre de la demande. */}
+
           {/* Avant acceptation, la vendeuse n'a besoin que du secteur pour
               décider. L'adresse exacte n'apparaît qu'une fois la demande
               attribuée — c'est le domicile d'une cliente, et la liste des
