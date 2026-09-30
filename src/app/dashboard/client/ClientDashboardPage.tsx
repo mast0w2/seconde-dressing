@@ -20,7 +20,7 @@ import {
 import { isProfileComplete } from "@/lib/profile";
 import { ArrowLeft, PenLine, Tags } from "lucide-react";
 
-type ItemPricing = Pick<RequestItem, "id" | "min_price" | "min_price_validated_at">;
+type ItemPricing = Pick<RequestItem, "id" | "status">;
 
 interface RequestWithRelations extends Request {
   seller: Profile | null;
@@ -29,9 +29,15 @@ interface RequestWithRelations extends Request {
   items: ItemPricing[] | null;
 }
 
-/** Nombre de prix minimaux renseignés que la cliente n'a pas encore validés. */
+/**
+ * Pièces dont la vendeuse attend l'accord de la cliente sur les prix.
+ *
+ * On se fie au statut, pas à l'absence de validation : une pièce dont le prix
+ * minimal est renseigné mais qui n'a pas encore été soumise n'a rien à
+ * demander à la cliente.
+ */
 function pricesToValidate(request: RequestWithRelations): number {
-  return (request.items ?? []).filter((it) => it.min_price != null && !it.min_price_validated_at).length;
+  return (request.items ?? []).filter((it) => it.status === "awaiting_client").length;
 }
 
 export default function ClientDashboardPage() {
@@ -86,7 +92,7 @@ export default function ClientDashboardPage() {
           seller:seller_id (id, first_name, last_name),
           formula:formula_id (id, slug, label, price),
           contract:request_contracts (*),
-          items:request_items (id, min_price, min_price_validated_at)
+          items:request_items (id, status)
         `)
         .eq("client_id", user.id)
         .order("created_at", { ascending: false });
@@ -236,7 +242,7 @@ export default function ClientDashboardPage() {
                 <li key={`prices-${r.id}`} className="flex flex-wrap items-center gap-3">
                   <Tags className="h-4 w-4 text-sauge-fonce shrink-0" />
                   <span className="flex-1 text-sm text-noir">
-                    {pricesToValidate(r)} prix minimal{pricesToValidate(r) > 1 ? "aux" : ""} à valider
+                    {pricesToValidate(r)} prix à valider
                     sur la demande #{r.id.slice(0, 8)} (dans l&apos;inventaire, ci-dessous).
                   </span>
                 </li>

@@ -33,6 +33,10 @@ export interface Ligne {
   venduLe: string | null;
   finaliseeLe: string | null;
   notes: string;
+  /** Envoi des prix à la cliente : point de départ de son délai de réponse. */
+  prixEnvoyesLe: string | null;
+  /** Remarque laissée par la cliente au moment de valider. */
+  noteCliente: string;
   uploading: boolean;
   uploadingPreuve: boolean;
 }
@@ -53,6 +57,8 @@ export function ligneDepuisRow(row: RequestItem): Ligne {
     venduLe: row.sold_at,
     finaliseeLe: row.finalized_at,
     notes: row.notes ?? "",
+    prixEnvoyesLe: row.prices_sent_at ?? null,
+    noteCliente: row.client_note ?? "",
     uploading: false,
     uploadingPreuve: false,
   };
@@ -79,6 +85,25 @@ export function euros(valeur: number): string {
 export function jour(iso: string | null): string {
   if (!iso) return "";
   return new Date(iso).toLocaleDateString("fr-FR");
+}
+
+/**
+ * Temps restant avant que le silence de la cliente vaille accord.
+ * Renvoie null quand rien n'a été envoyé, et 0 quand le délai est écoulé.
+ */
+export function heuresRestantes(
+  envoyeLe: string | null,
+  delaiHeures: number
+): number | null {
+  if (!envoyeLe) return null;
+  const fin = new Date(envoyeLe).getTime() + delaiHeures * 3600_000;
+  return Math.max(0, Math.ceil((fin - Date.now()) / 3600_000));
+}
+
+/** « 36 h », « 2 h », « quelques minutes ». */
+export function formaterDelai(heures: number): string {
+  if (heures <= 0) return "quelques minutes";
+  return `${heures} h`;
 }
 
 // ---------------------------------------------------------------------------

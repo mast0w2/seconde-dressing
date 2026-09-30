@@ -253,6 +253,7 @@ export interface InsertRequestRefusal {
  */
 export type ItemStatus =
   | "photos_taken"
+  | "awaiting_client"
   | "on_sale"
   | "sold"
   | "finalized"
@@ -280,8 +281,12 @@ export interface RequestItem {
   sold_at: string | null;
   /** Horodatage du virement à la cliente. Non nul = ligne verrouillée. */
   finalized_at: string | null;
-  /** Commentaire libre. Obligatoire quand status vaut « unsellable ». */
+  /** Commentaire libre de la vendeuse. */
   notes: string | null;
+  /** Envoi des prix à la cliente : point de départ du délai de réponse. */
+  prices_sent_at: string | null;
+  /** Remarque de la cliente au moment de valider les prix. */
+  client_note: string | null;
   created_at: string;
 }
 
@@ -312,6 +317,8 @@ export interface UpdateRequestItem {
   sold_at?: string | null;
   finalized_at?: string | null;
   notes?: string | null;
+  prices_sent_at?: string | null;
+  client_note?: string | null;
   created_at?: string;
 }
 

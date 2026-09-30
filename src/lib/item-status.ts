@@ -34,6 +34,13 @@ export const STATUTS: Record<ItemStatus, StatutInfo> = {
     texte: "#5b584f",
     bordure: "#cfcabd",
   },
+  awaiting_client: {
+    label: "En attente de la cliente",
+    labelCliente: "Prix à valider",
+    fond: "#e7e3ef",
+    texte: "#4c4663",
+    bordure: "#b3aacb",
+  },
   on_sale: {
     label: "Vente en cours",
     labelCliente: "En vente",
@@ -67,6 +74,7 @@ export const STATUTS: Record<ItemStatus, StatutInfo> = {
 /** Ordre d'affichage dans le menu déroulant et dans le tri par statut. */
 export const ORDRE_STATUTS: ItemStatus[] = [
   "photos_taken",
+  "awaiting_client",
   "on_sale",
   "sold",
   "finalized",
@@ -78,22 +86,35 @@ export const ORDRE_STATUTS: ItemStatus[] = [
  *
  * Deux états n'y figurent pas, parce qu'ils s'obtiennent par un geste explicite
  * et pas par un choix dans une liste :
+ *   * « En attente de la cliente » découle de l'envoi des prix pour validation ;
  *   * « Vendu » demande un prix de vente — bouton dédié dans la colonne Vendu ;
  *   * « Finalisé » demande une preuve de vente et verrouille la ligne
  *     pour de bon — il découle du dépôt de la preuve de vente.
  *
- * Le statut courant reste toujours proposé, sinon le menu afficherait du vide.
- * Une pièce finalisée ne propose plus rien du tout.
+ * Une pièce déjà dans l'un de ces trois états ne propose donc rien : le menu
+ * laisse place à une pastille et au geste qui convient.
  */
 export function statutsProposables(actuel: ItemStatus): ItemStatus[] {
-  if (actuel === "finalized") return [];
   const base: ItemStatus[] = ["photos_taken", "on_sale", "unsellable"];
-  return base.includes(actuel) ? base : [actuel, ...base];
+  if (!base.includes(actuel)) return [];
+  return base;
 }
 
 export function estVerrouille(statut: ItemStatus): boolean {
   return statut === "finalized";
 }
+
+/** La cliente a les prix en main et n'a pas encore répondu. */
+export function attendLaCliente(statut: ItemStatus): boolean {
+  return statut === "awaiting_client";
+}
+
+/**
+ * Délai laissé à la cliente pour répondre. Passé ce délai, les prix proposés
+ * sont réputés acceptés. La même durée est appliquée en base
+ * (request_items_delai_validation).
+ */
+export const DELAI_VALIDATION_HEURES = 48;
 
 /** Une pièce compte dans le chiffre d'affaires dès qu'elle est vendue. */
 export function estVendue(statut: ItemStatus): boolean {

@@ -10,7 +10,7 @@
 // pas proposer ce qui sera refusé, et de remonter tel quel le message de la
 // base quand elle refuse quand même.
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import {
   ArrowDown,
@@ -19,12 +19,14 @@ import {
   ChevronsUpDown,
   ExternalLink,
   ImageIcon,
+  Hourglass,
   Loader2,
   Lock,
   Mic,
   Paperclip,
   Plus,
   Search,
+  Send,
   StickyNote,
   Trash2,
   Upload,
@@ -38,8 +40,10 @@ import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { detecterMarque } from "@/lib/brands";
 import { minPriceEditorFor } from "@/lib/formules";
 import {
+  DELAI_VALIDATION_HEURES,
   ORDRE_STATUTS,
   STATUTS,
+  attendLaCliente,
   estVendue,
   estVerrouille,
   statutsProposables,
@@ -56,6 +60,8 @@ import {
   Loupe,
   Pastille,
   euros,
+  formaterDelai,
+  heuresRestantes,
   jour,
   ligneDepuisRow,
   useInventaire,
@@ -173,6 +179,8 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
         venduLe: null,
         finaliseeLe: null,
         notes: "",
+        prixEnvoyesLe: null,
+        noteCliente: "",
         uploading: true,
         uploadingPreuve: false,
       }));
@@ -353,6 +361,99 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
     },
     [ecrire, majLocale, toast]
   );
+
+  // -------------------------------------------------------------------------
+  // Envoi des prix à la cliente
+  // -------------------------------------------------------------------------
+
+  /** Une pièce est prête quand la cliente aurait de quoi juger le prix. */
+  const pieceComplete = useCallback(
+    (l: Ligne) =>
+      !!l.photoUrl &&
+      l.description.trim() !== "" &&
+      l.marque.trim() !== "" &&
+      versPrix(l.prixDepart) != null &&
+      versPrix(l.prixMin) != null,
+    []
+  );
+
+  const aSoumettre = useMemo(
+    () => lignes.filter((l) => l.statut === "photos_taken"),
+    [lignes]
+  );
+  const incompletes = useMemo(
+    () => aSoumettre.filter((l) => !pieceComplete(l)),
+    [aSoumettre, pieceComplete]
+  );
+  const enAttente = useMemo(
+    () => lignes.filter((l) => attendLaCliente(l.statut)),
+    [lignes]
+  );
+
+  const [envoiEnCours, setEnvoiEnCours] = useState(false);
+
+  const envoyerLesPrix = useCallback(async () => {
+    const ids = aSoumettre.map((l) => l.itemId).filter(Boolean) as string[];
+    if (ids.length === 0) return;
+    setEnvoiEnCours(true);
+    const maintenant = new Date().toISOString();
+    const { error } = await supabase
+      .from("request_items")
+      .update({ status: "awaiting_client" })
+      .in("id", ids);
+    setEnvoiEnCours(false);
+    if (error) {
+      toast({ title: "Envoi refusé", description: error.message, variant: "destructive" });
+      return;
+    }
+    setLignes((prev) =>
+      prev.map((l) =>
+        ids.includes(l.itemId ?? "")
+          ? { ...l, statut: "awaiting_client" as ItemStatus, prixEnvoyesLe: maintenant }
+          : l
+      )
+    );
+    onItemsChange?.();
+    toast({
+      title: "Prix envoyés",
+      description: `${ids.length} pièce${ids.length > 1 ? "s" : ""} soumise${
+        ids.length > 1 ? "s" : ""
+      } à la cliente. Elle a ${DELAI_VALIDATION_HEURES} h pour répondre.`,
+    });
+  }, [aSoumettre, supabase, setLignes, toast, onItemsChange]);
+
+  /**
+   * Passé le délai, le silence vaut accord : les pièces partent en vente aux
+   * prix proposés. Faute de tâche planifiée, la bascule se fait à l'ouverture
+   * de l'écran — la base vérifie de son côté que le délai est bien écoulé.
+   */
+  const bascule = useRef(new Set<string>());
+  useEffect(() => {
+    const echues = lignes.filter(
+      (l) =>
+        l.itemId &&
+        attendLaCliente(l.statut) &&
+        heuresRestantes(l.prixEnvoyesLe, DELAI_VALIDATION_HEURES) === 0 &&
+        !bascule.current.has(l.itemId)
+    );
+    if (echues.length === 0) return;
+    const ids = echues.map((l) => l.itemId as string);
+    ids.forEach((id) => bascule.current.add(id));
+
+    (async () => {
+      const { error } = await supabase
+        .from("request_items")
+        .update({ status: "on_sale" })
+        .in("id", ids);
+      if (error) return;
+      setLignes((prev) =>
+        prev.map((l) =>
+          ids.includes(l.itemId ?? "") ? { ...l, statut: "on_sale" as ItemStatus } : l
+        )
+      );
+      onItemsChange?.();
+    })();
+  }, [lignes, supabase, setLignes, onItemsChange]);
 
   // -------------------------------------------------------------------------
   // Tri, filtre, recherche
@@ -684,6 +785,19 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
         </>
       )}
 
+      {/* Envoi des prix : le geste qui fait passer l'inventaire de la
+          vendeuse à la cliente. Il reste visible pendant tout le remplissage,
+          pour qu'on sache dès le début où l'on va. */}
+      {(aSoumettre.length > 0 || enAttente.length > 0) && (
+        <BandeauEnvoi
+          aSoumettre={aSoumettre.length}
+          incompletes={incompletes.length}
+          enAttente={enAttente}
+          envoi={envoiEnCours}
+          onEnvoyer={() => void envoyerLesPrix()}
+        />
+      )}
+
       <Loupe src={loupe?.src ?? null} legende={loupe?.legende} onClose={() => setLoupe(null)} />
 
       <DialogueFinalisation
@@ -695,6 +809,87 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
         onAnnuler={() => setAFinaliser(null)}
         onConfirmer={() => aFinaliser && void finaliser(aFinaliser)}
       />
+    </div>
+  );
+}
+
+// ===========================================================================
+// Envoi des prix à la cliente
+// ===========================================================================
+
+function BandeauEnvoi({
+  aSoumettre,
+  incompletes,
+  enAttente,
+  envoi,
+  onEnvoyer,
+}: {
+  aSoumettre: number;
+  incompletes: number;
+  enAttente: Ligne[];
+  envoi: boolean;
+  onEnvoyer: () => void;
+}) {
+  // Le délai le plus court parmi les pièces en attente : c'est celui qui
+  // décidera du prochain basculement.
+  const restant = enAttente.reduce<number | null>((min, l) => {
+    const h = heuresRestantes(l.prixEnvoyesLe, DELAI_VALIDATION_HEURES);
+    if (h == null) return min;
+    return min == null || h < min ? h : min;
+  }, null);
+
+  return (
+    <div className="border border-noir/10 bg-gris-tres-clair p-4 space-y-3">
+      {enAttente.length > 0 && (
+        <p className="flex items-start gap-2 text-sm text-[#4c4663]">
+          <Hourglass className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>
+            {enAttente.length} pièce{enAttente.length > 1 ? "s" : ""} en attente de la
+            cliente.
+            {restant != null && restant > 0 && (
+              <> Il lui reste {formaterDelai(restant)} pour répondre.</>
+            )}{" "}
+            Sans réponse, les prix proposés s&apos;appliquent et la vente démarre.
+          </span>
+        </p>
+      )}
+
+      {aSoumettre > 0 && (
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex-1 min-w-[240px] text-sm text-gris-moyen">
+            {incompletes === 0 ? (
+              <>
+                {aSoumettre} pièce{aSoumettre > 1 ? "s" : ""} prête
+                {aSoumettre > 1 ? "s" : ""}. La cliente aura{" "}
+                {DELAI_VALIDATION_HEURES} h pour valider les prix ou les ajuster.
+              </>
+            ) : (
+              <>
+                {incompletes} pièce{incompletes > 1 ? "s" : ""} encore incomplète
+                {incompletes > 1 ? "s" : ""} : il faut une photo, une description, une
+                marque et les deux prix pour que la cliente puisse se prononcer.
+              </>
+            )}
+          </div>
+          <Button
+            type="button"
+            onClick={onEnvoyer}
+            disabled={envoi || incompletes > 0}
+            title={
+              incompletes > 0
+                ? "Complétez toutes les pièces avant d'envoyer"
+                : "Soumettre les prix à la cliente"
+            }
+          >
+            {envoi ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="mr-2 h-4 w-4" />
+            )}
+            Envoyer les prix à la cliente
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
@@ -1057,7 +1252,16 @@ function LigneTableau({
 
       {notesOuvertes && (
         <tr className={verrouille ? "bg-[#f4f7fa]" : "bg-gris-tres-clair/60"}>
-          <td colSpan={11} className="px-3 pb-3 pt-0">
+          <td colSpan={11} className="px-3 pb-3 pt-0 space-y-2">
+            {ligne.noteCliente && (
+              <p className="border-l-2 border-[#b3aacb] bg-[#f3f1f7] px-3 py-2 text-sm text-[#4c4663]">
+                <span className="text-[10px] uppercase tracking-[0.14em]">
+                  Remarque de la cliente
+                </span>
+                <br />
+                {ligne.noteCliente}
+              </p>
+            )}
             <Textarea
               value={ligne.notes}
               onChange={(e) => onChange({ notes: e.target.value })}
@@ -1162,11 +1366,16 @@ function ChoixStatut({
   ligne: Ligne;
   onStatut: (s: ItemStatus) => void;
 }) {
-  // « Vendu » et « Finalisé » ne s'obtiennent pas par la liste : le premier
-  // demande un prix, le second un justificatif. Ils s'affichent en pastille.
-  if (ligne.statut === "finalized" || ligne.statut === "sold") {
+  // Trois états ne s'obtiennent pas par la liste : « En attente de la
+  // cliente » vient de l'envoi des prix, « Vendu » d'un prix de vente,
+  // « Finalisé » d'une preuve. Ils s'affichent en pastille.
+  if (statutsProposables(ligne.statut).length === 0) {
+    const restant =
+      ligne.statut === "awaiting_client"
+        ? heuresRestantes(ligne.prixEnvoyesLe, DELAI_VALIDATION_HEURES)
+        : null;
     return (
-      <div className="flex items-center gap-1.5">
+      <div className="flex flex-col items-start gap-0.5">
         <Pastille statut={ligne.statut} />
         {ligne.statut === "sold" && (
           <button
@@ -1177,6 +1386,11 @@ function ChoixStatut({
           >
             annuler
           </button>
+        )}
+        {ligne.statut === "awaiting_client" && (
+          <span className="text-[11px] text-gris-moyen">
+            {restant != null && restant > 0 ? `reste ${formaterDelai(restant)}` : "délai écoulé"}
+          </span>
         )}
       </div>
     );

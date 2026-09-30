@@ -36,30 +36,33 @@ describe('detecterMarque', () => {
 });
 
 describe('statuts de pièce', () => {
-  it('décrit les cinq statuts, côté vendeuse et côté cliente', () => {
+  it('décrit les six statuts, côté vendeuse et côté cliente', () => {
     ORDRE_STATUTS.forEach((s) => {
       expect(STATUTS[s].label).toBeTruthy();
       expect(STATUTS[s].labelCliente).toBeTruthy();
     });
-    expect(ORDRE_STATUTS).toHaveLength(5);
+    expect(ORDRE_STATUTS).toHaveLength(6);
   });
 
-  it('ne propose ni « vendu » ni « finalisé » dans le menu déroulant', () => {
-    // Les deux s'obtiennent par un geste explicite : le prix de vente pour
-    // l'un, le justificatif de virement pour l'autre.
-    ORDRE_STATUTS.forEach((s) => {
-      expect(statutsProposables(s)).not.toContain('finalized');
-    });
+  it('ne propose que les trois statuts qui se choisissent librement', () => {
+    // Les autres s'obtiennent par un geste explicite : l'envoi des prix, la
+    // saisie du prix de vente, le dépôt de la preuve.
     expect(statutsProposables('photos_taken')).toEqual([
       'photos_taken',
       'on_sale',
       'unsellable',
     ]);
+    ORDRE_STATUTS.forEach((s) => {
+      expect(statutsProposables(s)).not.toContain('finalized');
+      expect(statutsProposables(s)).not.toContain('awaiting_client');
+      expect(statutsProposables(s)).not.toContain('sold');
+    });
   });
 
-  it('garde le statut courant dans la liste, sinon le menu afficherait du vide', () => {
-    expect(statutsProposables('sold')).toContain('sold');
-    expect(statutsProposables('sold')[0]).toBe('sold');
+  it('ne propose plus rien sur une pièce sortie de ces trois états', () => {
+    expect(statutsProposables('sold')).toEqual([]);
+    expect(statutsProposables('awaiting_client')).toEqual([]);
+    expect(statutsProposables('finalized')).toEqual([]);
   });
 
   it('ne propose plus rien sur une pièce finalisée', () => {
@@ -79,6 +82,8 @@ describe('statuts de pièce', () => {
     expect(libelle('sold', 'seller')).toBe('Vendu');
     expect(libelle('sold', 'client')).toBe('Vendue — paiement en cours');
     expect(libelle('finalized', 'client')).toBe('Vendue — vous avez été payée');
+    expect(libelle('awaiting_client', 'seller')).toBe('En attente de la cliente');
+    expect(libelle('awaiting_client', 'client')).toBe('Prix à valider');
   });
 });
 
