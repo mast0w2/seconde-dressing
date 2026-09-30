@@ -44,6 +44,23 @@ interface Props {
 /** Délai annoncé partout : contrat de dépôt-vente, CGV, emails, et ici. */
 const DELAI_VIREMENT_JOURS = 60;
 
+/**
+ * Ordre d'affichage des pièces côté cliente : ce qui demande une réponse,
+ * puis ce qui a rapporté, puis ce qui est en cours, puis ce qui ne partira
+ * pas. Elle ne parcourt pas un inventaire, elle cherche où en est son argent.
+ *
+ * Le tri est stable, donc à statut égal les pièces gardent l'ordre dans
+ * lequel la vendeuse les a saisies.
+ */
+const ORDRE_CLIENTE: Record<ItemStatus, number> = {
+  awaiting_client: 0,
+  finalized: 1,
+  sold: 2,
+  on_sale: 2,
+  photos_taken: 3,
+  unsellable: 4,
+};
+
 export function InventaireCliente({ requestId, onItemsChange }: Props) {
   const { toast } = useToast();
   const { lignes, setLignes, chargement, urlsSignees, supabase } = useInventaire(requestId);
@@ -54,6 +71,11 @@ export function InventaireCliente({ requestId, onItemsChange }: Props) {
     setLignes((prev) => prev.map((l) => (l.localId === localId ? { ...l, ...patch } : l)));
 
   const aValider = useMemo(() => lignes.filter((l) => attendLaCliente(l.statut)), [lignes]);
+
+  const lignesTriees = useMemo(
+    () => [...lignes].sort((a, b) => ORDRE_CLIENTE[a.statut] - ORDRE_CLIENTE[b.statut]),
+    [lignes]
+  );
 
   // -------------------------------------------------------------------------
   // Ce que la cliente touche : 50 % des pièces FINALISÉES uniquement.
@@ -167,7 +189,7 @@ export function InventaireCliente({ requestId, onItemsChange }: Props) {
       )}
 
       <div className="space-y-2">
-        {lignes.map((ligne) => (
+        {lignesTriees.map((ligne) => (
           <CartePiece
             key={ligne.localId}
             ligne={ligne}
