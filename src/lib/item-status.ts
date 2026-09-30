@@ -82,22 +82,27 @@ export const ORDRE_STATUTS: ItemStatus[] = [
 ];
 
 /**
- * Statuts proposés dans le menu déroulant.
+ * Statuts proposés dans le menu déroulant, selon l'état courant.
  *
- * Deux états n'y figurent pas, parce qu'ils s'obtiennent par un geste explicite
- * et pas par un choix dans une liste :
- *   * « En attente de la cliente » découle de l'envoi des prix pour validation ;
- *   * « Vendu » demande un prix de vente — bouton dédié dans la colonne Vendu ;
- *   * « Finalisé » demande une preuve de vente et verrouille la ligne
- *     pour de bon — il découle du dépôt de la preuve de vente.
+ * Le parcours d'une pièce ne se choisit pas dans une liste : chaque étape
+ * s'obtient par un geste qui a ses conditions. Envoyer les prix demande une
+ * fiche complète, la mise en vente demande l'accord de la cliente, la vente
+ * demande un prix, la finalisation une preuve. La seule bifurcation libre est
+ * « Invendable », qui peut survenir à n'importe quel moment et se défaire.
  *
- * Une pièce déjà dans l'un de ces trois états ne propose donc rien : le menu
- * laisse place à une pastille et au geste qui convient.
+ * Une liste vide veut dire : pas de menu, une pastille.
  */
 export function statutsProposables(actuel: ItemStatus): ItemStatus[] {
-  const base: ItemStatus[] = ["photos_taken", "on_sale", "unsellable"];
-  if (!base.includes(actuel)) return [];
-  return base;
+  switch (actuel) {
+    case "photos_taken":
+      return ["photos_taken", "unsellable"];
+    case "on_sale":
+      return ["on_sale", "unsellable"];
+    case "unsellable":
+      return ["unsellable", "photos_taken"];
+    default:
+      return [];
+  }
 }
 
 export function estVerrouille(statut: ItemStatus): boolean {

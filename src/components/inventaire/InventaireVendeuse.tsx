@@ -1081,6 +1081,10 @@ function LigneTableau({
 }) {
   const verrouille = estVerrouille(ligne.statut);
   const prixBloques = !!ligne.prixValidesLe;
+  // Avant la mise en vente, il n'y a rien à vendre : les colonnes qui
+  // parlent de la vente restent inertes plutôt que de laisser croire qu'on
+  // peut brûler les étapes.
+  const enVente = ligne.statut === "on_sale" || estVendue(ligne.statut);
   const inputPhoto = useRef<HTMLInputElement>(null);
 
   return (
@@ -1192,7 +1196,7 @@ function LigneTableau({
           <ChoixStatut ligne={ligne} onStatut={onStatut} />
         </td>
 
-        {/* Prix de vente */}
+        {/* Prix de vente : sans objet tant que la pièce n'est pas en ligne. */}
         <td className={CELLULE}>
           {verrouille ? (
             <span className="px-2 tabular-nums text-noir">
@@ -1204,8 +1208,10 @@ function LigneTableau({
               onChange={(e) => onChange({ prixVente: e.target.value })}
               onBlur={() => onEnregistrerPrix("sale_price", ligne.prixVente)}
               onKeyDown={sortirSurEntree}
+              disabled={!enVente}
               inputMode="decimal"
               placeholder=""
+              title={enVente ? undefined : "La pièce n'est pas encore en vente"}
               className={CHAMP_PRIX}
             />
           )}
@@ -1419,6 +1425,11 @@ function BoutonVendue({ ligne, onVendue }: { ligne: Ligne; onVendue: () => void 
     );
   }
 
+  // Une pièce qui n'est pas en ligne ne peut pas avoir été vendue.
+  if (ligne.statut !== "on_sale") {
+    return <span className="text-[11px] text-gris-moyen">—</span>;
+  }
+
   const prix = versPrix(ligne.prixVente);
   const pret = prix != null && prix > 0;
 
@@ -1512,6 +1523,7 @@ function CarteCompacte({
 }: LigneProps) {
   const verrouille = estVerrouille(ligne.statut);
   const prixBloques = !!ligne.prixValidesLe;
+  const enVente = ligne.statut === "on_sale" || estVendue(ligne.statut);
   const [notesOuvertes, setNotesOuvertes] = useState(false);
 
   // Passer une pièce en invendable ouvre les notes : l'explication est
@@ -1576,7 +1588,7 @@ function CarteCompacte({
         <Prix
           libelle="Prix vente"
           valeur={ligne.prixVente}
-          verrouille={verrouille}
+          verrouille={verrouille || !enVente}
           onChange={(v) => onChange({ prixVente: v })}
           onBlur={() => onEnregistrerPrix("sale_price", ligne.prixVente)}
         />
