@@ -141,7 +141,6 @@ export default function ClientDashboardPage() {
   };
 
   const renderRequestDetails = (request: RequestWithRelations) => {
-    const statusInfo = requestStatusConfig[request.status];
     const seller = request.seller;
     const formula = request.formula;
 
@@ -165,7 +164,7 @@ export default function ClientDashboardPage() {
           </div>
         )}
 
-        <Badge className={statusInfo.color}>{statusInfo.label}</Badge>
+        {/* Le statut est déjà dans le titre de la demande. */}
 
         {request.message && (
           <div className="p-3 bg-muted/50 rounded">

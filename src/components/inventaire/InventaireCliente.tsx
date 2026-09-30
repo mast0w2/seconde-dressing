@@ -221,6 +221,10 @@ function AValider({
   );
 }
 
+/**
+ * Le montant qui revient à la cliente, traité comme le chiffre principal de
+ * la page : c'est la seule chose qu'elle vient vérifier.
+ */
 function Synthese({ nbVendues, part }: { nbVendues: number; part: number }) {
   if (nbVendues === 0) {
     return (
@@ -232,13 +236,16 @@ function Synthese({ nbVendues, part }: { nbVendues: number; part: number }) {
   }
 
   return (
-    <div className="border border-noir/10 bg-gris-tres-clair p-4">
-      <p className="font-serif text-xl leading-snug text-noir">
-        Vous allez recevoir {euros(part)} pour {nbVendues} pièce{nbVendues > 1 ? "s" : ""}{" "}
-        vendue{nbVendues > 1 ? "s" : ""}.
+    <div className="border border-sauge bg-sauge-clair/25 p-4 sm:p-5">
+      <span className="text-[10px] uppercase tracking-[0.16em] text-gris-moyen">
+        Ce que vous allez recevoir
+      </span>
+      <p className="mt-1 font-serif text-4xl leading-none tabular-nums text-noir sm:text-5xl">
+        {euros(part)}
       </p>
-      <p className="mt-1.5 text-sm text-gris-moyen">
-        Le virement part sous {DELAI_VIREMENT_JOURS} jours après la vente.
+      <p className="mt-2 text-sm text-gris-moyen">
+        Pour {nbVendues} pièce{nbVendues > 1 ? "s" : ""} vendue{nbVendues > 1 ? "s" : ""}. Le
+        virement part sous {DELAI_VIREMENT_JOURS} jours après la vente.
       </p>
     </div>
   );
