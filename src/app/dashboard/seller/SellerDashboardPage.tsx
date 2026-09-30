@@ -477,7 +477,7 @@ export default function SellerDashboardPage() {
   }
 
   return (
-    <div className="container py-8 max-w-[1440px]">
+    <div className="container mx-auto py-8 max-w-[1440px]">
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" onClick={() => router.back()} className="h-10 w-10 p-0">

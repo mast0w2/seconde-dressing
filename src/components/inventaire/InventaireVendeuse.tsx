@@ -72,7 +72,7 @@ interface Props {
   onItemsChange?: () => void;
 }
 
-const CELLULE = "px-2 py-1.5 align-middle";
+const CELLULE = "px-2 py-1.5 align-middle overflow-hidden";
 const CHAMP_PRIX =
   "h-8 w-full px-2 text-right tabular-nums text-sm border-noir/15 bg-transparent";
 
@@ -486,23 +486,27 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
       ) : (
         <>
           {/* Écran large : le tableau */}
-          <div className="hidden min-w-0 max-h-[70vh] lg:block overflow-auto border border-noir/10">
-            {/* table-fixed + colgroup : les colonnes gardent leur largeur quoi
-                qu'on saisisse. Sans ça, marquer une pièce vendue ajoutait une
-                date, élargissait le tableau et décalait toute la page. */}
-            <table className="w-full min-w-[1230px] table-fixed border-collapse text-sm">
+          {/* Défilement vertical seulement. Aucune largeur minimale : c'est
+              elle qui débordait, poussait la page au-delà de la fenêtre et
+              décalait tout vers la gauche. Les colonnes sont en pourcentages,
+              donc le tableau tient toujours dans la place disponible. */}
+          <div className="hidden min-w-0 max-h-[70vh] lg:block overflow-y-auto overflow-x-hidden border border-noir/10">
+            {/* table-fixed : les colonnes gardent leur largeur quoi qu'on
+                saisisse. Sans ça, marquer une pièce vendue ajoutait une date
+                et élargissait tout le tableau. */}
+            <table className="w-full table-fixed border-collapse text-sm">
               <colgroup>
-                <col className="w-[68px]" />
-                <col className="w-[210px]" />
-                <col className="w-[132px]" />
-                <col className="w-[104px]" />
-                <col className="w-[104px]" />
-                <col className="w-[156px]" />
-                <col className="w-[104px]" />
-                <col className="w-[116px]" />
-                <col className="w-[132px]" />
-                <col className="w-[52px]" />
-                <col className="w-[52px]" />
+                <col style={{ width: "6%" }} />
+                <col style={{ width: "18%" }} />
+                <col style={{ width: "12%" }} />
+                <col style={{ width: "8%" }} />
+                <col style={{ width: "8%" }} />
+                <col style={{ width: "13%" }} />
+                <col style={{ width: "8%" }} />
+                <col style={{ width: "9%" }} />
+                <col style={{ width: "11%" }} />
+                <col style={{ width: "3.5%" }} />
+                <col style={{ width: "3.5%" }} />
               </colgroup>
               {/* L'en-tête suit le défilement : au-delà de quelques lignes, on
                   ne sait plus si la colonne est le prix min ou le prix départ. */}
@@ -834,7 +838,7 @@ function LigneTableau({
         {/* Photo */}
         <td className={CELLULE}>
           {ligne.uploading ? (
-            <div className="flex h-12 w-12 items-center justify-center bg-gris-clair">
+            <div className="flex h-11 w-11 items-center justify-center bg-gris-clair">
               <Loader2 className="h-4 w-4 animate-spin text-gris-moyen" />
             </div>
           ) : photoSrc ? (
@@ -843,7 +847,7 @@ function LigneTableau({
               <img
                 src={photoSrc}
                 alt={ligne.description || "Pièce"}
-                className="h-12 w-12 object-cover border border-noir/10"
+                className="h-11 w-11 object-cover border border-noir/10"
               />
             </button>
           ) : (
@@ -853,7 +857,7 @@ function LigneTableau({
                 onClick={() => !verrouille && inputPhoto.current?.click()}
                 disabled={verrouille}
                 aria-label="Ajouter une photo"
-                className="flex h-12 w-12 items-center justify-center border border-dashed border-noir/20 text-gris-moyen hover:border-noir/50 disabled:opacity-50"
+                className="flex h-11 w-11 items-center justify-center border border-dashed border-noir/20 text-gris-moyen hover:border-noir/50 disabled:opacity-50"
               >
                 <ImageIcon className="h-4 w-4" />
               </button>
@@ -1134,8 +1138,8 @@ function ChoixStatut({
 function BoutonVendue({ ligne, onVendue }: { ligne: Ligne; onVendue: () => void }) {
   if (estVendue(ligne.statut)) {
     return (
-      <span className="inline-flex items-center gap-1 whitespace-nowrap text-[11px] text-[#3b5029]">
-        <Check className="h-3.5 w-3.5" />
+      <span className="flex flex-wrap items-center gap-x-1 text-[11px] leading-tight text-[#3b5029]">
+        <Check className="h-3.5 w-3.5 shrink-0" />
         {jour(ligne.venduLe) || "Vendue"}
       </span>
     );
