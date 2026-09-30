@@ -441,11 +441,17 @@ export default function SellerDashboardPage() {
         />
       )}
 
-      <RequestItemsUploader
-        requestId={request.id}
-        role="seller"
-        formulaSlug={formula?.slug ?? null}
-      />
+      {/* L'inventaire n'apparaît qu'une fois la demande attribuée. Sur une
+          nouvelle demande, n'importe quelle vendeuse le voit passer : lui
+          proposer d'importer des photos n'a pas de sens, et n'a rien à faire
+          dans les pièces d'une cliente qui ne lui est pas encore confiée. */}
+      {isAssignedToMe && (
+        <RequestItemsUploader
+          requestId={request.id}
+          role="seller"
+          formulaSlug={formula?.slug ?? null}
+        />
+      )}
       </div>
     );
   };
