@@ -332,7 +332,10 @@ export default function SellerDashboardPage() {
       // ne pouvait pas rétrécir dans une rangée non empilable et débordait,
       // désalignant les boutons sur petit écran.
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div className="flex-1">
+        {/* min-w-0 : sans lui, un enfant flex ne peut pas rétrécir sous la
+            largeur de son contenu — le tableau d'inventaire débordait alors
+            de la carte et décalait toute la mise en page vers la droite. */}
+        <div className="flex-1 min-w-0">
           {clientDisplayName && (
             <div className="text-sm text-gris-moyen mb-2">
               {clientDisplayName}
@@ -474,7 +477,7 @@ export default function SellerDashboardPage() {
   }
 
   return (
-    <div className="container py-8 max-w-6xl">
+    <div className="container py-8 max-w-[1440px]">
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" onClick={() => router.back()} className="h-10 w-10 p-0">

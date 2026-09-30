@@ -46,11 +46,9 @@ import {
 } from "@/lib/item-status";
 import {
   PART_CLIENTE,
-  PART_PLATEFORME,
   PART_VENDEUSE,
   formatShare,
   montantCliente,
-  montantPlateforme,
   montantVendeuse,
 } from "@/lib/pricing";
 import type { ItemStatus } from "@/types/database";
@@ -76,7 +74,7 @@ interface Props {
 
 const CELLULE = "px-2 py-1.5 align-middle";
 const CHAMP_PRIX =
-  "h-8 w-[74px] px-2 text-right tabular-nums text-sm border-noir/15 bg-transparent";
+  "h-8 w-full px-2 text-right tabular-nums text-sm border-noir/15 bg-transparent";
 
 export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Props) {
   const { toast } = useToast();
@@ -306,12 +304,11 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
         uploadingPreuve: false,
         preuveUrl: ok ? chemin : ligne.preuveUrl,
       });
-      // Déposer le justificatif, c'est dire « la cliente a été payée ». On
-      // enchaîne donc sur la finalisation — mais en la faisant confirmer :
-      // après elle, la ligne est verrouillée définitivement.
-      if (ok && estVendue(ligne.statut)) {
-        setAFinaliser({ ...ligne, preuveUrl: chemin, uploadingPreuve: false });
-      }
+      // La fenêtre de finalisation reste ouverte : on lui rend la ligne à
+      // jour pour qu'elle affiche le justificatif qu'on vient de déposer.
+      if (ok) setAFinaliser((prev) => (prev?.localId === ligne.localId
+        ? { ...prev, preuveUrl: chemin, uploadingPreuve: false }
+        : prev));
     },
     [requestId, supabase, majLocale, ecrire, toast]
   );
@@ -442,18 +439,6 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
         />
       </div>
 
-      {/* La recherche a sa propre ligne, sur toute la largeur : coincée entre
-          deux boutons, on ne la voyait pas. */}
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gris-moyen" />
-        <Input
-          value={recherche}
-          onChange={(e) => setRecherche(e.target.value)}
-          placeholder="Rechercher une pièce, une marque…"
-          className="h-10 w-full pl-9 text-sm"
-        />
-      </div>
-
       {/* ---------------- Filtres ---------------- */}
       {lignes.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5">
@@ -471,13 +456,24 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
       {/* ---------------- Totaux ---------------- */}
       {totaux.nbVendues > 0 && (
         <Totaux
-          nbVendues={totaux.nbVendues}
           nbFinalisees={totaux.nbFinalisees}
-          montantVendu={totaux.montantVendu}
           montantFinalise={totaux.montantFinalise}
           enCours={totaux.enCours}
+          nbEnCours={totaux.nbVendues - totaux.nbFinalisees}
         />
       )}
+
+      {/* La recherche appartient au tableau : elle se place juste au-dessus,
+          après les totaux, sur toute la largeur. */}
+      <div className="relative pt-1">
+        <Search className="pointer-events-none absolute left-3 top-1/2 mt-0.5 h-4 w-4 -translate-y-1/2 text-gris-moyen" />
+        <Input
+          value={recherche}
+          onChange={(e) => setRecherche(e.target.value)}
+          placeholder="Rechercher une pièce, une marque…"
+          className="h-10 w-full pl-9 text-sm"
+        />
+      </div>
 
       {/* ---------------- Tableau ---------------- */}
       {chargement ? (
@@ -490,11 +486,29 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
       ) : (
         <>
           {/* Écran large : le tableau */}
-          <div className="hidden lg:block overflow-x-auto border border-noir/10">
-            <table className="w-full border-collapse text-sm">
-              <thead>
-                <tr className="bg-gris-tres-clair text-left text-[11px] uppercase tracking-[0.12em] text-gris-moyen">
-                  <th className="px-2 py-2 w-[64px]">Photo</th>
+          <div className="hidden min-w-0 max-h-[70vh] lg:block overflow-auto border border-noir/10">
+            {/* table-fixed + colgroup : les colonnes gardent leur largeur quoi
+                qu'on saisisse. Sans ça, marquer une pièce vendue ajoutait une
+                date, élargissait le tableau et décalait toute la page. */}
+            <table className="w-full min-w-[1230px] table-fixed border-collapse text-sm">
+              <colgroup>
+                <col className="w-[68px]" />
+                <col className="w-[210px]" />
+                <col className="w-[132px]" />
+                <col className="w-[104px]" />
+                <col className="w-[104px]" />
+                <col className="w-[156px]" />
+                <col className="w-[104px]" />
+                <col className="w-[116px]" />
+                <col className="w-[132px]" />
+                <col className="w-[52px]" />
+                <col className="w-[52px]" />
+              </colgroup>
+              {/* L'en-tête suit le défilement : au-delà de quelques lignes, on
+                  ne sait plus si la colonne est le prix min ou le prix départ. */}
+              <thead className="sticky top-0 z-10">
+                <tr className="bg-gris-tres-clair text-left text-[11px] uppercase tracking-[0.12em] text-gris-moyen shadow-[0_1px_0_0_rgba(46,58,44,0.12)]">
+                  <th className="px-2 py-2">Photo</th>
                   <EnTete colonne="description" tri={tri} onClick={basculerTri}>
                     Description
                   </EnTete>
@@ -513,10 +527,10 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
                   <EnTete colonne="prixVente" tri={tri} onClick={basculerTri} droite>
                     Prix vente
                   </EnTete>
-                  <th className="px-2 py-2 w-[92px]">Vendu</th>
-                  <th className="px-2 py-2 w-[128px]">Preuve de vente</th>
-                  <th className="px-2 py-2 w-[44px]">Notes</th>
-                  <th className="px-2 py-2 w-[44px]"></th>
+                  <th className="px-2 py-2">Vendu</th>
+                  <th className="px-2 py-2">Preuve de vente</th>
+                  <th className="px-2 py-2">Notes</th>
+                  <th className="px-2 py-2"></th>
                 </tr>
               </thead>
               <tbody>
@@ -545,7 +559,7 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
                     onStatut={(s) => void changerStatut(ligne, s)}
                     onVendue={() => void marquerVendue(ligne)}
                     onPhoto={(f) => void remplacerPhoto(ligne, f)}
-                    onPreuve={(f) => void deposerPreuve(ligne, f)}
+                    onFinaliser={() => setAFinaliser(ligne)}
                     onSupprimer={() => void supprimer(ligne)}
                     onLoupe={(src) =>
                       setLoupe({ src, legende: ligne.description || ligne.marque || "Pièce" })
@@ -588,7 +602,7 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
                 onEnregistrerPrix={(champ, valeur) => void enregistrerPrix(ligne, champ, valeur)}
                 onStatut={(s) => void changerStatut(ligne, s)}
                 onVendue={() => void marquerVendue(ligne)}
-                onPreuve={(f) => void deposerPreuve(ligne, f)}
+                onFinaliser={() => setAFinaliser(ligne)}
                 onSupprimer={() => void supprimer(ligne)}
                 onLoupe={(src) =>
                   setLoupe({ src, legende: ligne.description || ligne.marque || "Pièce" })
@@ -632,31 +646,36 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
 // Barre de totaux
 // ===========================================================================
 
+/**
+ * Un seul montant, volontairement.
+ *
+ * Afficher côte à côte « montant vendu » et « montant finalisé » obligeait à
+ * comprendre la différence avant de lire le chiffre. Le tableau n'annonce donc
+ * que l'argent réellement encaissé, et mentionne le reste en une phrase.
+ *
+ * La part Seconde n'apparaît pas : c'est notre marge, pas une information
+ * dont la vendeuse a besoin pour travailler.
+ */
 function Totaux({
-  nbVendues,
   nbFinalisees,
-  montantVendu,
   montantFinalise,
   enCours,
+  nbEnCours,
 }: {
-  nbVendues: number;
   nbFinalisees: number;
-  montantVendu: number;
   montantFinalise: number;
   enCours: number;
+  nbEnCours: number;
 }) {
   return (
     <div className="border border-noir/10 bg-gris-tres-clair p-3 sm:p-4">
-      <div className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-5">
+      <div className="grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-3">
         <Chiffre
-          libelle="Montant vendu"
-          valeur={euros(montantVendu)}
-          detail={`${nbVendues} pièce${nbVendues > 1 ? "s" : ""}`}
-        />
-        <Chiffre
-          libelle="Montant finalisé"
+          libelle="Montant de la vente"
           valeur={euros(montantFinalise)}
-          detail={`${nbFinalisees} pièce${nbFinalisees > 1 ? "s" : ""} payée${nbFinalisees > 1 ? "s" : ""}`}
+          detail={`${nbFinalisees} pièce${nbFinalisees > 1 ? "s" : ""} encaissée${
+            nbFinalisees > 1 ? "s" : ""
+          }`}
         />
         <Chiffre
           libelle={`Part cliente (${formatShare(PART_CLIENTE)})`}
@@ -666,15 +685,12 @@ function Totaux({
           libelle={`Part vendeuse (${formatShare(PART_VENDEUSE)})`}
           valeur={euros(montantVendeuse(montantFinalise))}
         />
-        <Chiffre
-          libelle={`Part Seconde (${formatShare(PART_PLATEFORME)})`}
-          valeur={euros(montantPlateforme(montantFinalise))}
-        />
       </div>
       {enCours > 0 && (
         <p className="mt-3 border-t border-noir/10 pt-2 text-xs text-gris-moyen">
-          {euros(enCours)} sont vendus mais pas encore finalisés : la répartition ne les compte
-          pas tant que la cliente n&apos;a pas été virée.
+          {nbEnCours} pièce{nbEnCours > 1 ? "s" : ""} vendue{nbEnCours > 1 ? "s" : ""} (
+          {euros(enCours)}) attend{nbEnCours > 1 ? "ent" : ""} d&apos;être finalisée
+          {nbEnCours > 1 ? "s" : ""}. Le montant ci-dessus ne les compte pas encore.
         </p>
       )}
     </div>
@@ -776,7 +792,7 @@ interface LigneProps {
   onEnregistrerPrix: (champ: "min_price" | "starting_price" | "sale_price", valeur: string) => void;
   onStatut: (s: ItemStatus) => void;
   onVendue: () => void;
-  onPreuve: (f: File | null) => void;
+  onFinaliser: () => void;
   onSupprimer: () => void;
   onLoupe: (src: string) => void;
 }
@@ -796,7 +812,7 @@ function LigneTableau({
   onStatut,
   onVendue,
   onPhoto,
-  onPreuve,
+  onFinaliser,
   onSupprimer,
   onLoupe,
 }: LigneProps & {
@@ -873,7 +889,7 @@ function LigneTableau({
             onBlur={onEnregistrerMarque}
             disabled={verrouille}
             placeholder=""
-            className="h-8 w-[120px] border-noir/15 bg-transparent px-2 text-sm"
+            className="h-8 w-full border-noir/15 bg-transparent px-2 text-sm"
           />
         </td>
 
@@ -939,7 +955,7 @@ function LigneTableau({
 
         {/* Preuve de vente */}
         <td className={CELLULE}>
-          <ChampPreuve ligne={ligne} preuveHref={preuveHref} onPreuve={onPreuve} />
+          <ChampPreuve ligne={ligne} preuveHref={preuveHref} onFinaliser={onFinaliser} />
         </td>
 
         {/* Notes */}
@@ -1034,7 +1050,7 @@ function ChampDescription({
         onBlur={() => onEnregistrer()}
         disabled={verrouille}
         placeholder=""
-        className={`h-8 min-w-[160px] border-noir/15 bg-transparent px-2 text-sm ${
+        className={`h-8 w-full min-w-0 border-noir/15 bg-transparent px-2 text-sm ${
           isListening ? "border-sauge-fonce ring-1 ring-sauge-fonce/40" : ""
         }`}
       />
@@ -1099,7 +1115,7 @@ function ChoixStatut({
     <Select
       value={ligne.statut}
       onChange={(e) => onStatut(e.target.value as ItemStatus)}
-      className="h-8 w-[142px] border px-2 text-xs"
+      className="h-8 w-full border px-2 py-0 text-xs"
       style={{
         backgroundColor: STATUTS[ligne.statut].fond,
         color: STATUTS[ligne.statut].texte,
@@ -1144,21 +1160,20 @@ function BoutonVendue({ ligne, onVendue }: { ligne: Ligne; onVendue: () => void 
 }
 
 /**
- * Le dépôt du justificatif est le geste qui finalise : c'est lui qui prouve
- * que la cliente a été payée. La confirmation qui suit n'est pas une
- * formalité — après elle, la ligne est verrouillée pour de bon.
+ * La colonne « Preuve de vente » n'est qu'une porte d'entrée : le bouton ouvre
+ * la fenêtre de finalisation, où l'on dépose le justificatif et où l'on
+ * confirme. Rien ne s'enregistre avant cette confirmation, parce qu'après
+ * elle la ligne est verrouillée pour de bon.
  */
 function ChampPreuve({
   ligne,
   preuveHref,
-  onPreuve,
+  onFinaliser,
 }: {
   ligne: Ligne;
   preuveHref: string | null;
-  onPreuve: (f: File | null) => void;
+  onFinaliser: () => void;
 }) {
-  const inputPreuve = useRef<HTMLInputElement>(null);
-
   if (ligne.statut === "finalized") {
     return (
       <div className="flex flex-col gap-0.5 text-[11px]">
@@ -1185,47 +1200,18 @@ function ChampPreuve({
   }
 
   return (
-    <div className="flex items-center gap-1.5">
-      <Button
-        type="button"
-        size="sm"
-        variant="outline"
-        onClick={() => inputPreuve.current?.click()}
-        disabled={ligne.uploadingPreuve}
-        className="h-7 px-2 text-[11px]"
-      >
-        {ligne.uploadingPreuve ? (
-          <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
-        ) : (
-          <Paperclip className="mr-1 h-3.5 w-3.5" />
-        )}
-        {ligne.preuveUrl ? "Remplacer" : "Déposer"}
-      </Button>
-      <input
-        ref={inputPreuve}
-        type="file"
-        accept="image/*,application/pdf"
-        className="hidden"
-        onChange={(e) => {
-          onPreuve(e.target.files?.[0] ?? null);
-          e.target.value = "";
-        }}
-      />
-      {preuveHref && (
-        <a
-          href={preuveHref}
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Voir le justificatif"
-          className="text-gris-moyen hover:text-noir"
-        >
-          <ExternalLink className="h-3.5 w-3.5" />
-        </a>
-      )}
-    </div>
+    <Button
+      type="button"
+      size="sm"
+      variant="outline"
+      onClick={onFinaliser}
+      className="h-7 w-full px-2 text-[11px]"
+    >
+      <Paperclip className="mr-1 h-3.5 w-3.5" />
+      Finaliser
+    </Button>
   );
 }
-
 
 // ===========================================================================
 // Liste compacte (mobile et tablette)
@@ -1243,7 +1229,7 @@ function CarteCompacte({
   onEnregistrerPrix,
   onStatut,
   onVendue,
-  onPreuve,
+  onFinaliser,
   onSupprimer,
   onLoupe,
 }: LigneProps) {
@@ -1323,7 +1309,7 @@ function CarteCompacte({
         <div className="w-[92px]">
           <BoutonVendue ligne={ligne} onVendue={onVendue} />
         </div>
-        <ChampPreuve ligne={ligne} preuveHref={preuveHref} onPreuve={onPreuve} />
+        <ChampPreuve ligne={ligne} preuveHref={preuveHref} onFinaliser={onFinaliser} />
 
         <button
           type="button"
@@ -1430,17 +1416,41 @@ function DialogueFinalisation({
           <div className="space-y-2">
             <div className="eyebrow">Finalisation</div>
             <AlertDialog.Title className="font-serif text-2xl">
-              Passer cette pièce en finalisé ?
+              Finaliser la vente
             </AlertDialog.Title>
             <AlertDialog.Description className="text-sm text-gris-moyen">
-              {ligne?.description || "Cette pièce"}
-              {prix != null ? ` — vendue ${euros(prix)}.` : "."} La cliente touche{" "}
-              <strong className="text-noir">{euros(montantCliente(prix ?? 0))}</strong> (
-              {formatShare(PART_CLIENTE)}).
+              Déposez le justificatif du virement, puis confirmez. C&apos;est ce qui fait
+              entrer cette vente dans le montant dû à la cliente.
             </AlertDialog.Description>
           </div>
 
-          <div className="space-y-2 border border-noir/10 bg-gris-tres-clair p-4">
+          {/* Récapitulatif : les trois chiffres qu'on veut relire avant de
+              valider quelque chose d'irréversible. */}
+          <dl className="space-y-1.5 border border-noir/10 bg-gris-tres-clair p-4 text-sm">
+            <div className="flex items-baseline justify-between gap-4">
+              <dt className="text-gris-moyen">Pièce</dt>
+              <dd className="truncate text-right text-noir">
+                {ligne?.description || "Sans description"}
+                {ligne?.marque ? ` · ${ligne.marque}` : ""}
+              </dd>
+            </div>
+            <div className="flex items-baseline justify-between gap-4">
+              <dt className="text-gris-moyen">Vendue</dt>
+              <dd className="tabular-nums text-noir">
+                {prix != null ? euros(prix) : "—"}
+              </dd>
+            </div>
+            <div className="flex items-baseline justify-between gap-4 border-t border-noir/10 pt-1.5">
+              <dt className="text-gris-moyen">
+                La cliente touche ({formatShare(PART_CLIENTE)})
+              </dt>
+              <dd className="font-serif text-lg tabular-nums text-noir">
+                {euros(montantCliente(prix ?? 0))}
+              </dd>
+            </div>
+          </dl>
+
+          <div className="space-y-2 border border-noir/10 p-4">
             <span className="text-[10px] uppercase tracking-[0.14em] text-gris-moyen">
               Justificatif de virement
             </span>
@@ -1490,8 +1500,8 @@ function DialogueFinalisation({
           </div>
 
           <p className="border-l-2 border-[#8ba3b8] bg-[#f1f5f9] px-3 py-2 text-sm text-[#364a5c]">
-            Une fois finalisée, cette pièce ne pourra plus être modifiée ni supprimée.
-            C&apos;est de l&apos;argent déjà versé à la cliente.
+            Cette action est irréversible : la pièce ne pourra plus être modifiée ni
+            supprimée.
           </p>
 
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
