@@ -357,8 +357,7 @@ export default function SellerDashboardPage() {
           {/* Ce que la cliente a déclaré dans le formulaire. C'est sur ces
               trois éléments qu'une vendeuse décide d'accepter ou non, donc ils
               s'affichent dès les nouvelles demandes : ils parlent des
-              vêtements, pas de la personne. L'estimation est celle qui a été
-              annoncée à la cliente — sa part, pas le total des ventes. */}
+              vêtements, pas de la personne. */}
           <div className="mb-3 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm">
             {request.number_of_items != null && (
               <span className="text-noir">
@@ -368,11 +367,6 @@ export default function SellerDashboardPage() {
             {request.average_value != null && (
               <span className="text-gris-moyen">
                 ~{request.average_value} € la pièce
-              </span>
-            )}
-            {request.estimate != null && (
-              <span className="text-gris-moyen">
-                estimation annoncée : {request.estimate} € pour la cliente
               </span>
             )}
           </div>
