@@ -39,7 +39,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { alleger } from "@/lib/image";
 import { detecterMarque } from "@/lib/brands";
-import { storagePath } from "@/lib/storage";
+import { safeExtension, storagePath } from "@/lib/storage";
 import { minPriceEditorFor } from "@/lib/formules";
 import {
   DELAI_VALIDATION_HEURES,
@@ -188,8 +188,9 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
       if (!fichiers || fichiers.length === 0) return;
       const liste = Array.from(fichiers);
 
-      const brouillons: Ligne[] = liste.map((f) => ({
-        localId: `${Date.now()}-${f.name}-${Math.random().toString(36).slice(2)}`,
+      const brouillons: Ligne[] = liste.map(() => ({
+        // No file name here: it ends up in the storage key (see safeExtension).
+        localId: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
         photoUrl: null,
         description: "",
         marque: "",
@@ -214,7 +215,7 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
         // Une photo de téléphone pèse plusieurs mégaoctets pour finir dans une
         // vignette de 44 pixels : on la réduit avant de l'envoyer.
         const fichier = await alleger(liste[i]);
-        const ext = fichier.name.split(".").pop() || "jpg";
+        const ext = safeExtension(fichier.name);
         const chemin = `${requestId}/${brouillon.localId}.${ext}`;
 
         const { error: erreurUpload } = await supabase.storage
@@ -248,7 +249,7 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
       if (!brut || !ligne.itemId) return;
       majLocale(ligne.localId, { uploading: true });
       const fichier = await alleger(brut);
-      const ext = fichier.name.split(".").pop() || "jpg";
+      const ext = safeExtension(fichier.name);
       const chemin = `${requestId}/${ligne.itemId}-${Date.now()}.${ext}`;
       const { error } = await supabase.storage
         .from("request-items")
@@ -376,7 +377,7 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
       if (!brut || !ligne.itemId) return;
       majLocale(ligne.localId, { uploadingPreuve: true });
       const fichier = await alleger(brut);
-      const ext = fichier.name.split(".").pop() || "jpg";
+      const ext = safeExtension(fichier.name);
       const chemin = `${requestId}/${ligne.itemId}-preuve-${Date.now()}.${ext}`;
       const { error } = await supabase.storage
         .from("sale-proofs")

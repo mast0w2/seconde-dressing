@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { capitalizeName } from "@/lib/text";
 import { roleFromMetadata } from "@/lib/auth/role";
 import { safeRedirectPath } from "@/lib/safe-redirect";
+import { safeExtension } from "@/lib/storage";
 import Link from "next/link";
 
 const profileFormSchema = z.object({
@@ -269,7 +270,7 @@ function ProfileForm() {
 
       // One folder per user: the storage policy only lets a user write in
       // the folder named after her own id (migration 0022).
-      const fileExt = file.name.split(".").pop();
+      const fileExt = safeExtension(file.name);
       const filePath = `${user.id}/avatar.${fileExt}`;
 
       // Upload to the 'avatars' bucket, replacing any existing photo for this user

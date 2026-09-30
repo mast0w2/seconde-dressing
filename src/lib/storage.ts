@@ -13,6 +13,18 @@ export type PrivateBucket = "request-items" | "sale-proofs";
 
 const SIGNED_URL_TTL_SECONDS = 3600;
 
+/**
+ * Extension of an uploaded file, safe for a storage key.
+ *
+ * Supabase refuses keys with accents, spaces or other special characters
+ * ("Invalid key"), and phones happily produce « robe d'été.jpg ». So nothing
+ * from the original name goes into a path, except its extension once checked.
+ */
+export function safeExtension(fileName: string, fallback = "jpg"): string {
+  const ext = fileName.includes(".") ? (fileName.split(".").pop() ?? "").toLowerCase() : "";
+  return /^[a-z0-9]{1,5}$/.test(ext) ? ext : fallback;
+}
+
 /** Path of a file inside its bucket, from what the database stores. */
 export function storagePath(stored: string, bucket: PrivateBucket): string {
   const marker = `/object/public/${bucket}/`;
