@@ -44,25 +44,33 @@ describe('statuts de pièce', () => {
     expect(ORDRE_STATUTS).toHaveLength(6);
   });
 
-  it('ne propose que les trois statuts qui se choisissent librement', () => {
-    // Les autres s'obtiennent par un geste explicite : l'envoi des prix, la
-    // saisie du prix de vente, le dépôt de la preuve.
-    expect(statutsProposables('photos_taken')).toEqual([
-      'photos_taken',
-      'on_sale',
-      'unsellable',
-    ]);
+  it('ne laisse choisir librement que le va-et-vient avec « invendable »', () => {
+    // Chaque autre étape s'obtient par un geste qui a ses conditions :
+    // l'envoi des prix demande une fiche complète, la mise en vente l'accord
+    // de la cliente, la vente un prix, la finalisation une preuve.
+    expect(statutsProposables('photos_taken')).toEqual(['photos_taken', 'unsellable']);
+    expect(statutsProposables('on_sale')).toEqual(['on_sale', 'unsellable']);
+    expect(statutsProposables('unsellable')).toEqual(['unsellable', 'photos_taken']);
+  });
+
+  it('ne propose jamais un statut qui a des conditions', () => {
     ORDRE_STATUTS.forEach((s) => {
-      expect(statutsProposables(s)).not.toContain('finalized');
       expect(statutsProposables(s)).not.toContain('awaiting_client');
       expect(statutsProposables(s)).not.toContain('sold');
+      expect(statutsProposables(s)).not.toContain('finalized');
     });
   });
 
-  it('ne propose plus rien sur une pièce sortie de ces trois états', () => {
-    expect(statutsProposables('sold')).toEqual([]);
+  it('ne propose plus rien sur une pièce sortie du remplissage', () => {
     expect(statutsProposables('awaiting_client')).toEqual([]);
+    expect(statutsProposables('sold')).toEqual([]);
     expect(statutsProposables('finalized')).toEqual([]);
+  });
+
+  it('ne propose jamais « vente en cours » depuis le remplissage', () => {
+    // La mise en vente découle de la validation des prix par la cliente :
+    // la proposer ici laissait croire qu'on pouvait sauter cette étape.
+    expect(statutsProposables('photos_taken')).not.toContain('on_sale');
   });
 
   it('ne propose plus rien sur une pièce finalisée', () => {
