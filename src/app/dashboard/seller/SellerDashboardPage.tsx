@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { secteur } from "@/lib/secteur";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
@@ -358,11 +359,22 @@ export default function SellerDashboardPage() {
               Formule : {formula.label} ({formula.price} €)
             </div>
           )}
-          {request.address && (
-            <div className="text-sm text-gris-moyen mb-3">
-              Adresse : {request.address}
-            </div>
-          )}
+          {/* Avant acceptation, la vendeuse n'a besoin que du secteur pour
+              décider. L'adresse exacte n'apparaît qu'une fois la demande
+              attribuée — c'est le domicile d'une cliente, et la liste des
+              demandes ouvertes est visible par toutes les vendeuses. */}
+          {request.address &&
+            (isAssignedToMe ? (
+              <div className="text-sm text-gris-moyen mb-3">
+                Adresse : {request.address}
+              </div>
+            ) : (
+              secteur(request.address) && (
+                <div className="text-sm text-gris-moyen mb-3">
+                  Secteur : {secteur(request.address)}
+                </div>
+              )
+            ))}
 
           {/* Le statut est déjà affiché dans le titre de la demande : le
               répéter ici n'ajoutait rien. */}
