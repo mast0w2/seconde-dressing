@@ -74,7 +74,7 @@ interface Props {
 
 const CELLULE = "px-2 py-1.5 align-middle overflow-hidden";
 const CHAMP_PRIX =
-  "h-8 w-full px-2 text-right tabular-nums text-sm border-noir/15 bg-transparent";
+  "h-8 w-full px-2 text-left tabular-nums text-sm border-noir/15 bg-transparent";
 
 export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Props) {
   const { toast } = useToast();
@@ -527,7 +527,6 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
                     colonne="prixDepart"
                     tri={tri}
                     onClick={basculerTri}
-                    droite
                     titre="Prix de départ affiché en ligne"
                   >
                     Départ
@@ -536,7 +535,6 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
                     colonne="prixMin"
                     tri={tri}
                     onClick={basculerTri}
-                    droite
                     titre="Prix minimal accepté par la cliente"
                   >
                     Minimum
@@ -548,7 +546,6 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
                     colonne="prixVente"
                     tri={tri}
                     onClick={basculerTri}
-                    droite
                     titre="Prix auquel la pièce a été vendue"
                   >
                     Vente
@@ -750,30 +747,29 @@ function Chiffre({
 /**
  * En-tête de colonne triable.
  *
- * La flèche est toujours à droite du libellé, quelle que soit l'alignement de
- * la colonne : une flèche qui saute d'un côté à l'autre donne un en-tête qui
- * paraît en désordre. Et le libellé ne passe jamais à la ligne — c'est pour ça
- * qu'ils sont courts, avec l'intitulé complet en infobulle.
+ * Toutes les colonnes sont alignées à gauche, y compris les prix : la
+ * convention des tableurs (chiffres à droite) donnait, au milieu de huit
+ * colonnes de texte, une ligne d'en-tête en dents de scie. La flèche est
+ * toujours juste après le libellé, et le libellé ne passe jamais à la ligne —
+ * d'où des intitulés courts, complétés par une infobulle.
  */
 function EnTete({
   colonne,
   tri,
   onClick,
-  droite = false,
   titre,
   children,
 }: {
   colonne: Colonne;
   tri: { colonne: Colonne; sens: 1 | -1 } | null;
   onClick: (c: Colonne) => void;
-  droite?: boolean;
   titre?: string;
   children: React.ReactNode;
 }) {
   const actif = tri?.colonne === colonne;
   const Icone = !actif ? ChevronsUpDown : tri.sens === 1 ? ArrowUp : ArrowDown;
   return (
-    <th className={`px-2 py-2 ${droite ? "text-right" : "text-left"}`}>
+    <th className="px-2 py-2 text-left">
       <button
         type="button"
         onClick={() => onClick(colonne)}
@@ -933,7 +929,7 @@ function LigneTableau({
         </td>
 
         {/* Prix départ */}
-        <td className={`${CELLULE} text-right`}>
+        <td className={CELLULE}>
           <Input
             value={ligne.prixDepart}
             onChange={(e) => onChange({ prixDepart: e.target.value })}
@@ -946,9 +942,9 @@ function LigneTableau({
         </td>
 
         {/* Prix min */}
-        <td className={`${CELLULE} text-right`}>
+        <td className={CELLULE}>
           {prixBloques ? (
-            <span className="inline-flex items-center justify-end gap-1 tabular-nums text-noir">
+            <span className="inline-flex items-center gap-1 px-2 tabular-nums text-noir">
               {ligne.prixValidesLe && <Lock className="h-3 w-3 text-gris-moyen" />}
               {versPrix(ligne.prixMin) != null ? euros(versPrix(ligne.prixMin) as number) : "—"}
             </span>
@@ -970,9 +966,9 @@ function LigneTableau({
         </td>
 
         {/* Prix de vente */}
-        <td className={`${CELLULE} text-right`}>
+        <td className={CELLULE}>
           {verrouille ? (
-            <span className="tabular-nums text-noir">
+            <span className="px-2 tabular-nums text-noir">
               {versPrix(ligne.prixVente) != null ? euros(versPrix(ligne.prixVente) as number) : "—"}
             </span>
           ) : (
@@ -1419,7 +1415,7 @@ function Prix({
           onBlur={onBlur}
           inputMode="decimal"
           placeholder="—"
-          className="h-8 w-full border-noir/15 bg-transparent px-2 text-right tabular-nums text-sm"
+          className="h-8 w-full border-noir/15 bg-transparent px-2 text-left tabular-nums text-sm"
         />
       )}
     </label>
