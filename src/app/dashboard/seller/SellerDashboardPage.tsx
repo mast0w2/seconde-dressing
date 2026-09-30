@@ -319,7 +319,6 @@ export default function SellerDashboardPage() {
     request: RequestWithRelations,
     tab: "new" | "accepted" | "refused"
   ) => {
-    const statusInfo = requestStatusConfig[request.status];
     const client = request.client;
     const formula = request.formula;
     const isAssignedToMe = request.seller_id === user?.id;
@@ -365,7 +364,8 @@ export default function SellerDashboardPage() {
             </div>
           )}
 
-          <Badge className={statusInfo.color}>{statusInfo.label}</Badge>
+          {/* Le statut est déjà affiché dans le titre de la demande : le
+              répéter ici n'ajoutait rien. */}
 
           {request.message && (
             <div className="mt-3 p-3 bg-muted/50 rounded">
