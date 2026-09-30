@@ -1370,10 +1370,8 @@ function ChoixStatut({
   // cliente » vient de l'envoi des prix, « Vendu » d'un prix de vente,
   // « Finalisé » d'une preuve. Ils s'affichent en pastille.
   if (statutsProposables(ligne.statut).length === 0) {
-    const restant =
-      ligne.statut === "awaiting_client"
-        ? heuresRestantes(ligne.prixEnvoyesLe, DELAI_VALIDATION_HEURES)
-        : null;
+    // Pas de compte à rebours par ligne : le délai est le même pour toute la
+    // commande, il est annoncé une fois dans le bandeau d'envoi.
     return (
       <div className="flex flex-col items-start gap-0.5">
         <Pastille statut={ligne.statut} />
@@ -1386,11 +1384,6 @@ function ChoixStatut({
           >
             annuler
           </button>
-        )}
-        {ligne.statut === "awaiting_client" && (
-          <span className="text-[11px] text-gris-moyen">
-            {restant != null && restant > 0 ? `reste ${formaterDelai(restant)}` : "délai écoulé"}
-          </span>
         )}
       </div>
     );
