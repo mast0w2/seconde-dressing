@@ -439,20 +439,6 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
         />
       </div>
 
-      {/* ---------------- Filtres ---------------- */}
-      {lignes.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5">
-          <FiltreBouton actif={filtre === "tous"} onClick={() => setFiltre("tous")}>
-            Toutes ({lignes.length})
-          </FiltreBouton>
-          {ORDRE_STATUTS.filter((s) => nbParStatut[s] > 0).map((s) => (
-            <FiltreBouton key={s} actif={filtre === s} onClick={() => setFiltre(s)}>
-              {STATUTS[s].label} ({nbParStatut[s]})
-            </FiltreBouton>
-          ))}
-        </div>
-      )}
-
       {/* ---------------- Totaux ---------------- */}
       {totaux.nbVendues > 0 && (
         <Totaux
@@ -463,17 +449,33 @@ export function InventaireVendeuse({ requestId, formulaSlug, onItemsChange }: Pr
         />
       )}
 
-      {/* La recherche appartient au tableau : elle se place juste au-dessus,
-          après les totaux, sur toute la largeur. */}
-      <div className="relative pt-1">
-        <Search className="pointer-events-none absolute left-3 top-1/2 mt-0.5 h-4 w-4 -translate-y-1/2 text-gris-moyen" />
-        <Input
-          value={recherche}
-          onChange={(e) => setRecherche(e.target.value)}
-          placeholder="Rechercher une pièce, une marque…"
-          className="h-10 w-full pl-9 text-sm"
-        />
-      </div>
+      {/* Filtrer et chercher sont le même geste : réduire ce qu'on voit dans
+          le tableau. Les deux vivent donc sur une seule ligne, juste au-dessus
+          des colonnes — filtres à gauche, recherche à droite. */}
+      {lignes.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 pt-1">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <FiltreBouton actif={filtre === "tous"} onClick={() => setFiltre("tous")}>
+              Toutes ({lignes.length})
+            </FiltreBouton>
+            {ORDRE_STATUTS.filter((s) => nbParStatut[s] > 0).map((s) => (
+              <FiltreBouton key={s} actif={filtre === s} onClick={() => setFiltre(s)}>
+                {STATUTS[s].label} ({nbParStatut[s]})
+              </FiltreBouton>
+            ))}
+          </div>
+
+          <div className="relative ml-auto w-full sm:w-[280px]">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gris-moyen" />
+            <Input
+              value={recherche}
+              onChange={(e) => setRecherche(e.target.value)}
+              placeholder="Rechercher une pièce, une marque…"
+              className="h-9 w-full pl-9 text-sm"
+            />
+          </div>
+        </div>
+      )}
 
       {/* ---------------- Tableau ---------------- */}
       {chargement ? (
