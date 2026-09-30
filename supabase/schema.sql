@@ -1,7 +1,7 @@
 -- supabase/schema.sql
 -- Snapshot of the production schema (public tables, functions, RLS, grants,
 -- storage buckets and policies), read from the production catalog on
--- 2026-09-24, then brought up to date with migrations 0019 to 0026
+-- 2026-09-24, then brought up to date with migrations 0019 to 0027
 -- (seller approval, locked requests, server-only contracts, private storage,
 -- shared rate limits, statut par pièce et finalisation).
 --
@@ -665,6 +665,10 @@ CREATE POLICY request_items_update_involved ON public.request_items FOR UPDATE T
     USING (request_id IN (SELECT requests.id FROM requests
         WHERE requests.client_id = auth.uid() OR requests.seller_id = auth.uid()))
     WITH CHECK (request_id IN (SELECT requests.id FROM requests
+        WHERE requests.client_id = auth.uid() OR requests.seller_id = auth.uid()));
+
+CREATE POLICY request_items_delete_involved ON public.request_items FOR DELETE TO authenticated
+    USING (request_id IN (SELECT requests.id FROM requests
         WHERE requests.client_id = auth.uid() OR requests.seller_id = auth.uid()));
 
 CREATE POLICY request_refusals_read_own ON public.request_refusals FOR SELECT TO authenticated

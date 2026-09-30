@@ -55,9 +55,14 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
   const onResultRef = useRef(onResult);
   onResultRef.current = onResult;
 
-  useEffect(() => {
+  // Le moteur de reconnaissance n'est créé qu'au premier usage. Il vivait
+  // jusqu'ici dès le montage : dans un tableau de quarante pièces, cela
+  // faisait quarante moteurs vocaux ouverts pour un seul micro utilisé à la
+  // fois — et autant de travail au chargement de l'écran.
+  const creer = useCallback((): SpeechRecognitionLike | null => {
+    if (recognitionRef.current) return recognitionRef.current;
     const Ctor = getRecognitionCtor();
-    if (!Ctor) return;
+    if (!Ctor) return null;
     const recognition = new Ctor();
     recognition.lang = lang;
     recognition.continuous = false;
@@ -72,25 +77,32 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
     };
     recognition.onend = () => setIsListening(false);
     recognitionRef.current = recognition;
-    return () => {
-      recognition.abort();
-      recognitionRef.current = null;
-    };
+    return recognition;
   }, [lang]);
 
+  // Rien à monter : on se contente de libérer ce qui a servi.
+  useEffect(
+    () => () => {
+      recognitionRef.current?.abort();
+      recognitionRef.current = null;
+    },
+    []
+  );
+
   const start = useCallback(() => {
-    if (!recognitionRef.current) {
+    const recognition = creer();
+    if (!recognition) {
       setError("Transcription vocale indisponible sur ce navigateur.");
       return;
     }
     setError(null);
     try {
-      recognitionRef.current.start();
+      recognition.start();
       setIsListening(true);
     } catch {
       setIsListening(false);
     }
-  }, []);
+  }, [creer]);
 
   const stop = useCallback(() => {
     recognitionRef.current?.stop();

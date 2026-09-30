@@ -315,6 +315,10 @@ function CartePiece({
             <img
               src={src}
               alt={ligne.description || "Pièce"}
+              loading="lazy"
+              decoding="async"
+              width={48}
+              height={48}
               className="h-12 w-12 border border-noir/10 object-cover"
             />
           </button>
