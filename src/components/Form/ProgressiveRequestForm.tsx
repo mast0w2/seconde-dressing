@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/components/ui/use-toast";
@@ -8,6 +9,8 @@ import { getSupabaseClient } from "@/lib/supabase/client";
 import { capitalizeName } from "@/lib/text";
 import { envoyerLienEspace, type StatutLien } from "@/lib/auth/espace-link";
 import { PART_CLIENTE, formatShare, montantCliente } from "@/lib/pricing";
+import { EMAIL_REGEX, FIELD_MAX, PHONE_REGEX } from "@/lib/form-limits";
+import { HoneypotField, spamTrapFields, useFormStartedAt } from "@/components/HoneypotField";
 import { Users, Sparkles, Gem, Ban } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -55,6 +58,9 @@ interface Question {
   unit?: string;
   options?: FormuleOption[];
   criteres?: Critere[];
+  /** Browser autofill hint (HTML autocomplete attribute). */
+  autoComplete?: string;
+  maxLength?: number;
 }
 
 // ============================================================================
@@ -94,6 +100,8 @@ const QUESTIONS: Question[] = [
     question: "Quel est votre prénom ?",
     type: "text",
     placeholder: "Votre prénom",
+    autoComplete: "given-name",
+    maxLength: FIELD_MAX.name,
     required: true,
   },
   {
@@ -101,6 +109,8 @@ const QUESTIONS: Question[] = [
     question: "Quel est votre nom ?",
     type: "text",
     placeholder: "Votre nom",
+    autoComplete: "family-name",
+    maxLength: FIELD_MAX.name,
     required: true,
   },
   {
@@ -108,6 +118,8 @@ const QUESTIONS: Question[] = [
     question: "Quelle est votre adresse email ?",
     type: "email",
     placeholder: "votre@email.com",
+    autoComplete: "email",
+    maxLength: FIELD_MAX.email,
     required: true,
   },
   {
@@ -115,6 +127,8 @@ const QUESTIONS: Question[] = [
     question: "Quel est votre numéro de téléphone ?",
     type: "tel",
     placeholder: "06 12 34 56 78",
+    autoComplete: "tel",
+    maxLength: FIELD_MAX.phone,
     required: true,
   },
   {
@@ -123,6 +137,7 @@ const QUESTIONS: Question[] = [
     type: "address",
     placeholder: "Commencez à taper votre adresse…",
     aide: "Pour l'instant, on se déplace à Paris et en proche banlieue.",
+    maxLength: FIELD_MAX.address,
     required: true,
   },
   {
@@ -179,6 +194,7 @@ const QUESTIONS: Question[] = [
     question: "Quelles sont les marques principales de vos vêtements ?",
     type: "text",
     placeholder: "Ex : Sézane, Sandro, Maje, The Kooples, Ba&sh, Zadig & Voltaire…",
+    maxLength: FIELD_MAX.brands,
     required: true,
   },
   {
@@ -186,6 +202,7 @@ const QUESTIONS: Question[] = [
     question: "Une précision à ajouter ?",
     type: "textarea",
     placeholder: "Optionnel — tout ce qui peut nous aider à préparer le rendez-vous.",
+    maxLength: FIELD_MAX.shortText,
     required: false,
   },
 ];
@@ -194,10 +211,15 @@ const QUESTIONS: Question[] = [
 // Validation
 // ============================================================================
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_REGEX = /^[\+]?[0-9\s\-()]{10,}$/;
-
 function validateField(value: any, question: Question): string | null {
+  if (
+    question.maxLength &&
+    typeof value === "string" &&
+    value.trim().length > question.maxLength
+  ) {
+    return `${question.maxLength} caractères maximum`;
+  }
+
   if (question.required === false) {
     return null;
   }
@@ -208,16 +230,16 @@ function validateField(value: any, question: Question): string | null {
       : "Merci de confirmer que vos pièces correspondent à ces critères";
   }
 
-  if (value === "" || value === null || value === undefined) {
+  if (value === null || value === undefined || String(value).trim() === "") {
     return "Ce champ est requis";
   }
 
   switch (question.type) {
     case "email":
-      if (!EMAIL_REGEX.test(value)) return "L'email n'est pas valide";
+      if (!EMAIL_REGEX.test(String(value).trim())) return "L'email n'est pas valide";
       break;
     case "tel":
-      if (!PHONE_REGEX.test(value)) return "Le numéro de téléphone n'est pas valide";
+      if (!PHONE_REGEX.test(String(value).trim())) return "Le numéro de téléphone n'est pas valide";
       break;
     case "address":
       if (String(value).trim().length < 5) return "Merci d'indiquer une adresse complète";
@@ -241,18 +263,19 @@ function estHorsZone(adresse: string): boolean {
 // ============================================================================
 
 async function submitForm(
-  data: FormData
+  data: FormData,
+  spamTraps: Record<string, unknown>
 ): Promise<{ success: boolean; message?: string; requestId?: string }> {
   try {
     const response = await fetch("/api/appointment-request", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        nom: data.nom,
-        prenom: data.prenom,
-        email: data.email,
-        telephone: data.telephone,
-        adresse: data.adresse,
+        nom: data.nom.trim(),
+        prenom: data.prenom.trim(),
+        email: data.email.trim(),
+        telephone: data.telephone.trim(),
+        adresse: data.adresse.trim(),
         conditionsAcceptees: data.conditionsAcceptees,
         formule: data.formule,
         nombreVetements: data.nombreVetements,
@@ -260,6 +283,7 @@ async function submitForm(
         marques: data.marques,
         description: data.description,
         estimation: montantCliente(data.nombreVetements * data.valeurMoyenne),
+        ...spamTraps,
       }),
     });
 
@@ -287,12 +311,14 @@ function AddressInput({
   placeholder,
   disabled,
   onValidate,
+  inputProps,
 }: {
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
   disabled?: boolean;
   onValidate: () => void;
+  inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
 }) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -379,6 +405,7 @@ function AddressInput({
         placeholder={placeholder}
         disabled={disabled}
         autoComplete="off"
+        {...inputProps}
         className="w-full border border-noir bg-transparent rounded-none px-6 py-6 text-lg"
       />
       {isOpen && suggestions.length > 0 && (
@@ -443,6 +470,8 @@ export function ProgressiveRequestForm({ onCompleteChange }: ProgressiveRequestF
   // True when the signed-in user is a seller: they cannot submit a request
   // (the form is for clients). They must create a separate client account.
   const [isSeller, setIsSeller] = useState(false);
+  const [honeypot, setHoneypot] = useState("");
+  const startedAt = useFormStartedAt();
 
   useEffect(() => {
     onCompleteChange?.(isComplete);
@@ -512,7 +541,7 @@ export function ProgressiveRequestForm({ onCompleteChange }: ProgressiveRequestF
     try {
       // La demande part TOUJOURS en premier. La création de l'espace de suivi
       // ne doit jamais pouvoir empêcher l'envoi de la demande.
-      const result = await submitForm(formData);
+      const result = await submitForm(formData, spamTrapFields(honeypot, startedAt));
       if (!result.success) {
         toast({
           title: "Erreur",
@@ -559,6 +588,16 @@ export function ProgressiveRequestForm({ onCompleteChange }: ProgressiveRequestF
   };
 
   // ---------- rendu du champ ----------
+  // The question shown above the field is its label; the error under it is
+  // announced with it.
+  const QUESTION_ID = "request-step-question";
+  const ERROR_ID = "request-step-error";
+  const a11yProps = {
+    "aria-labelledby": QUESTION_ID,
+    "aria-invalid": errors[currentQuestion.id] ? true : undefined,
+    "aria-describedby": errors[currentQuestion.id] ? ERROR_ID : undefined,
+  } as const;
+
   const renderInput = () => {
     const value = formData[currentQuestion.id];
 
@@ -572,6 +611,7 @@ export function ProgressiveRequestForm({ onCompleteChange }: ProgressiveRequestF
               placeholder={currentQuestion.placeholder}
               disabled={isSubmitting}
               onValidate={handleNext}
+              inputProps={{ ...a11yProps, maxLength: currentQuestion.maxLength }}
             />
             {estHorsZone(value as string) && (
               <p className="text-sm text-gris-moyen border-l-2 border-sauge-clair pl-4">
@@ -684,22 +724,28 @@ export function ProgressiveRequestForm({ onCompleteChange }: ProgressiveRequestF
       case "textarea":
         return (
           <textarea
+            {...a11yProps}
             value={value as string}
             onChange={(e) => handleChange(e.target.value)}
             placeholder={currentQuestion.placeholder}
+            maxLength={currentQuestion.maxLength}
             disabled={isSubmitting}
             rows={4}
-            className="w-full p-6 border border-noir bg-transparent rounded-none focus:outline-none focus:border-sauge text-lg"
+            className="w-full p-6 border border-noir bg-transparent rounded-none focus:outline-none focus:border-sauge-fonce text-lg"
           />
         );
 
       default:
         return (
           <Input
+            {...a11yProps}
             type={currentQuestion.type}
+            name={currentQuestion.id}
+            autoComplete={currentQuestion.autoComplete}
+            maxLength={currentQuestion.maxLength}
             value={value as string}
             onChange={(e) => handleChange(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyPress}
             placeholder={currentQuestion.placeholder}
             disabled={isSubmitting}
             className="w-full border border-noir bg-transparent rounded-none px-6 py-6 text-lg"
@@ -710,6 +756,7 @@ export function ProgressiveRequestForm({ onCompleteChange }: ProgressiveRequestF
 
   const renderProgress = () => (
     <div className="mb-8">
+      <HoneypotField value={honeypot} onChange={setHoneypot} />
       <div className="w-full bg-sauge-clair/40 h-px">
         <div
           className="bg-noir h-px transition-all duration-300"
@@ -824,12 +871,12 @@ export function ProgressiveRequestForm({ onCompleteChange }: ProgressiveRequestF
 
       <div className="space-y-4">
         {isSeller && (
-          <p className="text-sm text-red-600">
+          <p className="text-sm text-destructive">
             Vous êtes connectée en tant que vendeuse. Pour vendre vos propres
             vêtements, créez un autre compte client.
           </p>
         )}
-        <h3 className="font-serif text-2xl sm:text-3xl text-noir">
+        <h3 id={QUESTION_ID} className="font-serif text-2xl sm:text-3xl text-noir">
           {currentQuestion.question}
         </h3>
 
@@ -840,7 +887,9 @@ export function ProgressiveRequestForm({ onCompleteChange }: ProgressiveRequestF
         <div>{renderInput()}</div>
 
         {errors[currentQuestion.id] && (
-          <p className="text-sm text-destructive">{errors[currentQuestion.id]}</p>
+          <p id={ERROR_ID} role="alert" className="text-sm text-destructive">
+            {errors[currentQuestion.id]}
+          </p>
         )}
 
         {renderEstimation()}
@@ -853,7 +902,7 @@ export function ProgressiveRequestForm({ onCompleteChange }: ProgressiveRequestF
               type="checkbox"
               checked={creerEspace}
               onChange={(e) => setCreerEspace(e.target.checked)}
-              className="mt-1 h-4 w-4 shrink-0 accent-[#6f7d62]"
+              className="mt-1 h-4 w-4 shrink-0 accent-[#5b6e49]"
             />
             <span className="flex flex-col gap-1">
               <span className="text-sm text-noir">
@@ -866,6 +915,20 @@ export function ProgressiveRequestForm({ onCompleteChange }: ProgressiveRequestF
               </span>
             </span>
           </label>
+        )}
+
+        {isLastStep && (
+          <p className="text-sm text-gris-moyen">
+            En validant, vous acceptez nos{" "}
+            <Link href="/terms" className="text-sauge-fonce underline underline-offset-4 hover:text-noir">
+              conditions générales
+            </Link>
+            . Vos coordonnées servent uniquement à organiser votre rendez-vous (
+            <Link href="/privacy" className="text-sauge-fonce underline underline-offset-4 hover:text-noir">
+              politique de confidentialité
+            </Link>
+            ).
+          </p>
         )}
 
         <div className="flex items-center justify-between gap-4 pt-4">

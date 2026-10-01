@@ -7,10 +7,17 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/admin/", "/dashboard/", "/profile", "/preferences"],
+        // Private or one-off pages: they also carry a noindex tag.
+        disallow: [
+          "/api/",
+          "/admin",
+          "/dashboard",
+          "/profile",
+          "/appointment-request",
+          "/reset-password",
+        ],
       },
     ],
     sitemap: `${siteConfig.url}/sitemap.xml`,
-    host: siteConfig.url,
   };
 }

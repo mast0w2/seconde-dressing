@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ToastProvider } from "@/components/ToastProvider";
+import { CookieConsent } from "@/components/CookieConsent";
 import { siteConfig, buildJsonLd, buildOrganizationLd, buildWebsiteLd } from "@/lib/seo";
 
 // next/font héberge les polices sous un nom généré (ex. __Jost_744fae). Les
@@ -25,10 +26,9 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
+  // Icons come from the file conventions in this folder: favicon.ico,
+  // icon.svg and apple-icon.png.
   metadataBase: new URL(siteConfig.url),
-  icons: {
-    icon: "/favicon.svg",
-  },
   title: {
     default: siteConfig.title,
     template: `%s | ${siteConfig.name}`,
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
         url: siteConfig.ogImage,
         width: 1200,
         height: 630,
-        alt: "Seconde - conciergerie de seconde main",
+        alt: siteConfig.ogImageAlt,
       },
     ],
   },
@@ -79,6 +79,7 @@ export default function RootLayout({
           <Footer />
         </div>
         <ToastProvider />
+        <CookieConsent />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(buildJsonLd()) }}

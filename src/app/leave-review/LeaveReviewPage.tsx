@@ -3,10 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Star, Check } from "lucide-react";
+import { HoneypotField, spamTrapFields, useFormStartedAt } from "@/components/HoneypotField";
+import { EMAIL_REGEX, FIELD_MAX } from "@/lib/form-limits";
 
 const LABEL = "text-[10px] tracking-[0.22em] uppercase text-gris-moyen";
 const CHAMP =
-  "w-full bg-transparent border-0 border-b border-noir/20 py-3 text-base text-noir placeholder:text-gris-moyen/50 focus:outline-none focus:border-sauge transition-colors";
+  "w-full bg-transparent border-0 border-b border-noir/20 py-3 text-base text-noir placeholder:text-gris-moyen focus:outline-none focus:border-sauge-fonce transition-colors";
 
 const VIDE = {
   prenom: "",
@@ -23,15 +25,17 @@ export default function LeaveReviewPage() {
   const [envoi, setEnvoi] = useState(false);
   const [envoye, setEnvoye] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
+  const [honeypot, setHoneypot] = useState("");
+  const startedAt = useFormStartedAt();
 
   // Liste, en clair, ce qu'il reste à remplir. Un message générique ne dit pas
   // à la cliente quel champ bloque : elle abandonne.
   const manquants: string[] = [];
   if (form.note < 1) manquants.push("une note en étoiles");
-  if (form.texte.trim().length < 5) manquants.push("votre reviews");
+  if (form.texte.trim().length < 5) manquants.push("votre avis");
   if (form.prenom.trim() === "") manquants.push("votre prénom");
   if (form.nom.trim() === "") manquants.push("votre nom");
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) manquants.push("un email valide");
+  if (!EMAIL_REGEX.test(form.email.trim())) manquants.push("un email valide");
   if (!form.consentement) manquants.push("l'autorisation de publication");
   const valide = manquants.length === 0;
 
@@ -61,6 +65,7 @@ export default function LeaveReviewPage() {
           note: form.note,
           texte: form.texte.trim(),
           consentement: form.consentement,
+          ...spamTrapFields(honeypot, startedAt),
         }),
       });
 
@@ -83,7 +88,7 @@ export default function LeaveReviewPage() {
             <Check className="h-8 w-8 text-sauge" strokeWidth={1.3} />
             <h1 className="text-3xl sm:text-4xl">Merci beaucoup.</h1>
             <p className="text-gris-moyen">
-              Votre reviews nous est bien parvenu. Nous le publierons tel que vous l&apos;avez écrit,
+              Votre avis nous est bien parvenu. Nous le publierons tel que vous l&apos;avez écrit,
               avec votre prénom seul, dans les prochains jours. Vous pouvez à tout moment nous
               demander de le modifier ou de le retirer.
             </p>
@@ -91,7 +96,7 @@ export default function LeaveReviewPage() {
               href="/reviews"
               className="mt-2 bg-noir text-blanc border border-noir px-8 py-4 text-[11px] tracking-[0.2em] uppercase hover:bg-transparent hover:text-noir transition-colors"
             >
-              Voir les reviews
+              Voir les avis
             </Link>
           </div>
         </section>
@@ -104,33 +109,35 @@ export default function LeaveReviewPage() {
       <section className="px-6 sm:px-10 lg:px-[76px] pt-12 sm:pt-16 pb-16 sm:pb-20 lg:pb-24">
         <div className="max-w-[620px] mx-auto flex flex-col gap-10">
           <div className="flex flex-col gap-5">
-            <div className="eyebrow">Votre reviews</div>
+            <div className="eyebrow">Votre avis</div>
             <h1 className="text-4xl sm:text-5xl leading-[1.14]">
               Vos pièces sont vendues.
               <br />
               <span className="italic text-sauge-fonce">Dites-nous comment ça s&apos;est passé.</span>
             </h1>
             <p className="text-base text-gris-moyen">
-              Votre reviews sera publié sur notre page reviews, tel que vous l&apos;écrivez, avec votre
+              Votre avis sera publié sur notre page d&apos;avis, tel que vous l&apos;écrivez, avec votre
               prénom seul. Deux minutes, et vous aidez les prochaines clientes à savoir à quoi
               s&apos;attendre.
             </p>
           </div>
 
-          <form onSubmit={envoyer} className="flex flex-col gap-8">
+          <form onSubmit={envoyer} noValidate className="flex flex-col gap-8">
+            <HoneypotField value={honeypot} onChange={setHoneypot} />
             <div className="flex flex-col gap-3">
-              <span className={LABEL}>Votre note *</span>
-              <div className="flex items-center gap-2">
+              <span id="note-label" className={LABEL}>Votre note *</span>
+              <div role="group" aria-labelledby="note-label" className="flex items-center gap-2">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <button
                     key={i}
                     type="button"
                     onClick={() => setForm({ ...form, note: i })}
                     aria-label={`${i} étoile${i > 1 ? "s" : ""}`}
+                    aria-pressed={form.note === i}
                     className="p-1 transition-transform hover:scale-110"
                   >
                     <Star
-                      className={i <= form.note ? "fill-sauge text-sauge" : "text-sauge-clair"}
+                      className={i <= form.note ? "fill-sauge-fonce text-sauge-fonce" : "text-sauge-clair"}
                       style={{ width: 30, height: 30 }}
                       strokeWidth={1.3}
                     />
@@ -141,11 +148,12 @@ export default function LeaveReviewPage() {
 
             <div className="flex flex-col gap-2">
               <label htmlFor="texte" className={LABEL}>
-                Votre reviews *
+                Votre avis *
               </label>
               <textarea
                 id="texte"
                 rows={5}
+                maxLength={FIELD_MAX.shortText}
                 value={form.texte}
                 onChange={(e) => setForm({ ...form, texte: e.target.value })}
                 placeholder="Ce qui vous a plu, ce qui pourrait être mieux, ce que vous diriez à une amie…"
@@ -161,6 +169,8 @@ export default function LeaveReviewPage() {
                 <input
                   id="prenom"
                   type="text"
+                  autoComplete="given-name"
+                  maxLength={FIELD_MAX.name}
                   value={form.prenom}
                   onChange={(e) => setForm({ ...form, prenom: e.target.value })}
                   className={CHAMP}
@@ -174,6 +184,8 @@ export default function LeaveReviewPage() {
                 <input
                   id="nom"
                   type="text"
+                  autoComplete="family-name"
+                  maxLength={FIELD_MAX.name}
                   value={form.nom}
                   onChange={(e) => setForm({ ...form, nom: e.target.value })}
                   className={CHAMP}
@@ -187,6 +199,8 @@ export default function LeaveReviewPage() {
                 <input
                   id="email"
                   type="email"
+                  autoComplete="email"
+                  maxLength={FIELD_MAX.email}
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   className={CHAMP}
@@ -200,6 +214,8 @@ export default function LeaveReviewPage() {
                 <input
                   id="ville"
                   type="text"
+                  autoComplete="address-level2"
+                  maxLength={FIELD_MAX.city}
                   value={form.ville}
                   onChange={(e) => setForm({ ...form, ville: e.target.value })}
                   placeholder="Paris 11e"
@@ -213,24 +229,32 @@ export default function LeaveReviewPage() {
                 type="checkbox"
                 checked={form.consentement}
                 onChange={(e) => setForm({ ...form, consentement: e.target.checked })}
-                className="mt-1 h-4 w-4 shrink-0 accent-[#6f7d62]"
+                className="mt-1 h-4 w-4 shrink-0 accent-[#5b6e49]"
               />
               <span className="text-sm text-gris-moyen">
-                J&apos;autorise Seconde à publier cet reviews sur son site avec mon prénom et ma ville.
+                J&apos;autorise Seconde à publier cet avis sur son site avec mon prénom et ma ville.
                 Mon nom et mon email ne seront pas publiés et servent uniquement à vérifier que
-                l&apos;reviews provient bien d&apos;une cliente. Je peux demander sa modification ou son
-                retrait à tout moment.
+                l&apos;avis provient bien d&apos;une cliente. Je peux demander sa modification ou son
+                retrait à tout moment (
+                <Link href="/privacy" className="text-sauge-fonce underline underline-offset-4 hover:text-noir">
+                  politique de confidentialité
+                </Link>
+                ).
               </span>
             </label>
 
-            {erreur && <p className="text-sm text-red-700">{erreur}</p>}
+            {erreur && (
+              <p role="alert" className="text-sm text-destructive">
+                {erreur}
+              </p>
+            )}
 
             <button
               type="submit"
               disabled={envoi}
               className="self-start bg-noir text-blanc border border-noir px-8 py-4 text-[11px] tracking-[0.2em] uppercase hover:bg-transparent hover:text-noir transition-colors disabled:opacity-50"
             >
-              {envoi ? "Envoi en cours…" : "Envoyer mon reviews"}
+              {envoi ? "Envoi en cours…" : "Envoyer mon avis"}
             </button>
           </form>
         </div>

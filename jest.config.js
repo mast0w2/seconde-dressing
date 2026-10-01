@@ -11,6 +11,8 @@ const customJestConfig = {
   testEnvironment: 'jest-environment-jsdom',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    // The real package throws outside React Server Components.
+    '^server-only$': '<rootDir>/src/__mocks__/server-only.js',
   },
   testMatch: [
     '**/__tests__/**/*.[jt]s?(x)',

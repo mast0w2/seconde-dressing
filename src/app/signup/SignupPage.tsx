@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { FIELD_MAX } from "@/lib/form-limits";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -17,10 +18,10 @@ import { capitalizeName } from "@/lib/text";
 import type { Role } from "@/types/database";
 
 const formSchema = z.object({
-  email: z.string().email("Adresse email invalide"),
+  email: z.string().trim().email("Adresse email invalide").max(FIELD_MAX.email),
   password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
-  prenom: z.string().min(2, "Le prénom est requis"),
-  nom: z.string().min(2, "Le nom est requis"),
+  prenom: z.string().trim().min(2, "Le prénom est requis").max(FIELD_MAX.name, "Prénom trop long"),
+  nom: z.string().trim().min(2, "Le nom est requis").max(FIELD_MAX.name, "Nom trop long"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -269,6 +270,9 @@ function SignupForm() {
                     <Label htmlFor="prenom">Prénom</Label>
                     <Input
                       id="prenom"
+                      autoComplete="given-name"
+                      maxLength={FIELD_MAX.name}
+                      aria-invalid={errors.prenom ? true : undefined}
                       placeholder="Léa"
                       {...register("prenom")}
                       className={errors.prenom ? "border-destructive" : ""}
@@ -281,6 +285,9 @@ function SignupForm() {
                     <Label htmlFor="nom">Nom</Label>
                     <Input
                       id="nom"
+                      autoComplete="family-name"
+                      maxLength={FIELD_MAX.name}
+                      aria-invalid={errors.nom ? true : undefined}
                       placeholder="Martin"
                       {...register("nom")}
                       className={errors.nom ? "border-destructive" : ""}
@@ -295,6 +302,9 @@ function SignupForm() {
                   <Input
                     id="email"
                     type="email"
+                    autoComplete="email"
+                    maxLength={FIELD_MAX.email}
+                    aria-invalid={errors.email ? true : undefined}
                     placeholder="votre@email.com"
                     {...register("email")}
                     className={errors.email ? "border-destructive" : ""}
@@ -308,6 +318,8 @@ function SignupForm() {
                   <Input
                     id="password"
                     type="password"
+                    autoComplete="new-password"
+                    aria-invalid={errors.password ? true : undefined}
                     placeholder="••••••••"
                     {...register("password")}
                     className={errors.password ? "border-destructive" : ""}
@@ -316,6 +328,18 @@ function SignupForm() {
                     <p className="text-sm text-destructive">{errors.password.message}</p>
                   )}
                 </div>
+
+                <p className="text-sm text-gris-moyen">
+                  En créant un compte, vous acceptez nos{" "}
+                  <Link href="/terms" className="text-sauge-fonce underline underline-offset-4 hover:text-noir">
+                    conditions générales
+                  </Link>{" "}
+                  et notre{" "}
+                  <Link href="/privacy" className="text-sauge-fonce underline underline-offset-4 hover:text-noir">
+                    politique de confidentialité
+                  </Link>
+                  .
+                </p>
 
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
                   {isSubmitting ? "Inscription..." : "S'inscrire"}
@@ -336,7 +360,9 @@ function SignupForm() {
 
 export default function SignupPage() {
   return (
-    <Suspense>
+    // The form reads the URL, so it only renders in the browser: the fallback
+    // takes the same height, otherwise the footer jumps when it appears.
+    <Suspense fallback={<div className="min-h-screen bg-creme" aria-busy="true" />}>
       <SignupForm />
     </Suspense>
   );

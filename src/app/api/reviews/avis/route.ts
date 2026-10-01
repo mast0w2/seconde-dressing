@@ -1,16 +1,16 @@
 // src/app/api/reviews/avis/route.ts
 //
-// Réception d'un reviews cliente. Volontairement SANS base de données : un reviews
-// n'a pas besoin d'être stocké pour être utile, et faire dépendre l'envoi de
-// Supabase le casse dès que la configuration locale n'est pas complète.
-// L'reviews arrive par email ; il est ensuite ajouté à la main dans src/data/reviews.ts
-// après vérification, ce qui garantit qu'aucun reviews n'est publié sans contrôle.
+// Receives a customer review. Deliberately WITHOUT a database: a review does
+// not need to be stored to be useful, and depending on Supabase breaks the
+// form whenever the local configuration is incomplete. The review arrives by
+// email and is added by hand to src/data/reviews.ts after checking, so no
+// review is ever published unchecked.
 
 import { NextResponse } from "next/server";
 import { emailService } from "@/lib/email";
 import { allowRequest, clientIp } from "@/lib/rate-limit";
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { isLikelySpam } from "@/lib/spam";
+import { EMAIL_REGEX, FIELD_MAX } from "@/lib/form-limits";
 
 interface CorpsAvis {
   prenom: string;
@@ -42,6 +42,11 @@ function valider(data: unknown): { ok: true; reviews: CorpsAvis } | { ok: false;
   if (note < 1 || note > 5) erreurs.push("Note invalide");
   if (reviewsTexte.length < 5) erreurs.push("Avis trop court");
   if (d.consentement !== true) erreurs.push("Autorisation de publication manquante");
+  if (prenom.length > FIELD_MAX.name || nom.length > FIELD_MAX.name) erreurs.push("Nom trop long");
+  if (email.length > FIELD_MAX.email) erreurs.push("Email trop long");
+  if (ville.length > FIELD_MAX.city) erreurs.push("Ville trop longue");
+  if (reviewsTexte.length > FIELD_MAX.shortText)
+    erreurs.push(`Avis trop long (${FIELD_MAX.shortText} caractères maximum)`);
 
   if (erreurs.length > 0) return { ok: false, erreurs };
   return { ok: true, reviews: { prenom, nom, email, ville, note, texte: reviewsTexte, consentement: true } };
@@ -71,7 +76,7 @@ function corpsEmail(a: CorpsAvis): string {
  * Destinataires de l'alerte. On accepte les deux orthographes de la variable
  * d'environnement : le code historique lit CONTACT_ADMIN_EMAILS, mais la
  * production a été configurée avec CONTACT_ADMIN_EMAIL (au singulier).
- * Sans ce repli, l'reviews partirait dans le vide sans que personne le sache.
+ * Sans ce repli, l'avis partirait dans le vide sans que personne le sache.
  */
 function destinataires(): string[] {
   const brut = process.env.CONTACT_ADMIN_EMAILS || process.env.CONTACT_ADMIN_EMAIL || "";
@@ -83,7 +88,15 @@ function destinataires(): string[] {
 
 export async function POST(request: Request) {
   try {
-    const validation = valider(await request.json());
+    const body = await request.json();
+
+    // Bots get the same answer as people but nothing is sent.
+    if (isLikelySpam(body)) {
+      console.warn("[Avis] Submission dropped by the spam traps");
+      return NextResponse.json({ success: true, envoye: false });
+    }
+
+    const validation = valider(body);
     if (!validation.ok) {
       return NextResponse.json({ success: false, errors: validation.erreurs }, { status: 400 });
     }
@@ -103,21 +116,21 @@ export async function POST(request: Request) {
     }
     const message = corpsEmail(a);
 
-    // On journalise TOUJOURS l'reviews, quoi qu'il arrive ensuite. C'est le filet
-    // de sécurité : même si l'email échoue, l'reviews reste récupérable dans les
-    // logs du serveur. Un reviews de cliente ne doit jamais disparaître.
+    // The review is ALWAYS logged, whatever happens next: if the email fails,
+    // it can still be recovered from the server logs. A customer review must
+    // never get lost.
     console.log("[Avis] Avis reçu :\n" + message);
 
     const admins = destinataires();
     if (admins.length === 0) {
       console.error(
-        "[Avis] Aucun destinataire configuré (CONTACT_ADMIN_EMAILS). L'reviews n'a pas été envoyé par email."
+        "[Avis] Aucun destinataire configuré (CONTACT_ADMIN_EMAILS). L'avis n'a pas été envoyé par email."
       );
       return NextResponse.json({ success: true, envoye: false });
     }
 
     const html =
-      "<h2>Nouvel reviews cliente</h2><pre style=\"font-family:inherit;white-space:pre-wrap\">" +
+      "<h2>Nouvel avis cliente</h2><pre style=\"font-family:inherit;white-space:pre-wrap\">" +
       message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") +
       "</pre>";
     const sujet = `Avis cliente — ${a.prenom} — ${a.note}/5`;

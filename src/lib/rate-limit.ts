@@ -9,6 +9,7 @@
 // yet, database unreachable), we fall back to a count in process memory:
 // per instance only, but still a guardrail rather than none.
 
+import "server-only";
 import { createHash } from "node:crypto";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 

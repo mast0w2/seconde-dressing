@@ -1,6 +1,24 @@
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { Logo } from "@/components/Logo";
+import { CookieSettingsButton } from "@/components/CookieConsent";
+
+const NAV_LINKS = [
+  { href: "/", label: "Accueil" },
+  { href: "/concept", label: "Notre concept" },
+  { href: "/impact", label: "Économie circulaire" },
+  { href: "/reviews", label: "Avis" },
+  { href: "/contact", label: "Contact" },
+  { href: "/signup?vendeur=true", label: "Devenir vendeuse" },
+];
+
+const LEGAL_LINKS = [
+  { href: "/terms", label: "CGU / CGV" },
+  { href: "/privacy", label: "Confidentialité" },
+  { href: "/legal-notice", label: "Mentions légales" },
+];
+
+const LEGAL_LINK = "text-xs sm:text-sm text-gris-moyen underline-offset-4 hover:text-noir hover:underline";
 
 export function Footer() {
   return (
@@ -15,27 +33,34 @@ export function Footer() {
         </div>
 
         {/* Navigation links - centered and wrapped on mobile */}
-        <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
-          <Button asChild variant="ghost" size="sm" className="text-xs sm:text-sm text-gris-moyen hover:text-noir hover:bg-noir/5 px-3 sm:px-4">
-            <Link href="/">Accueil</Link>
-          </Button>
-          <Button asChild variant="ghost" size="sm" className="text-xs sm:text-sm text-gris-moyen hover:text-noir hover:bg-noir/5 px-3 sm:px-4">
-            <Link href="/concept">Notre concept</Link>
-          </Button>
-          <Button asChild variant="ghost" size="sm" className="text-xs sm:text-sm text-gris-moyen hover:text-noir hover:bg-noir/5 px-3 sm:px-4">
-            <Link href="/impact">Économie circulaire</Link>
-          </Button>
-          <Button asChild variant="ghost" size="sm" className="text-xs sm:text-sm text-gris-moyen hover:text-noir hover:bg-noir/5 px-3 sm:px-4">
-            <Link href="/contact">Contact</Link>
-          </Button>
-        </div>
+        <nav aria-label="Pied de page" className="flex flex-wrap justify-center gap-3 sm:gap-4">
+          {NAV_LINKS.map((link) => (
+            <Button
+              key={link.href}
+              asChild
+              variant="ghost"
+              size="sm"
+              className="text-xs sm:text-sm text-gris-moyen hover:text-noir hover:bg-noir/5 px-3 sm:px-4"
+            >
+              <Link href={link.href}>{link.label}</Link>
+            </Button>
+          ))}
+        </nav>
       </div>
 
       <div className="border-t border-noir/10 mt-8 sm:mt-12 pt-6 sm:pt-8">
-        <div className="container flex items-center justify-center">
+        <div className="container flex flex-col-reverse sm:flex-row items-center justify-between gap-4">
           <p className="text-xs sm:text-sm text-gris-moyen">
             © {new Date().getFullYear()} Seconde. Tous droits réservés.
           </p>
+          <div className="flex flex-wrap justify-center gap-x-5 gap-y-2">
+            {LEGAL_LINKS.map((link) => (
+              <Link key={link.href} href={link.href} className={LEGAL_LINK}>
+                {link.label}
+              </Link>
+            ))}
+            <CookieSettingsButton className={LEGAL_LINK} />
+          </div>
         </div>
       </div>
     </footer>

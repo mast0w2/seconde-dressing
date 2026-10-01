@@ -87,8 +87,9 @@ export function Navbar() {
         <button
           className="p-2 rounded-md border border-noir/10 hover:bg-noir/5 transition-colors"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-label="Toggle menu"
+          aria-label={isMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
           aria-expanded={isMenuOpen}
+          aria-controls="main-menu"
         >
           {isMenuOpen ? <X className="h-5 w-5 sm:h-6 sm:w-6 text-noir" /> : <Menu className="h-5 w-5 sm:h-6 sm:w-6 text-noir" />}
         </button>
@@ -101,14 +102,16 @@ export function Navbar() {
           <Logo layout="stack" />
         </Link>
 
-        {/* Devenir vendeuse + icône de connexion - extrême droite */}
+        {/* Single call to action + account icon - far right. The button only
+            fits next to the centered logo from lg up; below, it sits at the
+            bottom of the menu. Sellers cannot request an appointment. */}
         <div className="flex items-center gap-5 sm:gap-7">
           {!isSeller && (
             <Button
               asChild
-              className="hidden sm:inline-flex bg-noir text-blanc border border-noir rounded-none h-9 px-5 text-[10px] font-medium tracking-[0.18em] uppercase hover:bg-transparent hover:text-noir transition-colors"
+              className="hidden lg:inline-flex bg-noir text-blanc border border-noir rounded-none h-9 px-5 text-[10px] font-medium tracking-[0.18em] uppercase hover:bg-transparent hover:text-noir transition-colors"
             >
-              <Link href="/signup?vendeur=true">Devenir vendeuse</Link>
+              <Link href="/#appointment-request-form">Demander un rendez-vous</Link>
             </Button>
           )}
           {user ? (
@@ -130,7 +133,7 @@ export function Navbar() {
                           className="object-cover"
                         />
                       ) : (
-                        <AvatarFallback className="bg-sauge text-creme text-[13px] sm:text-[15px] font-normal tracking-wide">
+                        <AvatarFallback className="bg-sauge-fonce text-creme text-[13px] sm:text-[15px] font-normal tracking-wide">
                           {initiale}
                         </AvatarFallback>
                       )}
@@ -198,7 +201,7 @@ export function Navbar() {
       </div>
 
       {isMenuOpen && (
-        <div className="absolute top-20 sm:top-24 left-0 right-0 bg-blanc border-b border-noir/10 z-50">
+        <div id="main-menu" className="absolute top-20 sm:top-24 left-0 right-0 bg-blanc border-b border-noir/10 z-50">
             <div className="flex flex-col gap-3 p-4 sm:p-6">
               <Link
                 href="/"
@@ -248,10 +251,19 @@ export function Navbar() {
               {!isSeller && (
                 <Link
                   href="/signup?vendeur=true"
-                  className="sm:hidden mt-2 inline-flex items-center justify-center bg-noir text-blanc border border-noir h-11 px-5 text-[11px] font-medium tracking-[0.18em] uppercase"
+                  className="text-sm font-medium transition-colors hover:text-noir text-gris-moyen"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Devenir vendeuse
+                  DEVENIR VENDEUSE
+                </Link>
+              )}
+              {!isSeller && (
+                <Link
+                  href="/#appointment-request-form"
+                  className="lg:hidden mt-2 inline-flex items-center justify-center bg-noir text-blanc border border-noir h-11 px-5 text-[11px] font-medium tracking-[0.18em] uppercase"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Demander un rendez-vous
                 </Link>
               )}
             </div>

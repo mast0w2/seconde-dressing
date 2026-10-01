@@ -180,7 +180,7 @@ export default function ImpactPage() {
             </div>
 
             <div className="bg-gris-tres-clair border border-sauge-clair p-8">
-              <span className="font-serif text-5xl leading-none text-sauge">÷ 4</span>
+              <span className="font-serif text-5xl leading-none text-sauge-fonce">÷ 4</span>
               <p className="mt-4 text-gris-moyen">
                 L&apos;impact environnemental du textile pourrait être divisé par quatre si les
                 vêtements étaient portés jusqu&apos;au bout de leur durée de vie, au lieu d&apos;être

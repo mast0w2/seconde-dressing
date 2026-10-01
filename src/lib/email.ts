@@ -2,6 +2,8 @@
 // Brevo (ex Sendinblue) Email Service Implementation
 // Follows industry best practices: SOLID principles, dependency injection, separation of concerns
 
+// Reads BREVO_API_KEY: the build fails if a client component imports it.
+import "server-only";
 import { PART_CLIENTE, formatShare } from "@/lib/pricing";
 
 // ============================================================================
@@ -118,7 +120,7 @@ const EMAIL_CONFIG = {
     email: EMAIL_FROM,
   },
   replyTo: { name: 'Seconde', email: EMAIL_REPLY_TO },
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://seconde-dressing.com',
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.seconde-dressing.com',
 } as const;
 
 // ============================================================================
@@ -142,7 +144,7 @@ export const env = {
       .filter((e) => e),
   },
   app: {
-    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://seconde.fr',
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.seconde-dressing.com',
   },
 } as const;
 
@@ -722,7 +724,7 @@ class NotificationService {
     const content = `
       <h2>\ud83c\udf89 Bienvenue, ${esc(name)} !</h2>
       <p>Merci de vous être inscrit(e) sur <strong>Seconde</strong> !</p>
-      <p>Nous sommes rreviews de vous compter parmi nous.</p>
+      <p>Nous sommes ravis de vous compter parmi nous.</p>
       
       ${roleSpecificContent}
       
