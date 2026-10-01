@@ -27,11 +27,10 @@ export const legalEntity = {
   vatMention: "TVA non applicable, article 293 B du Code général des impôts",
   /** For a sole trader, the publication director is the owner. */
   publicationDirector: OWNER_NAME,
-  /** Consumer mediator the business has signed up with (mandatory in B2C). */
-  mediator: {
-    name: TO_FILL("nom du médiateur de la consommation"),
-    website: TO_FILL("site internet du médiateur"),
-  },
+  /** Consumer mediator the business has signed up with (mandatory in B2C).
+   *  null until one is chosen: the terms then say so explicitly. Replace with
+   *  { name: "…", website: "https://…" }. */
+  mediator: null as { name: string; website: string } | null,
 };
 
 export const hostingProvider = {

@@ -248,7 +248,10 @@ const SECTIONS: LegalSection[] = [
             {legalEntity.email}
           </a>
           . Si aucune solution n&apos;est trouvée, vous pouvez recourir gratuitement au médiateur
-          de la consommation : {legalEntity.mediator.name} ({legalEntity.mediator.website}).
+          de la consommation :{" "}
+          {legalEntity.mediator
+            ? `${legalEntity.mediator.name} (${legalEntity.mediator.website}).`
+            : "pas de médiateur encore trouvé, à venir dans les prochaines semaines."}
         </p>
         <p>Les présentes conditions sont soumises au droit français.</p>
       </>

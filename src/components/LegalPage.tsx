@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { LEGAL_LAST_UPDATED } from "@/lib/legal";
 
 // Shared layout of the legal pages (terms, privacy policy, legal notice):
@@ -16,12 +15,6 @@ interface LegalPageProps {
   intro?: React.ReactNode;
   sections: LegalSection[];
 }
-
-const LEGAL_LINKS = [
-  { href: "/terms", label: "Conditions générales" },
-  { href: "/privacy", label: "Politique de confidentialité" },
-  { href: "/legal-notice", label: "Mentions légales" },
-];
 
 export function LegalPage({ eyebrow, title, intro, sections }: LegalPageProps) {
   return (
@@ -60,18 +53,6 @@ export function LegalPage({ eyebrow, title, intro, sections }: LegalPageProps) {
               </div>
             </section>
           ))}
-
-          <footer className="border-t border-noir/10 pt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm">
-            {LEGAL_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-sauge-fonce underline underline-offset-4 hover:text-noir"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </footer>
         </div>
       </article>
     </div>
