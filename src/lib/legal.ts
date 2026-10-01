@@ -9,11 +9,13 @@
 /** Marks a value that still has to be provided. Rendered as-is on the page. */
 export const TO_FILL = (what: string) => `[à compléter : ${what}]`;
 
+const OWNER_NAME = "Victor Duleba";
+
 export const legalEntity = {
   /** Trade name used on the site. */
   brand: "Seconde",
   /** First and last name of the entrepreneur, followed by "EI". */
-  ownerName: TO_FILL("Victor Duleba"),
+  ownerName: OWNER_NAME,
   legalForm: "Entrepreneur individuel (micro-entreprise)",
   siret: TO_FILL("numéro SIRET"),
   /** Business address (home or domiciliation). */
@@ -22,7 +24,8 @@ export const legalEntity = {
   phone: TO_FILL("numéro de téléphone"),
   /** Micro-enterprises under the VAT threshold must print this sentence. */
   vatMention: "TVA non applicable, article 293 B du Code général des impôts",
-  publicationDirector: TO_FILL("prénom et nom du directeur de la publication"),
+  /** For a sole trader, the publication director is the owner. */
+  publicationDirector: OWNER_NAME,
   /** Consumer mediator the business has signed up with (mandatory in B2C). */
   mediator: {
     name: TO_FILL("nom du médiateur de la consommation"),

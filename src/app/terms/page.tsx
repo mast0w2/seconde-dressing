@@ -52,6 +52,13 @@ const SECTIONS: LegalSection[] = [
           l&apos;expédition.
         </p>
         <p>
+          {legalEntity.brand} agit comme intermédiaire : la vente des pièces est réalisée par la
+          Vendeuse, professionnelle indépendante, sur des plateformes de revente tierces.{" "}
+          {legalEntity.brand} n&apos;achète pas vos pièces et n&apos;en devient jamais
+          propriétaire. {legalEntity.brand} encaisse le prix des formules, perçoit une commission
+          sur chaque vente (voir « Dépôt-vente et répartition du prix ») et vous verse votre part.
+        </p>
+        <p>
           Le service est proposé à Paris et en proche banlieue (départements 75, 92, 93 et 94).
         </p>
       </>
@@ -145,8 +152,8 @@ const SECTIONS: LegalSection[] = [
           effectivement encaissé et le justificatif correspondant, visibles dans votre espace.
         </p>
         <p>
-          Votre part vous est versée par virement après l&apos;encaissement effectif de la vente,
-          au plus tard 60 jours après celle-ci.
+          Votre part vous est versée par {legalEntity.brand}, par virement, après
+          l&apos;encaissement effectif de la vente, au plus tard 60 jours après celle-ci.
         </p>
       </>
     ),
