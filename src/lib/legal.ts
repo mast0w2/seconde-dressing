@@ -6,8 +6,9 @@
 // French law (LCEN art. 6, Code de la consommation L111-1 and L612-1)
 // requires them to be accurate.
 
-/** Marks a value that still has to be provided. Rendered as-is on the page. */
-export const TO_FILL = (what: string) => `[à compléter : ${what}]`;
+/** Marks a value that still has to be provided. Rendered as-is on the page;
+ *  `what` documents the missing value for whoever fills it in. */
+export const TO_FILL = (what: string) => "à venir bientôt";
 
 const OWNER_NAME = "Victor Duleba";
 
