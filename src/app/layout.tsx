@@ -4,7 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ToastProvider } from "@/components/ToastProvider";
-import { CookieConsent } from "@/components/CookieConsent";
+import { SiteAnalytics } from "@/components/SiteAnalytics";
 import { siteConfig, buildJsonLd, buildOrganizationLd, buildWebsiteLd } from "@/lib/seo";
 
 // next/font héberge les polices sous un nom généré (ex. __Jost_744fae). Les
@@ -79,7 +79,7 @@ export default function RootLayout({
           <Footer />
         </div>
         <ToastProvider />
-        <CookieConsent />
+        <SiteAnalytics />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(buildJsonLd()) }}

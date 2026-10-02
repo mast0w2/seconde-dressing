@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
-import { CookieSettingsButton } from "@/components/CookieConsent";
 
 // Site navigation lives in the header menu; the footer only carries the
 // brand and the links the law requires on every page.
@@ -26,7 +25,6 @@ export function Footer() {
               {link.label}
             </Link>
           ))}
-          <CookieSettingsButton className={LEGAL_LINK} />
         </nav>
         <p className="text-xs sm:text-sm text-gris-moyen">
           © {new Date().getFullYear()} Seconde. Tous droits réservés.

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { buildPageMetadata, buildBreadcrumbLd } from "@/lib/seo";
 import { JsonLd } from "@/components/JsonLd";
 import { LegalPage, type LegalSection } from "@/components/LegalPage";
-import { CookieSettingsButton } from "@/components/CookieConsent";
+import { AnalyticsOptOut } from "@/components/SiteAnalytics";
 import { legalEntity, hostingProvider } from "@/lib/legal";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -68,8 +68,8 @@ const SECTIONS: LegalSection[] = [
             ville, la note et le texte sont publiés, et uniquement avec votre accord.
           </li>
           <li>
-            <strong>Navigation</strong> : les cookies de connexion à votre espace et, si vous
-            l&apos;acceptez, une mesure d&apos;audience anonyme (voir la section Cookies).
+            <strong>Navigation</strong> : les cookies de connexion à votre espace et une mesure
+            d&apos;audience anonyme, à laquelle vous pouvez vous opposer (voir la section Cookies).
           </li>
         </ul>
       </>
@@ -102,7 +102,8 @@ const SECTIONS: LegalSection[] = [
           n&apos;est jamais conservée en clair.
         </li>
         <li>
-          <strong>Mesurer l&apos;audience</strong> : votre consentement.
+          <strong>Mesurer l&apos;audience</strong> de façon anonyme : notre intérêt légitime à
+          améliorer le site. Vous pouvez vous y opposer (voir la section Cookies).
         </li>
         <li>
           <strong>Tenir notre comptabilité et répondre aux autorités</strong> : nos obligations
@@ -166,7 +167,6 @@ const SECTIONS: LegalSection[] = [
           Avis : tant qu&apos;il est publié, puis 5 ans comme preuve de votre accord.
         </li>
         <li>Empreintes d&apos;adresse IP de la protection anti-abus : 24 heures.</li>
-        <li>Votre choix sur les cookies : 6 mois.</li>
       </ul>
     ),
   },
@@ -181,16 +181,19 @@ const SECTIONS: LegalSection[] = [
           demandent donc pas d&apos;accord.
         </p>
         <p>
-          <strong>Mesure d&apos;audience.</strong> Si vous l&apos;acceptez, nous utilisons Vercel
-          Web Analytics pour compter les pages vues. Cet outil ne dépose aucun cookie, ne vous
-          suit pas d&apos;un site à l&apos;autre et ne conserve pas votre adresse IP. Les
-          paramètres des liens (sauf ceux des campagnes) sont retirés avant l&apos;envoi.
+          <strong>Mesure d&apos;audience.</strong> Nous utilisons Vercel Web Analytics pour compter
+          les pages vues. Cet outil ne dépose aucun cookie, ne vous suit pas d&apos;un site à
+          l&apos;autre et ne conserve pas votre adresse IP : les statistiques sont anonymes et
+          servent uniquement à savoir quelles pages sont utiles. Les paramètres des liens (sauf
+          ceux des campagnes) sont retirés avant l&apos;envoi.
         </p>
         <p>
-          Votre choix est enregistré dans votre navigateur pendant 6 mois. Vous pouvez le changer
-          à tout moment :{" "}
-          <CookieSettingsButton className={LINK} />.
+          Cette mesure étant anonyme, elle ne demande pas d&apos;accord préalable, mais vous
+          pouvez vous y opposer à tout moment. Votre choix est enregistré dans votre navigateur.
+          Si celui-ci envoie le signal « Global Privacy Control », la mesure est désactivée
+          automatiquement.
         </p>
+        <AnalyticsOptOut />
       </>
     ),
   },
