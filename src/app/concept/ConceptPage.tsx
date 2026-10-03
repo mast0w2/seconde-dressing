@@ -147,7 +147,7 @@ export default function ConceptPage() {
           </div>
 
           <div className="relative">
-            <div className="absolute inset-x-[-28px] top-[28px] bottom-[-26px] bg-sauge-clair/45 rounded-xl" />
+            <div className="absolute inset-x-[-16px] sm:inset-x-[-28px] top-[28px] bottom-[-26px] bg-sauge-clair/45 rounded-xl" />
             <div className="relative w-full h-[290px] sm:h-[390px] rounded-xl overflow-hidden">
               <Image
                 src="/concept-carton.jpg"
@@ -208,7 +208,7 @@ export default function ConceptPage() {
                 {isFirstFree ? (
                   <div className="flex flex-col gap-2">
                     <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                      <span className="font-serif text-4xl leading-none text-sauge">Gratuit</span>
+                      <span className="font-serif text-4xl leading-none text-sauge-fonce">Gratuit</span>
                       {/* Barré maison : le line-through natif n'est pas centré sur la Cormorant */}
                       <span className="relative whitespace-nowrap font-serif text-2xl leading-none text-gris-moyen after:absolute after:inset-x-0 after:top-[58%] after:h-px after:bg-current">
                         {prix}
@@ -217,7 +217,7 @@ export default function ConceptPage() {
                     <span className="eyebrow">Première commande</span>
                   </div>
                 ) : (
-                  <span className="font-serif text-4xl leading-none text-sauge">{prix}</span>
+                  <span className="font-serif text-4xl leading-none text-sauge-fonce">{prix}</span>
                 )}
                 <h3 className="text-xl">{titre}</h3>
                 <p className="text-sm text-gris-moyen">{texte}</p>
@@ -250,7 +250,7 @@ export default function ConceptPage() {
                 key={titre}
                 className="bg-gris-tres-clair border border-noir/10 p-8 flex flex-col gap-3"
               >
-                <span className="font-serif text-5xl leading-none text-sauge">{part}</span>
+                <span className="font-serif text-5xl leading-none text-sauge-fonce">{part}</span>
                 <h3 className="text-xl">{titre}</h3>
                 <p className="text-sm text-gris-moyen">{texte}</p>
               </div>

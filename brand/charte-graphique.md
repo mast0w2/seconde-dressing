@@ -31,9 +31,9 @@ L'identité doit dire **chaleureux, humain, responsable** — jamais froid, tech
 | **Crème** | `#f4f1ea` | Fond principal du site, texte sur fond vert |
 | **Crème rompu** | `#ede9df` | Fond des sections alternées (ex. « Notre concept ») |
 | **Blanc cassé** | `#faf8f3` | Fond des cartes |
-| **Sauge** | `#8b9a7a` | Accent : icônes, cœur du logo, surtitres |
+| **Sauge** | `#8b9a7a` | Accent : icônes, cœur du logo. Jamais pour du texte sur fond clair (contraste 2,5:1) |
 | **Sauge clair** | `#c7d0b7` | Formes organiques derrière les photos, filets, accents sur fond foncé |
-| **Sauge foncé** | `#6f7d62` | Liens, italiques mises en valeur, petites capitales |
+| **Sauge foncé** | `#5b6e49` | Liens, italiques mises en valeur, petites capitales et surtitres. Assombri depuis `#6f7d62` pour atteindre le contraste AA (4,5:1) sur tous les fonds clairs |
 | **Bordures** | `#e2ddd0` / `#e6e1d4` | Filets, séparateurs, contours de cartes |
 
 Aucun noir pur (`#000`) ni blanc pur (`#fff`) dans l'interface : tout passe par le vert forêt et le crème.
@@ -54,7 +54,7 @@ Les tokens Tailwind ont gardé leurs **anciens noms** issus de la charte précé
 | `creme` | `#f4f1ea` |
 | `sauge` | `#8b9a7a` |
 | `sauge-clair` | `#c7d0b7` |
-| `sauge-fonce` | `#6f7d62` |
+| `sauge-fonce` | `#5b6e49` |
 | `foret` | `#2e3a2c` |
 
 Exemples : `text-noir` = texte vert forêt · `bg-blanc` = fond crème · `text-sauge` = icône sauge.
@@ -91,7 +91,7 @@ Deux polices, toutes deux libres et gratuites sur Google Fonts, chargées via `n
 
 Règles : les titres ne sont **jamais** en gras ni en majuscules (l'élégance vient du serif, pas du poids). Les majuscules sont réservées aux surtitres, boutons et micro-labels, toujours avec un fort interlettrage.
 
-Une mise en valeur fréquente : la deuxième ligne d'un titre en *italique* couleur sauge foncé (`#6f7d62`).
+Une mise en valeur fréquente : la deuxième ligne d'un titre en *italique* couleur sauge foncé (`#5b6e49`).
 
 ---
 
@@ -156,6 +156,8 @@ Style validé : **appartement parisien chaleureux**. Parquet point de Hongrie, m
 | `src/components/Logo.tsx` | Composant logo (mise en page empilée ou en ligne) |
 | `src/app/page.tsx` | Page d'accueil — référence de mise en œuvre de toute la charte |
 | `brand/logo/` | Déclinaisons du logo pour les usages externes |
-| `public/favicon.svg` | Favicon |
+| `src/app/icon.svg`, `src/app/favicon.ico`, `src/app/apple-icon.png` | Favicon (carré, fond crème) et icône iOS |
+| `public/icon-192.png`, `public/icon-512.png` | Icônes du manifeste et logo des données structurées |
+| `public/og-image.jpg` | Image de partage sur les réseaux sociaux (1200 × 630) |
 
 **Pour développer une nouvelle page** : partir de `src/app/page.tsx` comme modèle de référence, réutiliser les tokens Tailwind existants (jamais de valeur hex écrite en dur dans un composant), respecter l'échelle typographique ci-dessus et l'alternance des fonds.

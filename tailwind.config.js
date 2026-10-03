@@ -33,7 +33,7 @@ module.exports = {
         // Accents botaniques
         'sauge': '#8b9a7a',
         'sauge-clair': '#c7d0b7',
-        'sauge-fonce': '#6f7d62',
+        'sauge-fonce': '#5b6e49', // AA (4.5:1) on every light background
         'foret': '#2e3a2c',
 
         // Semantic colors

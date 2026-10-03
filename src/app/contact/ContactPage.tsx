@@ -3,18 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useToast } from "@/components/ui/use-toast";
-
-// ============================================================================
-// Types
-// ============================================================================
-
-interface ContactFormData {
-  name: string;
-  email: string;
-  phone?: string;
-  subject: string;
-  message: string;
-}
+import { HoneypotField, spamTrapFields, useFormStartedAt } from "@/components/HoneypotField";
+import {
+  contactFieldErrors,
+  type ContactErrors,
+  type ContactField,
+  type ContactFormData,
+} from "@/lib/contact-form";
+import { FIELD_MAX } from "@/lib/form-limits";
 
 const CHAMPS_VIDES: ContactFormData = {
   name: "",
@@ -25,35 +21,12 @@ const CHAMPS_VIDES: ContactFormData = {
 };
 
 // ============================================================================
-// Validation
-// ============================================================================
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function validateForm(data: ContactFormData): { valid: boolean; errors: string[] } {
-  const errors: string[] = [];
-
-  if (!data.name.trim()) errors.push("Le nom est requis");
-
-  if (!data.email.trim()) {
-    errors.push("L'email est requis");
-  } else if (!EMAIL_REGEX.test(data.email)) {
-    errors.push("L'email n'est pas valide");
-  }
-
-  if (!data.subject.trim()) errors.push("Le sujet est requis");
-  if (!data.message.trim()) errors.push("Le message est requis");
-
-  return { valid: errors.length === 0, errors };
-}
-
-// ============================================================================
 // API
 // ============================================================================
 
 async function submitContactForm(
-  data: ContactFormData
-): Promise<{ success: boolean; message?: string; errors?: string[] }> {
+  data: ContactFormData & Record<string, unknown>
+): Promise<{ success: boolean; message?: string; error?: string; errors?: string[] }> {
   try {
     const response = await fetch("/api/contact", {
       method: "POST",
@@ -76,7 +49,8 @@ async function submitContactForm(
 
 const LABEL = "block text-[10px] tracking-[0.2em] uppercase text-sauge-fonce mb-2";
 const CHAMP =
-  "w-full border border-noir/25 bg-gris-tres-clair rounded-none px-5 py-4 text-base text-noir placeholder:text-gris-moyen/60 focus:outline-none focus:border-sauge transition-colors disabled:opacity-60";
+  "w-full border border-noir/25 bg-gris-tres-clair rounded-none px-5 py-4 text-base text-noir placeholder:text-gris-moyen focus:outline-none focus:border-sauge-fonce transition-colors disabled:opacity-60 aria-[invalid=true]:border-destructive";
+const ERREUR = "mt-2 text-sm text-destructive";
 
 // ============================================================================
 // Page
@@ -87,34 +61,62 @@ export default function ContactPage() {
   const [formData, setFormData] = useState<ContactFormData>(CHAMPS_VIDES);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSent, setIsSent] = useState(false);
+  const [errors, setErrors] = useState<ContactErrors>({});
+  const [honeypot, setHoneypot] = useState("");
+  const startedAt = useFormStartedAt();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
+    const field = e.target.id as ContactField;
+    const { value } = e.target;
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
+
+  // Field errors appear under each field, linked to it for screen readers;
+  // focus goes to the first wrong field.
+  const fieldProps = (field: ContactField) => ({
+    id: field,
+    name: field,
+    value: formData[field] ?? "",
+    onChange: handleChange,
+    disabled: isSubmitting,
+    className: CHAMP,
+    "aria-invalid": errors[field] ? true : undefined,
+    "aria-describedby": errors[field] ? `${field}-error` : undefined,
+  });
+
+  const fieldError = (field: ContactField) =>
+    errors[field] ? (
+      <p id={`${field}-error`} className={ERREUR}>
+        {errors[field]}
+      </p>
+    ) : null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const validation = validateForm(formData);
-    if (!validation.valid) {
-      validation.errors.forEach((error) =>
-        toast({ title: "Erreur", description: error, variant: "destructive" })
-      );
+    const fieldErrors = contactFieldErrors({ ...formData });
+    setErrors(fieldErrors);
+    const firstInvalid = Object.keys(fieldErrors)[0];
+    if (firstInvalid) {
+      document.getElementById(firstInvalid)?.focus();
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const result = await submitContactForm(formData);
+      const result = await submitContactForm({
+        ...formData,
+        ...spamTrapFields(honeypot, startedAt),
+      });
 
       if (!result.success) {
         const messages =
           result.errors && Array.isArray(result.errors)
             ? result.errors
-            : [result.message || "Impossible d'envoyer votre message."];
+            : [result.error || result.message || "Impossible d'envoyer votre message."];
         messages.forEach((description) =>
           toast({ title: "Erreur", description, variant: "destructive" })
         );
@@ -177,22 +179,22 @@ export default function ContactPage() {
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+            <form onSubmit={handleSubmit} noValidate className="relative flex flex-col gap-6">
+              <HoneypotField value={honeypot} onChange={setHoneypot} />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="name" className={LABEL}>
                     Nom *
                   </label>
                   <input
-                    id="name"
+                    {...fieldProps("name")}
                     type="text"
-                    value={formData.name}
-                    onChange={handleChange}
+                    autoComplete="name"
+                    maxLength={FIELD_MAX.name}
                     placeholder="Votre nom"
-                    disabled={isSubmitting}
-                    className={CHAMP}
                     required
                   />
+                  {fieldError("name")}
                 </div>
 
                 <div>
@@ -200,15 +202,15 @@ export default function ContactPage() {
                     Email *
                   </label>
                   <input
-                    id="email"
+                    {...fieldProps("email")}
                     type="email"
-                    value={formData.email}
-                    onChange={handleChange}
+                    autoComplete="email"
+                    inputMode="email"
+                    maxLength={FIELD_MAX.email}
                     placeholder="votre@email.com"
-                    disabled={isSubmitting}
-                    className={CHAMP}
                     required
                   />
+                  {fieldError("email")}
                 </div>
               </div>
 
@@ -217,14 +219,13 @@ export default function ContactPage() {
                   Téléphone <span className="normal-case tracking-normal">(facultatif)</span>
                 </label>
                 <input
-                  id="phone"
+                  {...fieldProps("phone")}
                   type="tel"
-                  value={formData.phone}
-                  onChange={handleChange}
+                  autoComplete="tel"
+                  maxLength={FIELD_MAX.phone}
                   placeholder="06 12 34 56 78"
-                  disabled={isSubmitting}
-                  className={CHAMP}
                 />
+                {fieldError("phone")}
               </div>
 
               <div>
@@ -232,15 +233,13 @@ export default function ContactPage() {
                   Sujet *
                 </label>
                 <input
-                  id="subject"
+                  {...fieldProps("subject")}
                   type="text"
-                  value={formData.subject}
-                  onChange={handleChange}
+                  maxLength={FIELD_MAX.subject}
                   placeholder="En deux mots"
-                  disabled={isSubmitting}
-                  className={CHAMP}
                   required
                 />
+                {fieldError("subject")}
               </div>
 
               <div>
@@ -248,16 +247,25 @@ export default function ContactPage() {
                   Message *
                 </label>
                 <textarea
-                  id="message"
-                  value={formData.message}
-                  onChange={handleChange}
+                  {...fieldProps("message")}
+                  maxLength={FIELD_MAX.message}
                   placeholder="Dites-nous tout."
                   rows={6}
-                  disabled={isSubmitting}
-                  className={CHAMP}
                   required
                 />
+                {fieldError("message")}
               </div>
+
+              <p className="text-sm text-gris-moyen">
+                Vos coordonnées servent uniquement à vous répondre. Voir notre{" "}
+                <Link
+                  href="/privacy"
+                  className="text-sauge-fonce underline underline-offset-4 hover:text-noir"
+                >
+                  politique de confidentialité
+                </Link>
+                .
+              </p>
 
               <button
                 type="submit"

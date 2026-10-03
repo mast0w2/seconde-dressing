@@ -252,13 +252,13 @@ export default function AppointmentRequestPage() {
                       {isFreeFirstRequest ? (
                         <div className="flex items-center gap-2">
                           <span className="text-sm line-through text-gris-moyen">{formula.price} €</span>
-                          <span className="text-sm font-medium text-sauge">Gratuit</span>
+                          <span className="text-sm font-medium text-sauge-fonce">Gratuit</span>
                         </div>
                       ) : (
                         <span className="text-sm text-gris-moyen">{formula.price} €</span>
                       )}
                       {isFreeFirstRequest && (
-                        <span className="text-xs text-sauge font-medium">Première commande gratuite!</span>
+                        <span className="text-xs text-sauge-fonce font-medium">Première commande gratuite!</span>
                       )}
                       {detail && (
                         <span className="text-xs text-gris-moyen mt-1 line-clamp-2">{detail}</span>

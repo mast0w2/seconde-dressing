@@ -4,6 +4,8 @@ import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { capitalizeName } from "@/lib/text";
 import { notificationService } from "@/lib/email";
 import { allowRequest, clientIp } from "@/lib/rate-limit";
+import { isLikelySpam } from "@/lib/spam";
+import { EMAIL_REGEX, FIELD_MAX, PHONE_REGEX, fitsLength } from "@/lib/form-limits";
 
 import { NextResponse } from 'next/server';
 
@@ -33,8 +35,22 @@ interface AppointmentRequestData {
 // Validation
 // ============================================================================
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_REGEX = /^[\+]?[0-9\s\-()]{10,}$/;
+// Upper bounds of the homepage sliders, with room to spare.
+const MAX_ITEMS = 1000;
+const MAX_AVERAGE_VALUE = 10000;
+
+const LENGTH_LIMITS: [string, number][] = [
+  ['nom', FIELD_MAX.name],
+  ['prenom', FIELD_MAX.name],
+  ['email', FIELD_MAX.email],
+  ['telephone', FIELD_MAX.phone],
+  ['adresse', FIELD_MAX.address],
+  ['address', FIELD_MAX.address],
+  ['marques', FIELD_MAX.brands],
+  ['description', FIELD_MAX.shortText],
+  ['formule', FIELD_MAX.name],
+  ['formulaId', FIELD_MAX.name],
+];
 
 function validateRequestData(data: unknown): { valid: boolean; errors?: string[]; data?: AppointmentRequestData } {
   const errors: string[] = [];
@@ -76,6 +92,20 @@ function validateRequestData(data: unknown): { valid: boolean; errors?: string[]
 
   if (!requestData.marques || typeof requestData.marques !== 'string' || requestData.marques.trim() === '') {
     errors.push('Marques is required');
+  }
+
+  if (typeof requestData.nombreVetements === 'number' && requestData.nombreVetements > MAX_ITEMS) {
+    errors.push('Nombre de vêtements is too large');
+  }
+
+  if (typeof requestData.valeurMoyenne === 'number' && requestData.valeurMoyenne > MAX_AVERAGE_VALUE) {
+    errors.push('Valeur moyenne is too large');
+  }
+
+  for (const [field, max] of LENGTH_LIMITS) {
+    if (!fitsLength(requestData[field], max)) {
+      errors.push(`${field} is too long (${max} characters max)`);
+    }
   }
 
   if (errors.length > 0) {
@@ -183,6 +213,15 @@ export async function POST(request: Request) {
     // Parse request body
     const body = await request.json();
 
+    // Bots get the same answer as people but nothing is stored or sent.
+    if (isLikelySpam(body)) {
+      console.warn('[Appointment Request API] Submission dropped by the spam traps');
+      return NextResponse.json({
+        success: true,
+        message: 'Votre demande a été envoyée avec succès. Nous vous recontacterons sous 24h.'
+      });
+    }
+
     // Validate data
     const validation = validateRequestData(body);
     if (!validation.valid) {
@@ -216,14 +255,12 @@ export async function POST(request: Request) {
     // Save to database
     const dbResult = await saveAppointmentRequest(requestData);
     if (!dbResult.success) {
+      // The database message stays in the logs: it describes the schema.
       console.error('[Appointment Request API] Database error:', dbResult.error);
-      const detail =
-        (dbResult.error as { message?: string } | null)?.message ||
-        'Failed to save appointment request';
       return NextResponse.json(
         {
           success: false,
-          error: detail
+          message: "Votre demande n'a pas pu être enregistrée. Merci de réessayer."
         },
         { status: 500 }
       );

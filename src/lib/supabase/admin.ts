@@ -9,6 +9,8 @@
 // La clé n'est jamais exposée au navigateur : ce module n'est importé que
 // depuis des routes d'API.
 
+// Build fails if a client component ever imports this module.
+import 'server-only';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { getSupabaseEnv } from './env';
 

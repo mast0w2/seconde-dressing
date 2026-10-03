@@ -6,7 +6,7 @@ import { AVIS, noteMoyenne, formaterMois, formaterJour } from "@/data/reviews";
 import { Etoiles } from "@/components/Etoiles";
 
 export default function ReviewsPage() {
-  // Les reviews les plus récents d'abord.
+  // Most recent reviews first.
   const reviews = [...AVIS].sort((a, b) => b.datePublication.localeCompare(a.datePublication));
   const moyenne = noteMoyenne(reviews);
 
@@ -22,7 +22,7 @@ export default function ReviewsPage() {
             <span className="italic text-sauge-fonce">une fois leurs pièces vendues.</span>
           </h1>
           <p>
-            Chaque reviews publié ici vient d&apos;une cliente à qui nous avons réellement vendu des
+            Chaque avis publié ici vient d&apos;une cliente à qui nous avons réellement vendu des
             vêtements. Nous les sollicitons par email à la fin de la vente, et nous publions ce
             qu&apos;elles écrivent — sans trier.
           </p>
@@ -50,7 +50,7 @@ export default function ReviewsPage() {
           {reviews.length === 0 ? (
             <div className="max-w-[620px] mx-auto text-center flex flex-col items-center gap-5 bg-gris-tres-clair border border-noir/10 p-10 sm:p-12">
               <MessageCircle className="h-8 w-8 text-sauge" strokeWidth={1.3} />
-              <h2 className="text-2xl sm:text-3xl">Les premiers reviews arrivent bientôt.</h2>
+              <h2 className="text-2xl sm:text-3xl">Les premiers avis arrivent bientôt.</h2>
               <p className="text-gris-moyen">
                 Nous venons d&apos;ouvrir. Dès que les premières ventes seront conclues, les clientes
                 concernées recevront une invitation à donner leur reviews, et il apparaîtra ici tel
@@ -73,7 +73,7 @@ export default function ReviewsPage() {
                     className="bg-gris-tres-clair border border-noir/10 p-8 flex flex-col gap-4"
                   >
                     <div className="flex items-start gap-4">
-                      <div className="h-12 w-12 rounded-full bg-sauge text-creme flex items-center justify-center font-serif font-medium text-sm flex-shrink-0">
+                      <div className="h-12 w-12 rounded-full bg-sauge-fonce text-creme flex items-center justify-center font-serif font-medium text-sm flex-shrink-0">
                         {initials}
                       </div>
                       <div className="flex flex-col gap-4 flex-1">

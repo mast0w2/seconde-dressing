@@ -257,11 +257,7 @@ function LoginForm() {
   };
 
   if (isChecking) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-creme">
-        <p className="text-gris-moyen">Vérification de votre session...</p>
-      </div>
-    );
+    return <SessionCheck />;
   }
 
   const heading = {
@@ -476,9 +472,20 @@ function LoginForm() {
   );
 }
 
+function SessionCheck() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-creme" aria-busy="true">
+      <p className="text-gris-moyen">Vérification de votre session...</p>
+    </div>
+  );
+}
+
 export default function LoginPage() {
   return (
-    <Suspense>
+    // The form reads the URL, so it only renders in the browser. The server
+    // sends the session check screen it starts with: something shows at once
+    // and nothing moves when the form takes over.
+    <Suspense fallback={<SessionCheck />}>
       <LoginForm />
     </Suspense>
   );

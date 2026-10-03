@@ -158,14 +158,14 @@ export default function HomePage() {
               </span>
             </div>
 
-            <div className="flex items-center gap-5 mt-1">
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-3 mt-1">
               <Button
                 onClick={scrollToForm}
                 className="bg-noir hover:bg-transparent hover:text-noir border border-noir text-blanc rounded-none px-8 py-6 text-[11px] tracking-[0.2em] uppercase"
               >
-                Demandez un rendez-vous
+                Demander un rendez-vous
               </Button>
-              <span className="text-xs text-gris-moyen">Réponse sous 24 h · Gratuit</span>
+              <span className="text-xs text-gris-moyen whitespace-nowrap">Réponse sous 24 h · Gratuit</span>
             </div>
           </div>
 
@@ -215,7 +215,7 @@ export default function HomePage() {
                       « {a.texte} »
                     </blockquote>
                     <figcaption className="mt-auto flex items-center gap-3 text-sm text-gris-moyen">
-                      <span className="h-9 w-9 rounded-full bg-sauge text-creme flex items-center justify-center font-serif text-xs flex-shrink-0">
+                      <span className="h-9 w-9 rounded-full bg-sauge-fonce text-creme flex items-center justify-center font-serif text-xs flex-shrink-0">
                         {initials}
                       </span>
                       <span className="text-noir">

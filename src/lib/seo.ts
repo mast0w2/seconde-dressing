@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 
+// The bare domain redirects to www: canonical URLs must point to www, or
+// search engines receive a redirect where they expect the final page.
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-  "https://seconde-dressing.com";
+  "https://www.seconde-dressing.com";
 
 export const siteConfig = {
   name: "Seconde",
@@ -11,7 +13,10 @@ export const siteConfig = {
   title: "Seconde - On vous aide à vendre vos vêtements",
   description:
     "Seconde vient chercher votre dressing, trie, photographie et vend vos vêtements pour vous. Donnez-leur une seconde vie.",
-  ogImage: "/og-image.png",
+  ogImage: "/og-image.jpg",
+  ogImageAlt:
+    "Seconde, conciergerie de seconde main : on vous aide à vendre vos vêtements",
+  logo: "/icon-512.png",
 };
 
 type PageMetadataInput = {
@@ -57,7 +62,7 @@ export function buildPageMetadata({
           url: siteConfig.ogImage,
           width: 1200,
           height: 630,
-          alt: "Seconde - conciergerie de seconde main",
+          alt: siteConfig.ogImageAlt,
         },
       ],
     },
@@ -93,7 +98,7 @@ export function buildOrganizationLd() {
     "@type": "Organization",
     name: "Seconde",
     url: SITE_URL,
-    logo: `${SITE_URL}/favicon.svg`,
+    logo: `${SITE_URL}${siteConfig.logo}`,
     description: siteConfig.description,
     areaServed: "FR",
   };
@@ -131,7 +136,7 @@ export type ReviewData = {
 
 export function buildReviewsLd(reviews: ReviewData[]) {
   const reviewCount = reviews.length;
- const ratingSum = reviews.reduce((sum, r) => sum + r.rating, 0);
+  const ratingSum = reviews.reduce((sum, r) => sum + r.rating, 0);
   const ratingValue = reviewCount > 0 ? ratingSum / reviewCount : 0;
 
   return {

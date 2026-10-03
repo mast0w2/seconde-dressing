@@ -8,7 +8,7 @@ export function Etoiles({ note, taille = 14 }: { note: number; taille?: number }
           key={i}
           style={{ width: taille, height: taille }}
           strokeWidth={1.3}
-          className={i <= Math.round(note) ? "fill-sauge text-sauge" : "text-sauge-clair"}
+          className={i <= Math.round(note) ? "fill-sauge-fonce text-sauge-fonce" : "text-sauge-clair"}
         />
       ))}
     </span>

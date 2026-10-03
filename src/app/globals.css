@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Jost:wght@300;400;500;600&display=swap');
 
 @layer base {
   :root {
@@ -17,7 +16,7 @@
     --creme: #f4f1ea;
     --sauge: #8b9a7a;
     --sauge-clair: #c7d0b7;
-    --sauge-fonce: #6f7d62;
+    --sauge-fonce: #5b6e49;
 
     /* Font Families */
     --font-titres: var(--font-cormorant), 'Cormorant Garamond', Georgia, serif;
@@ -130,11 +129,13 @@
     letter-spacing: 0.02em;
   }
 
+  /* Small capitals: sauge-fonce, the lightest green that keeps 4.5:1 on
+     every light background (sauge alone falls to 2.5:1). */
   .eyebrow {
     font-size: 10px;
     letter-spacing: 0.26em;
     text-transform: uppercase;
-    color: var(--sauge);
+    color: var(--sauge-fonce);
   }
 
   input, textarea, select {
@@ -233,7 +234,7 @@
   }
 
   .form-input-cezanne:focus {
-    border-bottom-color: var(--sauge);
+    border-bottom-color: var(--sauge-fonce);
     box-shadow: none;
   }
 
@@ -306,6 +307,26 @@
     .text-2xl {
       font-size: 18px !important;
     }
+  }
+}
+
+/* Legal pages: lists and emphasis inside the long-form sections. */
+@layer components {
+  .legal-prose ul {
+    list-style: disc;
+    padding-left: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .legal-prose li::marker {
+    color: var(--sauge-fonce);
+  }
+
+  .legal-prose strong {
+    font-weight: 500;
+    color: var(--noir);
   }
 }
 
